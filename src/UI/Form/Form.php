@@ -1,0 +1,227 @@
+<?php
+namespace Pecee\UI\Form;
+
+use Pecee\Bool;
+use Pecee\Dataset;
+use Pecee\Session\SessionMessage;
+use Pecee\String;
+use Pecee\UI\Html\HtmlCheckbox;
+use Pecee\UI\Html\HtmlForm;
+use Pecee\UI\Html\HtmlInput;
+use Pecee\UI\Html\HtmlLabel;
+use Pecee\UI\Html\HtmlSelect;
+use Pecee\UI\Html\HtmlSelectOption;
+use Pecee\UI\Html\HtmlTextarea;
+use Pecee\UI\ResponseData\ResponseDataPost;
+use Pecee\Widget;
+
+class Form {
+	const FORM_ENCTYPE_FORM_DATA='multipart/form-data';
+	protected $prefixElements;
+	protected $post;
+	protected $name;
+	protected $indexes;
+	public function __construct(ResponseDataPost $post) {
+		$this->prefixElements=true;
+		$this->post=$post;
+		$this->indexes=array();
+	}
+
+	protected function getPostBackValue($name) {
+		if(strpos($name, '[]') != false) {
+			$index=$this->indexes[md5($name)];
+			$newName=substr($name, 0, strpos($name, '[]'));
+			if(isset($_POST[$newName][$index])) {
+				return $_POST[$newName][$index];
+			}
+		} else {
+			if(!is_null($this->post->__get($name))) {
+				return $this->post->__get($name);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Tries to make some kind of unique form input name
+	 * @param string $name
+	 * @return string
+	 */
+	public function getInputName($name) {
+		if($this->prefixElements) {
+			$name = ($this->name) ? sprintf('%s_%s', $this->name, $name) : $name;
+		}
+		$this->indexes[md5($name)]=(isset($this->indexes[md5($name)])) ? ($this->indexes[md5($name)]+1) : 0;
+		return $name;
+	}
+
+	/**
+	 * Starts new form
+	 * @param string $name
+	 * @param string $method
+	 * @param string $action
+	 * @param string $enctype
+	 * @return \Pecee\UI\Html\HtmlForm
+	 */
+	public function start($name = null, $method = 'post', $action = null, $enctype = 'multipart/form-data') {
+		$this->name=$name;
+		return new HtmlForm($name, $method, $action, $enctype);
+	}
+
+	/**
+	 * Creates new HTML input element
+	 * @param string $name
+	 * @param string $type
+	 * @param string $value
+     * @param bool $forcePostback
+	 * @return \Pecee\UI\Html\HtmlInput
+	 */
+	public function input($name, $type, $value = null, $forcePostback = false) {
+		$name = $this->getInputName($name);
+		if(is_null($value) && $this->getPostBackValue($name) || $forcePostback && ResponseDataPost::IsPostBack()) {
+			$value = $this->getPostBackValue($name);
+		}
+		$element = new HtmlInput($name, $type, String::HtmlEntities($value));
+		// Added: if the input is an radio, then save the god damn post value :-D...
+		if(strtolower($type) == 'radio' && $this->getPostBackValue($name) && $value == $this->getPostBackValue($name) ) {
+			$element->addAttribute('checked', 'checked');
+		}
+		return $element;
+	}
+
+	public function showError($index) {
+		$msg = $this->validationFor($index);
+		if($msg) {
+			return $msg->getMessage();
+		}
+		return null;
+	}
+
+	public function validationFor($index) {
+		$messages = SessionMessage::getInstance()->get(Widget::MSG_ERROR);
+		if($messages && is_array($messages)) {
+			/* @var $message \Pecee\UI\Form\FormMessage */
+			foreach($messages as $message) {
+				if($message->getIndex()==$index) {
+					return $message->getMessage();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Make new captcha element
+	 * @param string $name
+	 * @return \Pecee\UI\Form\FormCaptcha
+	 */
+	public function captcha( $name ) {
+		return new FormCaptcha($name);
+	}
+
+	/**
+	 * Creates new checkbox input element
+	 * @param string $name
+	 * @param string $value
+     * @param bool $forcePostback
+     * @param string|null $defaultValue
+	 * @return \Pecee\UI\Html\HtmlCheckbox
+	 */
+	public function bool($name, $value = null, $forcePostback=true, $defaultValue = null) {
+		$name = $this->getInputName($name);
+		$v = (!is_null($defaultValue)) ? $defaultValue : true;
+		$element = new HtmlCheckbox($name, $v);
+		if($forcePostback && ResponseDataPost::IsPostBack()) {
+			if($v && $this->getPostBackValue($name) == $v) {
+				$element->addAttribute('checked', 'checked');
+			}
+		} else {
+			if(Bool::Parse($value)) {
+				$element->addAttribute('checked', 'checked');
+			}
+		}
+		return $element;
+	}
+
+	/**
+	 * Creates new label
+	 * @param string $value
+	 * @param string $for
+	 * @return \Pecee\UI\Html\HtmlLabel
+	 */
+	public function label($value, $for=null) {
+		return new HtmlLabel($value, $for);
+	}
+
+	/**
+	 * Creates new HTML Select element
+	 * @param string $name
+	 * @param Dataset $data
+     * @param string|null $value
+     * @param bool $forcePostback
+	 * @return \Pecee\UI\Html\HtmlSelect
+	 */
+	public function selectStart($name, $data = null, $value=null, $forcePostback=false) {
+		$name = $this->getInputName($name);
+		$element = new HtmlSelect($name);
+		if(!is_null($data)) {
+			if($data instanceof Dataset) {
+				$arr=$data->getArray();
+				if(count($arr) > 0) {
+					foreach($data->getArray() as $i) {
+						$val=(!isset($i['value'])) ? $i['name'] : $i['value'];
+						$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
+						$element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
+					}
+				}
+			} elseif(is_array($data)) {
+				foreach($data as $val=>$name) {
+					$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
+					$element->addOption(new HtmlSelectOption($name, $val, $selected));
+				}
+			} else {
+				throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
+			}
+		}
+		return $element;
+	}
+
+	/**
+	 * Creates new textarea
+	 * @param string $name
+	 * @param int $rows
+	 * @param int $cols
+	 * @param string $value
+     * @param bool $forcePostback
+	 * @return \Pecee\UI\Html\HtmlTextarea
+	 */
+	public function textarea($name, $rows, $cols, $value = null, $forcePostback = false) {
+		$name = $this->getInputName($name);
+		if(!$value && $this->getPostBackValue($name) || $forcePostback && ResponseDataPost::IsPostBack()) {
+			$value = $this->getPostBackValue($name);
+		}
+		return new HtmlTextarea($name, $rows, $cols, $value);
+	}
+
+	/**
+	 * Creates submit element
+	 * @param string $name
+	 * @param string $value
+	 * @return \Pecee\UI\Html\HtmlInput
+	 */
+	public function submit($name, $value) {
+		return $this->input($name, 'submit', $value);
+	}
+
+	/**
+	 * Ends open form
+	 * @return string
+	 */
+	public function end() {
+		return '</form>';
+	}
+
+	public function setPrefixElements($bool) {
+		$this->prefixElements=$bool;
+	}
+}

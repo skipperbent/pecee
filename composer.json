@@ -1,0 +1,30 @@
+{
+    "name": "pecee/lightspeed",
+    "description": "Lightspeed Framework.",
+    "keywords": [ "lightspeed", "framework", "pecee" ],
+    "license": "MIT",
+    "homepage": "http://www.pecee.dk",
+    "support": {
+        "source": "https://bitbucket.org/sessingo/pecee-framework"
+    },
+    "authors": [
+        {
+            "name": "Simon Sessingø",
+            "email": "simon.sessingoe@gmail.com"
+        }
+    ],
+    "require": {
+        "pecee/simple-router": "dev-master",
+        "vlucas/phpdotenv": "2.0"
+    },
+    "require-dev": {
+        "pecee/simple-router": "dev-master",
+        "vlucas/phpdotenv": "2.0"
+    },
+    "autoload": {
+
+    },
+    "config": {
+        "preferred-install": "dist"
+    }
+}

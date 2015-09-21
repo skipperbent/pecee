@@ -1,0 +1,99 @@
+[
+    {
+        "name": "pecee/simple-router",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/skipperbent/simple-php-router.git",
+            "reference": "4cc306a2ccad1e17bfd91fb19298878997475e6c"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/4cc306a2ccad1e17bfd91fb19298878997475e6c",
+            "reference": "4cc306a2ccad1e17bfd91fb19298878997475e6c",
+            "shasum": ""
+        },
+        "require-dev": {
+            "phpunit/phpunit": "4.7.7"
+        },
+        "time": "2015-09-20 10:26:16",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Pecee\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Simon Sessingø",
+                "email": "simon.sessingoe@gmail.com"
+            }
+        ],
+        "description": "Simple, fast PHP router that is easy to get integrated and in almost any project. Heavily inspired by the Laravel router.",
+        "keywords": [
+            "laravel",
+            "pecee",
+            "router",
+            "routing"
+        ]
+    },
+    {
+        "name": "vlucas/phpdotenv",
+        "version": "v2.0.0",
+        "version_normalized": "2.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/vlucas/phpdotenv.git",
+            "reference": "058b9b03b945b6c3eced241935c45822fd2bf4e8"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/vlucas/phpdotenv/zipball/058b9b03b945b6c3eced241935c45822fd2bf4e8",
+            "reference": "058b9b03b945b6c3eced241935c45822fd2bf4e8",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.2"
+        },
+        "require-dev": {
+            "phpunit/phpunit": "~4.0"
+        },
+        "time": "2015-05-29 20:43:19",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.1-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Dotenv\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "BSD"
+        ],
+        "authors": [
+            {
+                "name": "Vance Lucas",
+                "email": "vance@vancelucas.com",
+                "homepage": "http://www.vancelucas.com"
+            }
+        ],
+        "description": "Loads environment variables from `.env` to `getenv()`, `$_ENV` and `$_SERVER` automagically.",
+        "homepage": "http://github.com/vlucas/phpdotenv",
+        "keywords": [
+            "dotenv",
+            "env",
+            "environment"
+        ]
+    }
+]
