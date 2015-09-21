@@ -54,11 +54,11 @@ class ModelLanguage extends \Pecee\Model\Model {
         return $text;
     }
 	
-	public static function GetPages($rows=15, $page=0) {
+	public static function getPages($rows=15, $page=0) {
 		return self::FetchPage('SELECT * FROM {table} GROUP BY `path` ORDER BY `path` ASC', $rows, $page);
 	}
 	
-	public static function GetByContext($context, $locale=null, $rows=null, $page=null) {
+	public static function getByContext($context, $locale=null, $rows=null, $page=null) {
 		$where=array(sprintf("`context` = '%s'", \Pecee\DB\DB::Escape($context)));
 		if(!is_null($locale)) {
 			$where[]=sprintf("`locale` = '%s'", \Pecee\DB\DB::Escape($locale));
@@ -66,7 +66,7 @@ class ModelLanguage extends \Pecee\Model\Model {
 		return self::FetchPage('SELECT * FROM {table} WHERE ' . join(' && ', $where), $rows, $page);
 	}
 	
-	public static function GetById($languageId) {
+	public static function getById($languageId) {
 		return self::FetchOne('SELECT * FROM {table} WHERE `languageId` = %s', $languageId);
 	}
 }

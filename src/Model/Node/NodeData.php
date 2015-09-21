@@ -21,15 +21,15 @@ class NodeData extends \Pecee\Model\Model {
 		}
 	}
 
-	public static function Clear($nodeId) {
+	public static function clear($nodeId) {
 		self::NonQuery('DELETE FROM {table} WHERE `nodeId` = %s', array($nodeId));
 	}
 
-	public static function GetByNodeIDs(array $nodeIds) {
+	public static function getByNodeIds(array $nodeIds) {
 		return self::FetchAll('SELECT * FROM {table} WHERE `nodeId` IN('.DB::JoinArray($nodeIds).')');
 	}
 
-	public static function GetByNodeID($nodeId) {
+	public static function getByNodeId($nodeId) {
 		return self::FetchAll('SELECT * FROM {table} WHERE `nodeId` = %s', array($nodeId));
 	}
 }

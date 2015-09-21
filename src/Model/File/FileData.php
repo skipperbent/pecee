@@ -24,11 +24,11 @@ class FileData extends \Pecee\Model\Model {
         }
     }
 
-    public static function RemoveAll($fileId) {
+    public static function removeAll($fileId) {
         self::NonQuery('DELETE FROM {table} WHERE `fileId` = %s', array($fileId));
     }
 
-    public static function GetFileId($fileId) {
+    public static function getFileId($fileId) {
         return self::FetchAll('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
     }
 }

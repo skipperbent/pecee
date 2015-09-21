@@ -18,13 +18,13 @@ class UserBadLogin extends \Pecee\Model\Model {
         $this->date = \Pecee\Date::ToDateTime();
 	}
 
-    public static function Track($username) {
+    public static function track($username) {
         $login = new self();
         $login->username = $username;
         $login->save();
     }
 	
-	public static function CheckBadLogin() {
+	public static function checkBadLogin() {
         $trackQuery = self::FetchOne('SELECT `date`, COUNT(`ipAddress`) AS `requestFromIp` FROM {table} WHERE `ipAddress` = %s AND `active` = 1 GROUP BY `ipAddress` ORDER BY `requestFromIp` DESC', \Pecee\Server::GetRemoteAddr());
         if($trackQuery->hasRow()) {
             $lastLoginTimeStamp = $trackQuery->date;
@@ -35,7 +35,7 @@ class UserBadLogin extends \Pecee\Model\Model {
         return false;
 	}
 	
-	public static function Reset() {
+	public static function reset() {
         self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', \Pecee\Server::GetRemoteAddr());
 	}
 }

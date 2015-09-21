@@ -73,11 +73,11 @@ class ModelUser extends ModelData {
 		}
 	}
 
-	protected function fetchData($row) {
-		$data = UserData::GetByUserID($row->userId);
+	protected function fetchData() {
+		$data = UserData::GetByUserID($this->userId);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
-				$row->setDataValue($d->getKey(), $d->getValue());
+				$this->setDataValue($d->getKey(), $d->getValue());
 			}
 		}
 	}

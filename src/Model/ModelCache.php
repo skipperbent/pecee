@@ -30,29 +30,29 @@ class ModelCache extends Model {
 	 * @param string $cacheKey
 	 * @return bool
 	 */
-	protected static function IsExpired($expireDate) {
+	protected static function isExpired($expireDate) {
 		return ($expireDate && strtotime($expireDate) <= time());
 	}
 
 	/**
 	 * Clear all cache elements.
 	 */
-	public static function ClearCache() {
+	public static function clear() {
 		self::NonQuery('TRUNCATE {table}');
 	}
 
-	public static function SetCache($key, $data, $expireMinutes) {
+	public static function set($key, $data, $expireMinutes) {
 		$expireDate = \Pecee\Date::ToDateTime(time() + ($expireMinutes*60));
 		self::RemoveCache($key);
 		$model = new self($key, $data, $expireDate);
 		return ($model->save());
 	}
 
-	public static function RemoveCache($key) {
+	public static function remove($key) {
 		self::NonQuery('DELETE FROM {table} WHERE `key` = %s', $key);
 	}
 
-	public static function Get($key) {
+	public static function get($key) {
 		$model = self::FetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
 		if($model->hasRow()) {
 			if(self::IsExpired($model->getExpireDate())){

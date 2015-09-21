@@ -15,7 +15,7 @@ abstract class ModelData extends \Pecee\Model\Model {
 		throw new \ErrorException('Yet not implemented');
 	}
 
-	protected function fetchData($row) {
+	protected function fetchData() {
 		// Implement this method in your extending class
 		throw new \ErrorException('Yet not implemented');
 	}
@@ -30,49 +30,14 @@ abstract class ModelData extends \Pecee\Model\Model {
 		$this->updateData();
 	}
 
-	protected function setEntityFields($single=false) {
-		if($single && $this->hasRow()) {
-			$this->fetchData($this);
-		} else {
-			if($this->hasRows()) {
-				foreach($this->getRows() as $row) {
-					$this->fetchData($row);
-				}
-			}
-		}
-	}
-
-	protected function setDataValue($name, $value) {
+    protected function setDataValue($name, $value) {
 		$this->data->$name=$value;
 	}
 
-	public static function FetchAll($query, $args = null) {
-		$args = (is_null($args) || is_array($args) ? $args : \Pecee\DB\DB::ParseArgs(func_get_args(), 1));
-		$model = parent::FetchAll($query, $args);
-		$model->setEntityFields();
-		return $model;
-	}
-
-	public static function FetchPage($query, $rows = 10, $page = 0, $args=null) {
-		$args = (!$args || is_array($args) ? $args : \Pecee\DB\DB::ParseArgs(func_get_args(), 3));
-		$model = parent::FetchPage($query, $rows, $page, $args);
-		$model->setEntityFields();
-		return $model;
-	}
-
-	public static function FetchRows($query, $startIndex=0, $rows = 10, $args = null) {
-		$args = (!$args || is_array($args) ? $args : \Pecee\DB\DB::ParseArgs(func_get_args(), 3));
-		$model = parent::FetchAll($query, $startIndex, $rows, $args);
-		$model->setEntityFields();
-		return $model;
-	}
-
-	public static function FetchOne($query, $args=null) {
-		$args = (!$args || is_array($args) ? $args : \Pecee\DB\DB::ParseArgs(func_get_args(), 1));
-		$model = parent::FetchOne($query, $args);
-		$model->setEntityFields(true);
-		return $model;
-	}
+    public function setRows(array $rows) {
+        parent::setRows($rows);
+        $this->fetchData();
+    }
 
 	public function getAsJsonObject(){
 		$arr=array('rows' => null);

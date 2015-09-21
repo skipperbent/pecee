@@ -18,11 +18,11 @@ class UserReset extends \Pecee\Model\Model {
         $this->date = Date::ToDateTime();
 	}
 	
-	public static function GetByKey($key) {
+	public static function getByKey($key) {
 		return self::FetchOne('SELECT * FROM {table} WHERE `key` = %s', array($key));
 	}
 	
-	public static function Confirm($Key, $Password) {
+	public static function confirm($Key, $Password) {
 		$reset = self::FetchOne('SELECT * FROM {table} WHERE `key` = %s', $Key);
 		if($reset->hasRow()) {
 			$reset->delete();

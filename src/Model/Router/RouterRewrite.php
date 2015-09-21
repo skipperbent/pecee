@@ -22,10 +22,11 @@ class RouterRewrite extends Model {
 	
 	/**
 	 * Get rewrite by originalpath
-	 * @param string $originalPath
+	 * @param string $originalUrl
+	 * @param string|null $host
 	 * @return \Pecee\Model\ModelRouterRewrite
 	 */
-	public static function GetByOriginalUrl($originalUrl, $host = null) {
+	public static function getByOriginalUrl($originalUrl, $host = null) {
 		$where = array('1=1');
 		if(!is_null($host)) {
 			$where[] = \Pecee\DB\DB::FormatQuery('`host` = %s', array($host));
@@ -33,15 +34,15 @@ class RouterRewrite extends Model {
 		return self::FetchOne('SELECT * FROM {table} WHERE `originalUrl` = %s && ' . join(' && ', $where), $originalUrl);
 	}
 	
-	public static function GetByRewritePath($rewriteUrl) {
+	public static function getByRewritePath($rewriteUrl) {
 		return self::FetchOne('SELECT * FROM {table} WHERE `rewriteUrl` = %s', $rewriteUrl);
 	}
 	
-	public static function Get($rows = null, $page = null) {
+	public static function get($rows = null, $page = null) {
 		return self::FetchPage('SELECT * FROM {table} ORDER BY `order` ASC, `rewriteId` DESC', $rows, $page);
 	}
 	
-	public static function GetByRewriteID($rewriteId) {
+	public static function getByRewriteId($rewriteId) {
 		return self::FetchOne('SELECT * FROM {table} WHERE `rewriteId` = %s', $rewriteId);
 	}
 }

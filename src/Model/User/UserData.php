@@ -24,10 +24,10 @@ class UserData extends \Pecee\Model\Model {
 		}
 	}
 
-	public static function RemoveAll($userId) {
+	public static function removeAll($userId) {
 		self::NonQuery('DELETE FROM {table} WHERE `userId` = %s', array($userId));
 	}
-	public static function GetByUserID($userId) {
+	public static function getByUserId($userId) {
 		return self::FetchAll('SELECT * FROM {table} WHERE `userId` = %s', array($userId));
 	}
 }

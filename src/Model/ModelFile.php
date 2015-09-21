@@ -73,11 +73,11 @@ class ModelFile extends \Pecee\Model\ModelData {
 		}
 	}
 
-	protected function fetchData($row) {
-		$data = ModelFileData::GetFileId($row->fileId);
+	protected function fetchData() {
+		$data = ModelFileData::GetFileId($this->fileId);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
-				$row->setDataValue($d->getKey(), $d->getValue());
+				$this->setDataValue($d->getKey(), $d->getValue());
 			}
 		}
 	}
@@ -91,11 +91,11 @@ class ModelFile extends \Pecee\Model\ModelData {
 	 * @param string $fileId
 	 * @return self
 	 */
-	public static function GetById($fileId){
+	public static function getById($fileId){
 		return self::FetchOne('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
 	}
 
-	public static function Get($order=null, $rows=null, $page=null){
+	public static function get($order=null, $rows=null, $page=null){
 		$order = (in_array($order, self::$ORDERS)) ? $order : self::ORDER_DATE_DESC;
 		return self::FetchPage('SELECT f.* FROM {table} f ORDER BY ' .$order, $rows=null,$page=null);
 	}
