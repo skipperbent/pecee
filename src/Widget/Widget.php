@@ -1,14 +1,16 @@
 <?php
-namespace Pecee;
+namespace Pecee\Widget;
 
 use Pecee\Auth;
-use Pecee\Router;
+use Pecee\Base;
+use Pecee\Debug;
 use Pecee\String;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
+use Pecee\Url;
 
 abstract class Widget extends Base  {
 	protected $jsWrapRoute;
@@ -24,9 +26,20 @@ abstract class Widget extends Base  {
 
 		Debug::getInstance()->add('START ' . get_class($this));
 		$this->setTemplate('Default.php');
-		$this->setContentTemplate(Router::GetTemplatePath(get_class($this)));
+		$this->setContentTemplate($this->getTemplatePath());
 		$this->jsWrapRoute = url('js','wrap');
 		$this->cssWrapRoute = url('css','wrap');
+	}
+
+	/**
+	 * Calculates template path from given Widget name.
+	 *
+	 * @return string
+	 */
+	protected function getTemplatePath() {
+		$path=explode('\\', get_class($this));
+		$path = array_slice($path, 2);
+		return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
 	}
 
 	public function showMessages($type) {
@@ -104,7 +117,7 @@ abstract class Widget extends Base  {
 			}
 
 			$p = $this->cssWrapRoute;
-            $p .= join($this->_site->getCssFilesWrapped(), ',') . Url::GetQueryStringSeperator($this->cssWrapRoute) . Url::QueryStringToString($get);
+            $p .= join($this->_site->getCssFilesWrapped(), ',') . Url::getParamsSeperator($this->cssWrapRoute) . Url::arrayToParams($get);
 			$o[] = new HtmlLink($p);
 		}
 
@@ -132,7 +145,7 @@ abstract class Widget extends Base  {
 			}
 
 			$p = $this->jsWrapRoute;
-            $p .= join($this->_site->getJsFilesWrapped(),',') . Url::GetQueryStringSeperator($this->jsWrapRoute) . Url::QueryStringToString($get);
+            $p .= join($this->_site->getJsFilesWrapped(),',') . Url::getParamsSeperator($this->jsWrapRoute) . Url::arrayToParams($get);
 			$o[] = new HtmlScript($p);
 		}
 
@@ -189,7 +202,7 @@ abstract class Widget extends Base  {
 
 	/**
 	 * Include widget on page.
-	 * @param \Pecee\Widget $widget
+	 * @param \Pecee\Widget\Widget $widget
 	 */
 	public function widget(Widget $widget) {
 		if($widget->getTemplate() == 'Template\Default.php') {
@@ -210,10 +223,10 @@ abstract class Widget extends Base  {
 	public function render()  {
 		$this->renderContent();
 		$this->renderTemplate();
-		$output = String::GetFirstOrValue($this->_contentHtml, '');
+		$output = String::getFirstOrDefault($this->_contentHtml, '');
 		Debug::getInstance()->add('END ' . get_class($this));
 		// Output debug info
-		if($this->getSite()->getDebug() && String::GetFirstOrValue($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
+		if($this->getSite()->getDebug() && String::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
             $output .= Debug::getInstance()->__toString();
 		}
 		return $output;
@@ -229,7 +242,7 @@ abstract class Widget extends Base  {
 	}
 
 	protected function renderTemplate() {
-		if(String::GetFirstOrValue($this->_template, false)) {
+		if(String::getFirstOrDefault($this->_template, false)) {
 			ob_start();
 			include $this->_template;
 			$this->_contentHtml = ob_get_contents();

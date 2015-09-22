@@ -11,7 +11,7 @@ abstract class WidgetTaglib extends \Pecee\Widget {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        return \Pecee\String::GetFirstOrValue($this->_contentHtml, '');
+        return \Pecee\String::getFirstOrDefault($this->_contentHtml, '');
     }
 
     public function renderContent() {

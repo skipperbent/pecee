@@ -188,7 +188,7 @@ abstract class Base {
 	 * @return string|null
 	 */
 	public function getParam($name, $default=null) {
-		return ($this->hasParam($name) ? String::GetFirstOrValue($_GET[$this->getKey($name)],$default) : $default);
+		return ($this->hasParam($name) ? String::getFirstOrDefault($_GET[$this->getKey($name)],$default) : $default);
 	}
 
 	/**
