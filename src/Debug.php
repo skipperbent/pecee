@@ -1,6 +1,7 @@
 <?php
 namespace Pecee;
 use Pecee\UI\Site;
+use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug {
 	private static $instance;
@@ -73,7 +74,7 @@ class Debug {
 	}
 
 	public function add($text) {
-		if($this->getEnabled()) {
+		if($this->enabled) {
 			$this->addObject($text);
 		}
 	}
@@ -87,47 +88,8 @@ class Debug {
 	}
 
 	public function __toString() {
-
-		// TODO: move to WidgetDebug class
-
-		if($this->enabled && count($this->stack) > 0) {
-			$output[] = '<h1 style="font-family:Arial;font-size:18px;margin:10px 0px;border-bottom:1px solid #CCC;padding-bottom:5px;">Debug information</h1>
-			<table cellspacing="0" cellpadding="0" style="width:100%;font-size:12px;font-family:Arial;">
-			<thead style="background-color:#EEE;">
-				<tr>
-					<th align="left" style="padding:5px;">Execution time</th>
-					<th align="left" style="padding:5px;">Message</th>
-					<th align="left" style="padding:5px;">Class</th>
-					<th align="left" style="padding:5px;">Method</th>
-					<th align="left" style="padding:5px;">File</th>
-					<th align="center" style="padding:5px;">Line</th>
-				</tr>
-			</thead>
-			<tbody style="background-color:#FFF;">';
-			foreach($this->stack as $i=>$log) {
-				$output[] = sprintf('<tr style="border-bottom:1px solid #CCC;cursor:pointer;height:10px;" onclick="show_debug(\'debug_'.$i.'\')">
-				<td style="vertical-align: top;padding:5px;">
-				    %s
-                </td>
-				<td style="vertical-align: top;padding:5px;">
-				    %s
-				    <div id="debug_'.$i.'" style="display: none;background-color:#EEE;padding:10px;margin-top:10px;">
-                        <pre>%s</pre>
-                    </div>
-				</td>
-				<td style="vertical-align:top; padding:5px;">%s</td>
-				<td style="vertical-align:top; padding:5px;">%s</td>
-				<td style="vertical-align:top; padding:5px;">%s</td>
-				<td style="vertical-align:top; padding:5px;" align="center">%s</td>
-			</tr>', $log['time'], $log['text'], print_r($log['debug'],true), $log['class'], $log['method'], $log['file'], $log['line']);
-			}
-			$output[] = '</tbody></table><script> function show_debug(id) {
-                var el = document.getElementById(id);
-                document.getElementById(id).style.display = (el.style.display == \'block\') ? \'none\' : \'block\';
-            } </script>';
-			return join('', $output);
-		}
-		return '';
+		$widget = new WidgetDebug($this->stack);
+		return $widget->render();
 	}
 
 }

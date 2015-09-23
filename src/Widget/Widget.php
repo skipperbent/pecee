@@ -227,7 +227,7 @@ abstract class Widget extends Base  {
 		Debug::getInstance()->add('END ' . get_class($this));
 		// Output debug info
 		if($this->getSite()->getDebug() && String::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
-            $output .= Debug::getInstance()->__toString();
+            $output .= Debug::getInstance();
 		}
 		return $output;
 	}
