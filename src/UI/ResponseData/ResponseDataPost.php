@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\UI\ResponseData;
-use Pecee\String;
+use Pecee\PhpString;
 
 class ResponseDataPost extends ResponseData {
 	public function __construct() {
@@ -9,11 +9,11 @@ class ResponseDataPost extends ResponseData {
 			foreach($_POST as $i=>$post) {
 				if(is_array($post)) {
 					foreach($post as $k=>$p) {
-						$post[$k] = String::HtmlEntitiesDecode($p);
+						$post[$k] = PhpString::HtmlEntitiesDecode($p);
 					}
 					$this->data[strtolower($i)] = $post;
 				} else {
-					$this->data[strtolower($i)] = String::HtmlEntitiesDecode($post);
+					$this->data[strtolower($i)] = PhpString::HtmlEntitiesDecode($post);
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 <?php
 namespace Pecee;
-class String {
+class PhpString {
 
 	public static function getFirstOrDefault($value, $default = null){
 		return ($value !== null && trim($value) !== '') ? trim($value) : $default;

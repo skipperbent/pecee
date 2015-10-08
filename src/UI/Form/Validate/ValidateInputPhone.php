@@ -7,7 +7,7 @@ class ValidateInputPhone extends ValidateInput {
 		$this->length=$length;
 	}
 	public function validate() {
-		if(\Pecee\Integer::isInteger($this->value))
+		if(\Pecee\PhpInteger::isInteger($this->value))
 			$this->error = lang('%s is not a valid number', $this->name);
 		elseif(strlen($this->value) == $this->length)
 			return true;

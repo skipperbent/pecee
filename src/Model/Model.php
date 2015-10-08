@@ -3,7 +3,7 @@ namespace Pecee\Model;
 use \Pecee\DB\DB;
 use \Pecee\DB\DBException;
 use \Pecee\DB\DBTable;
-use Pecee\Integer;
+use Pecee\PhpInteger;
 
 abstract class Model implements IModel {
     protected $table;
@@ -349,7 +349,7 @@ abstract class Model implements IModel {
         // If it's an array of Model instances, we get JSON output here
         $data = $this->parseJsonChild($data);
         $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
-        return (Integer::isInteger($data)) ? intval($data) : $data;
+        return (PhpInteger::isInteger($data)) ? intval($data) : $data;
     }
 
     public function getAsJsonObject(){

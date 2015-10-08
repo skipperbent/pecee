@@ -1,6 +1,6 @@
 <?php
 namespace Pecee;
-class Integer {
+class PhpInteger {
 	
 	/**
 	 * Check if a given value is a counting type or 

@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\DB;
 use Pecee\Debug;
-use Pecee\Integer;
+use Pecee\PhpInteger;
 use Pecee\Collection;
 use Pecee\Registry;
 
@@ -120,7 +120,7 @@ class DB {
 		$args = (is_null($args) || is_array($args) ? $args : self::ParseArgs(func_get_args(), 3));
 		$where = self::FormatQuery($where, $args);
 		$q = $this->scalar(sprintf('SELECT COUNT(%s) FROM %s %s',$fieldName,$tableName,$where,$fieldName));
-		return ($q==null||!Integer::isInteger($q)) ? 0 : $q;
+		return ($q==null||!PhpInteger::isInteger($q)) ? 0 : $q;
 	}
 
 	/**
@@ -136,7 +136,7 @@ class DB {
 		$args = (is_null($args) || is_array($args) ? $args : self::ParseArgs(func_get_args(), 3));
 		$where = self::FormatQuery($where, $args);
 		$q = $this->scalar(sprintf('SELECT MAX(%s) FROM %s %s',$fieldName,$tableName,$where));
-		return ($q==null||!Integer::isInteger($q)) ? 0 : $q;
+		return ($q==null||!PhpInteger::isInteger($q)) ? 0 : $q;
 	}
 
 	public function query($query, $pageIndex = null, $pageSize = null, $args = null) {
@@ -186,7 +186,7 @@ class DB {
 			foreach($args as $arg) {
 				if(is_null($arg)) {
 					$a[] =  'null';
-				} elseif(Integer::isInteger($arg)) {
+				} elseif(PhpInteger::isInteger($arg)) {
 					$a[] =  sprintf("%s", self::getInstance()->getConnection()->escape_string($arg));
 				} else {
 					$a[] =  sprintf("'%s'", self::getInstance()->getConnection()->escape_string($arg));

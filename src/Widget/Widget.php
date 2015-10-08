@@ -4,7 +4,7 @@ namespace Pecee\Widget;
 use Pecee\Auth;
 use Pecee\Base;
 use Pecee\Debug;
-use Pecee\String;
+use Pecee\PhpString;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
@@ -27,8 +27,8 @@ abstract class Widget extends Base  {
 		Debug::getInstance()->add('START ' . get_class($this));
 		$this->setTemplate('Default.php');
 		$this->setContentTemplate($this->getTemplatePath());
-		$this->jsWrapRoute = url('js','wrap');
-		$this->cssWrapRoute = url('css','wrap');
+		$this->jsWrapRoute = url('js', array('wrap'));
+		$this->cssWrapRoute = url('css', array('wrap'));
 	}
 
 	/**
@@ -223,10 +223,10 @@ abstract class Widget extends Base  {
 	public function render()  {
 		$this->renderContent();
 		$this->renderTemplate();
-		$output = String::getFirstOrDefault($this->_contentHtml, '');
+		$output = PhpString::getFirstOrDefault($this->_contentHtml, '');
 		Debug::getInstance()->add('END ' . get_class($this));
 		// Output debug info
-		if($this->getSite()->getDebug() && String::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
+		if($this->getSite()->getDebug() && PhpString::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
             $output .= Debug::getInstance();
 		}
 		return $output;
@@ -242,7 +242,7 @@ abstract class Widget extends Base  {
 	}
 
 	protected function renderTemplate() {
-		if(String::getFirstOrDefault($this->_template, false)) {
+		if(PhpString::getFirstOrDefault($this->_template, false)) {
 			ob_start();
 			include $this->_template;
 			$this->_contentHtml = ob_get_contents();

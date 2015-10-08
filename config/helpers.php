@@ -4,12 +4,12 @@
  * Contain helper functions which provides shortcuts for various classes.
  */
 
-function url($controller, $parameters = null, $getParams = null) {
-    \Pecee\SimpleRouter\RouterBase::getInstance()->getRoute($controller, $parameters, $getParams);
+function url($controller = null, $parameters = null, $getParams = null) {
+    return \Pecee\Router::getRoute($controller, $parameters, $getParams);
 }
 
 function redirect($url) {
-    return \Pecee\Router::Redirect($url);
+    return \Pecee\Router::redirect($url);
 }
 
 function lang($key, $args = null) {

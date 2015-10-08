@@ -6,7 +6,7 @@ use Pecee\DB\DB;
 use Pecee\DB\DBTable;
 use Pecee\Collection;
 use Pecee\Model\Node\NodeData;
-use Pecee\String;
+use Pecee\PhpString;
 
 class ModelNode extends Model {
 	const ORDER_ID_DESC = 'n.`nodeId` DESC';
@@ -269,7 +269,7 @@ class ModelNode extends Model {
 			$rows = array();
 			foreach($this->getRows() as $row) {
 				$k = (isset($row->fields[$key])) ? $row->__get($key) : $row->data->$key;
-				$k = ($k == 'Tjs=') ? String::base64Decode($k) : $k;
+				$k = ($k == 'Tjs=') ? PhpString::base64Decode($k) : $k;
 				$rows[$k] = $row;
 			}
 			if(strtolower($direction) == 'asc') {
@@ -342,7 +342,7 @@ class ModelNode extends Model {
 				$keys = (is_array($key)) ? $key : array($key);
 				foreach($keys as $_key) {
 					$k = (array_key_exists($_key, $row->fields)) ? $row->__get($_key) : $row->data->$_key;
-					$k = (strpos($k, 'Tjs=') == '1') ? String::base64Decode($k) : $k;
+					$k = (strpos($k, 'Tjs=') == '1') ? PhpString::base64Decode($k) : $k;
 
 					if($delimiter == '>') {
 						if($k > $value) {
@@ -406,7 +406,7 @@ class ModelNode extends Model {
 	public static function GetByNodeIDs(array $nodeIds, $active=null, $rows=null,$page=null) {
 		$where='n.`nodeId` IN('.DB::JoinArray($nodeIds).')';
 		if(!is_null($active)) {
-			$where.=' AND n.`active` = ' . Bool::Parse($active,0);
+			$where.=' AND n.`active` = ' . PhpBoolParse($active,0);
 		}
 		return self::FetchPage('SELECT n.* FROM {table} n WHERE ' . $where . ' ORDER BY n.`order` ASC', $rows, $page);
 	}
@@ -420,7 +420,7 @@ class ModelNode extends Model {
 	public static function GetByNodeID($nodeId, $active=null) {
 		$where='n.`nodeId` = %s';
 		if(!is_null($active)) {
-			$where.=' AND n.`active` = ' . Bool::Parse($active,0);
+			$where.=' AND n.`active` = ' . PhpBoolParse($active,0);
 		}
 		return self::FetchOne('SELECT n.* FROM {table} n WHERE ' . $where, array($nodeId));
 	}
@@ -439,7 +439,7 @@ class ModelNode extends Model {
 	public static function GetByPath($type=null, $query=null, $active=null, $parentNodeId=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
 		if(!is_null($active)) {
-			$where[] = DB::FormatQuery('n.`active` = %s', array(Bool::Parse($active)));
+			$where[] = DB::FormatQuery('n.`active` = %s', array(PhpBoolParse($active)));
 			$where[] = DB::FormatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
 		}
 		if(!is_null($parentNodeId)) {
@@ -474,7 +474,7 @@ class ModelNode extends Model {
 	public static function Get($type=null, $query=null, $active=null, $parentNodeId=null, $path=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
 		if(!is_null($active)) {
-			$where[] = DB::FormatQuery('n.`active` = %s', array(Bool::Parse($active)));
+			$where[] = DB::FormatQuery('n.`active` = %s', array(PhpBoolParse($active)));
 			$where[] = DB::FormatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
 		}
 		if(!is_null($parentNodeId)) {

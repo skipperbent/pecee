@@ -150,7 +150,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setUniqueValueLength( $length ) {
-		if( !\Pecee\Integer::isInteger($length) )
+		if( !\Pecee\PhpInteger::isInteger($length) )
 			throw new \InvalidArgumentException('Unknown datatype for length. Must be INT or nummeric string.');
 		$this->uniqueValueLength = $length;
 		$this->identifier = $this->CreateUniqueIdentifier();
@@ -177,7 +177,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontSize( $size ) {
-		if( !\Pecee\Integer::isInteger($size) )
+		if( !\Pecee\PhpInteger::isInteger($size) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontSize = $size;
 		return $this;
@@ -190,28 +190,28 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowSize( $size ) {
-		if( !\Pecee\Integer::isInteger($size) )
+		if( !\Pecee\PhpInteger::isInteger($size) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontShadowSize = $size;
 		return $this;
 	}
 	
 	public function setFontRotation( $degrees ) {
-		if( !\Pecee\Integer::isInteger($degrees) )
+		if( !\Pecee\PhpInteger::isInteger($degrees) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontRotationDegrees = $degrees;
 		return $this;
 	}
 	
 	public function setFontMarginTop( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
+		if( !\Pecee\PhpInteger::isInteger($pixels) )
 			throw new \InvalidArgumentException('Unknown datatype for pixels. Must be INT or nummeric string.');
 		$this->fontMarginTop = $pixels;
 		return $this;
 	}
 	
 	public function setFontShadowMarginTop( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
+		if( !\Pecee\PhpInteger::isInteger($pixels) )
 			throw new \InvalidArgumentException('Unknown datatype for pixels. Must be INT or nummeric string.');
 		$this->fontShadowMarginTop = $pixels;
 		return $this;
@@ -224,7 +224,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowRotation( $degrees ) {
-		if( !\Pecee\Integer::isInteger($degrees) )
+		if( !\Pecee\PhpInteger::isInteger($degrees) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontShadowRotationDegrees = $degrees;
 		return $this;
@@ -237,7 +237,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontMarginLeft( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
+		if( !\Pecee\PhpInteger::isInteger($pixels) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontMarginLeft = $pixels;
 		return $this;
@@ -250,7 +250,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowMarginLeft( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
+		if( !\Pecee\PhpInteger::isInteger($pixels) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontShadowMarginLeft = $pixels;
 		return $this;

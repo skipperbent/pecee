@@ -4,7 +4,7 @@ namespace Pecee\UI\Form;
 use Pecee\Bool;
 use Pecee\Dataset;
 use Pecee\Session\SessionMessage;
-use Pecee\String;
+use Pecee\PhpString;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
 use Pecee\UI\Html\HtmlInput;
@@ -81,7 +81,7 @@ class Form {
 		if(is_null($value) && $this->getPostBackValue($name) || $forcePostback && ResponseDataPost::IsPostBack()) {
 			$value = $this->getPostBackValue($name);
 		}
-		$element = new HtmlInput($name, $type, String::HtmlEntities($value));
+		$element = new HtmlInput($name, $type, PhpString::HtmlEntities($value));
 		// Added: if the input is an radio, then save the god damn post value :-D...
 		if(strtolower($type) == 'radio' && $this->getPostBackValue($name) && $value == $this->getPostBackValue($name) ) {
 			$element->addAttribute('checked', 'checked');
@@ -136,7 +136,7 @@ class Form {
 				$element->addAttribute('checked', 'checked');
 			}
 		} else {
-			if(Bool::Parse($value)) {
+			if(PhpBoolParse($value)) {
 				$element->addAttribute('checked', 'checked');
 			}
 		}

@@ -38,6 +38,11 @@ class Router extends SimpleRouter {
         }
     }
 
+    public static function redirect($url) {
+        // TODO: move to response class
+        header('location: ' . $url);
+    }
+
     public static function addExceptionHandler($handler) {
         self::$exceptionHandlers[] = $handler;
     }

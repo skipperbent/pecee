@@ -101,7 +101,7 @@ abstract class FileAbstract extends Controller {
                             }
 
                             $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */';
-                            $buffer.= ($this->debugMode()) ? $content : \Pecee\String::removeTabs($content);
+                            $buffer.= ($this->debugMode()) ? $content : \Pecee\PhpString::removeTabs($content);
 
                             if( $index < count($files)-1 ) {
                                 $buffer .= str_repeat(chr(10),2);

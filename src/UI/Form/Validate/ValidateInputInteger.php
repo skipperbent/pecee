@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\UI\Form\Validate;
-use Pecee\Integer;
+use Pecee\PhpInteger;
 
 class ValidateInputInteger extends ValidateInput {
 
@@ -10,7 +10,7 @@ class ValidateInputInteger extends ValidateInput {
 	}
 
 	public function validate() {
-		return ($this->allowEmpty && empty($this->value) || Integer::isInteger($this->value));
+		return ($this->allowEmpty && empty($this->value) || PhpInteger::isInteger($this->value));
 	}
 	public function getErrorMessage() {
 		return lang('%s is not a valid number', $this->name);

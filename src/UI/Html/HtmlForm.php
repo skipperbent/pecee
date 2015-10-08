@@ -8,6 +8,6 @@ class HtmlForm extends \Pecee\UI\Html\Html {
 		$this->addAttribute('name', $name);
 		$this->addAttribute('enctype', $enctype);
 		$this->addAttribute('method', $method);
-		$this->addAttribute('action', ((!$action) ? \Pecee\Router::GetCurrentRoute() : $action));		
+		$this->addAttribute('action', ((!$action) ? url() : $action));
 	}
 }
