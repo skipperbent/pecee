@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Model;
 use Pecee\DB\DBTable;
+use Pecee\Router;
+use Pecee\SimpleRouter\RouterBase;
 
 class ModelLanguage extends \Pecee\Model\Model {
 
@@ -12,12 +14,20 @@ class ModelLanguage extends \Pecee\Model\Model {
     public static function getInstance() {
         if(!self::$instance) {
             $locale = strtolower(\Pecee\Locale::getInstance()->getLocale());
-            $context = \Pecee\Router::getInstance()->getPath(true);
-            $lang = self::GetByContext($context, $locale);
+
+            $lang = self::GetByContext(self::getContext(), $locale);
             self::$instance = $lang;
 
         }
         return self::$instance;
+    }
+
+    protected static function getContext() {
+        $route = RouterBase::getInstance()->getLoadedRoute();
+        if($route->getName()) {
+            return $route->getIdentifier();
+        }
+        return '';
     }
 
 	public function __construct() {
@@ -33,7 +43,7 @@ class ModelLanguage extends \Pecee\Model\Model {
         parent::__construct($table);
 
         $this->locale = strtolower(\Pecee\Locale::getInstance()->getLocale());
-        $this->context = \Pecee\Router::getInstance()->getPath(true);
+        $this->context = self::getContext();
 	}
 
     public function lookup($text) {
