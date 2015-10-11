@@ -3,6 +3,6 @@ namespace Pecee\Handler;
 
 abstract class ExceptionHandler {
 
-	abstract public function handleError(\Exception $error);
+	abstract public function handleError(\RouterEntry $router = null, \Exception $error);
 
 }

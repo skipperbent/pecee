@@ -2,6 +2,7 @@
 namespace Pecee;
 
 use Pecee\Handler\ExceptionHandler;
+use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
 
 class Router extends SimpleRouter {
@@ -28,10 +29,11 @@ class Router extends SimpleRouter {
         try {
             parent::start($defaultNamespace);
         } catch(\Exception $e) {
+            $route = RouterBase::getInstance()->getLoadedRoute();
             /* @var $handler ExceptionHandler */
             foreach(self::$exceptionHandlers as $handler) {
                 $class = new $handler();
-                $class->handleError($e);
+                $class->handleError($route, $e);
             }
 
             throw $e;
