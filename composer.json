@@ -14,11 +14,11 @@
         }
     ],
     "require": {
-        "pecee/simple-router": "dev-master",
+        "pecee/simple-router": "1.*",
         "vlucas/phpdotenv": "2.0"
     },
     "require-dev": {
-        "pecee/simple-router": "dev-master",
+        "pecee/simple-router": "1.*",
         "vlucas/phpdotenv": "2.0"
     },
     "autoload": {
