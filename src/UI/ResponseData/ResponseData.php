@@ -4,7 +4,7 @@ namespace Pecee\UI\ResponseData;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Form\Validate\ValidateInput;
-use Pecee\Widget;
+use Pecee\Widget\Widget;
 
 abstract class ResponseData {
 

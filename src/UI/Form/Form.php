@@ -13,7 +13,7 @@ use Pecee\UI\Html\HtmlSelect;
 use Pecee\UI\Html\HtmlSelectOption;
 use Pecee\UI\Html\HtmlTextarea;
 use Pecee\UI\ResponseData\ResponseDataPost;
-use Pecee\Widget;
+use Pecee\Widget\Widget;
 
 class Form {
 	const FORM_ENCTYPE_FORM_DATA='multipart/form-data';

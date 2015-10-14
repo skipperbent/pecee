@@ -2,7 +2,7 @@
 namespace Pecee\UI\Html;
 
 use Pecee\UI\Menu\Menu;
-use Pecee\Widget;
+use Pecee\Widget\Widget;
 
 class Html {
 	protected $name;
