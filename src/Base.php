@@ -135,7 +135,7 @@ abstract class Base {
 	 * @param \Pecee\UI\Form\Validate\ValidateInput|array $type
 	 */
 	protected function addInputValidation($name, $index, $type) {
-		if(Util::GetTypeOf($type) == 'Pecee\\UI\\Form\\Validate\\ValidateFile') {
+		if(Util::getTypeOf($type) == 'Pecee\\UI\\Form\\Validate\\ValidateFile') {
 			$this->files->addInputValidation($name, $index, $type);
 		} else {
 			$this->data->addInputValidation($name, $index, $type);
