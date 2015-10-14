@@ -24,7 +24,7 @@ class ModelLanguage extends \Pecee\Model\Model {
 
     protected static function getContext() {
         $route = RouterBase::getInstance()->getLoadedRoute();
-        if($route->getName()) {
+        if($route->getIdentifier()) {
             return $route->getIdentifier();
         }
         return '';
