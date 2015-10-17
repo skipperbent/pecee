@@ -6,6 +6,6 @@ use Pecee\SimpleRouter\RouterException;
 abstract class ControllerRestful extends Controller {
 
 
-    // TODO: rewrite
+    // TODO: rewrite with abstract methods etc.
 
 }

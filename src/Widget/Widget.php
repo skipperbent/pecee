@@ -27,8 +27,8 @@ abstract class Widget extends Base  {
 		Debug::getInstance()->add('START ' . get_class($this));
 		$this->setTemplate('Default.php');
 		$this->setContentTemplate($this->getTemplatePath());
-		$this->jsWrapRoute = url('js', array('wrap'));
-		$this->cssWrapRoute = url('css', array('wrap'));
+		$this->jsWrapRoute = url('ControllerJs@wrap');
+		$this->cssWrapRoute = url('ControllerCss@wrap');
 	}
 
 	/**

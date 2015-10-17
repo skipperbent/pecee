@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Form;
 class FormCaptcha {
-	
+
 	// Settings
 	private $name;
 	private $identifier;
@@ -20,10 +20,10 @@ class FormCaptcha {
 	private $fontSize;
 	private $fontShadowSize;
 	private $imageNoise;
-	
+
 	public $image;
-	
-	public function __construct($name) {		
+
+	public function __construct($name) {
 		$this->name = $name;
 		$this->numbersonly = false;
 		$this->uniqueValueLength = 8;
@@ -34,11 +34,11 @@ class FormCaptcha {
 		$this->imageNoise = true;
 		$relPath=str_replace('.php', DIRECTORY_SEPARATOR, __FILE__);
 		$this->fontPath = $relPath . DIRECTORY_SEPARATOR . 'pakenham.ttf';
-		$this->identifier = $this->CreateUniqueIdentifier();
-		$this->image = new \Pecee\UI\Html\HtmlImage(url('captcha', 'show', array($this->name)));
+		$this->identifier = $this->createUniqueIdentifier();
+		$this->image = new \Pecee\UI\Html\HtmlImage(url('ControllerCaptcha@show', array($this->name)));
 	}
-	
-	private function CreateUniqueIdentifier() {
+
+	protected function createUniqueIdentifier() {
 		$output = '';
 		if($this->numbersonly) {
 			for( $i=0;$i<$this->uniqueValueLength;$i++ ) {
@@ -48,15 +48,15 @@ class FormCaptcha {
 			$str = 'ABCDEFGHIJKLMNOPQRSTUVXYZW0123456789';
 			for( $i=0;$i<$this->uniqueValueLength;$i++ ) {
 				$num = rand() % 33;
-				$output .= substr( $str, $num, 1 );	
+				$output .= substr( $str, $num, 1 );
 			}
 		}
 		return $output;
 	}
-	
+
 	public function showCaptcha() {
 		\Pecee\Session::getInstance()->set($this->name, $this->identifier);
-		
+
 		if($this->backgroundImage) {
 			$image = imagecreatefromjpeg($this->backgroundImage);
 		} else {
@@ -64,61 +64,61 @@ class FormCaptcha {
 		}
 		/* Add font shadow */
 		if( $this->fontShadowColor ) {
-			$textShadow = imagecolorallocate( $image, 
-												$this->fontShadowColor[0], 
-												$this->fontShadowColor[1], 
+			$textShadow = imagecolorallocate( $image,
+												$this->fontShadowColor[0],
+												$this->fontShadowColor[1],
 												$this->fontShadowColor[2] );
-														
+
 			// Add some shadow to the text
 			imagettftext($image, $this->fontShadowSize, $this->fontShadowRotationDegrees, $this->fontShadowMarginLeft, $this->fontShadowMarginTop, $textShadow, $this->fontPath, $this->identifier);
 		}
-		
-		$textColor = imagecolorallocate( $image, 
+
+		$textColor = imagecolorallocate( $image,
 											$this->fontColor[0],
 											$this->fontColor[1],
 											$this->fontColor[2] );
 
 		// Add the text
 		imagettftext($image, $this->fontSize, $this->fontRotationDegrees, $this->fontMarginLeft, $this->fontMarginTop, $textColor, $this->fontPath, $this->identifier);
-		
+
 		/* Add image-noise */
 		if( $this->imageNoise ) {
-			
+
 			for( $i=0;$i<9;$i++ ) {
 				$colorNr = rand(180,250);
 				$color = imagecolorallocate($image, $colorNr, $colorNr, $colorNr);
 				imageline( $image, rand(0,18), rand(6,50), rand(120,500), -50, $color );
 			}
 		}
-		
-		// Date in the past 
-		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT"); 
-		
-		// always modified 
-		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT"); 
-		
-		// HTTP/1.1 
-		header("Cache-Control: no-store, no-cache, must-revalidate"); 
-		header("Cache-Control: post-check=0, pre-check=0", false); 
-		
-		// HTTP/1.0 
-		header("Pragma: no-cache"); 
-		
+
+		// Date in the past
+		header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+
+		// always modified
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+		// HTTP/1.1
+		header("Cache-Control: no-store, no-cache, must-revalidate");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+
+		// HTTP/1.0
+		header("Pragma: no-cache");
+
 		// send the content type header so the image is displayed properly
 		header('Content-type: image/jpeg');
-		
+
 		// send the image to the browser
 		imagejpeg($image);
-		
+
 		// destroy the image to free up the memory
 		imagedestroy($image);
 	}
-	
+
 	public function __toString() {
 		\Pecee\Session::getInstance()->set($this->name . '_data', $this);
 		return $this->image->__toString();
 	}
-	
+
 	/**
 	 * Add attribute to image element
 	 *
@@ -129,7 +129,7 @@ class FormCaptcha {
 		$this->image->addAttribute( $attribute, $value );
 		return $this;
 	}
-	
+
 	/**
 	 * Unique value should only contain numbers?
 	 *
@@ -142,7 +142,7 @@ class FormCaptcha {
 		$this->numbersonly = $bool;
 		return $this;
 	}
-	
+
 	/**
 	 * Set unique value length
 	 *
@@ -153,14 +153,15 @@ class FormCaptcha {
 		if( !\Pecee\PhpInteger::isInteger($length) )
 			throw new \InvalidArgumentException('Unknown datatype for length. Must be INT or nummeric string.');
 		$this->uniqueValueLength = $length;
-		$this->identifier = $this->CreateUniqueIdentifier();
-		return $this;		
+		$this->identifier = $this->createUniqueIdentifier();
+		return $this;
 	}
-	
+
 	/**
 	 * Set background-image
 	 *
 	 * @param string $imagePath
+	 * @throws \ErrorException
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setBackgroundImage( $imagePath ) {
@@ -169,7 +170,7 @@ class FormCaptcha {
 		$this->backgroundImage = $imagePath;
 		return $this;
 	}
-	
+
 	/**
 	 * Set font size
 	 *
@@ -182,7 +183,7 @@ class FormCaptcha {
 		$this->fontSize = $size;
 		return $this;
 	}
-	
+
 	/**
 	 * Set font shadow size
 	 *
@@ -195,28 +196,28 @@ class FormCaptcha {
 		$this->fontShadowSize = $size;
 		return $this;
 	}
-	
+
 	public function setFontRotation( $degrees ) {
 		if( !\Pecee\PhpInteger::isInteger($degrees) )
 			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontRotationDegrees = $degrees;
 		return $this;
 	}
-	
+
 	public function setFontMarginTop( $pixels ) {
 		if( !\Pecee\PhpInteger::isInteger($pixels) )
 			throw new \InvalidArgumentException('Unknown datatype for pixels. Must be INT or nummeric string.');
 		$this->fontMarginTop = $pixels;
 		return $this;
 	}
-	
+
 	public function setFontShadowMarginTop( $pixels ) {
 		if( !\Pecee\PhpInteger::isInteger($pixels) )
 			throw new \InvalidArgumentException('Unknown datatype for pixels. Must be INT or nummeric string.');
 		$this->fontShadowMarginTop = $pixels;
 		return $this;
 	}
-	
+
 	/**
 	 * Set font shadow rotation
 	 *
@@ -229,7 +230,7 @@ class FormCaptcha {
 		$this->fontShadowRotationDegrees = $degrees;
 		return $this;
 	}
-	
+
 	/**
 	 * Set normal text margin left
 	 *
@@ -242,7 +243,7 @@ class FormCaptcha {
 		$this->fontMarginLeft = $pixels;
 		return $this;
 	}
-	
+
 	/**
 	 * Set shadow text margin left
 	 *
@@ -255,7 +256,7 @@ class FormCaptcha {
 		$this->fontShadowMarginLeft = $pixels;
 		return $this;
 	}
-	
+
 	/**
 	 * Set font color
 	 *
@@ -266,7 +267,7 @@ class FormCaptcha {
 		$this->fontColor = \Pecee\Util::html2rgb($htmlColor);
 		return $this;
 	}
-	
+
 	/**
 	 * Set font shadow color
 	 *
@@ -277,5 +278,5 @@ class FormCaptcha {
 		$this->fontShadowColor = \Pecee\Util::html2rgb($htmlColor);
 		return $this;
 	}
-	
+
 }

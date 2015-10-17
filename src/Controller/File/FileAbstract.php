@@ -26,7 +26,7 @@ abstract class FileAbstract extends Controller {
         $this->tmpDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
     }
 
-    public function wrapView($files = null) {
+    public function getWrap($files = null) {
         set_time_limit(60);
         $this->files = $files;
         $this->cacheDate = $this->getParam('_', '');

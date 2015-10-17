@@ -4,7 +4,8 @@ use Pecee\Session\Session;
 use Pecee\UI\Form\FormCaptcha;
 
 class ControllerCaptcha extends Controller {
-	public function showView($captchaName) {
+
+	public function getShow($captchaName) {
         $session = Session::getInstance();
 		if($session->exists($captchaName . '_data')) {
 			$captcha = $session->get($captchaName . '_data');
@@ -14,4 +15,5 @@ class ControllerCaptcha extends Controller {
 			}
 		}
 	}
+
 }
