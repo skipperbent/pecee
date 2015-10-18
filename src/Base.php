@@ -123,7 +123,7 @@ abstract class Base {
 		$this->_site->setTitle(($this->_site->getTitle() . $seperator . $title));
 	}
 
-	protected function prependSiteTitle($title, $seperator='') {
+	protected function prependSiteTitle($title, $seperator=' - ') {
 		$this->_site->setTitle(($title . $seperator .$this->_site->getTitle()));
 	}
 

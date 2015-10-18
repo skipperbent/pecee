@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Controller\File;
+use Pecee\Controller\Controller;
 use Pecee\File;
 use Pecee\Registry;
 use Pecee\UI\Site;

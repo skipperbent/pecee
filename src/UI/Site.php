@@ -244,7 +244,10 @@ class Site {
 
 	public function hasAdminIp($ip = null) {
 		$ip = ($ip === null) ? Server::GetRemoteAddr() : $ip;
-		return (in_array($ip, $this->adminIps));
+		if(is_array($this->adminIps)) {
+			return (in_array($ip, $this->adminIps));
+		}
+		return false;
 	}
 
 }

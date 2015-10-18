@@ -8,8 +8,14 @@ function url($controller = null, $parameters = null, $getParams = null) {
     return \Pecee\Router::getRoute($controller, $parameters, $getParams);
 }
 
-function redirect($url) {
-    return \Pecee\Router::redirect($url);
+function redirect($url, $code = null) {
+    $response = new \Pecee\Http\Response();
+
+    if($code) {
+        $response->httpCode($code);
+    }
+
+    return $response->redirect($url);
 }
 
 function lang($key, $args = null) {
