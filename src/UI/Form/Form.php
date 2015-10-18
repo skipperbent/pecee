@@ -3,7 +3,7 @@ namespace Pecee\UI\Form;
 
 use Pecee\Bool;
 use Pecee\Boolean;
-use Pecee\Dataset;
+use Pecee\Dataset\Dataset;
 use Pecee\Session\SessionMessage;
 use Pecee\Str;
 use Pecee\UI\Html\HtmlCheckbox;
@@ -167,9 +167,9 @@ class Form {
 		$element = new HtmlSelect($name);
 		if(!is_null($data)) {
 			if($data instanceof Dataset) {
-				$arr=$data->getArray();
+				$arr=$data->getData();
 				if(count($arr) > 0) {
-					foreach($data->getArray() as $i) {
+					foreach($data->getData() as $i) {
 						$val=(!isset($i['value'])) ? $i['name'] : $i['value'];
 						$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
 						$element->addOption(new HtmlSelectOption($i['name'], $val, $selected));

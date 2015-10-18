@@ -1,5 +1,5 @@
 <?php
-namespace Pecee;
+namespace Pecee\Dataset;
 abstract class Dataset {
 	protected $data = array();
 
