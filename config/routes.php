@@ -22,6 +22,12 @@ loadComposer(dirname(__FILE__) . '/../vendor/composer/autoload_psr4.php');
 // Composer project classmap
 loadComposer(dirname(dirname($_ENV['basePath'])) . '/vendor/composer/autoload_psr4.php');
 
+// Load framework classmape
+loadComposer(dirname(__FILE__) . '/../vendor/composer/autoload_namespaces.php');
+
+// Composer project classmap
+loadComposer(dirname(dirname($_ENV['basePath'])) . '/vendor/composer/autoload_namespaces.php');
+
 function loadFile($file) {
     if($file) {
         $exists = stream_resolve_include_path($file);
