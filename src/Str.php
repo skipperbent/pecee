@@ -2,6 +2,22 @@
 namespace Pecee;
 class Str {
 
+	public static function removeNewlines($input){
+		return preg_replace('/[\n]/', ' ',$input);
+	}
+
+	public static function removeTabs($input) {
+		return preg_replace('/[\t]/','',$input);
+	}
+
+	public static function removeEnters($input) {
+		return preg_replace('/[\r]/','',$input);
+	}
+
+	public static function removeSlashes($string) {
+		return str_replace('\\"', '"', str_replace("\\'", "'", $string));
+	}
+
 	public static function getFirstOrDefault($value, $default = null){
 		return ($value !== null && trim($value) !== '') ? trim($value) : $default;
 	}
