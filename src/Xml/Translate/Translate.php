@@ -15,7 +15,7 @@ class Translate {
 		}
 		return self::$instance;
 	}
-	
+
 	protected $xml;
     protected $dir;
 
@@ -23,12 +23,12 @@ class Translate {
         $this->dir = '../lang';
 		$this->setLanguageXml();
 	}
-	
+
 	public function lookup($key) {
 		if(!$this->dir) {
 			throw new TranslateException('XML language directory must be specified.');
 		}
-		$xml=new \SimpleXmlElement($this->xml);		
+		$xml=new \SimpleXmlElement($this->xml);
 		$node=null;
 		if(strpos($key, '/') > -1) {
 			$children=explode('/', $key);
@@ -47,8 +47,8 @@ class Translate {
 		}
 		throw new TranslateException(sprintf('Key "%s" does not exist for locale "%s"', $key, Locale::getInstance()->getLocale()));
 	}
-	
-	protected function setLanguageXml() {
+
+	public function setLanguageXml() {
 		$path = sprintf('%s/%s.xml', $this->dir, Locale::getInstance()->getLocale());
 		if(!file_exists($path)) {
 			throw new TranslateException(sprintf('Language file %s not found for locale %s', $path, Locale::getInstance()->getLocale()));
