@@ -2,6 +2,7 @@
 namespace Pecee\Controller\File;
 use Pecee\Controller\Controller;
 use Pecee\Registry;
+use Pecee\Str;
 use Pecee\UI\Site;
 
 abstract class FileAbstract extends Controller {
@@ -101,7 +102,7 @@ abstract class FileAbstract extends Controller {
                             }
 
                             $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */';
-                            $buffer.= ($this->debugMode()) ? $content : \Pecee\Str::removeTabs($content);
+                            $buffer.= ($this->debugMode()) ? $content : Str::removeTabs($content);
 
                             if( $index < count($files)-1 ) {
                                 $buffer .= str_repeat(chr(10),2);

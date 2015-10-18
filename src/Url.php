@@ -90,8 +90,8 @@ class Url {
 		return (isset($url['query'])) ? $url['query'] : '';
 	}
 
-	public static function arrayToParams(array $getParams, $includeEmpty = true) {
-		if(count($getParams) > 0) {
+	public static function arrayToParams(array $getParams = null, $includeEmpty = true) {
+		if(is_array($getParams) && count($getParams) > 0) {
 			foreach($getParams as $key=>$val) {
 				if(!empty($val) || empty($val) && $includeEmpty) {
 					$getParams[$key] = $key.'='.$val;
