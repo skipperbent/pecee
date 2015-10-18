@@ -4,7 +4,7 @@ namespace Pecee\Widget;
 use Pecee\Auth;
 use Pecee\Base;
 use Pecee\Debug;
-use Pecee\PhpString;
+use Pecee\Str;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
@@ -223,10 +223,10 @@ abstract class Widget extends Base  {
 	public function render()  {
 		$this->renderContent();
 		$this->renderTemplate();
-		$output = PhpString::getFirstOrDefault($this->_contentHtml, '');
+		$output = Str::getFirstOrDefault($this->_contentHtml, '');
 		Debug::getInstance()->add('END ' . get_class($this));
 		// Output debug info
-		if($this->getSite()->getDebug() && PhpString::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
+		if($this->getSite()->getDebug() && Str::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
             $output .= Debug::getInstance();
 		}
 		return $output;
@@ -242,7 +242,7 @@ abstract class Widget extends Base  {
 	}
 
 	protected function renderTemplate() {
-		if(PhpString::getFirstOrDefault($this->_template, false)) {
+		if(Str::getFirstOrDefault($this->_template, false)) {
 			ob_start();
 			include $this->_template;
 			$this->_contentHtml = ob_get_contents();

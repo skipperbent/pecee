@@ -2,14 +2,14 @@
 namespace Pecee\UI\Form\Validate;
 class ValidateFileMaxSize extends ValidateFile {
 	protected $size;
-	
+
 	public function __construct($sizeKB) {
-		if(!\Pecee\PhpInteger::isInteger($sizeKB)) {
+		if(!\Pecee\Integer::isInteger($sizeKB)) {
 			throw new \InvalidArgumentException('Size must be integer');
 		}
 		$this->size = $sizeKB;
 	}
-	
+
 	public function validate() {
 		return (($this->size*1024) >= $this->fileSize);
 	}

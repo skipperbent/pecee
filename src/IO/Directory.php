@@ -21,8 +21,8 @@ class Directory {
         @rmdir($path);
     }
 
-    public static function hasEndingSeperator($path) {
-        return (strlen($path) > 0 && $path[strlen($path)-1] == DIRECTORY_SEPARATOR);
+    public static function normalize($path) {
+        return rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
     }
 
 }

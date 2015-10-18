@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\UI\ResponseData;
-use Pecee\PhpString;
+use Pecee\Str;
 
 class ResponseDataGet extends ResponseData {
 	public function __construct() {
@@ -9,16 +9,16 @@ class ResponseDataGet extends ResponseData {
 			foreach($_GET as $i=>$get) {
 				if(is_array($get)) {
 					foreach($get as $k=>$g) {
-						$get[$k] = PhpString::HtmlEntitiesDecode($g);
+						$get[$k] = Str::HtmlEntitiesDecode($g);
 					}
 					$this->data[strtolower($i)] = $get;
 				} else {
-					$this->data[strtolower($i)] = PhpString::HtmlEntitiesDecode($get);
+					$this->data[strtolower($i)] = Str::HtmlEntitiesDecode($get);
 				}
 			}
 		}
 	}
-	
+
 	public static function GetFormName() {
 		foreach($_GET as $key=>$p) {
 			if(strpos($key, '_') > 0) {

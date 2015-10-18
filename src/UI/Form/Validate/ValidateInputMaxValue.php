@@ -6,9 +6,9 @@ class ValidateInputMaxValue extends ValidateInput {
 	public function __construct($maxValue) {
 		$this->maxValue = $maxValue;
 	}
-	
+
 	public function validate() {
-		if(!\Pecee\PhpInteger::isInteger($this->value)) {
+		if(!\Pecee\Integer::isInteger($this->value)) {
 			$this->error = lang('%s is not a valid number', $this->name);
 		}
 		if($this->value > $this->maxValue) {
@@ -16,9 +16,9 @@ class ValidateInputMaxValue extends ValidateInput {
 		}
 		return !($this->error);
 	}
-	
+
 	public function getErrorMessage() {
 		return $this->error;
 	}
-	
+
 }

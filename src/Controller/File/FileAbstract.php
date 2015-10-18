@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Controller\File;
 use Pecee\Controller\Controller;
-use Pecee\File;
 use Pecee\Registry;
 use Pecee\UI\Site;
 
@@ -61,7 +60,7 @@ abstract class FileAbstract extends Controller {
             if(count($files) > 0) {
                 /* Begin wrapping */
                 if(!is_dir($this->tmpDir)) {
-                    File::CreatePath($this->tmpDir);
+                    mkdir($this->tmpDir, 0777, true);
                 }
                 $handle = fopen($this->getTempFile(), 'w+', FILE_USE_INCLUDE_PATH);
                 if($handle) {
@@ -102,7 +101,7 @@ abstract class FileAbstract extends Controller {
                             }
 
                             $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */';
-                            $buffer.= ($this->debugMode()) ? $content : \Pecee\PhpString::removeTabs($content);
+                            $buffer.= ($this->debugMode()) ? $content : \Pecee\Str::removeTabs($content);
 
                             if( $index < count($files)-1 ) {
                                 $buffer .= str_repeat(chr(10),2);

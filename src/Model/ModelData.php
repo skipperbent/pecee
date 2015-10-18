@@ -50,14 +50,14 @@ abstract class ModelData extends \Pecee\Model\Model {
 						$rows[$key]=$this->parseJsonRow($row);
 					} else {
 						$row=$this->parseJsonRow($row);
-						$rows[$key]=(\Pecee\PhpInteger::isInteger($row)) ? intval($row) : $row;
+						$rows[$key]=(\Pecee\Integer::isInteger($row)) ? intval($row) : $row;
 					}
 				}
 			}
 			$data=$this->data->getData();
 			$out=array();
 			foreach($data as $key=>$d) {
-				$out[$key]=(\Pecee\PhpInteger::isInteger($d)) ? intval($d) : $d;
+				$out[$key]=(\Pecee\Integer::isInteger($d)) ? intval($d) : $d;
 			}
 			$rows=array_merge($rows, $out);
 			if(count($this->getResults()) == 1) {

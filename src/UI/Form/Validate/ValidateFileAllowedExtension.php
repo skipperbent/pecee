@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\UI\Form\Validate;
-use Pecee\File;
+use Pecee\IO\File;
 
 class ValidateFileAllowedExtension extends ValidateFile {
 	protected $extensions;
@@ -9,7 +9,7 @@ class ValidateFileAllowedExtension extends ValidateFile {
 	}
 
 	public function validate() {
-		$ext = File::GetExtension($this->fileName);
+		$ext = File::getExtension($this->fileName);
 		return (in_array($ext, $this->extensions));
 	}
 

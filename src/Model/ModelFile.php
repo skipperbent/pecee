@@ -1,7 +1,8 @@
 <?php
 namespace Pecee\Model;
 use Pecee\DB\DBTable;
-use Pecee\File;
+use Pecee\IO\Directory;
+use Pecee\IO\File;
 
 class ModelFile extends \Pecee\Model\ModelData {
 	const ORDER_DATE_ASC = 'f.`createdDate` ASC';
@@ -12,7 +13,7 @@ class ModelFile extends \Pecee\Model\ModelData {
 	public function __construct($name = null, $path = null) {
 		$fullPath=null;
 		if(!is_null($name) && !is_null($path)) {
-			$fullPath=$path.(File::HasEndingDirectorySeperator($path) ? '' : DIRECTORY_SEPARATOR) . $name;
+			$fullPath = Directory::normalize($path);
 		}
 
         $table = new DBTable();
@@ -31,7 +32,7 @@ class ModelFile extends \Pecee\Model\ModelData {
         $this->path = $path;
 
         if($fullPath && is_file($fullPath)) {
-            $this->type = File::GetMimeType($fullPath);
+            $this->type = File::getMime($fullPath);
             $this->bytes = filesize($fullPath);
         }
 
@@ -83,7 +84,7 @@ class ModelFile extends \Pecee\Model\ModelData {
 	}
 
 	public function getFullPath() {
-		return $this->path . (File::HasEndingDirectorySeperator($this->path) ? '' : DIRECTORY_SEPARATOR) . $this->Filename;
+		return $this->path . Directory::normalize($this->path) . $this->Filename;
 	}
 
 	/**

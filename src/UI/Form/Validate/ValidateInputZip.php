@@ -7,7 +7,7 @@ class ValidateInputZip extends ValidateInput {
 		$this->length=$length;
 	}
 	public function validate() {
-		if(\Pecee\PhpInteger::isInteger($this->value))
+		if(\Pecee\Integer::isInteger($this->value))
 			$this->error = lang('%s can only contain numbers', $this->name);
 		elseif(strlen($this->value) == $this->length)
 			return true;

@@ -24,7 +24,7 @@ class TaglibJs extends Taglib {
 		if(count($expressionMatches) > 0) {
 			/* Let's ensure that our js-expression don't get addslashed */
 			foreach($expressionMatches[1] as $match) {
-				$fixedExpressions[] = '"+eval("'.\Pecee\PhpString::RemoveSlashes($match).'")+"';
+				$fixedExpressions[] = '"+eval("'.\Pecee\Str::RemoveSlashes($match).'")+"';
 			}
 			/* Now we replace the expression tags, with the fixed js expression */
 			for($i=0;$i<count($expressionMatches[0]);$i++) {

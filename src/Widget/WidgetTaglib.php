@@ -1,6 +1,5 @@
 <?php
 namespace Pecee\Widget;
-use Pecee\File;
 
 abstract class WidgetTaglib extends \Pecee\Widget {
 	public function __construct() {
@@ -11,7 +10,7 @@ abstract class WidgetTaglib extends \Pecee\Widget {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        return \Pecee\PhpString::getFirstOrDefault($this->_contentHtml, '');
+        return \Pecee\Str::getFirstOrDefault($this->_contentHtml, '');
     }
 
     public function renderContent() {
@@ -40,7 +39,7 @@ abstract class WidgetTaglib extends \Pecee\Widget {
 
                 if(!$error) {
                     if(!is_dir($cacheDir)) {
-                        File::CreatePath($cacheDir);
+                        mkdir($cacheDir, 0777, true);
                     }
 
                     $handle = fopen($cacheFile, 'w+');
