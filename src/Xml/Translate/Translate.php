@@ -49,7 +49,7 @@ class Translate {
 	}
 
 	public function setLanguageXml() {
-		$path = sprintf('%s/%s.xml', $this->dir, Locale::getInstance()->getLocale());
+		$path = sprintf('%s/%s.xml', $this->dir, strtolower(Locale::getInstance()->getLocale()));
 		if(!file_exists($path)) {
 			throw new TranslateException(sprintf('Language file %s not found for locale %s', $path, Locale::getInstance()->getLocale()));
 		}
