@@ -5,7 +5,7 @@ class Locale {
 	protected $timezone;
 	protected $defaultLocale;
 	protected $locale;
-	
+
 	/**
 	 * Get instance
 	 * @return \Pecee\Locale
@@ -16,7 +16,7 @@ class Locale {
 		}
 		return self::$instance;
 	}
-	
+
 	public function __construct() {
 		// Default stuff
 		$this->setTimezone('Europe/Copenhagen');
@@ -37,13 +37,13 @@ class Locale {
 		$this->timezone = $timezone;
 		date_default_timezone_set($timezone);
 	}
-	
+
 	public function setLocale($locale) {
 		/* Set PHP language */
-		setlocale(LC_ALL, str_replace('-', '_', $locale));
+		setlocale(LC_ALL, strtolower(str_replace('-', '_', $locale)));
 		$this->locale=$locale;
 	}
-	
+
 	public function getLocale() {
 		return $this->locale;
 	}
