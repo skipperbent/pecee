@@ -32,11 +32,8 @@ class Pdo {
     }
 
     public function __construct($connectionString, $username, $password) {
-        try {
-            $this->connection = new \PDO($connectionString, $username, $password );
-        }catch(\PDOException $e) {
-            throw new PdoException($e->getMessage(), $e->getCode());
-        }
+        $this->connection = new \PDO($connectionString, $username, $password );
+        $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
     /**
@@ -72,15 +69,11 @@ class Pdo {
             }
         }
 
-        try {
-            $this->query = $query->queryString;
-            Debug::getInstance()->add('START DB QUERY:' . $this->query);
-            if($query->execute($inputParameters)) {
-                Debug::getInstance()->add('END DB QUERY');
-                return $query;
-            }
-        }catch(\PDOException $e) {
-            throw new PdoException($e->getMessage(), $e->getCode(), $query->queryString);
+        $this->query = $query->queryString;
+        Debug::getInstance()->add('START DB QUERY:' . $this->query);
+        if($query->execute($inputParameters)) {
+            Debug::getInstance()->add('END DB QUERY');
+            return $query;
         }
     }
 

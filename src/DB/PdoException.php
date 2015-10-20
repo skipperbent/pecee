@@ -5,7 +5,9 @@ class PdoException extends \Exception {
 	protected $query;
 
 	public function __construct($text, $code = 0, $query = null) {
-		parent::__construct($text, $code);
+		//$this->code = $code;
+		die(var_dump($text));
+		parent::__construct($text, 0);
 		$this->query=$query;
 	}
 

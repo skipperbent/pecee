@@ -1,7 +1,5 @@
 <?php
 namespace Pecee\Model;
-use \Pecee\DB\DB;
-use \Pecee\DB\DBException;
 use \Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
 use Pecee\Db\PdoHelper;
@@ -49,10 +47,17 @@ abstract class Model implements IModel {
             throw new ModelException('Table rows missing from constructor.');
         }
         $values = array_values($this->getRows());
-        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($this->table->getColumnNames(),true), PdoHelper::formatQuery(PdoHelper::joinArray($values, ', '), $values));
+        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($this->table->getColumnNames(),true), PdoHelper::formatQuery(PdoHelper::joinArray($values)));
 
-        $id = Pdo::getInstance()->insert($sql);
-
+        try {
+            $id = Pdo::getInstance()->insert($sql);
+        }catch(\PDOException $e) {
+            if($e->getCode() == '42S02' && $this->getAutoCreateTable()) {
+                $this->table->create();
+                return $this->save();
+            }
+            throw $e;
+        }
         $primary = $this->table->getPrimary($this->table->getColumnByIndex(0));
         if($primary) {
             $this->results['data']['rows'][$primary->getName()] = $id;
@@ -98,12 +103,21 @@ abstract class Model implements IModel {
 
         if($primaryKey && $primaryValue) {
             $concat=array();
-            foreach($this->table->getColumnNames() as $key=>$name) {
+            foreach($this->table->getColumnNames(false, true) as $key=>$name) {
                 $val = $this->getRow($name);
                 $concat[] = PdoHelper::formatQuery('`'.$name.'` = %s', array($val));
             }
-            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = :primaryValue LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName());
-            return $this->query($sql, ['primaryValue' => $primaryValue]);
+            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = %s LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), PdoHelper::escape($primaryValue));
+
+            try {
+                Pdo::getInstance()->nonQuery($sql);
+            }catch(\PDOException $e) {
+                if($e->getCode() == '42S02' && $this->getAutoCreateTable()) {
+                    $this->table->create();
+                    return $this->save();
+                }
+                throw $e;
+            }
         }
         return null;
     }
@@ -133,21 +147,19 @@ abstract class Model implements IModel {
         $sql = PdoHelper::formatQuery($query, $args);
         try {
             $query =  Pdo::getInstance()->query($sql);
-        } catch(DBException $e) {
-            if($e->getCode() == 1146 && $model->getAutoCreateTable()) {
+        } catch(\PdoException $e) {
+            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
                 return $model::query($query, $rows, $page, $args);
             }
             throw $e;
         }
         if($query) {
-            $results['data']['numFields'] = isset($query->field_count) ? $query->field_count : 0;
-            $results['data']['numRows']=isset($query->num_rows) ? $query->num_rows : 0;
-            $results['insertId']=isset($query->insert_id) ? $query->insert_id : null;
-            $results['affectedRows']=isset($query->affected_rows) ? $query->affected_rows : 0;
-            $results['query'][]=$sql;
+            $results['data']['numFields'] = $query->columnCount();
+            $results['data']['numRows'] = $query->rowCount();
+            $results['query'][] = $sql;
             if($results['data']['numRows'] > 0) {
-                while(($row = $query->fetch_assoc()) != false) {
+                foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                     $obj = static::OnCreateModel();
                     $obj->setRows($row);
                     $results['data']['rows'][]=$obj;
@@ -169,30 +181,29 @@ abstract class Model implements IModel {
      * Returns model instance
      * @return static
      */
-    protected static function OnCreateModel() {
-        $caller=get_called_class();
-        return new $caller();
+    protected static function onCreateModel() {
+        return new static();
     }
 
-    public static function FetchAll($query, $args = null) {
+    public static function fetchAll($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
-        return self::Query($query, null, null, $args);
+        return self::query($query, null, null, $args);
     }
 
-    public static function FetchAllPage($query, $skip = null, $rows = null, $args=null) {
+    public static function fetchAllPage($query, $skip = null, $rows = null, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $skip = (is_null($skip)) ? 0 : $skip;
-        $model = static::OnCreateModel();
+        $model = static::onCreateModel();
         try {
             $maxRows = Pdo::getInstance()->value($model->getCountSql(PdoHelper::formatQuery($query, $args)));
             if(!is_null($skip) && !is_null($rows)) {
                 $query = $query.' LIMIT ' . $skip . ',' . $rows;
             }
-            $model = self::Query($query, null, null, $args);
-        } catch(DBException $e) {
-            if($e->getCode() == 1146 && $model->getAutoCreateTable()) {
+            $model = self::query($query, null, null, $args);
+        } catch(\PdoException $e) {
+            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
-                return model::FetchAllPage($query, $skip, $rows, $args);
+                return model::fetchAllPage($query, $skip, $rows, $args);
             }
             throw $e;
         }
@@ -205,14 +216,14 @@ abstract class Model implements IModel {
         return $model;
     }
 
-    public static function FetchPage($query, $rows = 10, $page = 0, $args=null) {
+    public static function fetchPage($query, $rows = 10, $page = 0, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        return self::Query($query, $rows, $page, $args);
+        return self::query($query, $rows, $page, $args);
     }
 
-    public static function FetchOne($query, $args=null) {
+    public static function fetchOne($query, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
-        $model =  self::Query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
+        $model =  self::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
         if($model->hasRows()){
             $results = $model->getResults();
             if(isset($results['data']['rows'])) {
@@ -372,14 +383,6 @@ abstract class Model implements IModel {
 
     public function __set($name, $value) {
         $this->results['data']['rows'][strtolower($name)] = $value;
-
-        /*$column = in_array(strtolower($name), $this->table->getColumnNames(true));
-        if($column) {
-            $column = $this->table->getColumn($name);
-            $this->results['data']['rows'][$column->getName()] = $value;
-        } else {
-            throw new ModelException(sprintf('Unknown field %s in table %s', $name, $this->table->getName()));
-        }*/
     }
 
     /**

@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Db;
 
+use Pecee\Integer;
+
 class PdoHelper {
 
     public static function parseArgs($args, $offset) {

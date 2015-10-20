@@ -7,26 +7,26 @@ class SessionMessage {
 	protected $messages;
 	protected static $instance;
 	const KEY='MSG';
-	
+
 	public static function getInstance() {
 		if(self::$instance === null) {
 			self::$instance = new static();
 		}
 		return self::$instance;
 	}
-	
+
 	public function __construct() {
 		$this->parseMessages();
 	}
-	
+
 	protected function parseMessages() {
 		$this->messages= Session::getInstance()->get(self::KEY);
 	}
-	
+
 	protected function saveMessages() {
 		Session::getInstance()->set(self::KEY, $this->messages);
 	}
-	
+
 	public function set(FormMessage $message, $type = null) {
 		// Ensure no double posting
 		if(isset($this->messages[$type]) && is_array($this->messages[$type])) {
@@ -39,7 +39,7 @@ class SessionMessage {
 			$this->saveMessages();
 		}
 	}
-	
+
 	/**
 	 * Get messages
 	 * @param string|null $type
@@ -52,7 +52,7 @@ class SessionMessage {
 		}
 		return $this->messages;
 	}
-	
+
 	/**
 	 * Checks if there's any messages
 	 * @param string|null $type
@@ -64,7 +64,7 @@ class SessionMessage {
 		}
 		return (count($this->messages) > 0);
 	}
-	
+
 	public function clear($type = null) {
 		if(!is_null($type)) {
 			unset($this->messages[$type]);
