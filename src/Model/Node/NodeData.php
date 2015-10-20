@@ -2,6 +2,7 @@
 namespace Pecee\Model\Node;
 use Pecee\DB\DB;
 use Pecee\DB\DBTable;
+use Pecee\Db\PdoHelper;
 
 class NodeData extends \Pecee\Model\Model {
 	public function __construct() {
@@ -26,7 +27,7 @@ class NodeData extends \Pecee\Model\Model {
 	}
 
 	public static function getByNodeIds(array $nodeIds) {
-		return self::FetchAll('SELECT * FROM {table} WHERE `nodeId` IN('.DB::JoinArray($nodeIds).')');
+		return self::FetchAll('SELECT * FROM {table} WHERE `nodeId` IN(' . PdoHelper::joinArray($nodeIds).')');
 	}
 
 	public static function getByNodeId($nodeId) {

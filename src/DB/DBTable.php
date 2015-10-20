@@ -95,11 +95,11 @@ class DBTable {
             $tmp .= (!$column->getNullable()) ? 'NOT null' : 'null';
 
             if($column->getDefaultValue()) {
-                $tmp .= DB::FormatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
+                $tmp .= PdoHelper::formatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
             }
 
             if($column->getComment()) {
-                $tmp .= DB::FormatQuery(' COMMENT %s', array($column->getComment()));
+                $tmp .= PdoHelper::formatQuery(' COMMENT %s', array($column->getComment()));
             }
 
             if($column->getIncrement()) {
@@ -116,7 +116,7 @@ class DBTable {
         $query = array_merge($query,$keys);
         $sql = sprintf('CREATE TABLE `'. $this->name .'` (%s) ENGINE = InnoDB;', join(', ', $query));
 
-        \Pecee\DB\DB::getInstance()->nonQuery($sql);
+        Pdo::getInstance()->nonQuery($sql);
     }
 
 }

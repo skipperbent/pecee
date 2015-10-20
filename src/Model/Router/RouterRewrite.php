@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Model\Router;
 use Pecee\DB\DBTable;
+use Pecee\Db\PdoHelper;
 
 class RouterRewrite extends Model {
 	public function __construct() {
@@ -29,7 +30,7 @@ class RouterRewrite extends Model {
 	public static function getByOriginalUrl($originalUrl, $host = null) {
 		$where = array('1=1');
 		if(!is_null($host)) {
-			$where[] = \Pecee\DB\DB::FormatQuery('`host` = %s', array($host));
+			$where[] = PdoHelper::formatQuery('`host` = %s', array($host));
 		}
 		return self::FetchOne('SELECT * FROM {table} WHERE `originalUrl` = %s && ' . join(' && ', $where), $originalUrl);
 	}

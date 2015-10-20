@@ -3,6 +3,8 @@ namespace Pecee\Model;
 use \Pecee\DB\DB;
 use \Pecee\DB\DBException;
 use \Pecee\DB\DBTable;
+use Pecee\DB\Pdo;
+use Pecee\Db\PdoHelper;
 use Pecee\Integer;
 
 abstract class Model implements IModel {
@@ -37,55 +39,6 @@ abstract class Model implements IModel {
     }
 
     /**
-     * Counts fieldname in the database, giving the
-     * number of rows in the table with the specified fieldname.
-     *
-     * @param string $fieldName
-     * @param string $tableName
-     * @param string $where
-     * @param array|null $args
-     * @throws DBException
-     * @return int
-     */
-    public static function Count($fieldName, $tableName, $where = '', $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
-        try {
-            return DB::getInstance()->count($fieldName, $tableName, $where, $args);
-        } catch(DBException $e) {
-            $class = static::OnCreateModel();
-            if($e->getCode() == 1146 && $class->getAutoCreateTable()) {
-                $class->getTable()->create();
-                return $class::Count($fieldName, $tableName, $where, $args);
-            }
-            throw $e;
-        }
-    }
-
-    /**
-     * Returns maximum rows by given fieldname.
-     *
-     * @param string $fieldName
-     * @param string $tableName
-     * @param string $where
-     * @param array|null $args
-     * @throws DBException
-     * @return int
-     */
-    public static function Max($fieldName, $tableName, $where = '', $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
-        try {
-            return DB::getInstance()->max($fieldName, $tableName, $where, $args);
-        } catch(DBException $e) {
-            $class = static::OnCreateModel();
-            if($e->getCode() == 1146 && $class->getAutoCreateTable()) {
-                $class->getTable()->create();
-                return $class::Max($fieldName, $tableName, $where, $args);
-            }
-            throw $e;
-        }
-    }
-
-    /**
      * Save item
      * @see Pecee\Model\Model::save()
      * @return self
@@ -96,13 +49,15 @@ abstract class Model implements IModel {
             throw new ModelException('Table rows missing from constructor.');
         }
         $values = array_values($this->getRows());
-        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), DB::JoinArray($this->table->getColumnNames(),true), DB::FormatQuery(DB::JoinValues($values, ', '), $values));
-        $out = $this->Insert($sql,null);
+        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($this->table->getColumnNames(),true), PdoHelper::formatQuery(PdoHelper::joinArray($values, ', '), $values));
+
+        $id = Pdo::getInstance()->insert($sql);
+
         $primary = $this->table->getPrimary($this->table->getColumnByIndex(0));
         if($primary) {
-            $this->results['data']['rows'][$primary->getName()] = $out->getInsertId();
+            $this->results['data']['rows'][$primary->getName()] = $id;
         }
-        return $out;
+        return $this;
     }
 
     public function delete() {
@@ -113,10 +68,9 @@ abstract class Model implements IModel {
         $primaryValue = array_values($this->getRows());
         $primaryValue = $primaryValue[0];
         if($primaryKey && $primaryValue) {
-            $sql = sprintf('DELETE FROM `%s` WHERE `%s` = %s;', $this->table->getName(), $primaryKey->getName(), DB::FormatQuery('%s', array($primaryValue)));
-            return $this->AffectedRows($sql);
+            $sql = sprintf('DELETE FROM `%s` WHERE `%s` = %s;', $this->table->getName(), $primaryKey->getName(), PdoHelper::formatQuery('%s', array($primaryValue)));
+            Pdo::getInstance()->nonQuery($sql);
         }
-        return null;
     }
 
     public function exists() {
@@ -124,8 +78,8 @@ abstract class Model implements IModel {
         $primaryValue = array_values($this->getRows());
         $primaryValue = $primaryValue[0];
         if($primaryKey && $primaryValue) {
-            $sql = sprintf('SELECT %s FROM `%s` WHERE `%s` = %s;', $primaryKey->getName(), $this->table->getName(), $primaryKey->getName(), DB::FormatQuery('%s', array($primaryValue)));
-            return self::Scalar($sql);
+            $sql = sprintf('SELECT `%s` FROM `%s` WHERE `%s` = %s;', $primaryKey->getName(), $this->table->getName(), $primaryKey->getName(), PdoHelper::formatQuery('%s', array($primaryValue)));
+            return Pdo::getInstance()->value($sql);
         }
         return false;
     }
@@ -146,10 +100,10 @@ abstract class Model implements IModel {
             $concat=array();
             foreach($this->table->getColumnNames() as $key=>$name) {
                 $val = $this->getRow($name);
-                $concat[]=DB::FormatQuery('`'.$name.'` = %s', array($val));
+                $concat[] = PdoHelper::formatQuery('`'.$name.'` = %s', array($val));
             }
-            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = \'%s\' LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), DB::Escape($primaryValue));
-            return $this->Query($sql);
+            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = :primaryValue LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName());
+            return $this->query($sql, ['primaryValue' => $primaryValue]);
         }
         return null;
     }
@@ -162,27 +116,27 @@ abstract class Model implements IModel {
         return sprintf('SELECT COUNT(`'.$primary->getName().'`) AS `Total` FROM (%s) AS `CountedResult`', $sql);
     }
 
-    public static function Query($query, $rows = null, $page = null, $args = null) {
+    public static function query($query, $rows = null, $page = null, $args = null) {
         /* $var $model Model */
         $model = static::OnCreateModel();
         $results = array();
         $fetchPage = false;
         $countSql = null;
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         if(!is_null($rows)){
             $page = (is_null($page)) ? 0 : $page;
-            $countSql=$model->getCountSql(DB::FormatQuery($query, $args));
+            $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
             $query .= sprintf(' LIMIT %s, %s',($page*$rows), $rows);
             $fetchPage = true;
         }
-        $sql = DB::FormatQuery($query, $args);
+        $sql = PdoHelper::formatQuery($query, $args);
         try {
-            $query = DB::getInstance()->query($sql);
+            $query =  Pdo::getInstance()->query($sql);
         } catch(DBException $e) {
             if($e->getCode() == 1146 && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
-                return $model::Query($query, $rows, $page, $args);
+                return $model::query($query, $rows, $page, $args);
             }
             throw $e;
         }
@@ -201,10 +155,10 @@ abstract class Model implements IModel {
             }
             if($fetchPage) {
                 $results['query'][] = $countSql;
-                $maxRows = DB::getInstance()->scalar($countSql);
-                $results['data']['page']=$page;
-                $results['data']['rowsPerPage']=$rows;
-                $results['data']['maxRows']=intval($maxRows);
+                $maxRows = Pdo::getInstance()->value($countSql);
+                $results['data']['page'] = $page;
+                $results['data']['rowsPerPage'] = $rows;
+                $results['data']['maxRows'] = intval($maxRows);
             }
             $model->setResults($results);
         }
@@ -221,16 +175,16 @@ abstract class Model implements IModel {
     }
 
     public static function FetchAll($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         return self::Query($query, null, null, $args);
     }
 
     public static function FetchAllPage($query, $skip = null, $rows = null, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $skip = (is_null($skip)) ? 0 : $skip;
         $model = static::OnCreateModel();
         try {
-            $maxRows = DB::getInstance()->scalar($model->getCountSql(DB::FormatQuery($query, $args)));
+            $maxRows = Pdo::getInstance()->value($model->getCountSql(PdoHelper::formatQuery($query, $args)));
             if(!is_null($skip) && !is_null($rows)) {
                 $query = $query.' LIMIT ' . $skip . ',' . $rows;
             }
@@ -252,12 +206,12 @@ abstract class Model implements IModel {
     }
 
     public static function FetchPage($query, $rows = 10, $page = 0, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         return self::Query($query, $rows, $page, $args);
     }
 
     public static function FetchOne($query, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         $model =  self::Query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
         if($model->hasRows()){
             $results = $model->getResults();
@@ -267,67 +221,6 @@ abstract class Model implements IModel {
         }
 
         return $model;
-    }
-
-    public static function Insert($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
-        $model=static::OnCreateModel();
-        try {
-            $model->setResults(array('insertId' => DB::getInstance()->insert($query, $args)));
-        } catch(DBException $e) {
-            if($e->getCode() == 1146 && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                return $model::Insert($query, $args);
-            }
-            throw $e;
-        }
-        return $model;
-    }
-
-    public static function AffectedRows($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
-        $model=static::OnCreateModel();
-        try {
-            $model->setResults(array('affectedRows' => DB::getInstance()->affectedRows($query, $args)));
-        } catch(DBException $e) {
-            if($e->getCode() == 1146 && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                return $model::AffectedRows($query, $args);
-            }
-            throw $e;
-        }
-        return $model;
-    }
-
-    public static function NonQuery($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
-        $class = static::OnCreateModel();
-        $query = str_ireplace('{table}', '`' . $class->getTable()->getName() . '`', $query);
-        try {
-            DB::getInstance()->nonQuery($query, $args);
-        } catch(DBException $e) {
-            if($e->getCode() == 1146 && $class->getAutoCreateTable()) {
-                $class->getTable()->create();
-                return $class::NonQuery($query, $args);
-            }
-            throw $e;
-        }
-        return null;
-    }
-
-    public static function Scalar($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
-        $class = static::OnCreateModel();
-        $query = str_ireplace('{table}', '`' . $class->getTable()->getName() . '`', $query);
-        try {
-            return DB::getInstance()->scalar($query, $args);
-        }catch(DBException $e) {
-            if($e->getCode() == 1146 && $class->getAutoCreateTable()) {
-                $class->getTable()->create();
-                return $class::Scalar($query, $args);
-            }
-            throw $e;
-        }
     }
 
     protected function parseJsonChild($data) {

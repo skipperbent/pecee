@@ -6,6 +6,7 @@ use Pecee\Date;
 use Pecee\DB\DB;
 use Pecee\DB\DBTable;
 use Pecee\Collection;
+use Pecee\Db\PdoHelper;
 use Pecee\Model\Node\NodeData;
 use Pecee\Str;
 
@@ -102,9 +103,9 @@ class ModelNode extends Model {
 			}
 
 			$where=array('n.`active` = 1');
-			$where[] = DB::FormatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
-			$where[] = "n.`parentNodeID` = '".DB::Escape($parentNodeId)."'";
-			$where[] = "n.`path` LIKE '%>".DB::Escape($parentNodeId).">%'";
+			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
+			$where[] = "n.`parentNodeID` = '".PdoHelper::escape($parentNodeId)."'";
+			$where[] = "n.`path` LIKE '%>".PdoHelper::escape($parentNodeId).">%'";
 			$where[] = 'n.`order` > ' . $this->order;
 
 			$this->next = self::FetchOne('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where));
@@ -123,9 +124,9 @@ class ModelNode extends Model {
 			}
 
 			$where=array('n.`active` = 1');
-			$where[] = DB::FormatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
-			$where[] = "n.`parentNodeId` = '".DB::Escape($parentNodeId)."'";
-			$where[] = "n.`path` LIKE '%>".DB::Escape($parentNodeId).">%'";
+			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
+			$where[] = "n.`parentNodeId` = '".PdoHelper::escape($parentNodeId)."'";
+			$where[] = "n.`path` LIKE '%>".PdoHelper::escape($parentNodeId).">%'";
 			$where[] = 'n.`order` < ' . $this->Order;
 
 			$this->prev = self::FetchOne('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where));
@@ -405,7 +406,7 @@ class ModelNode extends Model {
 	 * @return self
 	 */
 	public static function GetByNodeIDs(array $nodeIds, $active=null, $rows=null,$page=null) {
-		$where='n.`nodeId` IN('.DB::JoinArray($nodeIds).')';
+		$where='n.`nodeId` IN('.PdoHelper::joinArray($nodeIds).')';
 		if(!is_null($active)) {
 			$where.=' AND n.`active` = ' . Boolean::parse($active,0);
 		}
@@ -440,21 +441,21 @@ class ModelNode extends Model {
 	public static function GetByPath($type=null, $query=null, $active=null, $parentNodeId=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
 		if(!is_null($active)) {
-			$where[] = DB::FormatQuery('n.`active` = %s', array(Boolean::parse($active)));
-			$where[] = DB::FormatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
+			$where[] = PdoHelper::formatQuery('n.`active` = %s', array(Boolean::parse($active)));
+			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
 		}
 		if(!is_null($parentNodeId)) {
 			if(empty($parentNodeId)) {
 				$where[] = "(n.`path` IS null OR n.`parentNodeId` IS null)";
 			} else {
-				$where[] = "(n.`path` LIKE '%".DB::Escape($parentNodeId)."%'') ";
+				$where[] = "(n.`path` LIKE '%".PdoHelper::escape($parentNodeId)."%') ";
 			}
 		}
 		if(!is_null($type)) {
 			$where[] =  'n.`type` = \''.$type.'\'';
 		}
 		if(!is_null($query)) {
-			$where[] = sprintf('(n.`title` LIKE \'%s\' OR n.`content` LIKE \'%s\')', '%'.DB::Escape($query).'%', '%'.DB::Escape($query).'%');
+			$where[] = sprintf('(n.`title` LIKE \'%s\' OR n.`content` LIKE \'%s\')', '%'.PdoHelper::escape($query).'%', '%'.PdoHelper::escape($query).'%');
 		}
 		$order=(!is_null($order) && in_array($order, self::$orders)) ? $order : self::ORDER_DATE_DESC;
 		return self::FetchPage('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where) . ' ORDER BY ' . $order, $rows, $page);
@@ -475,48 +476,48 @@ class ModelNode extends Model {
 	public static function Get($type=null, $query=null, $active=null, $parentNodeId=null, $path=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
 		if(!is_null($active)) {
-			$where[] = DB::FormatQuery('n.`active` = %s', array(Boolean::parse($active)));
-			$where[] = DB::FormatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
+			$where[] = PdoHelper::formatQuery('n.`active` = %s', array(Boolean::parse($active)));
+			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
 		}
 		if(!is_null($parentNodeId)) {
-			$where[] = "n.`parentNodeId` = '".DB::Escape($parentNodeId)."'";
+			$where[] = "n.`parentNodeId` = '".PdoHelper::escape($parentNodeId)."'";
 		}
 
 		if(!is_null($path)) {
-			$where[] = "n.`path` LIKE '>%".DB::Escape($path)."'";
+			$where[] = "n.`path` LIKE '>%".PdoHelper::escape($path)."'";
 		}
 
 		if(!is_null($type)) {
 			if(is_array($type)) {
-				$where[] =  'n.`type` IN ('.DB::JoinArray($type).')';
+				$where[] =  'n.`type` IN ('.PdoHelper::joinArray($type).')';
 			} else {
 				$where[] =  'n.`type` = \''.$type.'\'';
 			}
 
 		}
 		if(!is_null($query)) {
-			$where[] = sprintf('(n.`title` LIKE \'%s\' OR n.`content` LIKE \'%s\')', '%'.DB::Escape($query).'%', '%'.DB::Escape($query).'%');
+			$where[] = sprintf('(n.`title` LIKE \'%s\' OR n.`content` LIKE \'%s\')', '%'.PdoHelper::escape($query).'%', '%'.PdoHelper::escape($query).'%');
 		}
 		$order=(!is_null($order) && in_array($order, self::$orders)) ? $order : self::ORDER_ORDER_ASC;
 		return self::FetchPage('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where) . ' ORDER BY ' . $order, $rows, $page);
 	}
 
 	public static function FetchPage($query, $rows = 10, $page = 0, $args=null) {
-		$args = (!$args || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
+		$args = (!$args || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
 		$model = parent::FetchPage($query, $rows, $page, $args);
 		$model->setEntityFields();
 		return $model;
 	}
 
 	public static function FetchRows($query, $startIndex=0, $rows = 10, $args = null) {
-		$args = (!$args || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 3));
+		$args = (!$args || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
 		$model = parent::FetchAllPage($query, $startIndex, $rows, $args);
 		$model->setEntityFields();
 		return $model;
 	}
 
 	public static function FetchOne($query, $args=null) {
-		$args = (!$args || is_array($args) ? $args : DB::ParseArgs(func_get_args(), 1));
+		$args = (!$args || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 		$model = parent::FetchOne($query, $args);
 		$model->setEntityFields(true);
 		return $model;

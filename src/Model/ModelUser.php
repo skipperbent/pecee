@@ -4,6 +4,7 @@ use Pecee\Cookie;
 use Pecee\Date;
 use Pecee\DB\DB;
 use Pecee\DB\DBTable;
+use Pecee\Db\PdoHelper;
 use Pecee\Mcrypt;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
@@ -187,13 +188,13 @@ class ModelUser extends ModelData {
 		$order=(is_null($order) || !in_array($order, self::$ORDERS)) ? self::ORDER_ID_DESC : $order;
 		$where=array('1=1');
 		if(!is_null($adminLevel)) {
-			$where[]=DB::FormatQuery('u.`adminLevel` = %s', array($adminLevel));
+			$where[] = PdoHelper::formatQuery('u.`adminLevel` = %s', array($adminLevel));
 		}
 		if(!is_null($deleted)) {
-			$where[]=DB::FormatQuery('u.`deleted` = %s', array($deleted));
+			$where[] = PdoHelper::formatQuery('u.`deleted` = %s', array($deleted));
 		}
 		if(!is_null($keyword)) {
-			$where[]='`username` LIKE \'%%'.DB::Escape($keyword).'%%\'';
+			$where[]='`username` LIKE \'%%' . PdoHelper::escape($keyword).'%%\'';
 		}
 		return self::FetchPage('SELECT u.* FROM {table} u WHERE ' . join(' && ', $where) . ' ORDER BY '.$order, $rows, $page);
 	}
@@ -208,7 +209,7 @@ class ModelUser extends ModelData {
 	}
 
 	public static function GetByUserIDs(array $userIds) {
-		return self::FetchAll('SELECT u.* FROM {table} u WHERE u.`userId` IN ('.DB::JoinArray($userIds).')' );
+		return self::FetchAll('SELECT u.* FROM {table} u WHERE u.`userId` IN ('.PdoHelper::joinArray($userIds).')' );
 	}
 
 	public static function GetByUsernameOrEmail($query, $rows = 10, $page = 0) {

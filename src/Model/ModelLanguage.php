@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Model;
 use Pecee\DB\DBTable;
+use Pecee\Db\PdoHelper;
 use Pecee\Router;
 use Pecee\SimpleRouter\RouterBase;
 
@@ -69,9 +70,9 @@ class ModelLanguage extends \Pecee\Model\Model {
 	}
 	
 	public static function getByContext($context, $locale=null, $rows=null, $page=null) {
-		$where=array(sprintf("`context` = '%s'", \Pecee\DB\DB::Escape($context)));
+		$where=array(sprintf("`context` = '%s'", PdoHelper::escape($context)));
 		if(!is_null($locale)) {
-			$where[]=sprintf("`locale` = '%s'", \Pecee\DB\DB::Escape($locale));
+			$where[]=sprintf("`locale` = '%s'", PdoHelper::escape($locale));
 		}
 		return self::FetchPage('SELECT * FROM {table} WHERE ' . join(' && ', $where), $rows, $page);
 	}
