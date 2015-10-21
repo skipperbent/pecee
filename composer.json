@@ -1,7 +1,7 @@
 {
-    "name": "pecee/lightspeed",
-    "description": "Lightspeed Framework.",
-    "keywords": [ "lightspeed", "framework", "pecee" ],
+    "name": "pecee/framework",
+    "description": "Simple, lightweight PHP framework based on Microsoft MVVM.",
+    "keywords": [ "fast", "speed", "framework", "pecee" ],
     "license": "MIT",
     "homepage": "http://www.pecee.dk",
     "support": {
