@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Db;
+namespace Pecee\DB;
 
 use Pecee\Integer;
 
