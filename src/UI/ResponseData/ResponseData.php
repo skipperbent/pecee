@@ -33,7 +33,7 @@ abstract class ResponseData {
 	}
 
 	protected function addError(ValidateInput $type) {
-		$obj=new FormMessage();
+		$obj = new FormMessage();
 		$obj->setIndex($type->getIndex());
 		$obj->setMessage($type->getErrorMessage());
 		$obj->setName($type->getName());

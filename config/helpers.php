@@ -62,3 +62,12 @@ function env($key, $default = null) {
     $value = getenv($key);
     return (is_null($value)) ? $default : $value;
 }
+
+/**
+ * Get current csrf-token
+ * @return null|string
+ */
+function csrf_token() {
+    $token = new \Pecee\CsrfToken();
+    return $token->getToken();
+}

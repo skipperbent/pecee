@@ -38,6 +38,10 @@ class Html {
 		$this->setInnerHtml($menu->__toString());
 	}
 
+	public function addItem(Html $htmlItem) {
+		$this->setInnerHtml($htmlItem->__toString());
+	}
+
 	public function setElement(Html $el) {
 		$this->innerHtml[]=$el->writeHtml();
 	}

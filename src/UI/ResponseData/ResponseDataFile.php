@@ -10,7 +10,7 @@ class ResponseDataFile extends ResponseData {
 					foreach($value['name'] as $k=>$val) {
 						// Strip empty values
 						if($value['error'][$k] != '4') {
-							$file=new \Pecee\UI\ResponseData\ResponseDataFileObject();
+							$file=new ResponseDataFileObject();
 							$file->name = $value['name'][$k];
 							$file->size = $value['size'][$k];
 							$file->type = $value['type'][$k];
@@ -22,7 +22,7 @@ class ResponseDataFile extends ResponseData {
 				} else {
 					// Strip empty values
 					if($value['error'] != '4') {
-						$file = new \Pecee\UI\ResponseData\ResponseDataFileObject();
+						$file = new ResponseDataFileObject();
 						$file->name = $value['name'];
 						$file->size = $value['size'];
 						$file->type = $value['type'];
@@ -34,7 +34,7 @@ class ResponseDataFile extends ResponseData {
 			}
 		}
 	}
-	
+
 	/**
 	 * Adds validation input
 	 * @param string $name
@@ -43,7 +43,7 @@ class ResponseDataFile extends ResponseData {
 	 * @throws \ErrorException
 	 */
 	public function addInputValidation($name, $index, $type) {
-		if($type == 'Pecee\\UI\\Form\\Validate\\IValidateFile') {	
+		if($type == 'Pecee\\UI\\Form\\Validate\\IValidateFile') {
 			throw new \ErrorException('Unknown validate type. Must be of type \Pecee\UI\Form\Validate\IValidateFile');
 		}
 		if(strtolower($_SERVER['REQUEST_METHOD']) == 'post') {
