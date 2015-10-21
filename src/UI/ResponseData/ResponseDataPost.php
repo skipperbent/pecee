@@ -5,15 +5,15 @@ use Pecee\Str;
 class ResponseDataPost extends ResponseData {
 	public function __construct() {
 		parent::__construct();
-		if(self::IsPostBack()) {
+		if(self::isPostBack()) {
 			foreach($_POST as $i=>$post) {
 				if(is_array($post)) {
 					foreach($post as $k=>$p) {
-						$post[$k] = Str::HtmlEntitiesDecode($p);
+						$post[$k] = Str::htmlEntitiesDecode($p);
 					}
 					$this->data[strtolower($i)] = $post;
 				} else {
-					$this->data[strtolower($i)] = Str::HtmlEntitiesDecode($post);
+					$this->data[strtolower($i)] = Str::htmlEntitiesDecode($post);
 				}
 			}
 		}
@@ -52,7 +52,7 @@ class ResponseDataPost extends ResponseData {
 	}
 
 	public static function GetFormName() {
-		if(self::IsPostBack()) {
+		if(self::isPostBack()) {
 			foreach($_POST as $key=>$p) {
 				if(strpos($key, '_') > 0) {
 					$form = explode('_', $key);
@@ -67,7 +67,7 @@ class ResponseDataPost extends ResponseData {
 		return count($this->data);
 	}
 
-	public static function IsPostBack() {
+	public static function isPostBack() {
 		return (isset($_POST) && isset($_SERVER['REQUEST_METHOD']) && strtolower($_SERVER['REQUEST_METHOD']) == 'post');
 	}
 }

@@ -3,9 +3,9 @@ namespace Pecee\Model;
 use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
 use Pecee\Locale;
-use Pecee\Router;
+use Pecee\SimpleRouter\RouterBase;
 
-class ModelLanguage extends \Pecee\Model\Model {
+class ModelLanguage extends Model {
 
     protected static $instance;
 
@@ -13,10 +13,10 @@ class ModelLanguage extends \Pecee\Model\Model {
      * @return self
      */
     public static function getInstance() {
-        if(!self::$instance) {
+        if(self::$instance === null) {
             $locale = strtolower(Locale::getInstance()->getLocale());
 
-            $lang = self::GetByContext(self::getContext(), $locale);
+            $lang = self::getByContext(self::getContext(), $locale);
             self::$instance = $lang;
 
         }
@@ -38,12 +38,10 @@ class ModelLanguage extends \Pecee\Model\Model {
         $table->column('originalText')->longtext();
         $table->column('translatedText')->longtext();
         $table->column('locale')->string(10)->index();
-        //$table->column('pageCode')->string(255)->index();
         $table->column('context')->string(255)->index();
 
         parent::__construct($table);
 
-        $this->locale = strtolower(Locale::getInstance()->getLocale());
         $this->context = self::getContext();
 	}
 
@@ -64,11 +62,11 @@ class ModelLanguage extends \Pecee\Model\Model {
         }
         return $text;
     }
-	
+
 	public static function getPages($rows=15, $page=0) {
 		return self::fetchPage('SELECT * FROM {table} GROUP BY `path` ORDER BY `path` ASC', $rows, $page);
 	}
-	
+
 	public static function getByContext($context, $locale=null, $rows=null, $page=null) {
 		$where=array(sprintf("`context` = '%s'", PdoHelper::escape($context)));
 		if(!is_null($locale)) {
@@ -76,7 +74,7 @@ class ModelLanguage extends \Pecee\Model\Model {
 		}
 		return self::fetchPage('SELECT * FROM {table} WHERE ' . join(' && ', $where), $rows, $page);
 	}
-	
+
 	public static function getById($languageId) {
 		return self::fetchOne('SELECT * FROM {table} WHERE `languageId` = %s', $languageId);
 	}
