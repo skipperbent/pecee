@@ -1,10 +1,12 @@
 <?php
 namespace Pecee\Model;
+use Pecee\Date;
 use Pecee\DB\DBTable;
 use Pecee\IO\Directory;
 use Pecee\IO\File;
+use Pecee\Model\File\FileData;
 
-class ModelFile extends \Pecee\Model\ModelData {
+class ModelFile extends ModelData {
 	const ORDER_DATE_ASC = 'f.`createdDate` ASC';
 	const ORDER_DATE_DESC = 'f.`createdDate` DESC';
 
@@ -27,7 +29,7 @@ class ModelFile extends \Pecee\Model\ModelData {
 
 		parent::__construct($table);
 
-        $this->fileId = \Pecee\Guid::Create();
+        $this->fileId = \Pecee\Guid::create();
         $this->filename = $name;
         $this->path = $path;
 
@@ -36,7 +38,7 @@ class ModelFile extends \Pecee\Model\ModelData {
             $this->bytes = filesize($fullPath);
         }
 
-        $this->createdDate = \Pecee\Date::ToDateTime();
+        $this->createdDate = Date::toDateTime();
 	}
 
 	public function setFilename($filename) {
@@ -66,16 +68,16 @@ class ModelFile extends \Pecee\Model\ModelData {
 	public function updateData() {
 		if($this->data) {
 			/* Remove all fields */
-			ModelFileData::RemoveAll($this->fileId);
+			FileData::removeAll($this->fileId);
 			foreach($this->data->getData() as $key=>$value) {
-				$data=new ModelFileData($this->fileId, $key, $value);
+				$data=new FileData($this->fileId, $key, $value);
 				$data->save();
 			}
 		}
 	}
 
 	protected function fetchData() {
-		$data = ModelFileData::GetFileId($this->fileId);
+		$data = FileData::getFileId($this->fileId);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
 				$this->setDataValue($d->getKey(), $d->getValue());
@@ -93,11 +95,11 @@ class ModelFile extends \Pecee\Model\ModelData {
 	 * @return self
 	 */
 	public static function getById($fileId){
-		return self::FetchOne('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
+		return self::fetchOne('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
 	}
 
 	public static function get($order=null, $rows=null, $page=null){
 		$order = (in_array($order, self::$ORDERS)) ? $order : self::ORDER_DATE_DESC;
-		return self::FetchPage('SELECT f.* FROM {table} f ORDER BY ' .$order, $rows=null,$page=null);
+		return self::fetchPage('SELECT f.* FROM {table} f ORDER BY ' .$order, $rows=null,$page=null);
 	}
 }

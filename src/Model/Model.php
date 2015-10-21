@@ -234,6 +234,16 @@ abstract class Model implements IModel {
         return $model;
     }
 
+    public static function nonQuery($query, $args = null) {
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        Pdo::getInstance()->nonQuery(PdoHelper::formatQuery($query, $args));
+    }
+
+    public static function scalar($query, $args) {
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        return Pdo::getInstance()->value(PdoHelper::formatQuery($query, $args));
+    }
+
     protected function parseJsonChild($data) {
         if($data instanceof self) {
             return $data->getAsJsonObject();

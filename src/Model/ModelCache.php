@@ -38,24 +38,24 @@ class ModelCache extends Model {
 	 * Clear all cache elements.
 	 */
 	public static function clear() {
-		self::NonQuery('TRUNCATE {table}');
+		Pdo::NonQuery('TRUNCATE {table}');
 	}
 
 	public static function set($key, $data, $expireMinutes) {
 		$expireDate = \Pecee\Date::ToDateTime(time() + ($expireMinutes*60));
-		self::RemoveCache($key);
-		$model = new self($key, $data, $expireDate);
+		self::remove($key);
+		$model = new static($key, $data, $expireDate);
 		return ($model->save());
 	}
 
 	public static function remove($key) {
-		self::NonQuery('DELETE FROM {table} WHERE `key` = %s', $key);
+		self::nonQuery('DELETE FROM {table} WHERE `key` = %s', $key);
 	}
 
 	public static function get($key) {
-		$model = self::FetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
+		$model = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
 		if($model->hasRow()) {
-			if(self::IsExpired($model->getExpireDate())){
+			if(self::isExpired($model->getExpireDate())){
 				$model->delete();
 			} else {
 				return unserialize($model->getData());

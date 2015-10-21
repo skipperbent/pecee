@@ -41,7 +41,7 @@ class ModelUser extends ModelData {
         $this->username = $username;
         $this->password = md5($password);
         $this->adminLevel = 0;
-        $this->lastActivity = Date::ToDateTime();
+        $this->lastActivity = Date::toDateTime();
         $this->deleted = false;
 
 		$this->setEmail($email);
@@ -66,7 +66,7 @@ class ModelUser extends ModelData {
 	public function updateData() {
 		if($this->data) {
 			/* Remove all fields */
-			UserData::RemoveAll($this->userId);
+			UserData::removeAll($this->userId);
 			foreach($this->data->getData() as $key=>$value) {
 				$data=new UserData($this->userId, $key, $value);
 				$data->save();
@@ -75,7 +75,7 @@ class ModelUser extends ModelData {
 	}
 
 	protected function fetchData() {
-		$data = UserData::GetByUserID($this->userId);
+		$data = UserData::getByUserId($this->userId);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
 				$this->setDataValue($d->getKey(), $d->getValue());
@@ -166,8 +166,7 @@ class ModelUser extends ModelData {
 					if($setData) {
 						self::$instance = self::getByUserId($user[0]);
 					} else {
-						$caller=get_called_class();
-						$obj=new $caller();
+						$obj=new static();
 						$obj->setRow('userId', $user[0]);
 						$obj->setRow('password', $user[1]);
 						$obj->setRow('username', $user[3]);

@@ -3,7 +3,7 @@ namespace Pecee\Model;
 use Pecee\DB\DBTable;
 use Pecee\Collection;
 
-abstract class ModelData extends \Pecee\Model\Model {
+abstract class ModelData extends Model {
 	public $data;
 	public function __construct(DBTable $table) {
 		parent::__construct($table);
@@ -46,7 +46,7 @@ abstract class ModelData extends \Pecee\Model\Model {
 			$rows=$this->results['data']['rows'];
 			if($rows && is_array($rows)) {
 				foreach($rows as $key=>$row){
-					if($row instanceof \Pecee\Model\Model) {
+					if($row instanceof Model) {
 						$rows[$key]=$this->parseJsonRow($row);
 					} else {
 						$row=$this->parseJsonRow($row);

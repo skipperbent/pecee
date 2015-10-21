@@ -23,14 +23,14 @@ class NodeData extends \Pecee\Model\Model {
 	}
 
 	public static function clear($nodeId) {
-		self::NonQuery('DELETE FROM {table} WHERE `nodeId` = %s', array($nodeId));
+		self::nonQuery('DELETE FROM {table} WHERE `nodeId` = %s', array($nodeId));
 	}
 
 	public static function getByNodeIds(array $nodeIds) {
-		return self::FetchAll('SELECT * FROM {table} WHERE `nodeId` IN(' . PdoHelper::joinArray($nodeIds).')');
+		return self::fetchAll('SELECT * FROM {table} WHERE `nodeId` IN(' . PdoHelper::joinArray($nodeIds).')');
 	}
 
 	public static function getByNodeId($nodeId) {
-		return self::FetchAll('SELECT * FROM {table} WHERE `nodeId` = %s', array($nodeId));
+		return self::fetchAll('SELECT * FROM {table} WHERE `nodeId` = %s', array($nodeId));
 	}
 }
