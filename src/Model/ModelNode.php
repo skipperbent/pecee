@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\Model;
-use Pecee\Bool;
+
 use Pecee\Boolean;
 use Pecee\Date;
 use Pecee\DB\DBTable;
