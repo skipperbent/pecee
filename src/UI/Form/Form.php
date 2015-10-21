@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\UI\Form;
 
-use Pecee\Bool;
 use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
 use Pecee\Session\SessionMessage;

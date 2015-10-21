@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\Model\Node;
-use Pecee\DB\DB;
+
 use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
 

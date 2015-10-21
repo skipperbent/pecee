@@ -87,8 +87,8 @@ class ArrayUtil {
 	}
 
 	public static function append(&$array1,$array2) {
-		for($i = 0;$i < count($array2);$i++) {
-			array_push($array1,$array2[$i]);
+		foreach($array2 as $key => $value) {
+			array_push($array1,$value);
 		}
 		return $array1;
 	}

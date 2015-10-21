@@ -2,7 +2,6 @@
 namespace Pecee\Model;
 use Pecee\Cookie;
 use Pecee\Date;
-use Pecee\DB\DB;
 use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
 use Pecee\Mcrypt;
