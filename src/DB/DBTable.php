@@ -14,7 +14,6 @@ class DBTable {
 
     /**
      * @param $name
-     * @param int|null $length
      * @return DBColumn
      */
     public function column($name) {
@@ -42,10 +41,13 @@ class DBTable {
         return $this->columns[$index];
     }
 
-    public function getColumnNames($lower = false) {
+    public function getColumnNames($lower = false, $excludePrimary = false) {
         $names = array();
         /* @var $column DBColumn */
         foreach($this->columns as $column) {
+            if($excludePrimary && $column->getIndex() === DBColumn::INDEX_PRIMARY) {
+                continue;
+            }
             if($lower) {
                 $names[] = strtolower($column->getName());
             } else {
@@ -95,11 +97,11 @@ class DBTable {
             $tmp .= (!$column->getNullable()) ? 'NOT null' : 'null';
 
             if($column->getDefaultValue()) {
-                $tmp .= DB::FormatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
+                $tmp .= PdoHelper::formatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
             }
 
             if($column->getComment()) {
-                $tmp .= DB::FormatQuery(' COMMENT %s', array($column->getComment()));
+                $tmp .= PdoHelper::formatQuery(' COMMENT %s', array($column->getComment()));
             }
 
             if($column->getIncrement()) {
@@ -116,7 +118,7 @@ class DBTable {
         $query = array_merge($query,$keys);
         $sql = sprintf('CREATE TABLE `'. $this->name .'` (%s) ENGINE = InnoDB;', join(', ', $query));
 
-        \Pecee\DB\DB::getInstance()->nonQuery($sql);
+        Pdo::getInstance()->nonQuery($sql);
     }
 
 }

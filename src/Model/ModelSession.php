@@ -17,11 +17,11 @@ class ModelSession extends Model {
 	}
 
 	public function save() {
-		self::NonQuery('DELETE FROM {table} WHERE `time` <= %s', Date::ToDateTime(time()-(60*30)));
+		self::nonQuery('DELETE FROM {table} WHERE `time` <= %s', Date::ToDateTime(time()-(60*30)));
 
 		$session = $this->get($this->name);
 		if($session->hasRows()) {
-			$session->time = Date::ToDateTime();
+			$session->time = Date::toDateTime();
 			$session->update();
 		} else {
 			parent::save();
@@ -34,6 +34,6 @@ class ModelSession extends Model {
 	 * @return \Pecee\Model\ModelSession
 	 */
 	public static function get($key) {
-		return self::FetchOne('SELECT * FROM {table} WHERE `name` = %s', $key);
+		return self::fetchOne('SELECT * FROM {table} WHERE `name` = %s', $key);
 	}
 }

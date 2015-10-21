@@ -1,8 +1,9 @@
 <?php
 namespace Pecee\Model\File;
 use Pecee\DB\DBTable;
+use Pecee\Model\Model;
 
-class FileData extends \Pecee\Model\Model {
+class FileData extends Model {
     public function __construct($fileId = null, $key = null, $value = null) {
 
         $table = new DBTable();
@@ -25,10 +26,10 @@ class FileData extends \Pecee\Model\Model {
     }
 
     public static function removeAll($fileId) {
-        self::NonQuery('DELETE FROM {table} WHERE `fileId` = %s', array($fileId));
+        self::nonQuery('DELETE FROM {table} WHERE `fileId` = %s', array($fileId));
     }
 
     public static function getFileId($fileId) {
-        return self::FetchAll('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
+        return self::fetchAll('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
     }
 }

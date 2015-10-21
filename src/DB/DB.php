@@ -1,4 +1,7 @@
 <?php
+/**
+ * @deprecated This class is deprecated, please use Pdo class instead.
+ */
 namespace Pecee\DB;
 use Pecee\Debug;
 use Pecee\Integer;

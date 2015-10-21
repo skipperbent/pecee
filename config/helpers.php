@@ -4,8 +4,13 @@
  * Contain helper functions which provides shortcuts for various classes.
  */
 
-function url($controller = null, $parameters = null, $getParams = null) {
+function url($controller = null, $parameters = null, $getParams = null)
+{
     return \Pecee\Router::getRoute($controller, $parameters, $getParams);
+}
+
+function response() {
+    return new \Pecee\Http\Response();
 }
 
 function redirect($url, $code = null) {
@@ -42,7 +47,8 @@ function message($message, $type, $form = null, $placement = null, $index = null
     $msg->setIndex($index);
     $msg->setPlacement($placement);
 
-    \Pecee\Session\SessionMessage::getInstance()->set($msg, $type);
+    $message = new \Pecee\Session\SessionMessage();
+    $message->set($msg, $type);
 }
 
 /**

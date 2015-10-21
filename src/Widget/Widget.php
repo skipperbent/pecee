@@ -11,8 +11,10 @@ use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
 use Pecee\Url;
+use Pecee\Session\SessionMessage;
 
 abstract class Widget extends Base  {
+
 	protected $jsWrapRoute;
 	protected $cssWrapRoute;
 	protected $_template;

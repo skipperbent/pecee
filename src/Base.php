@@ -10,105 +10,28 @@ use Pecee\UI\Site;
 
 abstract class Base {
 
-	const MSG_ERROR='error';
+	const MSG_ERROR = 'danger';
 
+	protected $_messages;
 	protected $_site;
 	protected $data;
 	protected $request;
 	protected $files;
-	protected $_messages;
 
 	public function __construct() {
 
 		Debug::getInstance()->add('BASE CLASS ' . get_class($this));
 
 		$this->_site = Site::getInstance();
-		$this->_messages = SessionMessage::getInstance();
 		$this->data = new ResponseDataPost();
 		$this->request = new ResponseDataGet();
 		$this->files = new ResponseDataFile();
+		$this->_messages = SessionMessage::getInstance();
+		$this->_messages->clear();
 	}
 
 	public function isAjaxRequest() {
 		return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
-	}
-
-	/**
-	 * Get form message
-	 * @param string $type
-	 * @return FormMessage|null
-	 */
-	public function getMessage($type){
-		$errors = $this->getMessages($type);
-		if($errors && is_array($errors)) {
-			return $errors[0];
-		}
-		return null;
-	}
-
-	/**
-	 * Get form messages
-	 * @param string $type
-	 * @return FormMessage|null
-	 */
-	public function getMessages($type) {
-		return $this->_messages->get($type);
-	}
-
-	public function hasMessages($type) {
-		return $this->_messages->hasMessages($type);
-	}
-
-	/**
-	 * Set message
-	 * @param string $message
-	 * @param string $type
-	 * @param string|null $form
-	 * @param string|null $placement Key to use if you want the message to be displayed an unique place
-	 * @param string|null $index
-	 */
-	protected function setMessage($message, $type, $form=null, $placement=null, $index = null) {
-		$msg = new FormMessage();
-		$msg->setForm($form);
-		$msg->setMessage($message);
-		$msg->setPlacement($placement);
-		$msg->setIndex($index);
-		$this->_messages->set($msg, $type);
-	}
-
-	public function showErrors($formName=null) {
-		return $this->showMessages(self::MSG_ERROR, $formName);
-	}
-
-	public function hasErrors() {
-		return $this->hasMessages(self::MSG_ERROR);
-	}
-
-	/**
-	 * Set error
-	 * @param string $message
-	 */
-	protected function setError($message) {
-		$this->setMessage($message, self::MSG_ERROR);
-	}
-
-	/**
-	 * Get error messages
-	 * @return array
-	 */
-	public function getErrors() {
-		return $this->getMessages(self::MSG_ERROR);
-	}
-
-	public function getErrorsArray() {
-		$output = array();
-
-		/* @var $error FormMessage */
-		foreach($this->getMessages(self::MSG_ERROR) as $error) {
-			$output[] = $error->getMessage();
-		}
-
-		return $output;
 	}
 
 	public function getFormName($post=true) {
@@ -199,8 +122,82 @@ abstract class Base {
 		return $this->_site;
 	}
 
-	public function __destruct() {
-		$this->_messages->clear();
+	/**
+	 * Get form message
+	 * @param string $type
+	 * @return FormMessage|null
+	 */
+	public function getMessage($type){
+		$errors = $this->getMessages($type);
+		if($errors && is_array($errors)) {
+			return $errors[0];
+		}
+		return null;
+	}
+
+	/**
+	 * Get form messages
+	 * @param string $type
+	 * @return FormMessage|null
+	 */
+	public function getMessages($type) {
+		return $this->_messages->get($type);
+	}
+
+	public function hasMessages($type) {
+		return $this->_messages->hasMessages($type);
+	}
+
+	/**
+	 * Set message
+	 * @param string $message
+	 * @param string $type
+	 * @param string|null $form
+	 * @param string|null $placement Key to use if you want the message to be displayed an unique place
+	 * @param string|null $index
+	 */
+	protected function setMessage($message, $type, $form=null, $placement=null, $index = null) {
+		$msg = new FormMessage();
+		$msg->setForm($form);
+		$msg->setMessage($message);
+		$msg->setPlacement($placement);
+		$msg->setIndex($index);
+		$this->_messages->set($msg, $type);
+	}
+
+	public function showErrors($formName=null) {
+		return $this->showMessages(self::MSG_ERROR, $formName);
+	}
+
+	public function hasErrors() {
+		return $this->hasMessages(self::MSG_ERROR);
+	}
+
+	/**
+	 * Set error
+	 * @param string $message
+	 */
+	protected function setError($message) {
+		$this->setMessage($message, self::MSG_ERROR);
+	}
+
+	/**
+	 * Get error messages
+	 * @return array
+	 */
+	public function getErrors() {
+		return $this->getMessages(self::MSG_ERROR);
+	}
+
+	public function getErrorsArray() {
+		$output = array();
+
+		/* @var $error FormMessage */
+		foreach($this->getMessages(self::MSG_ERROR) as $error) {
+			$output[] = $error->getMessage();
+		}
+
+		return $output;
 	}
 
 }
