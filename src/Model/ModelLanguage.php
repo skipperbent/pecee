@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model;
 use Pecee\DB\DBTable;
-use Pecee\Db\PdoHelper;
+use Pecee\DB\PdoHelper;
 use Pecee\Locale;
 use Pecee\Router;
 

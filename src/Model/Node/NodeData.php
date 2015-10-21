@@ -2,7 +2,7 @@
 namespace Pecee\Model\Node;
 use Pecee\DB\DB;
 use Pecee\DB\DBTable;
-use Pecee\Db\PdoHelper;
+use Pecee\DB\PdoHelper;
 
 class NodeData extends \Pecee\Model\Model {
 	public function __construct() {

@@ -2,7 +2,7 @@
 namespace Pecee\Model;
 use \Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
-use Pecee\Db\PdoHelper;
+use Pecee\DB\PdoHelper;
 use Pecee\Integer;
 
 abstract class Model implements IModel {

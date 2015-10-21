@@ -5,7 +5,7 @@ use Pecee\Boolean;
 use Pecee\Date;
 use Pecee\DB\DBTable;
 use Pecee\Collection;
-use Pecee\Db\PdoHelper;
+use Pecee\DB\PdoHelper;
 use Pecee\Model\Node\NodeData;
 use Pecee\Str;
 

@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model\Router;
 use Pecee\DB\DBTable;
-use Pecee\Db\PdoHelper;
+use Pecee\DB\PdoHelper;
 use Pecee\Model\Model;
 
 class RouterRewrite extends Model {

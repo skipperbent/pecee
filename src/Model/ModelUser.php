@@ -4,7 +4,7 @@ use Pecee\Cookie;
 use Pecee\Date;
 use Pecee\DB\DB;
 use Pecee\DB\DBTable;
-use Pecee\Db\PdoHelper;
+use Pecee\DB\PdoHelper;
 use Pecee\Mcrypt;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
