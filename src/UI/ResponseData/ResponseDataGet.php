@@ -9,17 +9,17 @@ class ResponseDataGet extends ResponseData {
 			foreach($_GET as $i=>$get) {
 				if(is_array($get)) {
 					foreach($get as $k=>$g) {
-						$get[$k] = Str::HtmlEntitiesDecode($g);
+						$get[$k] = Str::htmlEntitiesDecode($g);
 					}
 					$this->data[strtolower($i)] = $get;
 				} else {
-					$this->data[strtolower($i)] = Str::HtmlEntitiesDecode($get);
+					$this->data[strtolower($i)] = Str::htmlEntitiesDecode($get);
 				}
 			}
 		}
 	}
 
-	public static function GetFormName() {
+	public static function getFormName() {
 		foreach($_GET as $key=>$p) {
 			if(strpos($key, '_') > 0) {
 				$form = explode('_', $key);
