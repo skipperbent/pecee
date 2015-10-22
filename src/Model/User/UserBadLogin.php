@@ -41,6 +41,6 @@ class UserBadLogin extends Model {
 	}
 
 	public static function reset() {
-        self::nonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', request()->getIp());
+        self::nonQuery('UPDATE {table} SET `active` = 0 WHERE `ip` = %s', request()->getIp());
 	}
 }
