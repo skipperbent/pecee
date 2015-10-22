@@ -81,7 +81,7 @@ class ModelFile extends ModelData {
 		$data = FileData::getByFileId($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
-				$this->setDataValue($d->getKey(), $d->getValue());
+				$this->setDataValue($d->key, $d->value);
 			}
 		}
 	}

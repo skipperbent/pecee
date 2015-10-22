@@ -149,7 +149,7 @@ class ModelNode extends Model {
 		}
 		if($pages->hasRows()) {
 			foreach($pages->getRows() as $page) {
-				if($page->getProperty()->hasRow() && $page->getProperty()->getAlias() == $alias) {
+				if($page->getProperty()->hasRow() && $page->getProperty()->alias == $alias) {
 					$out[] = $page;
 				}
 			}
@@ -221,8 +221,8 @@ class ModelNode extends Model {
 		$data = NodeData::getByNodeId($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $field) {
-				$key=$field->getKey();
-				$this->data->$key = $field->getValue();
+				$key=$field->key;
+				$this->data->$key = $field->value;
 			}
 		}
 	}

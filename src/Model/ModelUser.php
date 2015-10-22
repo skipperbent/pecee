@@ -78,7 +78,7 @@ class ModelUser extends ModelData {
 		$data = UserData::getByUserId($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
-				$this->setDataValue($d->getKey(), $d->getValue());
+				$this->setDataValue($d->key, $d->value);
 			}
 		}
 	}
@@ -236,7 +236,7 @@ class ModelUser extends ModelData {
 			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
 		// Incorrect user login (track bad request).
-		if(strtolower($user->getEmail()) != strtolower($email) || $user->password != md5($password) && $user->password != $password) {
+		if(strtolower($user->email) != strtolower($email) || $user->password != md5($password) && $user->password != $password) {
 			$user->trackBadLogin();
 			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
