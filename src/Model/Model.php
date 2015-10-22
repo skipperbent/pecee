@@ -240,7 +240,15 @@ abstract class Model implements IModel {
         $model = static::OnCreateModel();
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
 
-        Pdo::getInstance()->nonQuery(PdoHelper::formatQuery($query, $args));
+        try {
+            Pdo::getInstance()->nonQuery(PdoHelper::formatQuery($query, $args));
+        } catch(\PdoException $e) {
+            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
+                $model->getTable()->create();
+                return $model::nonQuery($query, $args);
+            }
+            throw $e;
+        }
     }
 
     public static function scalar($query, $args) {
@@ -249,7 +257,15 @@ abstract class Model implements IModel {
         $model = static::OnCreateModel();
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
 
-        return Pdo::getInstance()->value(PdoHelper::formatQuery($query, $args));
+        try {
+            return Pdo::getInstance()->value(PdoHelper::formatQuery($query, $args));
+        } catch(\PdoException $e) {
+            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
+                $model->getTable()->create();
+                return $model::scalar($query, $args);
+            }
+            throw $e;
+        }
     }
 
     protected function parseJsonChild($data) {
