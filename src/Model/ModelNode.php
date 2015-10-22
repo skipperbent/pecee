@@ -10,15 +10,15 @@ use Pecee\Model\Node\NodeData;
 use Pecee\Str;
 
 class ModelNode extends Model {
-	const ORDER_ID_DESC = 'n.`nodeId` DESC';
-	const ORDER_CHANGED_DESC = 'IFnull(n.`changedDate`, IFnull(n.`activeFrom`, n.`pubDate`)) DESC';
-	const ORDER_CHANGED_ASC = 'IFnull(n.`changedDate`, IFnull(n.`activeFrom`, n.`pubDate`)) ASC';
-	const ORDER_DATE_DESC = 'IFnull(n.`activeFrom`, n.`pubDate`) DESC';
-	const ORDER_DATE_ASC = 'n.`pubDate` ASC';
+	const ORDER_ID_DESC = 'n.`id` DESC';
+	const ORDER_CHANGED_DESC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) DESC';
+	const ORDER_CHANGED_ASC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) ASC';
+	const ORDER_DATE_DESC = 'IFNULL(n.`active_from`, n.`created_date`) DESC';
+	const ORDER_DATE_ASC = 'n.`created_date` ASC';
 	const ORDER_TITLE_DESC = 'n.`title` DESC';
 	const ORDER_TITLE_ASC = 'n.`title` ASC';
-	const ORDER_PARENT_DESC = 'n.`parentNodeId` DESC';
-	const ORDER_PARENT_ASC = 'n.`parentNodeId` ASC';
+	const ORDER_PARENT_DESC = 'n.`parent_id` DESC';
+	const ORDER_PARENT_ASC = 'n.`parent_id` ASC';
 	const ORDER_ORDER_DESC = 'n.`order` DESC';
 	const ORDER_ORDER_ASC = 'n.`order` ASC';
 
@@ -33,16 +33,16 @@ class ModelNode extends Model {
 	public function __construct() {
 
         $table = new DBTable();
-        $table->column('nodeId')->bigint()->primary()->increment();
-        $table->column('parentNodeId')->bigint()->index();
+        $table->column('id')->bigint()->primary()->increment();
+        $table->column('parent_id')->bigint()->index();
         $table->column('path')->string(255)->index();
         $table->column('type')->string(255)->index();
         $table->column('title')->string(255);
         $table->column('content')->longtext();
-        $table->column('pubDate')->datetime()->index();
-        $table->column('changedDate')->datetime()->index();
-        $table->column('activeFrom')->datetime()->index();
-        $table->column('activeTo')->datetime()->index();
+		$table->column('created_date')->datetime()->index();
+		$table->column('changed_date')->datetime()->index();
+        $table->column('active_from')->datetime()->index();
+        $table->column('active_to')->datetime()->index();
         $table->column('level')->integer()->index();
         $table->column('order')->integer()->index();
 
@@ -53,15 +53,15 @@ class ModelNode extends Model {
 	protected function calculatePath() {
 		$path=array('0');
 		$fetchingPath=true;
-		if($this->parentNodeId) {
-			$parent=self::getByNodeId($this->parentNodeId);
+		if($this->parent_id) {
+			$parent=self::getById($this->parent_id);
 			$i=0;
 			while($fetchingPath) {
 				if($parent->hasRow()) {
-					$path[]=$parent->getNodeId();
-					$p=$parent->getParentNodeId();
+					$path[]=$parent->id;
+					$p=$parent->parent_id;
 					if(!empty($p)) {
-						$parent=self::getByNodeId($parent->getParentNodeId());
+						$parent=self::getById($parent->parent_id);
 					} else {
 						$fetchingPath=false;
 					}
@@ -72,7 +72,7 @@ class ModelNode extends Model {
 			}
 
 			if($i==0) {
-				$path[]=$this->parentNodeId;
+				$path[]=$this->parent_id;
 			}
 		}
 		$this->Path=join('>', $path);
@@ -93,18 +93,18 @@ class ModelNode extends Model {
 
 	public function getNext() {
 		if(!$this->next) {
-			$parentNodeId = 0;
-			if($this->parentNodeId) {
-				$parentNodeId = self::getByNodeId($this->parentNodeId);
-				if($parentNodeId->hasRow()) {
-					$parentNodeId = $parentNodeId->getNodeId();
+			$parentId = 0;
+			if($this->parent_id) {
+				$parentId = self::getById($this->parent_id);
+				if($parentId->hasRow()) {
+					$parentId = $parentId->id;
 				}
 			}
 
 			$where=array('n.`active` = 1');
-			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
-			$where[] = "n.`parentNodeID` = '".PdoHelper::escape($parentNodeId)."'";
-			$where[] = "n.`path` LIKE '%>".PdoHelper::escape($parentNodeId).">%'";
+			$where[] = PdoHelper::formatQuery('(ISNULL(n.`active_from`) && ISNULL(n.`active_to`) || n.`active_from` <= NOW() && (n.`active_to` >= NOW() || ISNULL(n.`active_to`)))');
+			$where[] = "n.`parent_id` = '".PdoHelper::escape($parentId)."'";
+			$where[] = "n.`path` LIKE '%>".PdoHelper::escape($parentId).">%'";
 			$where[] = 'n.`order` > ' . $this->order;
 
 			$this->next = self::fetchOne('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where));
@@ -114,18 +114,18 @@ class ModelNode extends Model {
 
 	public function getPrev() {
 		if(!$this->prev) {
-			$parentNodeId = 0;
-			if($this->parentNodeId) {
-				$parentNodeId = self::getByNodeId($this->parentNodeId);
-				if($parentNodeId->hasRow()) {
-					$parentNodeId = $parentNodeId->getNodeId();
+			$parentId = 0;
+			if($this->parent_id) {
+				$parentId = self::getById($this->parent_id);
+				if($parentId->hasRow()) {
+					$parentId = $parentId->id;
 				}
 			}
 
 			$where=array('n.`active` = 1');
-			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
-			$where[] = "n.`parentNodeId` = '".PdoHelper::escape($parentNodeId)."'";
-			$where[] = "n.`path` LIKE '%>".PdoHelper::escape($parentNodeId).">%'";
+			$where[] = PdoHelper::formatQuery('(ISNULL(n.`active_from`) && ISNULL(n.`active_to`) || n.`active_from` <= NOW() && (n.`active_to` >= NOW() || ISNULL(n.`active_to`)))');
+			$where[] = "n.`parent_id` = '".PdoHelper::escape($parentId)."'";
+			$where[] = "n.`path` LIKE '%>".PdoHelper::escape($parentId).">%'";
 			$where[] = 'n.`order` < ' . $this->Order;
 
 			$this->prev = self::fetchOne('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where));
@@ -143,9 +143,9 @@ class ModelNode extends Model {
 	public function getChildsOfType($alias, $recursive=true, $order = null) {
 		$out = array();
 		if($recursive) {
-			$pages = self::get(null, null, null, null, $this->getNodeId(), $order);
+			$pages = self::get(null, null, null, null, $this->id, $order);
 		} else {
-			$pages =  self::get(null, null, null, $this->getNodeId(), null, $order, null, null);
+			$pages =  self::get(null, null, null, $this->id, null, $order, null, null);
 		}
 		if($pages->hasRows()) {
 			foreach($pages->getRows() as $page) {
@@ -166,7 +166,7 @@ class ModelNode extends Model {
 
 	public function getChilds() {
 		if(!$this->parent) {
-			$this->parent = self::get(null, null, null, $this->getNodeId(), null, null, null, null);
+			$this->parent = self::get(null, null, null, $this->id, null, null, null, null);
 		}
 		return $this->parent;
 	}
@@ -174,13 +174,13 @@ class ModelNode extends Model {
 	public function updateFields() {
 		if($this->data) {
 			/* Remove all fields */
-			NodeData::clear($this->nodeId);
+			NodeData::clear($this->id);
 			if(count($this->data->getData()) > 0) {
 				foreach($this->data->getData() as $key=>$value) {
-					$field=new NodeData();
-					$field->setNodeId($this->nodeId);
-					$field->setKey($key);
-					$field->setValue($value);
+					$field = new NodeData();
+					$field->node_id = $this->id;
+					$field->key = $key;
+					$field->value = $value;
 					$field->save();
 				}
 			}
@@ -189,12 +189,12 @@ class ModelNode extends Model {
 
 	public function save() {
 		$this->calculatePath();
-		$this->nodeId = parent::save()->getInsertId();
+		$this->id = parent::save()->getInsertId();
 		$this->updateFields();
 	}
 
 	public function update() {
-		$this->changedDate = Date::toDateTime();
+		$this->changed_date = Date::toDateTime();
 		$this->calculatePath();
 		$this->updateFields();
 		parent::update();
@@ -209,16 +209,16 @@ class ModelNode extends Model {
 			}
 		}
 
-		NodeData::clear($this->nodeId);
+		NodeData::clear($this->id);
 		parent::delete();
 	}
 
 	public function exists() {
-		return self::scalar('SELECT `NodeID` FROM {table} WHERE `NodeID` = %s', $this->nodeId);
+		return self::scalar('SELECT `id` FROM {table} WHERE `id` = %s', $this->id);
 	}
 
 	protected function fetchField() {
-		$data = NodeData::getByNodeId($this->nodeId);
+		$data = NodeData::getById($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $field) {
 				$key=$field->getKey();
@@ -366,14 +366,14 @@ class ModelNode extends Model {
 
 	/**
 	 * Get node by node ids
-	 * @param array $nodeIds
+	 * @param array $ids
      * @param bool|null $active
      * @param int|null $rows
      * @param int|null $page
 	 * @return self
 	 */
-	public static function getByNodeIds(array $nodeIds, $active=null, $rows=null,$page=null) {
-		$where='n.`nodeId` IN('.PdoHelper::joinArray($nodeIds).')';
+	public static function getByIds(array $ids, $active=null, $rows=null,$page=null) {
+		$where='n.`id` IN('.PdoHelper::joinArray($ids).')';
 		if(!is_null($active)) {
 			$where.=' AND n.`active` = ' . Boolean::parse($active,0);
 		}
@@ -382,16 +382,16 @@ class ModelNode extends Model {
 
 	/**
 	 * Get node by node id.
-	 * @param int $nodeId
+	 * @param int $id
      * @param bool|null $active
 	 * @return self
 	 */
-	public static function getByNodeId($nodeId, $active=null) {
-		$where='n.`nodeId` = %s';
+	public static function getById($id, $active=null) {
+		$where='n.`id` = %s';
 		if(!is_null($active)) {
 			$where.=' AND n.`active` = ' . Boolean::parse($active,0);
 		}
-		return self::fetchPage('SELECT n.* FROM {table} n WHERE ' . $where, array($nodeId));
+		return self::fetchPage('SELECT n.* FROM {table} n WHERE ' . $where, array($id));
 	}
 
 	/**
@@ -399,23 +399,23 @@ class ModelNode extends Model {
 	 * @param string|null $type
 	 * @param string|null $query
 	 * @param bool|null $active
-	 * @param int|null $parentNodeId
+	 * @param int|null $parentId
      * @param string|null $order
      * @param int|null $rows
      * @param int|null $page
 	 * @return self
 	 */
-	public static function getByPath($type=null, $query=null, $active=null, $parentNodeId=null, $order=null, $rows=null, $page=null) {
+	public static function getByPath($type=null, $query=null, $active=null, $parentId=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
 		if(!is_null($active)) {
 			$where[] = PdoHelper::formatQuery('n.`active` = %s', array(Boolean::parse($active)));
-			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
+			$where[] = PdoHelper::formatQuery('(ISNULL(n.`active_from`) && ISNULL(n.`active_to`) || n.`active_from` <= NOW() && (n.`active_to` >= NOW() || ISNULL(n.`active_to`)))');
 		}
-		if(!is_null($parentNodeId)) {
-			if(empty($parentNodeId)) {
-				$where[] = "(n.`path` IS null OR n.`parentNodeId` IS null)";
+		if(!is_null($parentId)) {
+			if(empty($parentId)) {
+				$where[] = "(n.`path` IS NULL OR n.`parent_id` IS NULL)";
 			} else {
-				$where[] = "(n.`path` LIKE '%".PdoHelper::escape($parentNodeId)."%') ";
+				$where[] = "(n.`path` LIKE '%".PdoHelper::escape($parentId)."%') ";
 			}
 		}
 		if(!is_null($type)) {
@@ -433,21 +433,21 @@ class ModelNode extends Model {
 	 * @param string|null $type
 	 * @param string|null $query
 	 * @param bool|null $active
-	 * @param int|null $parentNodeId
+	 * @param int|null $parentId
      * @param string|null $path
      * @param string|null $order
      * @param int|null $rows
      * @param int|null $page
 	 * @return self
 	 */
-	public static function get($type=null, $query=null, $active=null, $parentNodeId=null, $path=null, $order=null, $rows=null, $page=null) {
+	public static function get($type=null, $query=null, $active=null, $parentId=null, $path=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
 		if(!is_null($active)) {
 			$where[] = PdoHelper::formatQuery('n.`active` = %s', array(Boolean::parse($active)));
-			$where[] = PdoHelper::formatQuery('(ISnull(n.`activeFrom`) && ISnull(n.`activeTo`) || n.`activeFrom` <= NOW() && (n.`activeTo` >= NOW() || ISnull(n.`activeTo`)))');
+			$where[] = PdoHelper::formatQuery('(ISNULL(n.`active_from`) && ISNULL(n.`active_to`) || n.`active_from` <= NOW() && (n.`active_to` >= NOW() || ISNULL(n.`active_to`)))');
 		}
-		if(!is_null($parentNodeId)) {
-			$where[] = "n.`parentNodeId` = '".PdoHelper::escape($parentNodeId)."'";
+		if(!is_null($parentId)) {
+			$where[] = "n.`parent_id` = '".PdoHelper::escape($parentId)."'";
 		}
 
 		if(!is_null($path)) {

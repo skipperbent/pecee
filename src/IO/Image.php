@@ -34,11 +34,11 @@ class Image {
 				return 'png';
 				break;
 		}
-		throw new \InvalidArgumentException('Unknown image!');
+		throw new \InvalidArgumentException('Unsupported image type');
 	}
 
 	public static function getImageType($filePath) {
-		switch (File::GetExtension($filePath)) {
+		switch (File::getExtension($filePath)) {
 			case 'jpeg':
 			case 'jpg':
 				return IMAGETYPE_JPEG;
@@ -53,7 +53,7 @@ class Image {
 				return IMAGETYPE_PNG;
 				break;
 			default:
-				throw new \ErrorException('Ukendt filtype: ' . File::GetExtension($filePath));
+				throw new \ErrorException('Unknown file extension: ' . File::getExtension($filePath));
 		}
 	}
 
@@ -94,7 +94,7 @@ class Image {
 				imagepng($image, null, min($this->quality,9));
 				break;
 			default:
-				throw new \ErrorException('Ukendt mimetype: ' . $this->mimeType);
+				throw new \ErrorException('Unknown mimetype: ' . $this->mimeType);
 		}
 		$fileContents = ob_get_contents();
 		ob_end_clean();
@@ -121,7 +121,7 @@ class Image {
 	public function getResizedExact($dstWidth,$dstHeight) {
 		$src = @imagecreatefromstring($this->originalBinary);
 		if (!$src)
-			throw new \ErrorException('Kunne ikke læse fil.');
+			throw new \ErrorException('Failed to read file');
 		$srcWidth  	= imagesx($src);
 		$srcHeight 	= imagesy($src);
 		$widthRatio = $srcWidth  / $dstWidth;

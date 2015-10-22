@@ -3,21 +3,22 @@ namespace Pecee\Model\User;
 use Pecee\Date;
 use Pecee\DB\DBTable;
 use Pecee\Model\Model;
+use Pecee\Server;
 
 class UserBadLogin extends Model {
 	public function __construct() {
 
         $table = new DBTable();
-        $table->column('userBadLoginId')->bigint()->primary()->increment();
+        $table->column('id')->bigint()->primary()->increment();
         $table->column('username')->string(300)->index();
-        $table->column('date')->datetime()->index();
-        $table->column('ipAddress')->string(50)->index();
+        $table->column('created_date')->datetime()->index();
+        $table->column('ip')->string(50)->index();
         $table->column('active')->bool()->nullable()->index();
 
 		parent::__construct($table);
 
-        $this->ipAddress = request()->ip();
-        $this->date = Date::toDateTime();
+        $this->ip = request()->getIp();
+        $this->created_date = Date::toDateTime();
 	}
 
     public static function track($username) {
@@ -27,7 +28,8 @@ class UserBadLogin extends Model {
     }
 
 	public static function checkBadLogin() {
-        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', request()->ip());
+
+        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', request()->getIp());
 
         if($trackQuery->hasRow()) {
             $lastLoginTimeStamp = $trackQuery->date;
@@ -39,6 +41,6 @@ class UserBadLogin extends Model {
 	}
 
 	public static function reset() {
-        self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', request()->ip());
+        self::nonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', request()->getIp());
 	}
 }

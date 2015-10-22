@@ -4,7 +4,8 @@ use Pecee\UI\Site;
 use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug {
-	private static $instance;
+
+	protected static $instance;
 	protected $enabled;
 	protected $lastTime;
 	protected $stack;

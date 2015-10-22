@@ -241,7 +241,7 @@ class Site {
 	}
 
 	public function hasAdminIp($ip = null) {
-		$ip = ($ip === null) ? request()->ip() : $ip;
+		$ip = ($ip === null) ? request()->getIp() : $ip;
 		if(is_array($this->adminIps)) {
 			return (in_array($ip, $this->adminIps));
 		}

@@ -407,24 +407,6 @@ abstract class Model implements IModel {
         }
     }
 
-    public function __call($name, $args=null) {
-        if(!method_exists($this, $name)){
-            $index = substr($name, 3, strlen($name));
-            switch(strtolower(substr($name, 0, 3))){
-                case 'get':
-                    return $this->__get($index);
-                    break;
-                case 'set':
-                    $this->__set($index, $args[0]);
-                    return true;
-                    break;
-            }
-            $debug=debug_backtrace();
-            throw new ModelException(sprintf('Unknown method: %s in %s on line %s', $name, $debug[0]['file'], $debug[0]['line']));
-        }
-        return call_user_func_array($name, $args);
-    }
-
     public function setAutoCreateTable($bool) {
         $this->autoCreate = $bool;
     }

@@ -7,18 +7,18 @@ class FileData extends Model {
     public function __construct($fileId = null, $key = null, $value = null) {
 
         $table = new DBTable();
-        $table->column('fileId')->string(40)->index();
+        $table->column('file_id')->string(40)->index();
         $table->column('key')->string(255);
         $table->column('value')->longtext();
 
         parent::__construct($table);
 
-        $this->fileId = $fileId;
+        $this->file_id = $fileId;
         $this->key = $key;
         $this->value = $value;
     }
     public function save() {
-        if(self::Scalar('SELECT `Key` FROM {table} WHERE `key` = %s AND `fileId` = %s', $this->Key, $this->FileID)) {
+        if(self::Scalar('SELECT `Key` FROM {table} WHERE `key` = %s AND `file_id` = %s', $this->key, $this->file_id)) {
             parent::update();
         } else {
             parent::save();
@@ -26,10 +26,10 @@ class FileData extends Model {
     }
 
     public static function removeAll($fileId) {
-        self::nonQuery('DELETE FROM {table} WHERE `fileId` = %s', array($fileId));
+        self::nonQuery('DELETE FROM {table} WHERE `file_id` = %s', array($fileId));
     }
 
-    public static function getFileId($fileId) {
-        return self::fetchAll('SELECT * FROM {table} WHERE `fileId` = %s', array($fileId));
+    public static function getByFileId($fileId) {
+        return self::fetchAll('SELECT * FROM {table} WHERE `file_id` = %s', array($fileId));
     }
 }
