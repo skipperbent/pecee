@@ -236,11 +236,19 @@ abstract class Model implements IModel {
 
     public static function nonQuery($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+
+        $model = static::OnCreateModel();
+        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
+
         Pdo::getInstance()->nonQuery(PdoHelper::formatQuery($query, $args));
     }
 
     public static function scalar($query, $args) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+
+        $model = static::OnCreateModel();
+        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
+
         return Pdo::getInstance()->value(PdoHelper::formatQuery($query, $args));
     }
 

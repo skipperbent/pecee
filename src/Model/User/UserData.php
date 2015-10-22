@@ -26,9 +26,9 @@ class UserData extends Model {
 	}
 
 	public static function removeAll($userId) {
-		self::NonQuery('DELETE FROM {table} WHERE `user_id` = %s', array($userId));
+		self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', array($userId));
 	}
 	public static function getByUserId($userId) {
-		return self::FetchAll('SELECT * FROM {table} WHERE `user_id` = %s', array($userId));
+		return self::fetchAll('SELECT * FROM {table} WHERE `user_id` = %s', array($userId));
 	}
 }
