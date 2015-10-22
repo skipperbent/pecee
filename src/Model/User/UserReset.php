@@ -28,8 +28,8 @@ class UserReset extends Model {
 		if($reset->hasRow()) {
 			$reset->delete();
 			self::nonQuery('DELETE FROM {table} WHERE `key` = %s LIMIT 1', $Key);
-			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `user_id` = %s LIMIT 1', md5($Password), $reset->getUserId());
-			return $reset->getUserId();
+			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `user_id` = %s LIMIT 1', md5($Password), $reset->user_id);
+			return $reset->user_id;
 		}
 		return null;
 	}
