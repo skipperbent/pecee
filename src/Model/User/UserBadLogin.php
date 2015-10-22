@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Model\User;
+use Pecee\Date;
 use Pecee\DB\DBTable;
 use Pecee\Model\Model;
 
@@ -15,8 +16,8 @@ class UserBadLogin extends Model {
 
 		parent::__construct($table);
 
-        $this->ipAddress = \Pecee\Server::getRemoteAddr();
-        $this->date = \Pecee\Date::toDateTime();
+        $this->ipAddress = request()->ip();
+        $this->date = Date::toDateTime();
 	}
 
     public static function track($username) {
@@ -27,7 +28,7 @@ class UserBadLogin extends Model {
 
 	public static function checkBadLogin() {
         $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', request()->ip());
-        
+
         if($trackQuery->hasRow()) {
             $lastLoginTimeStamp = $trackQuery->date;
             $countRequestsFromIP = $trackQuery->requestFromIp;
@@ -38,6 +39,6 @@ class UserBadLogin extends Model {
 	}
 
 	public static function reset() {
-        self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', \Pecee\Server::getRemoteAddr());
+        self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', request()->ip());
 	}
 }
