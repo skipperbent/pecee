@@ -1,13 +1,15 @@
 <?php
 namespace Pecee;
-use Pecee\Model\ModelLanguage;
 
-class Language {
+use Pecee\Model\ModelLanguage;
+use Pecee\Xml\Translate\Translate;
+
+class Translation {
 	const TYPE_DATABASE='LANG_DB';
 	const TYPE_XML='LANG_XML';
 
 	protected static $instance;
-	public static $TYPES=array(self::TYPE_DATABASE,self::TYPE_XML);
+	public static $TYPES=array(self::TYPE_DATABASE, self::TYPE_XML);
 
 	protected $type;
 
@@ -41,7 +43,7 @@ class Language {
 			case self::TYPE_DATABASE:
 				return ModelLanguage::getInstance()->lookup($key);
 			case self::TYPE_XML:
-				return Xml\Translate\Translate::getInstance()->lookup($key);
+				return Translate::getInstance()->lookup($key);
 		}
         return $key;
 	}

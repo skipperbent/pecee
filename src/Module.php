@@ -8,8 +8,8 @@ class Module {
 	 * @return self
 	 */
 	public static function getInstance() {
-		if(!self::$instance) {
-			self::$instance = new self();
+		if(self::$instance === null) {
+			self::$instance = new static();
 		}
 		return self::$instance;
 	}
@@ -20,20 +20,20 @@ class Module {
 
 	/**
 	 * Add new module
-	 * @param string $appname
+	 * @param string $name
 	 * @param string $path
 	 */
-	public function add($appname, $path) {
-		$this->modules[$appname] = $path;
+	public function add($name, $path) {
+		$this->modules[$name] = $path;
 	}
 
 	/**
 	 * Get module
-	 * @param string $appname
+	 * @param string $name
 	 * @return string
 	 */
-	public function get($appname) {
-		return (isset($this->modules[$appname]) ? $this->modules[$appname] : null);
+	public function get($name) {
+		return (isset($this->modules[$name]) ? $this->modules[$name] : null);
 	}
 
 	/**

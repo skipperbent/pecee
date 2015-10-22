@@ -17,19 +17,21 @@ use Pecee\Widget\Widget;
 
 class Form {
 	const FORM_ENCTYPE_FORM_DATA='multipart/form-data';
+
 	protected $prefixElements;
 	protected $post;
 	protected $name;
 	protected $indexes;
+
 	public function __construct(ResponseDataPost $post) {
-		$this->prefixElements=true;
-		$this->post=$post;
-		$this->indexes=array();
+		$this->prefixElements = true;
+		$this->post = $post;
+		$this->indexes = array();
 	}
 
 	protected function getPostBackValue($name) {
 		if(strpos($name, '[]') != false) {
-			$index=$this->indexes[md5($name)];
+			$index = $this->indexes[$name];
 			$newName=substr($name, 0, strpos($name, '[]'));
 			if(isset($_POST[$newName][$index])) {
 				return $_POST[$newName][$index];
@@ -47,11 +49,11 @@ class Form {
 	 * @param string $name
 	 * @return string
 	 */
-	public function getInputName($name) {
+	protected function getInputName($name) {
 		if($this->prefixElements) {
 			$name = ($this->name) ? sprintf('%s_%s', $this->name, $name) : $name;
 		}
-		$this->indexes[md5($name)]=(isset($this->indexes[md5($name)])) ? ($this->indexes[md5($name)]+1) : 0;
+		$this->indexes[$name] = (isset($this->indexes[$name])) ? ($this->indexes[$name]+1) : 0;
 		return $name;
 	}
 
@@ -89,27 +91,6 @@ class Form {
 		return $element;
 	}
 
-	public function showError($index) {
-		$msg = $this->validationFor($index);
-		if($msg) {
-			return $msg->getMessage();
-		}
-		return null;
-	}
-
-	public function validationFor($index) {
-		$messages = SessionMessage::getInstance()->get(Widget::MSG_ERROR);
-		if($messages && is_array($messages)) {
-			/* @var $message \Pecee\UI\Form\FormMessage */
-			foreach($messages as $message) {
-				if($message->getIndex()==$index) {
-					return $message->getMessage();
-				}
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Make new captcha element
 	 * @param string $name
@@ -131,7 +112,7 @@ class Form {
 		$name = $this->getInputName($name);
 		$v = (!is_null($defaultValue)) ? $defaultValue : true;
 		$element = new HtmlCheckbox($name, $v);
-		if($forcePostback && ResponseDataPost::IsPostBack()) {
+		if($forcePostback && ResponseDataPost::isPostBack()) {
 			if($v && $this->getPostBackValue($name) == $v) {
 				$element->addAttribute('checked', 'checked');
 			}
@@ -222,6 +203,6 @@ class Form {
 	}
 
 	public function setPrefixElements($bool) {
-		$this->prefixElements=$bool;
+		$this->prefixElements = $bool;
 	}
 }

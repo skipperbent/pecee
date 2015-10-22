@@ -5,11 +5,11 @@ class Registry {
 	protected static $registry;
 	/**
 	 * Get instance
-	 * @return self
+	 * @return static
 	 */
 	public static function getInstance() {
-		if(!self::$instance) {
-			self::$instance = new self();
+		if(self::$instance === null) {
+			self::$instance = new static();
 		}
 		return self::$instance;
 	}

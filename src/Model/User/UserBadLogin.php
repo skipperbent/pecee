@@ -1,22 +1,24 @@
 <?php
 namespace Pecee\Model\User;
+use Pecee\Date;
 use Pecee\DB\DBTable;
 use Pecee\Model\Model;
+use Pecee\Server;
 
 class UserBadLogin extends Model {
 	public function __construct() {
 
         $table = new DBTable();
-        $table->column('userBadLoginId')->bigint()->primary()->increment();
+        $table->column('id')->bigint()->primary()->increment();
         $table->column('username')->string(300)->index();
-        $table->column('date')->datetime()->index();
-        $table->column('ipAddress')->string(50)->index();
+        $table->column('created_date')->datetime()->index();
+        $table->column('ip')->string(50)->index();
         $table->column('active')->bool()->nullable()->index();
 
 		parent::__construct($table);
 
-        $this->ipAddress = \Pecee\Server::getRemoteAddr();
-        $this->date = \Pecee\Date::toDateTime();
+        $this->ip = request()->getIp();
+        $this->created_date = Date::toDateTime();
 	}
 
     public static function track($username) {
@@ -24,9 +26,9 @@ class UserBadLogin extends Model {
         $login->username = $username;
         $login->save();
     }
-	
+
 	public static function checkBadLogin() {
-        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ipAddress`) AS `requestFromIp` FROM {table} WHERE `ipAddress` = %s AND `active` = 1 GROUP BY `ipAddress` ORDER BY `requestFromIp` DESC', \Pecee\Server::GetRemoteAddr());
+        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', \Pecee\Server::GetRemoteAddr());
         if($trackQuery->hasRow()) {
             $lastLoginTimeStamp = $trackQuery->date;
             $countRequestsFromIP = $trackQuery->requestFromIp;
@@ -35,8 +37,8 @@ class UserBadLogin extends Model {
         }
         return false;
 	}
-	
+
 	public static function reset() {
-        self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', \Pecee\Server::getRemoteAddr());
+        self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ip` = %s', request()->getIp());
 	}
 }

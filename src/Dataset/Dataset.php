@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Dataset;
 abstract class Dataset {
+
 	protected $data = array();
 
 	/**
@@ -12,7 +13,7 @@ abstract class Dataset {
 
 	public function get($index) {
 		for($i = 0; $i < count($this->data); $i++) {
-			if($i == $index) {
+			if($i === $index) {
 				return $this->data[$i];
 			}
 		}
@@ -29,7 +30,7 @@ abstract class Dataset {
 
 	protected function add($value=null, $name) {
 		$arr = array();
-		if(!is_null($value)) {
+		if($value !== null) {
 			$arr['value'] = htmlspecialchars($value);
 		}
 		$arr['name'] = $name;

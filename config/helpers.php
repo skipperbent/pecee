@@ -13,6 +13,10 @@ function response() {
     return new \Pecee\Http\Response();
 }
 
+function request() {
+    return new \Pecee\Http\Request();
+}
+
 function redirect($url, $code = null) {
     $response = new \Pecee\Http\Response();
 
@@ -28,7 +32,7 @@ function lang($key, $args = null) {
         $args = func_get_args();
         $args = array_slice($args, 1);
     }
-    return \Pecee\Language::getInstance()->_($key, $args);
+    return \Pecee\Translation::getInstance()->_($key, $args);
 }
 
 /**

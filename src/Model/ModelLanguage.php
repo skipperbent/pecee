@@ -30,9 +30,9 @@ class ModelLanguage extends Model {
     public function __construct() {
 
         $table = new DBTable();
-        $table->column('languageId')->integer()->primary()->increment();
-        $table->column('originalText')->longtext();
-        $table->column('translatedText')->longtext();
+        $table->column('id')->integer()->primary()->increment();
+        $table->column('original')->longtext();
+        $table->column('translated')->longtext();
         $table->column('locale')->string(10)->index();
         $table->column('context')->string(255)->index();
 
@@ -45,15 +45,15 @@ class ModelLanguage extends Model {
         if(Locale::getInstance()->getDefaultLocale() != Locale::getInstance()->getLocale() && $this->hasRows()) {
 
             foreach($this->getRows() as $lang) {
-                if(trim($lang->originalText) == trim($text)) {
-                    return $lang->translatedText;
+                if(trim($lang->original) == trim($text)) {
+                    return $lang->translated;
                 }
             }
 
             // Save new key for translation
             $lang = new self();
-            $lang->originalText = $text;
-            $lang->translatedText = $text;
+            $lang->original = $text;
+            $lang->translated = $text;
             $lang->save();
         }
         return $text;
@@ -71,7 +71,7 @@ class ModelLanguage extends Model {
         return self::fetchPage('SELECT * FROM {table} WHERE ' . join(' && ', $where), $rows, $page);
     }
 
-    public static function getById($languageId) {
-        return self::fetchOne('SELECT * FROM {table} WHERE `languageId` = %s', $languageId);
+    public static function getById($id) {
+        return self::fetchOne('SELECT * FROM {table} WHERE `id` = %s', $id);
     }
 }
