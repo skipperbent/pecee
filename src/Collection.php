@@ -4,15 +4,15 @@ class Collection {
 	protected $data;
 
 	public function __construct(array $rows = null) {
-		if(!is_null($rows)) {
+		if($rows !== null) {
 			$this->setData($rows);
 		}
 	}
 
 	public function setData(array $arr) {
-		$this->data=array();
-		foreach($arr as $i=>$row) {
-			$this->__set(strtolower($i), $row);
+		$this->data = array();
+		foreach($arr as $key => $value) {
+			$this->__set($key, $value);
 		}
 	}
 
@@ -32,24 +32,12 @@ class Collection {
 		$this->data[strtolower($name)] = $value;
 	}
 
-	public function __call($name, $args) {
-		if(strlen($name) > 3) {
-			switch(substr(strtolower($name), 0, 3)) {
-				case 'get':
-					return $this->__get(substr($name, 3));
-					break;
-				case 'set':
-					$this->__set(substr($name, 3), $args[0]);
-					return null;
-					break;
-			}
-		}
-
-		throw new \InvalidArgumentException('The field "'.$name.'" couldt not be found');
-	}
-
 	public function getData() {
 		return $this->data;
+	}
+
+	public function add($key, $value) {
+		$this->data[$key] = $value;
 	}
 
 }

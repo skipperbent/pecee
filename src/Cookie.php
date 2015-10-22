@@ -8,7 +8,7 @@ class Cookie {
 			$sub = explode('.',$_SERVER['HTTP_HOST']);
 			$domain = (count($sub) > 2) ? $_SERVER['HTTP_HOST'] : '.' . $_SERVER['HTTP_HOST'];
 		}
-		return (@setCookie($id, $value, (($time > 0) ? $time : null), '/', $domain, $secure));
+		return (@setcookie($id, $value, (($time > 0) ? $time : null), '/', $domain, $secure));
 	}
 
 	public static function get($id,$defaultValue = null) {

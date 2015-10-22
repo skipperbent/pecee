@@ -1,11 +1,13 @@
 <?php
 namespace Pecee\Controller\File;
+
 use Pecee\Controller\Controller;
 use Pecee\Registry;
 use Pecee\Str;
 use Pecee\UI\Site;
 
 abstract class FileAbstract extends Controller {
+
     protected $files;
     protected $cacheDate;
     protected $type;
@@ -22,25 +24,29 @@ abstract class FileAbstract extends Controller {
         if(!in_array($type, self::$types)) {
             throw new \InvalidArgumentException(sprintf('Unknown type, must be one of the following: %s', join(', ', self::$types)));
         }
-        $this->type = $type;
 
+        $this->type = $type;
         $this->tmpDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
     }
 
     public function getWrap($files = null) {
+        // Set time limit
         set_time_limit(60);
+
         $this->files = $files;
         $this->cacheDate = $this->getParam('_', '');
-        header('Content-type: '.$this->getHeader());
-        header('Charset: ' . \Pecee\UI\Site::getInstance()->getCharset());
-        header('Cache-Control: must-revalidate');
-        header('Expires: ' . gmdate("D, d M Y H:i:s", time() + 9600) . ' GMT');
+
+        // Set headers
+        request()->cache()->headers([
+            'Content-type: '.$this->getHeader(),
+            'Charset: ' . Site::getInstance()->getCharset(),
+        ]);
 
         if(!in_array('ob_gzhandler', ob_list_handlers())) {
             ob_start ("ob_gzhandler");
         }
 
-        if(isset($_GET['__clearcache']) && Site::getInstance()->hasAdminIp() && is_dir($this->tmpDir)) {
+        if($this->hasParam('__clearcache') && Site::getInstance()->hasAdminIp() && is_dir($this->tmpDir)) {
             $handle = opendir($this->tmpDir);
             while (false !== ($file = readdir($handle))) {
                 if($file == (md5($this->files . $this->cacheDate) . '.' . $this->type)) {
@@ -53,8 +59,10 @@ abstract class FileAbstract extends Controller {
         if(!file_exists($this->getTempFile()) || Registry::getInstance()->get('DisableFileWrapperCache', false)) {
             $this->saveTempFile();
         }
+
         echo file_get_contents($this->getTempFile(), FILE_USE_INCLUDE_PATH);
     }
+
     protected function saveTempFile() {
         if($this->files) {
             $files = (strpos($this->files, ',')) ? @explode(',', $this->files) : array($this->files);
@@ -119,6 +127,7 @@ abstract class FileAbstract extends Controller {
     protected function debugMode() {
         return (strtolower($this->getParam('__debug')) == 'true' && Site::getInstance()->hasAdminIp());
     }
+
     protected function getHeader() {
         switch($this->type) {
             case self::TYPE_CSS:
@@ -130,17 +139,19 @@ abstract class FileAbstract extends Controller {
         }
         return '';
     }
+
     protected function getPath() {
         switch($this->type) {
             case self::TYPE_JAVASCRIPT:
-                return \Pecee\UI\Site::getInstance()->getJsPath();
+                return Site::getInstance()->getJsPath();
                 break;
             case self::TYPE_CSS:
-                return \Pecee\UI\Site::getInstance()->getCssPath();
+                return Site::getInstance()->getCssPath();
                 break;
         }
         return '';
     }
+
     protected function getTempFile() {
         return sprintf('%s.%s', $this->tmpDir.DIRECTORY_SEPARATOR.md5($this->files), $this->type);
     }
