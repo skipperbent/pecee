@@ -37,7 +37,7 @@ abstract class FileAbstract extends Controller {
         $this->cacheDate = $this->getParam('_', '');
 
         // Set headers
-        request()->cache()->headers([
+        response()->cache()->headers([
             'Content-type: '.$this->getHeader(),
             'Charset: ' . Site::getInstance()->getCharset(),
         ]);

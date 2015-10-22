@@ -12,7 +12,7 @@ abstract class Controller extends Base {
 	}
 
 	public function asJson(array $array) {
-		return request()->cache()->json($array);
+		return response()->cache()->json($array);
 	}
 
 }
