@@ -75,7 +75,7 @@ class ModelUser extends ModelData {
 	}
 
 	protected function fetchData() {
-		$data = UserData::getById($this->id);
+		$data = UserData::getByUserId($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
 				$this->setDataValue($d->getKey(), $d->getValue());

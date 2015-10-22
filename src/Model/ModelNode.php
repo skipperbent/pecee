@@ -218,7 +218,7 @@ class ModelNode extends Model {
 	}
 
 	protected function fetchField() {
-		$data = NodeData::getById($this->id);
+		$data = NodeData::getByNodeId($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $field) {
 				$key=$field->getKey();
