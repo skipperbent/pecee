@@ -12,19 +12,20 @@ use Pecee\Model\User\UserException;
 class ModelUser extends ModelData {
 	// Errors
 	const ERROR_TYPE_BANNED = 0x1;
-	const ERROR_TYPE_INVALID_USER = 0x2;
-	const ERROR_TYPE_INVALID_LOGIN = 0x3;
-	const ERROR_TYPE_EXISTS = 0x4;
+	const ERROR_TYPE_INVALID_LOGIN = 0x2;
+	const ERROR_TYPE_EXISTS = 0x3;
 
 	const ORDER_ID_DESC = 'u.`userId` DESC';
 	const ORDER_ID_ASC = 'u.`userId` ASC';
 	const ORDER_LASTACTIVITY_ASC = 'u.`lastActivity` DESC';
 	const ORDER_LASTACTIVITY_DESC = 'u.`lastActivity` ASC';
+
 	const TICKET_AUTH_KEY = 'TicketUserLoginKey';
 
 	protected static $instance;
 
 	public static $ORDERS = array(self::ORDER_ID_ASC, self::ORDER_ID_DESC, self::ORDER_LASTACTIVITY_ASC, self::ORDER_LASTACTIVITY_DESC);
+
 	public function __construct($username = null, $password = null, $email = null) {
 
         $table = new DBTable('user');
@@ -228,16 +229,16 @@ class ModelUser extends ModelData {
 
 	public static function authenticateByEmail($email, $password, $remember=false) {
 		if(self::checkBadLogin()) {
-			return self::ERROR_TYPE_BANNED;
+			throw new UserException('User has been banned', self::ERROR_TYPE_BANNED);
 		}
 		$user = self::fetchOne('SELECT u.`userId`, u.`username`, u.`password`, u.`adminLevel` FROM {table} u JOIN `user_data` ud ON(ud.`userId` = u.`userId`) WHERE u.`deleted` = 0 && ud.`key` = \'email\' && ud.`value` = %s', $email);
 		if(!$user->hasRows()) {
-			return self::ERROR_TYPE_INVALID_USER;
+			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
 		// Incorrect user login (track bad request).
 		if(strtolower($user->getEmail()) != strtolower($email) || $user->password != md5($password) && $user->password != $password) {
 			$user->trackBadLogin();
-			return self::ERROR_TYPE_INVALID_LOGIN;
+			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
 		$user->resetBadLogin();
 		$user->signIn(($remember) ? null : 0);
@@ -246,16 +247,16 @@ class ModelUser extends ModelData {
 
 	public static function authenticate($username, $password, $remember = false) {
 		if(self::checkBadLogin()) {
-			return self::ERROR_TYPE_BANNED;
+			throw new UserException('User has been banned', self::ERROR_TYPE_BANNED);
 		}
 		$user = self::fetchOne('SELECT u.* FROM {table} u WHERE u.`deleted` = 0 && u.`username` = %s', $username);
 		if(!$user->hasRows()) {
-			return self::ERROR_TYPE_INVALID_USER;
+			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
 		// Incorrect user login (track bad request).
 		if(strtolower($user->username) != strtolower($username) || $user->password != md5($password) && $user->password != $password) {
 			$user->trackBadLogin();
-			return self::ERROR_TYPE_INVALID_LOGIN;
+			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
 		$user->resetBadLogin();
 		$user->signIn(($remember) ? null : 0);
