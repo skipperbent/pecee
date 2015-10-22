@@ -28,7 +28,9 @@ class UserBadLogin extends Model {
     }
 
 	public static function checkBadLogin() {
-        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', \Pecee\Server::GetRemoteAddr());
+
+        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', request()->getIp());
+
         if($trackQuery->hasRow()) {
             $lastLoginTimeStamp = $trackQuery->date;
             $countRequestsFromIP = $trackQuery->requestFromIp;
@@ -39,6 +41,6 @@ class UserBadLogin extends Model {
 	}
 
 	public static function reset() {
-        self::NonQuery('UPDATE {table} SET `active` = 0 WHERE `ip` = %s', request()->getIp());
+        self::nonQuery('UPDATE {table} SET `active` = 0 WHERE `ipAddress` = %s', request()->getIp());
 	}
 }

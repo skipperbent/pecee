@@ -3,12 +3,10 @@ namespace Pecee\UI;
 use Pecee\Auth;
 use Pecee\Debug;
 use Pecee\Locale;
-use Pecee\Server;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
-use Pecee\UI\Menu\Menu;
 
 class Site {
 
@@ -243,7 +241,7 @@ class Site {
 	}
 
 	public function hasAdminIp($ip = null) {
-		$ip = ($ip === null) ? Server::GetRemoteAddr() : $ip;
+		$ip = ($ip === null) ? request()->getIp() : $ip;
 		if(is_array($this->adminIps)) {
 			return (in_array($ip, $this->adminIps));
 		}
