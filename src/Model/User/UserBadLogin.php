@@ -29,11 +29,11 @@ class UserBadLogin extends Model {
 
 	public static function checkBadLogin() {
 
-        $trackQuery = self::fetchOne('SELECT `date`, COUNT(`ip`) AS `requestFromIp` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `created_date` DESC', request()->getIp());
+        $trackQuery = self::fetchOne('SELECT `created_date`, COUNT(`ip`) AS `request_count` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `request_count` DESC', request()->getIp());
 
         if($trackQuery->hasRow()) {
-            $lastLoginTimeStamp = $trackQuery->date;
-            $countRequestsFromIP = $trackQuery->requestFromIp;
+            $lastLoginTimeStamp = $trackQuery->created_date;
+            $countRequestsFromIP = $trackQuery->request_count;
             $lastLoginMinutesAgo = round((time()-strtotime($lastLoginTimeStamp))/60);
             return ($lastLoginMinutesAgo < 30 && $countRequestsFromIP > 20);
         }
