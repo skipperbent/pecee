@@ -17,7 +17,7 @@ class ModelSession extends Model {
 	}
 
 	public function save() {
-		self::nonQuery('DELETE FROM {table} WHERE `time` <= %s', Date::ToDateTime(time()-(60*30)));
+		self::nonQuery('DELETE FROM {table} WHERE `time` <= %s', Date::toDateTime(time()-(60*30)));
 
 		$session = $this->get($this->name);
 		if($session->hasRows()) {
@@ -31,7 +31,7 @@ class ModelSession extends Model {
 	/**
 	 * Get Session by key
 	 * @param string $key
-	 * @return \Pecee\Model\ModelSession
+	 * @return self
 	 */
 	public static function get($key) {
 		return self::fetchOne('SELECT * FROM {table} WHERE `name` = %s', $key);

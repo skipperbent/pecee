@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Model;
+use Pecee\Date;
 use Pecee\DB\DBTable;
 
 /**
@@ -12,7 +13,7 @@ class ModelCache extends Model {
         $table = new DBTable();
         $table->column('key')->string()->primary();
         $table->column('data')->longtext();
-        $table->column('expireDate')->datetime()->index();
+        $table->column('expire_date')->datetime()->index();
 
         parent::__construct($table);
 
@@ -21,13 +22,13 @@ class ModelCache extends Model {
             $this->data = serialize($data);
         }
 
-        $this->expireDate = $expireDate;
+        $this->expire_date = $expireDate;
 	}
 
 	/**
 	 * Checks expiration date for given cache key.
 	 *
-	 * @param string $cacheKey
+	 * @param string $expireDate
 	 * @return bool
 	 */
 	protected static function isExpired($expireDate) {
@@ -42,7 +43,7 @@ class ModelCache extends Model {
 	}
 
 	public static function set($key, $data, $expireMinutes) {
-		$expireDate = \Pecee\Date::ToDateTime(time() + ($expireMinutes*60));
+		$expireDate = Date::ToDateTime(time() + ($expireMinutes*60));
 		self::remove($key);
 		$model = new static($key, $data, $expireDate);
 		return ($model->save());
@@ -55,7 +56,7 @@ class ModelCache extends Model {
 	public static function get($key) {
 		$model = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
 		if($model->hasRow()) {
-			if(self::isExpired($model->getExpireDate())){
+			if(self::isExpired($model->expire_date)){
 				$model->delete();
 			} else {
 				return unserialize($model->getData());

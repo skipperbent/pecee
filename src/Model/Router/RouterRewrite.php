@@ -8,20 +8,20 @@ class RouterRewrite extends Model {
 	public function __construct() {
 
         $table = new DBTable();
-        $table->column('rewriteId')->integer()->primary()->increment();
-        $table->column('originalUrl')->string(355)->index();
-        $table->column('rewriteUrl')->string(355)->index();
+        $table->column('id')->integer()->primary()->increment();
+        $table->column('original_url')->string(355)->index();
+        $table->column('rewrite_url')->string(355)->index();
         $table->column('host')->string(255)->index();
         $table->column('regex')->string(255)->index();
         $table->column('order')->integer()->index();
 
         parent::__construct($table);
 	}
-	
+
 	public function exists() {
 		return (self::Scalar('SELECT `originalPath` FROM {table} WHERE `originalPath` = %s', $this->OriginalPath));
 	}
-	
+
 	/**
 	 * Get rewrite by originalpath
 	 * @param string $originalUrl
@@ -33,18 +33,18 @@ class RouterRewrite extends Model {
 		if(!is_null($host)) {
 			$where[] = PdoHelper::formatQuery('`host` = %s', array($host));
 		}
-		return self::fetchOne('SELECT * FROM {table} WHERE `originalUrl` = %s && ' . join(' && ', $where), $originalUrl);
+		return self::fetchOne('SELECT * FROM {table} WHERE `original_url` = %s && ' . join(' && ', $where), $originalUrl);
 	}
-	
+
 	public static function getByRewritePath($rewriteUrl) {
-		return self::fetchOne('SELECT * FROM {table} WHERE `rewriteUrl` = %s', $rewriteUrl);
+		return self::fetchOne('SELECT * FROM {table} WHERE `rewrite_url` = %s', $rewriteUrl);
 	}
-	
+
 	public static function get($rows = null, $page = null) {
-		return self::fetchPage('SELECT * FROM {table} ORDER BY `order` ASC, `rewriteId` DESC', $rows, $page);
+		return self::fetchPage('SELECT * FROM {table} ORDER BY `order` ASC, `id` DESC', $rows, $page);
 	}
-	
-	public static function getByRewriteId($rewriteId) {
-		return self::fetchOne('SELECT * FROM {table} WHERE `rewriteId` = %s', $rewriteId);
+
+	public static function getById($id) {
+		return self::fetchOne('SELECT * FROM {table} WHERE `id` = %s', $id);
 	}
 }

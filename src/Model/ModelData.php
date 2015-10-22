@@ -7,7 +7,7 @@ abstract class ModelData extends Model {
 	public $data;
 	public function __construct(DBTable $table) {
 		parent::__construct($table);
-		$this->data=new Collection();
+		$this->data = new Collection();
 	}
 
 	protected function updateData() {
@@ -66,28 +66,6 @@ abstract class ModelData extends Model {
 			$arr['rows']=$rows;
 		}
 		return $arr;
-	}
-
-	public function __call($name, $args=null) {
-		if(!method_exists($this, $name)){
-			$index = substr($name, 3, strlen($name));
-			switch(strtolower(substr($name, 0, 3))){
-				case 'get':
-					if(!is_null($this->data->__get($index))) {
-						return $this->data->__get($index);
-					} else {
-                        return $this->__get($index);
-					}
-					break;
-				case 'set':
-					$this->__set($index, $args[0]);
-					return null;
-					break;
-			}
-			$debug=debug_backtrace();
-			throw new ModelException(sprintf('Unknown method: %s in %s on line %s', $name, $debug[0]['file'], $debug[0]['line']));
-		}
-        return call_user_func_array($name, $args);
 	}
 
 	public function setData(array $data) {
