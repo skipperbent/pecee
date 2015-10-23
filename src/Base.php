@@ -125,12 +125,15 @@ abstract class Base {
 	/**
 	 * Get form message
 	 * @param string $type
+     * @param string $form
 	 * @return FormMessage|null
 	 */
-	public function getMessage($type){
+	public function getMessage($type, $form = null){
 		$errors = $this->getMessages($type);
 		if($errors && is_array($errors)) {
-			return $errors[0];
+            if($form === null || $errors[0]->getForm() === $form) {
+			    return $errors[0];
+            }
 		}
 		return null;
 	}
@@ -138,20 +141,28 @@ abstract class Base {
 	/**
 	 * Get form messages
 	 * @param string $type
+     * @param string $form
 	 * @return FormMessage|null
 	 */
-	public function getMessages($type) {
+	public function getMessages($type, $form = null) {
         // Trigger validation
         $this->validateInput();
 
-		return $this->_messages->get($type);
+        $messages = array();
+
+        if($this->_messages->get($type) !== null) {
+            foreach ($this->_messages->get($type) as $message) {
+                if ($form === null || $message->getForm() === $form) {
+                    $messages[] = $message;
+                }
+            }
+        }
+
+        return $messages;
 	}
 
-	public function hasMessages($type) {
-        // Trigger validation
-        $this->validateInput();
-
-		return $this->_messages->hasMessages($type);
+	public function hasMessages($type, $form = null) {
+		return (count($this->getMessages($type, $form)) > 0);
 	}
 
 	/**
@@ -195,15 +206,28 @@ abstract class Base {
 		return $this->getMessages($this->errorType);
 	}
 
-	public function getErrorsArray() {
+	public function getErrorsArray($form = null) {
 		$output = array();
 
 		/* @var $error FormMessage */
-		foreach($this->getMessages($this->errorType) as $error) {
-			$output[] = $error->getMessage();
+		foreach($this->getMessages($this->errorType, $form) as $error) {
+            $output[] = $error->getMessage();
 		}
 
 		return $output;
 	}
 
+    public function validationFor($index) {
+        $messages = $this->_messages->get($this->errorType);
+        if($messages && is_array($messages)) {
+            /* @var $message \Pecee\UI\Form\FormMessage */
+            foreach($messages as $message) {
+                if($message->getIndex() === $index) {
+                    return $message->getMessage();
+                }
+            }
+        }
+        return null;
+    }
+    
 }
