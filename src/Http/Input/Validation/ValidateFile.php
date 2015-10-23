@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\UI\Form\Validate;
+namespace Pecee\Http\Input\Validation;
 
 abstract class ValidateFile extends ValidateInput implements IValidateFile {
 

@@ -34,7 +34,7 @@ abstract class FileAbstract extends Controller {
         set_time_limit(60);
 
         $this->files = $files;
-        $this->cacheDate = $this->getParam('_', '');
+        $this->cacheDate = $this->input('_', '');
 
         // Set headers
         response()->cache()->headers([
@@ -46,7 +46,7 @@ abstract class FileAbstract extends Controller {
             ob_start ("ob_gzhandler");
         }
 
-        if($this->hasParam('__clearcache') && Site::getInstance()->hasAdminIp() && is_dir($this->tmpDir)) {
+        if($this->input('__clearcache') && Site::getInstance()->hasAdminIp() && is_dir($this->tmpDir)) {
             $handle = opendir($this->tmpDir);
             while (false !== ($file = readdir($handle))) {
                 if($file == (md5($this->files . $this->cacheDate) . '.' . $this->type)) {
@@ -125,7 +125,7 @@ abstract class FileAbstract extends Controller {
         }
     }
     protected function debugMode() {
-        return (strtolower($this->getParam('__debug')) == 'true' && Site::getInstance()->hasAdminIp());
+        return (strtolower($this->input('__debug')) == 'true' && Site::getInstance()->hasAdminIp());
     }
 
     protected function getHeader() {
