@@ -25,10 +25,8 @@ class InputItem implements IInputItem {
             $index = substr($index, strlen($this->form)+1);
         }
 
-        // Make the name human friendly, by replace _ with uppercase characters
-        $this->name = ucfirst(preg_replace_callback('/_[a-z]?/is', function($matches) {
-            return strtoupper(str_replace('_', ' ', $matches[0]));
-        }, $index));
+        // Make the name human friendly, by replace _ with space
+        $this->name = ucfirst(str_replace('_', ' ', $index));
     }
 
     public function validates() {

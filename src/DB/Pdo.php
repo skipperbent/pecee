@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\DB;
 
-use Pecee\Collection\Collection;
+use Pecee\Collection\CollectionItem;
 use Pecee\Debug;
 use Pecee\Registry;
 
@@ -84,7 +84,7 @@ class Pdo {
             $output = array();
 
             foreach($results as $result) {
-                $output[] = new Collection($result);
+                $output[] = new CollectionItem($result);
             }
 
             return $output;

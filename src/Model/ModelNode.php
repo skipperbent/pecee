@@ -4,7 +4,7 @@ namespace Pecee\Model;
 use Pecee\Boolean;
 use Pecee\Date;
 use Pecee\DB\DBTable;
-use Pecee\Collection\Collection;
+use Pecee\Collection\CollectionItem;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Node\NodeData;
 use Pecee\Str;
@@ -47,7 +47,7 @@ class ModelNode extends Model {
         $table->column('order')->integer()->index();
 
 		parent::__construct($table);
-		$this->data = new Collection();
+		$this->data = new CollectionItem();
 	}
 
 	protected function calculatePath() {

@@ -5,7 +5,7 @@
 namespace Pecee\DB;
 use Pecee\Debug;
 use Pecee\Integer;
-use Pecee\Collection\Collection;
+use Pecee\Collection\CollectionItem;
 use Pecee\Registry;
 
 class DB {
@@ -232,7 +232,7 @@ class DB {
 			$row = $q->fetch_assoc();
 			if($row) {
 				$q->free();
-				return new Collection($row);
+				return new CollectionItem($row);
 			}
 		}
 		return null;
@@ -258,7 +258,7 @@ class DB {
 		if($q) {
 			$items = array();
 			while(($row = $q->fetch_assoc()) != false) {
-				$items[] = new Collection($row);
+				$items[] = new CollectionItem($row);
 			}
 			$q->free();
 			return $items;
