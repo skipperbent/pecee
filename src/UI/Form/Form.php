@@ -3,7 +3,7 @@ namespace Pecee\UI\Form;
 
 use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
-use Pecee\Session\SessionMessage;
+use Pecee\Http\Input\Input;
 use Pecee\Str;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
@@ -12,35 +12,43 @@ use Pecee\UI\Html\HtmlLabel;
 use Pecee\UI\Html\HtmlSelect;
 use Pecee\UI\Html\HtmlSelectOption;
 use Pecee\UI\Html\HtmlTextarea;
-use Pecee\UI\ResponseData\ResponseDataPost;
-use Pecee\Widget\Widget;
 
 class Form {
-	const FORM_ENCTYPE_FORM_DATA='multipart/form-data';
+	const FORM_ENCTYPE_FORM_DATA = 'multipart/form-data';
 
 	protected $prefixElements;
-	protected $post;
+	protected $input;
 	protected $name;
 	protected $indexes;
 
-	public function __construct(ResponseDataPost $post) {
+	public function __construct(Input $input) {
 		$this->prefixElements = true;
-		$this->post = $post;
+		$this->input = $input;
 		$this->indexes = array();
 	}
 
 	protected function getPostBackValue($name) {
-		if(strpos($name, '[]') != false) {
-			$index = $this->indexes[$name];
-			$newName=substr($name, 0, strpos($name, '[]'));
-			if(isset($_POST[$newName][$index])) {
-				return $_POST[$newName][$index];
+
+		$method = request()->getMethod();
+
+		if($method !== 'get') {
+			if(!is_null($this->input->post->get($name))) {
+				return $this->input->post->get($name)->getValue();
 			}
-		} else {
-			if(!is_null($this->post->__get($name))) {
-				return $this->post->__get($name);
+
+			if(strpos($name, '[]') != false) {
+				$index = $this->indexes[$name];
+				$newName = substr($name, 0, strpos($name, '[]'));
+				if(isset($_POST[$newName][$index])) {
+					return $_POST[$newName][$index];
+				}
 			}
 		}
+
+		if(!is_null($this->input->get->get($name))) {
+			return $this->input->get->get($name)->getValue();
+		}
+
 		return null;
 	}
 
@@ -80,12 +88,12 @@ class Form {
 	 */
 	public function input($name, $type, $value = null, $forcePostback = false) {
 		$name = $this->getInputName($name);
-		if(is_null($value) && $this->getPostBackValue($name) || $forcePostback && ResponseDataPost::IsPostBack()) {
+		if(is_null($value) && $this->getPostBackValue($name) || $forcePostback && request()->getMethod() !== 'get') {
 			$value = $this->getPostBackValue($name);
 		}
-		$element = new HtmlInput($name, $type, Str::HtmlEntities($value));
+		$element = new HtmlInput($name, $type, Str::htmlEntities($value));
 		// Added: if the input is an radio, then save the god damn post value :-D...
-		if(strtolower($type) == 'radio' && $this->getPostBackValue($name) && $value == $this->getPostBackValue($name) ) {
+		if(strtolower($type) === 'radio' && $this->getPostBackValue($name) && $value === $this->getPostBackValue($name) ) {
 			$element->addAttribute('checked', 'checked');
 		}
 		return $element;
@@ -112,8 +120,8 @@ class Form {
 		$name = $this->getInputName($name);
 		$v = (!is_null($defaultValue)) ? $defaultValue : true;
 		$element = new HtmlCheckbox($name, $v);
-		if($forcePostback && ResponseDataPost::isPostBack()) {
-			if($v && $this->getPostBackValue($name) == $v) {
+		if($forcePostback && request()->getMethod() !== 'get') {
+			if($v && $this->getPostBackValue($name) === $v) {
 				$element->addAttribute('checked', 'checked');
 			}
 		} else {
@@ -151,13 +159,13 @@ class Form {
 				if(count($arr) > 0) {
 					foreach($data->getData() as $i) {
 						$val=(!isset($i['value'])) ? $i['name'] : $i['value'];
-						$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
+						$selected=($forcePostback && $this->getPostBackValue($name) === $val  || $this->getPostBackValue($name) === $val || !$this->getPostBackValue($name) && $value === $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value === $val);
 						$element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
 					}
 				}
 			} elseif(is_array($data)) {
 				foreach($data as $val=>$name) {
-					$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
+					$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) === $val || !$this->getPostBackValue($name) && $value === $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value === $val);
 					$element->addOption(new HtmlSelectOption($name, $val, $selected));
 				}
 			} else {
@@ -178,7 +186,7 @@ class Form {
 	 */
 	public function textarea($name, $rows, $cols, $value = null, $forcePostback = false) {
 		$name = $this->getInputName($name);
-		if(!$value && $this->getPostBackValue($name) || $forcePostback && ResponseDataPost::IsPostBack()) {
+		if(!$value && $this->getPostBackValue($name) || $forcePostback && request()->getMethod() !== 'get') {
 			$value = $this->getPostBackValue($name);
 		}
 		return new HtmlTextarea($name, $rows, $cols, $value);

@@ -5,7 +5,7 @@
 namespace Pecee\DB;
 use Pecee\Debug;
 use Pecee\Integer;
-use Pecee\Collection;
+use Pecee\Collection\Collection;
 use Pecee\Registry;
 
 class DB {

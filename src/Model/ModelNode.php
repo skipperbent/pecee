@@ -4,7 +4,7 @@ namespace Pecee\Model;
 use Pecee\Boolean;
 use Pecee\Date;
 use Pecee\DB\DBTable;
-use Pecee\Collection;
+use Pecee\Collection\Collection;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Node\NodeData;
 use Pecee\Str;
