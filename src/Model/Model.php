@@ -5,7 +5,8 @@ use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
 use Pecee\Integer;
 
-abstract class Model implements IModel {
+abstract class Model implements IModel, \IteratorAggregate {
+
     protected $table;
     protected $columns;
     protected $query;
@@ -438,4 +439,16 @@ abstract class Model implements IModel {
     public function getAutoCreateTable() {
         return $this->autoCreate;
     }
+
+    /**
+     * Retrieve an external iterator
+     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * <b>Traversable</b>
+     * @since 5.0.0
+     */
+    public function getIterator() {
+        return new \ArrayIterator($this->getRows());
+    }
+
 }
