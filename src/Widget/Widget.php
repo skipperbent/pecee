@@ -31,7 +31,7 @@ abstract class Widget extends Base  {
 		$this->setContentTemplate($this->getTemplatePath());
 		$this->jsWrapRoute = url('ControllerJs@wrap');
 		$this->cssWrapRoute = url('ControllerCss@wrap');
-		$this->form = new Form($this->data);
+		$this->form = new Form($this->input);
 	}
 
 	/**
@@ -229,7 +229,7 @@ abstract class Widget extends Base  {
 		$output = Str::getFirstOrDefault($this->_contentHtml, '');
 		Debug::getInstance()->add('END ' . get_class($this));
 		// Output debug info
-		if($this->getSite()->getDebug() && Str::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->getParam('__debug')) == 'true') {
+		if($this->getSite()->getDebug() && Str::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->input('__debug')) == 'true') {
             $output .= Debug::getInstance();
 		}
 		return $output;

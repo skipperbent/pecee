@@ -1,7 +1,11 @@
 <?php
 namespace Pecee;
-class Collection {
-	protected $data;
+
+use Traversable;
+
+class Collection implements \IteratorAggregate {
+
+	protected $data = array();
 
 	public function __construct(array $rows = null) {
 		if($rows !== null) {
@@ -12,7 +16,7 @@ class Collection {
 	public function setData(array $arr) {
 		$this->data = array();
 		foreach($arr as $key => $value) {
-			$this->__set($key, $value);
+			$this->set($key, $value);
 		}
 	}
 
@@ -40,4 +44,14 @@ class Collection {
 		$this->data[$key] = $value;
 	}
 
+	/**
+	 * Retrieve an external iterator
+	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+	 * @return Traversable An instance of an object implementing <b>Iterator</b> or
+	 * <b>Traversable</b>
+	 * @since 5.0.0
+	 */
+	public function getIterator() {
+		return new \ArrayIterator($this->data);
+	}
 }
