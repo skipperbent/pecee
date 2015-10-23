@@ -141,10 +141,16 @@ abstract class Base {
 	 * @return FormMessage|null
 	 */
 	public function getMessages($type) {
+        // Trigger validation
+        $this->validateInput();
+
 		return $this->_messages->get($type);
 	}
 
 	public function hasMessages($type) {
+        // Trigger validation
+        $this->validateInput();
+        
 		return $this->_messages->hasMessages($type);
 	}
 
@@ -170,7 +176,6 @@ abstract class Base {
 	}
 
 	public function hasErrors() {
-        $this->validateInput();
 		return $this->hasMessages($this->errorType);
 	}
 
