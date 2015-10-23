@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\DB;
 
-use Pecee\Collection;
+use Pecee\Collection\Collection;
 use Pecee\Debug;
 use Pecee\Registry;
 

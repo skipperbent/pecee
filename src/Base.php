@@ -89,7 +89,7 @@ abstract class Base {
 	public function input($index, $default = null) {
 		$element = $this->input->get->findFirst($index);
         if($element !== null) {
-		    return $element;
+		    return $element->getValue();
         }
 
         $element = $this->input->post->findFirst($index);
@@ -150,7 +150,7 @@ abstract class Base {
 	public function hasMessages($type) {
         // Trigger validation
         $this->validateInput();
-        
+
 		return $this->_messages->hasMessages($type);
 	}
 
