@@ -22,7 +22,9 @@
         "vlucas/phpdotenv": "2.0"
     },
     "autoload": {
-
+        "psr-4": {
+            "Pecee\\": "src/"
+        }
     },
     "config": {
         "preferred-install": "dist"
