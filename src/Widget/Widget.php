@@ -31,7 +31,7 @@ abstract class Widget extends Base  {
 		$this->setContentTemplate($this->getTemplatePath());
 		$this->jsWrapRoute = url('ControllerJs@wrap');
 		$this->cssWrapRoute = url('ControllerCss@wrap');
-		$this->form = new Form($this->input);
+		$this->form = new Form($this->_input);
 	}
 
 	/**
