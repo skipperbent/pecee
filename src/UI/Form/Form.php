@@ -31,6 +31,9 @@ class Form {
 
 		$method = request()->getMethod();
 
+		// Remove form name
+		$name = substr($name, strlen($this->name)+1);
+
 		if($method !== 'get') {
 			if(!is_null($this->input->post->get($name))) {
 				return $this->input->post->get($name)->getValue();
@@ -74,7 +77,7 @@ class Form {
 	 * @return \Pecee\UI\Html\HtmlForm
 	 */
 	public function start($name = null, $method = 'post', $action = null, $enctype = 'multipart/form-data') {
-		$this->name=$name;
+		$this->name = $name;
 		return new HtmlForm($name, $method, $action, $enctype);
 	}
 
@@ -83,7 +86,7 @@ class Form {
 	 * @param string $name
 	 * @param string $type
 	 * @param string $value
-     * @param bool $forcePostback
+	 * @param bool $forcePostback
 	 * @return \Pecee\UI\Html\HtmlInput
 	 */
 	public function input($name, $type, $value = null, $forcePostback = false) {
@@ -112,8 +115,8 @@ class Form {
 	 * Creates new checkbox input element
 	 * @param string $name
 	 * @param string $value
-     * @param bool $forcePostback
-     * @param string|null $defaultValue
+	 * @param bool $forcePostback
+	 * @param string|null $defaultValue
 	 * @return \Pecee\UI\Html\HtmlCheckbox
 	 */
 	public function bool($name, $value = null, $forcePostback=true, $defaultValue = null) {
@@ -146,8 +149,8 @@ class Form {
 	 * Creates new HTML Select element
 	 * @param string $name
 	 * @param Dataset $data
-     * @param string|null $value
-     * @param bool $forcePostback
+	 * @param string|null $value
+	 * @param bool $forcePostback
 	 * @return \Pecee\UI\Html\HtmlSelect
 	 */
 	public function selectStart($name, $data = null, $value=null, $forcePostback=false) {
@@ -181,7 +184,7 @@ class Form {
 	 * @param int $rows
 	 * @param int $cols
 	 * @param string $value
-     * @param bool $forcePostback
+	 * @param bool $forcePostback
 	 * @return \Pecee\UI\Html\HtmlTextarea
 	 */
 	public function textarea($name, $rows, $cols, $value = null, $forcePostback = false) {
