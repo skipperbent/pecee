@@ -8,64 +8,64 @@ use Pecee\UI\Site;
 
 abstract class Base {
 
-    protected $errorType = 'danger';
+	protected $errorType = 'danger';
 	protected $_messages;
 	protected $_site;
-    protected $_input;
-    protected $get;
-    protected $post;
-    protected $file;
+	protected $_input;
+	protected $get;
+	protected $post;
+	protected $file;
 
 	public function __construct() {
 
 		Debug::getInstance()->add('BASE CLASS ' . get_class($this));
 
 		$this->_site = Site::getInstance();
-        $this->_input = new Input();
+		$this->_input = new Input();
 
-        // Add shortcuts
-        $this->get = $this->_input->get;
-        $this->post = $this->_input->post;
-        $this->file = $this->_input->file;
+		// Add shortcuts
+		$this->get = $this->_input->get;
+		$this->post = $this->_input->post;
+		$this->file = $this->_input->file;
 
 		$this->_messages = SessionMessage::getInstance();
 		$this->_messages->clear();
 	}
 
-    protected function validateInput() {
-        // Validate inputs
+	protected function validateInput() {
+		// Validate inputs
 
-        /* @var $item \Pecee\Http\Input\InputItem */
-        foreach($this->get as $item) {
-            if(!$item->validates()) {
-                /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
-                foreach($item->getValidationErrors() as $error) {
-                    $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
-                }
-            }
-        }
+		/* @var $item \Pecee\Http\Input\InputItem */
+		foreach($this->get as $item) {
+			if(!$item->validates()) {
+				/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
+				foreach($item->getValidationErrors() as $error) {
+					$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
+				}
+			}
+		}
 
-        if(request()->getMethod() !== 'get') {
+		if(request()->getMethod() !== 'get') {
 
-            foreach($this->post as $item) {
-                if(!$item->validates()) {
-                    /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
-                    foreach ($item->getValidationErrors() as $error) {
-                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
-                    }
-                }
-            }
+			foreach($this->post as $item) {
+				if(!$item->validates()) {
+					/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
+					foreach ($item->getValidationErrors() as $error) {
+						$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
+					}
+				}
+			}
 
-            foreach($this->file as $item) {
-                if(!$item->validate()) {
-                    /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
-                    foreach($item->getValidationErrors() as $error) {
-                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
-                    }
-                }
-            }
-        }
-    }
+			foreach($this->file as $item) {
+				if(!$item->validate()) {
+					/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
+					foreach($item->getValidationErrors() as $error) {
+						$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
+					}
+				}
+			}
+		}
+	}
 
 	public function isAjaxRequest() {
 		return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
@@ -88,23 +88,23 @@ abstract class Base {
 	 */
 	public function input($index, $default = null) {
 		$element = $this->get->findFirst($index);
-        if($element !== null) {
-		    return $element->getValue();
-        }
+		if($element !== null) {
+			return Str::getFirstOrDefault($element->getValue(), $default);
+		}
 
-        $element = $this->post->findFirst($index);
-        return ($element !== null) ? $element->getValue() : $default;
+		$element = $this->post->findFirst($index);
+		return ($element !== null) ? Str::getFirstOrDefault($element->getValue(), $default) : $default;
 	}
 
-    /**
-     * Get post input element
-     * @param string $index
-     * @return \Pecee\Http\Input\InputFile|null
-     */
-    public function file($index) {
-        $element = $this->file->findFirst($index);
-        return ($element !== null) ? $element : null;
-    }
+	/**
+	 * Get post input element
+	 * @param string $index
+	 * @return \Pecee\Http\Input\InputFile|null
+	 */
+	public function file($index) {
+		$element = $this->file->findFirst($index);
+		return ($element !== null) ? $element : null;
+	}
 
 	/**
 	 * Checks if there has been a form post-back
@@ -125,15 +125,15 @@ abstract class Base {
 	/**
 	 * Get form message
 	 * @param string $type
-     * @param string $form
+	 * @param string $form
 	 * @return FormMessage|null
 	 */
 	public function getMessage($type, $form = null){
 		$errors = $this->getMessages($type);
 		if($errors && is_array($errors)) {
-            if($form === null || $errors[0]->getForm() === $form) {
-			    return $errors[0];
-            }
+			if($form === null || $errors[0]->getForm() === $form) {
+				return $errors[0];
+			}
 		}
 		return null;
 	}
@@ -141,24 +141,24 @@ abstract class Base {
 	/**
 	 * Get form messages
 	 * @param string $type
-     * @param string $form
+	 * @param string $form
 	 * @return FormMessage|null
 	 */
 	public function getMessages($type, $form = null) {
-        // Trigger validation
-        $this->validateInput();
+		// Trigger validation
+		$this->validateInput();
 
-        $messages = array();
+		$messages = array();
 
-        if($this->_messages->get($type) !== null) {
-            foreach ($this->_messages->get($type) as $message) {
-                if ($form === null || $message->getForm() === $form) {
-                    $messages[] = $message;
-                }
-            }
-        }
+		if($this->_messages->get($type) !== null) {
+			foreach ($this->_messages->get($type) as $message) {
+				if ($form === null || $message->getForm() === $form) {
+					$messages[] = $message;
+				}
+			}
+		}
 
-        return $messages;
+		return $messages;
 	}
 
 	public function hasMessages($type, $form = null) {
@@ -211,23 +211,23 @@ abstract class Base {
 
 		/* @var $error FormMessage */
 		foreach($this->getMessages($this->errorType, $form) as $error) {
-            $output[] = $error->getMessage();
+			$output[] = $error->getMessage();
 		}
 
 		return $output;
 	}
 
-    public function validationFor($index) {
-        $messages = $this->_messages->get($this->errorType);
-        if($messages && is_array($messages)) {
-            /* @var $message \Pecee\UI\Form\FormMessage */
-            foreach($messages as $message) {
-                if($message->getIndex() === $index) {
-                    return $message->getMessage();
-                }
-            }
-        }
-        return null;
-    }
+	public function validationFor($index) {
+		$messages = $this->_messages->get($this->errorType);
+		if($messages && is_array($messages)) {
+			/* @var $message \Pecee\UI\Form\FormMessage */
+			foreach($messages as $message) {
+				if($message->getIndex() === $index) {
+					return $message->getMessage();
+				}
+			}
+		}
+		return null;
+	}
 
 }
