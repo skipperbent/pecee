@@ -11,7 +11,7 @@ abstract class Base {
     protected $errorType = 'danger';
 	protected $_messages;
 	protected $_site;
-    protected $input;
+    protected $_input;
     protected $get;
     protected $post;
     protected $file;
@@ -21,12 +21,12 @@ abstract class Base {
 		Debug::getInstance()->add('BASE CLASS ' . get_class($this));
 
 		$this->_site = Site::getInstance();
-        $this->input = new Input();
+        $this->_input = new Input();
 
         // Add shortcuts
-        $this->get = $this->input->get;
-        $this->post = $this->input->post;
-        $this->file = $this->input->file;
+        $this->get = $this->_input->get;
+        $this->post = $this->_input->post;
+        $this->file = $this->_input->file;
 
 		$this->_messages = SessionMessage::getInstance();
 		$this->_messages->clear();
@@ -87,12 +87,12 @@ abstract class Base {
 	 * @return string|null
 	 */
 	public function input($index, $default = null) {
-		$element = $this->input->get->findFirst($index);
+		$element = $this->get->findFirst($index);
         if($element !== null) {
 		    return $element->getValue();
         }
 
-        $element = $this->input->post->findFirst($index);
+        $element = $this->post->findFirst($index);
         return ($element !== null) ? $element->getValue() : $default;
 	}
 
@@ -102,7 +102,7 @@ abstract class Base {
      * @return \Pecee\Http\Input\InputFile|null
      */
     public function file($index) {
-        $element = $this->input->file->findFirst($index);
+        $element = $this->file->findFirst($index);
         return ($element !== null) ? $element : null;
     }
 

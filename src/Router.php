@@ -19,7 +19,7 @@ class Router extends SimpleRouter {
         self::get('/captcha/show', 'ControllerCaptcha@getShow')->addSettings(['namespace' => '\Pecee\Controller']);
 
         // Load routes.php
-        $file = $_ENV['basePath'] . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';
+        $file = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';
         if(file_exists($file)) {
             require_once $file;
         }
@@ -28,7 +28,7 @@ class Router extends SimpleRouter {
         Locale::getInstance();
 
         // Set default namespace
-        $defaultNamespace = '\\'.Registry::getInstance()->get('AppName') . '\\Controller';
+        $defaultNamespace = '\\'.$_ENV['app_name'] . '\\Controller';
 
         // Handle exceptions
         try {

@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Model;
+use Pecee\Collection\CollectionItem;
 use \Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
@@ -133,7 +134,7 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     public static function query($query, $rows = null, $page = null, $args = null) {
         /* $var $model Model */
-        $model = static::OnCreateModel();
+        $model = static::onCreateModel();
         $results = array();
         $fetchPage = false;
         $countSql = null;
@@ -142,7 +143,9 @@ abstract class Model implements IModel, \IteratorAggregate {
         if(!is_null($rows)){
             $page = (is_null($page)) ? 0 : $page;
             $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
-            $query .= sprintf(' LIMIT %s, %s',($page*$rows), $rows);
+            if(stripos($query, 'limit') === false) {
+                $query .= sprintf(' LIMIT %s, %s', ($page * $rows), $rows);
+            }
             $fetchPage = true;
         }
         $sql = PdoHelper::formatQuery($query, $args);
@@ -151,7 +154,7 @@ abstract class Model implements IModel, \IteratorAggregate {
         } catch(\PdoException $e) {
             if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
-                return $model::query($query, $rows, $page, $args);
+                return $model::query($sql, $rows, $page, $args);
             }
             throw $e;
         }
@@ -161,7 +164,7 @@ abstract class Model implements IModel, \IteratorAggregate {
             $results['query'][] = $sql;
             if($results['data']['numRows'] > 0) {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-                    $obj = static::OnCreateModel();
+                    $obj = static::onCreateModel(new CollectionItem($row));
                     $obj->setRows($row);
                     $results['data']['rows'][]=$obj;
                 }
@@ -180,15 +183,16 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     /**
      * Returns model instance
+     * @param CollectionItem $row
      * @return static
      */
-    protected static function onCreateModel() {
+    protected static function onCreateModel(CollectionItem $row = null) {
         return new static();
     }
 
     public static function fetchAll($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
-        return self::query($query, null, null, $args);
+        return static::query($query, null, null, $args);
     }
 
     public static function fetchAllPage($query, $skip = null, $rows = null, $args=null) {
@@ -200,7 +204,7 @@ abstract class Model implements IModel, \IteratorAggregate {
             if(!is_null($skip) && !is_null($rows)) {
                 $query = $query.' LIMIT ' . $skip . ',' . $rows;
             }
-            $model = self::query($query, null, null, $args);
+            $model = static::query($query, null, null, $args);
         } catch(\PdoException $e) {
             if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
@@ -219,12 +223,12 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     public static function fetchPage($query, $rows = 10, $page = 0, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        return self::query($query, $rows, $page, $args);
+        return static::query($query, $rows, $page, $args);
     }
 
     public static function fetchOne($query, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
-        $model =  self::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
+        $model =  static::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
         if($model->hasRows()){
             $results = $model->getResults();
             if(isset($results['data']['rows'])) {
@@ -238,7 +242,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     public static function nonQuery($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
-        $model = static::OnCreateModel();
+        $model = static::onCreateModel();
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
 
         try {
@@ -255,7 +259,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     public static function scalar($query, $args) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
-        $model = static::OnCreateModel();
+        $model = static::onCreateModel();
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
 
         try {
@@ -359,18 +363,6 @@ abstract class Model implements IModel, \IteratorAggregate {
         $this->results['data']['maxRows'] = $rows;
     }
 
-    public function setNumRow($numRows) {
-        $this->results['data']['numRows'] = $numRows;
-    }
-
-    public function getNumRows() {
-        return isset($this->results['data']['numRows']) ? $this->results['data']['numRows'] : 0;
-    }
-
-    public function getNumFields( ){
-        return isset($this->results['data']['numFields']) ? $this->results['data']['numFields'] : 0;
-    }
-
     public function getMaxPages() {
         return ($this->getMaxRows() && $this->getNumRows()) ? ceil($this->getMaxRows()/$this->getNumRows()) : 0;
     }
@@ -399,14 +391,6 @@ abstract class Model implements IModel, \IteratorAggregate {
         return ($this->getPage() > 0);
     }
 
-    public function getInsertId() {
-        return (isset($this->results['insertId']) ? $this->results['insertId'] : null);
-    }
-
-    public function setTable($table) {
-        $this->table = $table;
-    }
-
     public function getTable() {
         return $this->table;
     }
@@ -418,18 +402,6 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     public function __set($name, $value) {
         $this->results['data']['rows'][strtolower($name)] = $value;
-    }
-
-    /**
-     * Sets post data from post variable.
-     * @param array $data
-     */
-    public function setPostData($data){
-        if($data && count($data) > 0) {
-            foreach($data as $key=>$value){
-                $this->__set($key, $value);
-            }
-        }
     }
 
     public function setAutoCreateTable($bool) {
