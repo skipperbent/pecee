@@ -57,7 +57,7 @@ abstract class Base {
 			}
 
 			foreach($this->file as $item) {
-				if(!$item->validate()) {
+				if(!$item->validates()) {
 					/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
 					foreach($item->getValidationErrors() as $error) {
 						$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());

@@ -96,7 +96,7 @@ class Form {
 		}
 		$element = new HtmlInput($name, $type, Str::htmlEntities($value));
 		// Added: if the input is an radio, then save the god damn post value :-D...
-		if(strtolower($type) === 'radio' && $this->getPostBackValue($name) && $value === $this->getPostBackValue($name) ) {
+		if(strtolower($type) == 'radio' && $this->getPostBackValue($name) && $value == $this->getPostBackValue($name) ) {
 			$element->addAttribute('checked', 'checked');
 		}
 		return $element;
@@ -124,7 +124,7 @@ class Form {
 		$v = (!is_null($defaultValue)) ? $defaultValue : true;
 		$element = new HtmlCheckbox($name, $v);
 		if($forcePostback && request()->getMethod() !== 'get') {
-			if($v && $this->getPostBackValue($name) === $v) {
+			if($v && $this->getPostBackValue($name) == $v) {
 				$element->addAttribute('checked', 'checked');
 			}
 		} else {
@@ -162,13 +162,13 @@ class Form {
 				if(count($arr) > 0) {
 					foreach($data->getData() as $i) {
 						$val=(!isset($i['value'])) ? $i['name'] : $i['value'];
-						$selected=($forcePostback && $this->getPostBackValue($name) === $val  || $this->getPostBackValue($name) === $val || !$this->getPostBackValue($name) && $value === $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value === $val);
+						$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
 						$element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
 					}
 				}
 			} elseif(is_array($data)) {
 				foreach($data as $val=>$name) {
-					$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) === $val || !$this->getPostBackValue($name) && $value === $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value === $val);
+					$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
 					$element->addOption(new HtmlSelectOption($name, $val, $selected));
 				}
 			} else {
