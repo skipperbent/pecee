@@ -3,6 +3,7 @@ namespace Pecee\Http\Input;
 
 use Pecee\Collection\CollectionItem;
 use Pecee\Http\Input\Validation\IValidateFile;
+use Pecee\IO\File;
 
 class InputFile extends CollectionItem implements IInputItem {
 
@@ -89,6 +90,10 @@ class InputFile extends CollectionItem implements IInputItem {
 	public function getTmpName() {
 		return $this->tmpName;
 	}
+
+    public function getExtension() {
+        return File::getExtension($this->getName());
+    }
 
 	public function move($destination) {
 		return move_uploaded_file($this->tmpName, $destination);
