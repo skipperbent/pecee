@@ -14,9 +14,9 @@ class Router extends SimpleRouter {
         Debug::getInstance()->add('Router initialised.');
 
         // Load framework specific controllers
-        self::get('/js/wrap/{files}', 'ControllerJs@getWrap')->addSettings(['namespace' => '\Pecee\Controller']);
-        self::get('/css/wrap/{files}', 'ControllerCss@getWrap')->addSettings(['namespace' => '\Pecee\Controller']);
-        self::get('/captcha/show', 'ControllerCaptcha@getShow')->addSettings(['namespace' => '\Pecee\Controller']);
+        self::get('/js/wrap/{files}', 'ControllerJs@wrap')->addSettings(['namespace' => '\Pecee\Controller']);
+        self::get('/css/wrap/{files}', 'ControllerCss@wrap')->addSettings(['namespace' => '\Pecee\Controller']);
+        self::get('/captcha/show', 'ControllerCaptcha@show')->addSettings(['namespace' => '\Pecee\Controller']);
 
         // Load routes.php
         $file = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';

@@ -15,6 +15,7 @@ abstract class FileAbstract extends Controller {
 
     const TYPE_JAVASCRIPT = 'js';
     const TYPE_CSS = 'css';
+
     public static $types=array(self::TYPE_JAVASCRIPT, self::TYPE_CSS);
 
     public function __construct($type) {
@@ -29,7 +30,7 @@ abstract class FileAbstract extends Controller {
         $this->tmpDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
     }
 
-    public function getWrap($files = null) {
+    public function wrap($files = null) {
         // Set time limit
         set_time_limit(60);
 
@@ -125,7 +126,7 @@ abstract class FileAbstract extends Controller {
         }
     }
     protected function debugMode() {
-        return (strtolower($this->input('__debug')) == 'true' && Site::getInstance()->hasAdminIp());
+        return (strtolower($this->input('__debug')) === 'true' && Site::getInstance()->hasAdminIp());
     }
 
     protected function getHeader() {

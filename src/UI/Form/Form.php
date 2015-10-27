@@ -39,7 +39,7 @@ class Form {
 				return $this->input->post->get($name)->getValue();
 			}
 
-			if(strpos($name, '[]') != false) {
+			if(strpos($name, '[]') !== false) {
 				$index = $this->indexes[$name];
 				$newName = substr($name, 0, strpos($name, '[]'));
 				if(isset($_POST[$newName][$index])) {
@@ -48,7 +48,7 @@ class Form {
 			}
 		}
 
-		if(!is_null($this->input->get->get($name))) {
+		if(!$this->input->get->get($name) !== null) {
 			return $this->input->get->get($name)->getValue();
 		}
 
@@ -171,9 +171,9 @@ class Form {
 					$selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
 					$element->addOption(new HtmlSelectOption($name, $val, $selected));
 				}
-			} else {
-				throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
 			}
+
+			throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
 		}
 		return $element;
 	}
