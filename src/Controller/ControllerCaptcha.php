@@ -5,7 +5,7 @@ use Pecee\UI\Form\FormCaptcha;
 
 class ControllerCaptcha extends Controller {
 
-	public function getShow($captchaName) {
+	public function show($captchaName) {
         $session = Session::getInstance();
 		if($session->exists($captchaName . '_data')) {
 			$captcha = $session->get($captchaName . '_data');

@@ -222,8 +222,21 @@ abstract class Base {
 		if($messages && is_array($messages)) {
 			/* @var $message \Pecee\UI\Form\FormMessage */
 			foreach($messages as $message) {
-				if($message->getIndex() === $index) {
-					return $message->getMessage();
+
+				$input = null;
+				if(request()->getMethod() !== 'get') {
+					$input = $this->post->findFirst($index);
+					if($input === null) {
+						$input = $this->file->findFirst($index);
+					}
+				} else {
+					$input = $this->get->findFirst($index);
+				}
+
+				if($input !== null) {
+					if ($message->getIndex() === $input->getIndex()) {
+						return $message->getMessage();
+					}
 				}
 			}
 		}

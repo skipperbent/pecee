@@ -99,7 +99,10 @@ class InputItem implements IInputItem {
     /**
      * @return string
      */
-    public function getIndex() {
+    public function getIndex($removeFormName = false) {
+        if($removeFormName && $this->form) {
+            return substr($this->index, strlen($this->form)+1);
+        }
         return $this->index;
     }
 
