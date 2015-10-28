@@ -13,9 +13,9 @@ abstract class Dataset implements \IteratorAggregate {
 	}
 
 	public function get($index) {
-		for($i = 0; $i < count($this->data); $i++) {
-			if($i === $index) {
-				return $this->data[$i];
+		foreach($this->data as $data) {
+			if($data['value'] === $index) {
+				return $data['name'];
 			}
 		}
 
