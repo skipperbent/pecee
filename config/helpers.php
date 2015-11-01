@@ -8,12 +8,18 @@ function url($controller = null, $parameters = null, $getParams = null) {
     return \Pecee\Router::getRoute($controller, $parameters, $getParams);
 }
 
+/**
+ * @return \Pecee\Http\Response
+ */
 function response() {
     return new \Pecee\Http\Response();
 }
 
+/**
+ * @return \Pecee\Http\Request
+ */
 function request() {
-    return new \Pecee\Http\Request();
+    return \Pecee\Http\Request::getInstance();
 }
 
 function redirect($url, $code = null) {
