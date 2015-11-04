@@ -212,7 +212,7 @@ class ModelUser extends ModelData {
 	}
 
 	public static function getByUsernameOrEmail($query, $rows = 10, $page = 0) {
-		return self::fetchPage('SELECT u.* FROM {table} u JOIN `user_data` ud ON(ud.`id` = u.`id`) WHERE (ud.`key` = \'email\' && ud.`value` LIKE %s || u.`username` LIKE %s) && u.`deleted` = 0', $rows, $page, $query, $query);
+		return self::fetchPage('SELECT u.* FROM {table} u JOIN `user_data` ud ON(ud.`user_id` = u.`id`) WHERE (ud.`key` = \'email\' && ud.`value` LIKE %s || u.`username` LIKE %s) && u.`deleted` = 0', $rows, $page, $query, $query);
 	}
 
 	public static function getByUsername($username) {
@@ -220,7 +220,7 @@ class ModelUser extends ModelData {
 	}
 
 	public static function getByEmail($email) {
-		return self::fetchOne('SELECT u.* FROM {table} u JOIN `user_data` ud ON(ud.`id` = u.`id`) WHERE ud.`key` = \'email\' && ud.`value` = %s && u.`deleted` = 0', $email);
+		return self::fetchOne('SELECT u.* FROM {table} u JOIN `user_data` ud ON(ud.`user_id` = u.`id`) WHERE ud.`key` = \'email\' && ud.`value` = %s && u.`deleted` = 0', $email);
 	}
 
 	public function auth() {
@@ -231,7 +231,7 @@ class ModelUser extends ModelData {
 		if(self::checkBadLogin()) {
 			throw new UserException('User has been banned', self::ERROR_TYPE_BANNED);
 		}
-		$user = self::fetchOne('SELECT u.`id`, u.`username`, u.`password`, u.`admin_level` FROM {table} u JOIN `user_data` ud ON(ud.`id` = u.`id`) WHERE u.`deleted` = 0 && ud.`key` = \'email\' && ud.`value` = %s', $email);
+		$user = self::fetchOne('SELECT u.`id`, u.`username`, u.`password`, u.`admin_level` FROM {table} u JOIN `user_data` ud ON(ud.`user_id` = u.`id`) WHERE u.`deleted` = 0 && ud.`key` = \'email\' && ud.`value` = %s', $email);
 		if(!$user->hasRows()) {
 			throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
 		}
