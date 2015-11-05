@@ -23,12 +23,12 @@ class UserReset extends Model {
 		return self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', array($key));
 	}
 
-	public static function confirm($Key, $Password) {
-		$reset = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $Key);
+	public static function confirm($key, $newPassword) {
+		$reset = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
 		if($reset->hasRow()) {
 			$reset->delete();
-			self::nonQuery('DELETE FROM {table} WHERE `key` = %s LIMIT 1', $Key);
-			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `user_id` = %s LIMIT 1', md5($Password), $reset->user_id);
+			self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', $reset->user_id);
+			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `user_id` = %s LIMIT 1', md5($newPassword), $reset->user_id);
 			return $reset->user_id;
 		}
 		return null;
