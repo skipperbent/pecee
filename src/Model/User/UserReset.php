@@ -28,7 +28,7 @@ class UserReset extends Model {
 		if($reset->hasRow()) {
 			$reset->delete();
 			self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', $reset->user_id);
-			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `user_id` = %s LIMIT 1', md5($newPassword), $reset->user_id);
+			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `id` = %s LIMIT 1', md5($newPassword), $reset->user_id);
 			return $reset->user_id;
 		}
 		return null;
