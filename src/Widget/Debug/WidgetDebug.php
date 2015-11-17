@@ -11,6 +11,8 @@ class WidgetDebug extends Widget {
     public function __construct(array $stack) {
         parent::__construct();
 
+        $this->setTemplate(null);
+
         $this->stack = $stack;
     }
 
