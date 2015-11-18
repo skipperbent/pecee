@@ -32,8 +32,8 @@ class Form {
         $method = request()->getMethod();
 
         if($method !== 'get') {
-            if(!is_null($this->input->post->findFirst($name))) {
-                return $this->input->post->findFirst($name)->getValue();
+            if(!is_null($this->input->post->get($name))) {
+                return $this->input->post->get($name)->getValue();
             }
 
             if(strpos($name, '[]') !== false) {
@@ -45,8 +45,8 @@ class Form {
             }
         }
 
-        if($this->input->get->findFirst($name) !== null) {
-            return $this->input->get->findFirst($name)->getValue();
+        if($this->input->get->get($name) !== null) {
+            return $this->input->get->get($name)->getValue();
         }
 
         return null;
