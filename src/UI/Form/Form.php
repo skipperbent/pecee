@@ -45,7 +45,7 @@ class Form {
             }
         }
 
-        if(!$this->input->get->findFirst($name) !== null) {
+        if($this->input->get->findFirst($name) !== null) {
             return $this->input->get->findFirst($name)->getValue();
         }
 
@@ -120,7 +120,7 @@ class Form {
         $name = $this->getInputName($name);
         $v = (!is_null($defaultValue)) ? $defaultValue : true;
         $element = new HtmlCheckbox($name, $v);
-        if($saveValue && request()->getMethod() !== 'get') {
+        if($saveValue) {
             if($v && $this->getValue($name) == $v) {
                 $element->addAttribute('checked', 'checked');
             }
