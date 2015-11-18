@@ -27,16 +27,13 @@ class Form {
         $this->indexes = array();
     }
 
-    protected function getPostBackValue($name) {
+    protected function getValue($name) {
 
         $method = request()->getMethod();
 
-        // Remove form name
-        $name = substr($name, strlen($this->name)+1);
-
         if($method !== 'get') {
-            if(!is_null($this->input->post->get($name))) {
-                return $this->input->post->get($name)->getValue();
+            if(!is_null($this->input->post->findFirst($name))) {
+                return $this->input->post->findFirst($name)->getValue();
             }
 
             if(strpos($name, '[]') !== false) {
@@ -48,8 +45,8 @@ class Form {
             }
         }
 
-        if(!$this->input->get->get($name) !== null) {
-            return $this->input->get->get($name)->getValue();
+        if(!$this->input->get->findFirst($name) !== null) {
+            return $this->input->get->findFirst($name)->getValue();
         }
 
         return null;
@@ -86,17 +83,17 @@ class Form {
      * @param string $name
      * @param string $type
      * @param string $value
-     * @param bool $forcePostback
+     * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlInput
      */
-    public function input($name, $type, $value = null, $forcePostback = false) {
+    public function input($name, $type, $value = null, $saveValue = false) {
         $name = $this->getInputName($name);
-        if(is_null($value) && $this->getPostBackValue($name) || $forcePostback && request()->getMethod() !== 'get') {
-            $value = $this->getPostBackValue($name);
+        if(is_null($value) && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
+            $value = $this->getValue($name);
         }
         $element = new HtmlInput($name, $type, Str::htmlEntities($value));
         // Added: if the input is an radio, then save the god damn post value :-D...
-        if(strtolower($type) == 'radio' && $this->getPostBackValue($name) && $value == $this->getPostBackValue($name) ) {
+        if(strtolower($type) == 'radio' && $this->getValue($name) && $value == $this->getValue($name) ) {
             $element->addAttribute('checked', 'checked');
         }
         return $element;
@@ -115,16 +112,16 @@ class Form {
      * Creates new checkbox input element
      * @param string $name
      * @param string $value
-     * @param bool $forcePostback
+     * @param bool $saveValue
      * @param string|null $defaultValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = null, $forcePostback=true, $defaultValue = null) {
+    public function bool($name, $value = null, $saveValue = true, $defaultValue = null) {
         $name = $this->getInputName($name);
         $v = (!is_null($defaultValue)) ? $defaultValue : true;
         $element = new HtmlCheckbox($name, $v);
-        if($forcePostback && request()->getMethod() !== 'get') {
-            if($v && $this->getPostBackValue($name) == $v) {
+        if($saveValue && request()->getMethod() !== 'get') {
+            if($v && $this->getValue($name) == $v) {
                 $element->addAttribute('checked', 'checked');
             }
         } else {
@@ -150,10 +147,10 @@ class Form {
      * @param string $name
      * @param Dataset $data
      * @param string|null $value
-     * @param bool $forcePostback
+     * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlSelect
      */
-    public function selectStart($name, $data = null, $value=null, $forcePostback=false) {
+    public function selectStart($name, $data = null, $value = null, $saveValue = false) {
         $name = $this->getInputName($name);
         $element = new HtmlSelect($name);
         if(!is_null($data)) {
@@ -162,13 +159,13 @@ class Form {
                 if(count($arr) > 0) {
                     foreach($data->getData() as $i) {
                         $val=(!isset($i['value'])) ? $i['name'] : $i['value'];
-                        $selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
+                        $selected=($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                         $element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
                     }
                 }
             } elseif(is_array($data)) {
                 foreach($data as $val=>$name) {
-                    $selected=($forcePostback && $this->getPostBackValue($name) == $val  || $this->getPostBackValue($name) == $val || !$this->getPostBackValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$forcePostback && $value == $val);
+                    $selected=($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                     $element->addOption(new HtmlSelectOption($name, $val, $selected));
                 }
             } else {
@@ -184,13 +181,13 @@ class Form {
      * @param int $rows
      * @param int $cols
      * @param string $value
-     * @param bool $forcePostback
+     * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlTextarea
      */
-    public function textarea($name, $rows, $cols, $value = null, $forcePostback = false) {
+    public function textarea($name, $rows, $cols, $value = null, $saveValue = false) {
         $name = $this->getInputName($name);
-        if(!$value && $this->getPostBackValue($name) || $forcePostback && request()->getMethod() !== 'get') {
-            $value = $this->getPostBackValue($name);
+        if(!$value && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
+            $value = $this->getValue($name);
         }
         return new HtmlTextarea($name, $rows, $cols, $value);
     }
