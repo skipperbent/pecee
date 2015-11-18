@@ -110,7 +110,7 @@ abstract class Model implements IModel, \IteratorAggregate {
                 $concat[] = PdoHelper::formatQuery('`'.$name.'` = %s', array($val));
             }
             $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = \'%s\' LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), PdoHelper::escape($primaryValue));
-            
+
             try {
                 Pdo::getInstance()->nonQuery($sql);
             }catch(\PDOException $e) {
@@ -420,7 +420,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      * @since 5.0.0
      */
     public function getIterator() {
-        return new \ArrayIterator($this->getRows());
+        return new \ArrayIterator(($this->hasRows()) ? $this->getRows() : array());
     }
 
 }
