@@ -109,8 +109,8 @@ abstract class Model implements IModel, \IteratorAggregate {
                 $val = $this->getRow($name);
                 $concat[] = PdoHelper::formatQuery('`'.$name.'` = %s', array($val));
             }
-            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = %s LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), PdoHelper::escape($primaryValue));
-
+            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = \'%s\' LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), PdoHelper::escape($primaryValue));
+            
             try {
                 Pdo::getInstance()->nonQuery($sql);
             }catch(\PDOException $e) {
