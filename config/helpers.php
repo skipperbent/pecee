@@ -69,7 +69,7 @@ function message($message, $type, $form = null, $placement = null, $index = null
  */
 function env($key, $default = null) {
     $value = getenv($key);
-    return (is_null($value)) ? $default : $value;
+    return (!$value) ? $default : $value;
 }
 
 /**
