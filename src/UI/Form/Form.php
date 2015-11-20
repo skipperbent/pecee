@@ -111,17 +111,17 @@ class Form {
     /**
      * Creates new checkbox input element
      * @param string $name
-     * @param string $value
+     * @param bool $value
      * @param bool $saveValue
-     * @param string|null $defaultValue
+     * @param bool $defaultValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = null, $saveValue = true, $defaultValue = null) {
+    public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
         $name = $this->getInputName($name);
-        $v = Boolean::parse($defaultValue);
-        $element = new HtmlCheckbox($name, $v);
+        $element = new HtmlCheckbox($name, $value);
         if($saveValue) {
-            if($v || $v && $this->getValue($name) == $v) {
+            $checked = Boolean::parse(($this->getValue($name)) ? $this->getValue($name) : $defaultValue);
+            if($checked) {
                 $element->addAttribute('checked', 'checked');
             }
         } else {
