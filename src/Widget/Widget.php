@@ -120,7 +120,7 @@ abstract class Widget extends Base  {
 			}
 
 			$p = $this->cssWrapRoute;
-            $p .= join($this->_site->getCssFilesWrapped(), ',') . Url::getParamsSeperator($this->cssWrapRoute) . Url::arrayToParams($get);
+            $p .= join($this->_site->getCssFilesWrapped(), ',') . Url::getParamsSeparator($this->cssWrapRoute) . Url::arrayToParams($get);
 			$o[] = new HtmlLink($p);
 		}
 
@@ -148,7 +148,7 @@ abstract class Widget extends Base  {
 			}
 
 			$p = $this->jsWrapRoute;
-            $p .= join($this->_site->getJsFilesWrapped(),',') . Url::getParamsSeperator($this->jsWrapRoute) . Url::arrayToParams($get);
+            $p .= join($this->_site->getJsFilesWrapped(),',') . Url::getParamsSeparator($this->jsWrapRoute) . Url::arrayToParams($get);
 			$o[] = new HtmlScript($p);
 		}
 
