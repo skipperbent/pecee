@@ -27,12 +27,12 @@ class Form {
         $this->indexes = array();
     }
 
-    protected function getValue($name) {
+    protected function getValue($name, $defaultValue = null) {
 
         $method = request()->getMethod();
 
         if($method !== 'get') {
-            if(!is_null($this->input->post->get($name))) {
+            if($this->input->post->get($name) !== null && count($_POST)) {
                 return $this->input->post->get($name)->getValue();
             }
 
@@ -45,11 +45,11 @@ class Form {
             }
         }
 
-        if($this->input->get->get($name) !== null) {
+        if($this->input->get->get($name) !== null && count($_GET)) {
             return $this->input->get->get($name)->getValue();
         }
 
-        return null;
+        return $defaultValue;
     }
 
     /**
@@ -120,7 +120,7 @@ class Form {
         $name = $this->getInputName($name);
         $element = new HtmlCheckbox($name, $value);
         if($saveValue) {
-            $checked = Boolean::parse(($this->getValue($name)) ? $this->getValue($name) : $defaultValue);
+            $checked = Boolean::parse($this->getValue($name, $defaultValue));
             if($checked) {
                 $element->addAttribute('checked', 'checked');
             }
