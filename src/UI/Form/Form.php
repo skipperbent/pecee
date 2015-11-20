@@ -164,9 +164,9 @@ class Form {
                     }
                 }
             } elseif(is_array($data)) {
-                foreach($data as $val=>$name) {
+                foreach($data as $val => $key) {
                     $selected=($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
-                    $element->addOption(new HtmlSelectOption($name, $val, $selected));
+                    $element->addOption(new HtmlSelectOption($key, $val, $selected));
                 }
             } else {
                 throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
