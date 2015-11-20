@@ -66,22 +66,11 @@ class Url {
 	}
 
 	public static function paramsToArray($querystring) {
-		if(!empty($querystring)) {
-			$output = array();
-			if( substr($querystring, 0, 1) == '?' ) {
-				$querystring = substr($querystring, 1, strlen($querystring));
-			}
-			$tmp = @explode( '&', $querystring );
-			foreach( $tmp as $q ) {
-				$keyValue = @explode('=', $q);
-				$output[$keyValue[0]] = $keyValue[1];
-			}
-			return $output;
-		}
-		return null;
+		$output = array();
+		return '?' . parse_str($querystring, $output);
 	}
 
-	public static function getParamsSeperator($url) {
+	public static function getParamsSeparator($url) {
 		return (strpos($url, '?') > -1) ? '&' : '?';
 	}
 
@@ -103,7 +92,7 @@ class Url {
 	}
 
 	public static function isValid($url) {
-		return (!preg_match('/^(http|https):\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url)) ? false : true;
+		return (!preg_match('/^(http|https):\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url));
 	}
 
 	public static function isValidHostname($hostname) {
