@@ -7,7 +7,7 @@ class ValidateInputBoolean extends ValidateInput {
 	}
 
 	public function getErrorMessage() {
-		// No error message for a bolean.
+		return lang('%s must be true or false', $this->name);
 	}
 
 }

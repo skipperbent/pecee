@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
+use Pecee\Url;
+
 class ValidateInputUri extends ValidateInput {
 
 	protected $error;
@@ -9,7 +11,7 @@ class ValidateInputUri extends ValidateInput {
 		if(empty($this->value)) {
 			$this->error = lang('%s is required', $this->name);
 			return false;
-		} elseif(!\Pecee\Url::IsValid($this->value)) {
+		} elseif(!Url::isValid($this->value)) {
 			$this->error = lang('%s is not a valid link', $this->name);
 			return false;
 		}

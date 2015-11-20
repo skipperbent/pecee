@@ -1,9 +1,11 @@
 <?php
 namespace Pecee\Http\Input\Validation;
+use Pecee\Util;
+
 class ValidateInputEmail extends ValidateInput {
 
 	public function validate() {
-		return \Pecee\Util::is_email($this->value);
+		return Util::is_email($this->value);
 	}
 
 	public function getErrorMessage() {

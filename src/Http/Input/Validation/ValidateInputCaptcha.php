@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
+use Pecee\Session\Session;
+
 class ValidateInputCaptcha extends ValidateInput {
 
 	protected $captchaName;
@@ -10,9 +12,9 @@ class ValidateInputCaptcha extends ValidateInput {
 	}
 
 	public function validate() {
-		$result = (\Pecee\Session::getInstance()->exists($this->captchaName) && strtolower($this->value) == strtolower(\Pecee\Session::getInstance()->get($this->captchaName)));
+		$result = (Session::getInstance()->exists($this->captchaName) && strtolower($this->value) == strtolower(Session::getInstance()->get($this->captchaName)));
 		if($result) {
-			\Pecee\Session::getInstance()->destroy($this->captchaName);
+			Session::getInstance()->destroy($this->captchaName);
 		}
 		return $result;
 	}

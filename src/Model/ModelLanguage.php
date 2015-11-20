@@ -21,7 +21,7 @@ class ModelLanguage extends Model {
 
     protected static function getContext() {
         $route = RouterBase::getInstance()->getLoadedRoute();
-        if($route->getIdentifier()) {
+        if($route && $route->getIdentifier()) {
             return $route->getIdentifier();
         }
         return '';
