@@ -65,9 +65,9 @@ class Url {
 		return (strpos($url, '?') > -1);
 	}
 
-	public static function paramsToArray($querystring) {
+	public static function paramsToArray($queryString) {
 		$output = array();
-		return '?' . parse_str($querystring, $output);
+		return parse_str($queryString, $output);
 	}
 
 	public static function getParamsSeparator($url) {
