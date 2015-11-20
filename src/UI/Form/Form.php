@@ -118,10 +118,10 @@ class Form {
      */
     public function bool($name, $value = null, $saveValue = true, $defaultValue = null) {
         $name = $this->getInputName($name);
-        $v = (!is_null($defaultValue)) ? $defaultValue : true;
+        $v = Boolean::parse($defaultValue);
         $element = new HtmlCheckbox($name, $v);
         if($saveValue) {
-            if($v && $this->getValue($name) == $v) {
+            if($v || $v && $this->getValue($name) == $v) {
                 $element->addAttribute('checked', 'checked');
             }
         } else {
