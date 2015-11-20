@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
+use Pecee\Integer;
+
 class ValidateInputPhone extends ValidateInput {
 
 	protected $error;
@@ -11,7 +13,7 @@ class ValidateInputPhone extends ValidateInput {
 	}
 
 	public function validate() {
-		if(\Pecee\Integer::isInteger($this->value))
+		if(Integer::isInteger($this->value))
 			$this->error = lang('%s is not a valid number', $this->name);
 		elseif(strlen($this->value) == $this->length)
 			return true;

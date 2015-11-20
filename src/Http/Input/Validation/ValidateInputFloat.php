@@ -1,16 +1,18 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
+use Pecee\FloatUtil;
+
 class ValidateInputFloat extends ValidateInput {
 
 	protected $allowEmpty;
 
 	public function __construct($allowEmpty=false) {
-		$this->allowEmpty=$allowEmpty;
+		$this->allowEmpty = $allowEmpty;
 	}
 
 	public function validate() {
-		return ($this->allowEmpty && empty($this->value) || \Pecee\Float::is_float(\Pecee\Float::ParseFloat($this->value)));
+		return ($this->allowEmpty && empty($this->value) || FloatUtil::isFloat(FloatUtil::parse($this->value)));
 	}
 
 	public function getErrorMessage() {

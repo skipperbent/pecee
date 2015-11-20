@@ -1,5 +1,7 @@
 <?php
 namespace Pecee\Http\Input\Validation;
+use Pecee\Integer;
+
 class ValidateInputZip extends ValidateInput {
 
 	protected $error;
@@ -10,7 +12,7 @@ class ValidateInputZip extends ValidateInput {
 	}
 
 	public function validate() {
-		if(\Pecee\Integer::isInteger($this->value))
+		if(Integer::isInteger($this->value))
 			$this->error = lang('%s can only contain numbers', $this->name);
 		elseif(strlen($this->value) == $this->length)
 			return true;
