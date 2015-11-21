@@ -86,7 +86,7 @@ class Form {
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlInput
      */
-    public function input($name, $type, $value = null, $saveValue = false) {
+    public function input($name, $type, $value = null, $saveValue = true) {
         $name = $this->getInputName($name);
         if(is_null($value) && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
             $value = $this->getValue($name);
@@ -116,7 +116,7 @@ class Form {
      * @param bool $defaultValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
+    public function bool($name, $value = true, $saveValue = true, $defaultValue = true) {
         $name = $this->getInputName($name);
         $element = new HtmlCheckbox($name, $value);
         if($saveValue) {
@@ -150,7 +150,7 @@ class Form {
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlSelect
      */
-    public function selectStart($name, $data = null, $value = null, $saveValue = false) {
+    public function selectStart($name, $data = null, $value = null, $saveValue = true) {
         $name = $this->getInputName($name);
         $element = new HtmlSelect($name);
         if(!is_null($data)) {
@@ -184,7 +184,7 @@ class Form {
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlTextarea
      */
-    public function textarea($name, $rows, $cols, $value = null, $saveValue = false) {
+    public function textarea($name, $rows, $cols, $value = null, $saveValue = true) {
         $name = $this->getInputName($name);
         if(!$value && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
             $value = $this->getValue($name);
