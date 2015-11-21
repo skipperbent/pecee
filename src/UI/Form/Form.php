@@ -16,13 +16,11 @@ use Pecee\UI\Html\HtmlTextarea;
 class Form {
     const FORM_ENCTYPE_FORM_DATA = 'multipart/form-data';
 
-    protected $prefixElements;
     protected $input;
     protected $name;
     protected $indexes;
 
     public function __construct(Input $input) {
-        $this->prefixElements = true;
         $this->input = $input;
         $this->indexes = array();
     }
@@ -53,19 +51,6 @@ class Form {
     }
 
     /**
-     * Tries to make some kind of unique form input name
-     * @param string $name
-     * @return string
-     */
-    protected function getInputName($name) {
-        if($this->prefixElements) {
-            $name = ($this->name) ? sprintf('%s_%s', $this->name, $name) : $name;
-        }
-        $this->indexes[$name] = (isset($this->indexes[$name])) ? ($this->indexes[$name]+1) : 0;
-        return $name;
-    }
-
-    /**
      * Starts new form
      * @param string $name
      * @param string $method
@@ -87,7 +72,6 @@ class Form {
      * @return \Pecee\UI\Html\HtmlInput
      */
     public function input($name, $type, $value = null, $saveValue = true) {
-        $name = $this->getInputName($name);
         if(is_null($value) && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
             $value = $this->getValue($name);
         }
@@ -117,7 +101,6 @@ class Form {
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
     public function bool($name, $value = true, $saveValue = true, $defaultValue = true) {
-        $name = $this->getInputName($name);
         $element = new HtmlCheckbox($name, $value);
         if($saveValue) {
             $checked = Boolean::parse($this->getValue($name, $defaultValue));
@@ -151,7 +134,6 @@ class Form {
      * @return \Pecee\UI\Html\HtmlSelect
      */
     public function selectStart($name, $data = null, $value = null, $saveValue = true) {
-        $name = $this->getInputName($name);
         $element = new HtmlSelect($name);
         if(!is_null($data)) {
             if($data instanceof Dataset) {
@@ -185,7 +167,6 @@ class Form {
      * @return \Pecee\UI\Html\HtmlTextarea
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true) {
-        $name = $this->getInputName($name);
         if(!$value && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
             $value = $this->getValue($name);
         }
