@@ -19,7 +19,7 @@ class CollectionItem implements \IteratorAggregate {
     }
 
     public function get($name) {
-        return $this->__get($name);
+        return $this->exist($name) ? $this->data[strtolower($name)] : null;
     }
 
     public function set($name, $value) {

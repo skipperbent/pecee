@@ -1,6 +1,6 @@
 <?php
 namespace Pecee;
-use Pecee\UI\Site;
+
 use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug {
