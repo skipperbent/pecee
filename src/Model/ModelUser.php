@@ -20,8 +20,6 @@ class ModelUser extends ModelData {
 	const ORDER_LASTACTIVITY_ASC = 'u.`last_activity` DESC';
 	const ORDER_LASTACTIVITY_DESC = 'u.`last_activity` ASC';
 
-	const TICKET_AUTH_KEY = 'TicketUserLoginKey';
-
 	protected static $instance;
 
 	public static $ORDERS = array(self::ORDER_ID_ASC, self::ORDER_ID_DESC, self::ORDER_LASTACTIVITY_ASC, self::ORDER_LASTACTIVITY_DESC);
@@ -180,7 +178,7 @@ class ModelUser extends ModelData {
 	}
 
 	protected static function generateLoginKey() {
-		return substr(md5(md5(self::TICKET_AUTH_KEY)), 0, 15);
+		return substr(env('APP_SECRET', md5('NoApplicationSecretDefined')), 0, 15);
 	}
 
 	public static function get($keyword=null, $adminLevel=null, $deleted=null, $order=null, $rows=null, $page=null) {

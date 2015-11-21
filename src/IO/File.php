@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\IO;
 
+use Pecee\Url;
+
 class File {
 
 	public static function exists($path) {
@@ -21,29 +23,31 @@ class File {
 		if (isset($headers['Content-length'])) return $headers['Content-length'];
 		$c = curl_init();
 		curl_setopt_array($c, array(CURLOPT_URL => $url,
-									CURLOPT_RETURNTRANSFER => true,
-									CURLOPT_HTTPHEADER => array('User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3'),));
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_HTTPHEADER => array('User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3'),));
 		curl_exec($c);
 		return curl_getinfo($c, CURLINFO_SIZE_DOWNLOAD);
 	}
 
 	public static function remoteExists($url) {
 		$curl = curl_init($url);
-	    curl_setopt($curl, CURLOPT_NOBODY, true);
-	    $result = curl_exec($curl);
-	    if ($result) {
-	        //if request was ok, check response code
-	        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-	        if ($statusCode == 200) {
-	            return true;
-	        }
-	    }
-	    curl_close($curl);
-	    return false;
+		curl_setopt($curl, CURLOPT_NOBODY, true);
+		$result = curl_exec($curl);
+		if ($result) {
+			//if request was ok, check response code
+			$statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+			if ($statusCode == 200) {
+				return true;
+			}
+		}
+		curl_close($curl);
+		return false;
 	}
 
 	public static function getMime($file) {
-		if(Url::IsValid($file)) {
+		if(file_exists($file)) {
+			return mime_content_type($file);
+		} elseif(Url::isValid($file)) {
 			$ch = curl_init($file);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -53,23 +57,21 @@ class File {
 
 			curl_exec($ch);
 			return curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-		} else if (function_exists('mime_content_type')){
-			return mime_content_type($file);
-		} else if (function_exists('finfo_file')){
-			$finfo = finfo_open(FILEINFO_MIME);
-		    $mtype = finfo_file($finfo, $file);
-		    finfo_close($finfo);
-		    return $mtype;
+		} else {
+			$handle = finfo_open(FILEINFO_MIME);
+			$mime = finfo_file($handle, $file);
+			finfo_close($handle);
+			return $mime;
 		}
-		return 'application/force-download';
+		throw new \ErrorException('Unable to determinate mimetime');
 	}
 
 	public static function getExtension($path) {
 		$ext = pathinfo($path, PATHINFO_EXTENSION);
-        if($ext == '') {
-            $ext = substr($path, strrpos('.', $path));
-        }
-        return $ext;
+		if($ext == '') {
+			$ext = substr($path, strrpos('.', $path));
+		}
+		return $ext;
 	}
 
 	public static function move($source, $destination) {

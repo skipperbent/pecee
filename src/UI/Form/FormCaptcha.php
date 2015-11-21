@@ -124,6 +124,7 @@ class FormCaptcha {
 	 *
 	 * @param string $attribute
 	 * @param string $value
+	 * @return this
 	 */
 	public function addAttribute( $attribute, $value ) {
 		$this->image->addAttribute( $attribute, $value );

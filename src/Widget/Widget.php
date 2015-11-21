@@ -11,7 +11,6 @@ use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
 use Pecee\Url;
-use Pecee\Session\SessionMessage;
 
 abstract class Widget extends Base  {
 
@@ -29,8 +28,8 @@ abstract class Widget extends Base  {
 		Debug::getInstance()->add('START ' . get_class($this));
 		$this->setTemplate('Default.php');
 		$this->setContentTemplate($this->getTemplatePath());
-		$this->jsWrapRoute = url('ControllerJs@wrap');
-		$this->cssWrapRoute = url('ControllerCss@wrap');
+		$this->jsWrapRoute = url('pecee.js.wrap');
+		$this->cssWrapRoute = url('pecee.css.wrap');
 		$this->form = new Form($this->_input);
 	}
 
@@ -51,7 +50,7 @@ abstract class Widget extends Base  {
 			$output[] = sprintf('<ul class="msg %s">', $type);
 			/* @var $error FormMessage */
 			foreach($this->getMessages($type) as $error) {
-				 $output[] = sprintf('<li>%s</li>', $error->getMessage());
+				$output[] = sprintf('<li>%s</li>', $error->getMessage());
 			}
 			$output[] = '</ul>';
 			return join($output, '');
@@ -60,8 +59,8 @@ abstract class Widget extends Base  {
 	}
 
 	/**
-     * @param bool $includeCss
-     * @param bool $includeJs
+	 * @param bool $includeCss
+	 * @param bool $includeJs
 	 * @return string
 	 */
 	public function printHeader($includeCss=true, $includeJs=true) {
@@ -120,7 +119,7 @@ abstract class Widget extends Base  {
 			}
 
 			$p = $this->cssWrapRoute;
-            $p .= join($this->_site->getCssFilesWrapped(), ',') . Url::getParamsSeparator($this->cssWrapRoute) . Url::arrayToParams($get);
+			$p .= join($this->_site->getCssFilesWrapped(), ',') . Url::getParamsSeparator($this->cssWrapRoute) . Url::arrayToParams($get);
 			$o[] = new HtmlLink($p);
 		}
 
@@ -148,7 +147,7 @@ abstract class Widget extends Base  {
 			}
 
 			$p = $this->jsWrapRoute;
-            $p .= join($this->_site->getJsFilesWrapped(),',') . Url::getParamsSeparator($this->jsWrapRoute) . Url::arrayToParams($get);
+			$p .= join($this->_site->getJsFilesWrapped(),',') . Url::getParamsSeparator($this->jsWrapRoute) . Url::arrayToParams($get);
 			$o[] = new HtmlScript($p);
 		}
 
@@ -220,7 +219,7 @@ abstract class Widget extends Base  {
 		}catch(\Exception $e) {
 			$this->setError($e->getMessage());
 		}
-        return '';
+		return '';
 	}
 
 	public function render()  {
@@ -230,7 +229,7 @@ abstract class Widget extends Base  {
 		Debug::getInstance()->add('END ' . get_class($this));
 		// Output debug info
 		if($this->getSite()->getDebug() && Str::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->input('__debug')) == 'true') {
-            $output .= Debug::getInstance();
+			$output .= Debug::getInstance();
 		}
 		return $output;
 	}

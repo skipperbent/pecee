@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Model;
+
 use Pecee\Collection\CollectionItem;
 use \Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
@@ -48,8 +49,21 @@ abstract class Model implements IModel, \IteratorAggregate {
         if(!$this->hasRows() || !is_array($this->getRows())) {
             throw new ModelException('Table rows missing from constructor.');
         }
-        $values = array_values($this->getRows());
-        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($this->table->getColumnNames(),true), PdoHelper::formatQuery(PdoHelper::joinArray($values)));
+
+        $keys = array();
+        $values = array();
+
+        foreach($this->getRows() as $name => $row) {
+            if($row !== '') {
+                $column = $this->table->getColumn($name);
+                if ($column !== null) {
+                    $keys[] = $column->getName();
+                    $values[] = $row;
+                }
+            }
+        }
+
+        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), PdoHelper::formatQuery(PdoHelper::joinArray($values)));
 
         try {
             $id = Pdo::getInstance()->insert($sql);
@@ -71,6 +85,7 @@ abstract class Model implements IModel, \IteratorAggregate {
         if(!$this->hasRows() || !is_array($this->getRows())) {
             throw new ModelException('Table rows missing from constructor.');
         }
+
         $primaryKey = $this->table->getPrimary($this->table->getColumnByIndex(0));
         $primaryValue = array_values($this->getRows());
         $primaryValue = $primaryValue[0];
