@@ -20,14 +20,8 @@ class InputCollection extends CollectionItem {
             }
 
             foreach($this->data as $key => $value) {
-
-                if(strpos($key, '_') !== false) {
-                    $form = substr($key, 0, strpos($key, '_'));
-                    $key = substr($key, strlen($form)+1);
-
-                    if(strtolower($index) === strtolower($key)) {
-                        return $value;
-                    }
+                if(strtolower($index) === strtolower($key)) {
+                    return $value;
                 }
             }
         }
