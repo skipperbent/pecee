@@ -100,7 +100,7 @@ class Form {
      * @param bool $defaultValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = true, $saveValue = true, $defaultValue = true) {
+    public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
         $element = new HtmlCheckbox($name, $value);
         if($saveValue) {
             $checked = Boolean::parse($this->getValue($name, $defaultValue));
