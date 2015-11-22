@@ -44,22 +44,30 @@ class Router extends SimpleRouter {
                 $exceptionHandler = $route->getGroup()->getExceptionHandler();
 
                 if($exceptionHandler !== null) {
-                    $class = new $exceptionHandler();
-                    $class->handleError(RouterBase::getInstance()->getRequest(), $route, $e);
+                    self::loadExceptionHandler($exceptionHandler, $route, $e);
                 }
             }
 
             // Otherwise use the fallback default exceptions handler
             if(self::$defaultExceptionHandler !== null) {
-                $class = new self::$defaultExceptionHandler();
-                $class->handleError(RouterBase::getInstance()->getRequest(), $route, $e);
+                self::loadExceptionHandler(self::$defaultExceptionHandler, $route, $e);
             }
 
             throw $e;
         }
     }
 
-    public static function setDefaultExceptionHandler(ExceptionHandler $handler) {
+    protected static function loadExceptionHandler($class, $route, $e) {
+        $class = new $class();
+
+        if(!($class instanceof ExceptionHandler)) {
+            throw new \ErrorException('Exception handler must be an instance of \Pecee\Handler\ExceptionHandler');
+        }
+
+        $class->handleError(RouterBase::getInstance()->getRequest(), $route, $e);
+    }
+
+    public static function setDefaultExceptionHandler($handler) {
         self::$defaultExceptionHandler = $handler;
     }
 
