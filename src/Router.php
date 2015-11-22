@@ -7,7 +7,7 @@ use Pecee\SimpleRouter\SimpleRouter;
 
 class Router extends SimpleRouter {
 
-    protected static $exceptionHandlers = array();
+    protected static $defaultExceptionHandler;
 
     public static function start($defaultNamespace = null) {
 
@@ -34,10 +34,24 @@ class Router extends SimpleRouter {
         try {
             parent::start($defaultNamespace);
         } catch(\Exception $e) {
+
             $route = RouterBase::getInstance()->getLoadedRoute();
-            /* @var $handler ExceptionHandler */
-            foreach(self::$exceptionHandlers as $handler) {
-                $class = new $handler();
+
+            $exceptionHandler = null;
+
+            // Load and use exception-handler defined on group
+            if($route && $route->getGroup()) {
+                $exceptionHandler = $route->getGroup()->getExceptionHandler();
+
+                if($exceptionHandler !== null) {
+                    $class = new $exceptionHandler();
+                    $class->handleError(RouterBase::getInstance()->getRequest(), $route, $e);
+                }
+            }
+
+            // Otherwise use the fallback default exceptions handler
+            if(self::$defaultExceptionHandler !== null) {
+                $class = new self::$defaultExceptionHandler();
                 $class->handleError(RouterBase::getInstance()->getRequest(), $route, $e);
             }
 
@@ -45,8 +59,8 @@ class Router extends SimpleRouter {
         }
     }
 
-    public static function addExceptionHandler($handler) {
-        self::$exceptionHandlers[] = $handler;
+    public static function setDefaultExceptionHandler(ExceptionHandler $handler) {
+        self::$defaultExceptionHandler = $handler;
     }
 
 }
