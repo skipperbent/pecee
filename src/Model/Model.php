@@ -271,7 +271,7 @@ abstract class Model implements IModel, \IteratorAggregate {
         }
     }
 
-    public static function scalar($query, $args) {
+    public static function scalar($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
         $model = static::onCreateModel();
