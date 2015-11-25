@@ -54,16 +54,14 @@ abstract class Model implements IModel, \IteratorAggregate {
         $values = array();
 
         foreach($this->getRows() as $name => $row) {
-            if($row !== '') {
-                $column = $this->table->getColumn($name);
-                if ($column !== null) {
-                    $keys[] = $column->getName();
-                    $values[] = $row;
-                }
+            $column = $this->table->getColumn($name);
+            if ($column !== null) {
+                $keys[] = $column->getName();
+                $values[] = $row;
             }
         }
 
-        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), PdoHelper::formatQuery(PdoHelper::joinArray($values)));
+        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), PdoHelper::joinArray($values));
 
         try {
             $id = Pdo::getInstance()->insert($sql);

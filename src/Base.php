@@ -89,12 +89,34 @@ abstract class Base {
 	 */
 	public function input($index, $default = null) {
 		$element = $this->get->findFirst($index);
+
 		if($element !== null) {
+
+			if(is_array($element->getValue())) {
+				return $element->getValue();
+			}
+
 			return Str::getFirstOrDefault($element->getValue(), $default);
 		}
 
 		$element = $this->post->findFirst($index);
-		return ($element !== null) ? Str::getFirstOrDefault($element->getValue(), $default) : $default;
+
+		if($element !== null) {
+
+			if(is_array($element->getValue())) {
+				return $element->getValue();
+			}
+
+			return Str::getFirstOrDefault($element->getValue(), $default);
+		}
+
+		$element = $this->file->findFirst($index);
+
+		if($element !== null) {
+			return $element;
+		}
+
+		return $default;
 	}
 
 	/**
