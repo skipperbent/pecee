@@ -23,11 +23,11 @@ class PdoHelper {
             $a=array();
             foreach($args as $arg) {
                 if(is_null($arg)) {
-                    $a[] =  'null';
+                    $a[] = 'null';
                 } elseif(Integer::isInteger($arg)) {
-                    $a[] =  sprintf("%s", self::escape($arg));
+                    $a[] = sprintf("%s", self::escape($arg));
                 } else {
-                    $a[] =  sprintf("'%s'", self::escape($arg));
+                    $a[] = sprintf("'%s'", self::escape($arg));
                 }
             }
             if(count($a) > 0 && $query) {
@@ -43,7 +43,11 @@ class PdoHelper {
             if($isFields) {
                 $statement[] = sprintf('`%s`', $arr);
             } else {
-                $statement[] = Pdo::getInstance()->getConnection()->quote($arr);
+                if($arr === null) {
+                    $statement[] = 'NULL';
+                } else {
+                    $statement[] = Pdo::getInstance()->getConnection()->quote($arr);
+                }
             }
         }
         return join(',', $statement);

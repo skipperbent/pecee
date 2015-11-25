@@ -34,10 +34,13 @@ class Input {
                     continue;
                 }
 
+                $output = array();
+
                 foreach($get as $k => $g) {
-                    $get[$k] = new InputItem($k, $g);
+                    $output[$k] = new InputItem($k, $g);
                 }
-                $this->get->{$key} = $get;
+
+                $this->get->{$key} = new InputItem($output);
             }
         }
     }
@@ -53,11 +56,13 @@ class Input {
                     continue;
                 }
 
+                $output = array();
+
                 foreach($post as $k=>$p) {
-                    $post[$k] = new InputItem($k, $p);
+                    $output[$k] = new InputItem($k, $p);
                 }
 
-                $this->post->{strtolower($key)} = $post;
+                $this->post->{strtolower($key)} = new InputItem($key, $output);
             }
         }
     }
