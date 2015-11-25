@@ -1,6 +1,7 @@
 <?php
 namespace Pecee;
 
+use Pecee\Http\Input\IInputItem;
 use Pecee\Http\Input\Input;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
@@ -37,7 +38,7 @@ abstract class Base {
 
 		/* @var $item \Pecee\Http\Input\InputItem */
 		foreach($this->get as $item) {
-			if(!$item->validates()) {
+			if($item instanceof IInputItem && !$item->validates()) {
 				/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
 				foreach($item->getValidationErrors() as $error) {
 					$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
@@ -48,7 +49,7 @@ abstract class Base {
 		if(request()->getMethod() !== 'get') {
 
 			foreach($this->post as $item) {
-				if(!$item->validates()) {
+				if($item instanceof IInputItem && !$item->validates()) {
 					/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
 					foreach ($item->getValidationErrors() as $error) {
 						$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
@@ -57,7 +58,7 @@ abstract class Base {
 			}
 
 			foreach($this->file as $item) {
-				if(!$item->validates()) {
+				if($item instanceof IInputItem && !$item->validates()) {
 					/* @var $error \Pecee\Http\Input\Validation\ValidateInput */
 					foreach($item->getValidationErrors() as $error) {
 						$this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), null, $error->getIndex());
