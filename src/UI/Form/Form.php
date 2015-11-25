@@ -103,6 +103,7 @@ class Form {
     public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
         $element = new HtmlCheckbox($name, $value);
         if($saveValue) {
+            $defaultValue = (count($_GET)) ? null : $defaultValue;
             $checked = Boolean::parse($this->getValue($name, $defaultValue));
             if($checked) {
                 $element->addAttribute('checked', 'checked');
