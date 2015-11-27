@@ -187,10 +187,21 @@ class Form {
 
     /**
      * Create button element
+     * @param string|null $type
+     * @param string|null $name
      * @return Html
      */
-    public function button() {
+    public function button($type = null, $name = null) {
         $el = new Html('button');
+
+        if($type !== null) {
+            $el->addAttribute('type', $type);
+        }
+
+        if($name !== null) {
+            $el->addAttribute('name', $name);
+        }
+
         $el->setClosingType(Html::CLOSE_TYPE_TAG);
         return $el;
     }
