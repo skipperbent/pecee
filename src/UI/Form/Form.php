@@ -187,6 +187,8 @@ class Form {
 
     /**
      * Create button element
+     * @param string|null $type
+     * @param string|null $name
      * @return Html
      */
     public function button($type = null, $name = null) {
