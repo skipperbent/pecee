@@ -5,6 +5,7 @@ use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
 use Pecee\Http\Input\Input;
 use Pecee\Str;
+use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
 use Pecee\UI\Html\HtmlInput;
@@ -182,6 +183,16 @@ class Form {
      */
     public function submit($name, $value) {
         return $this->input($name, 'submit', $value);
+    }
+
+    /**
+     * Create button element
+     * @return Html
+     */
+    public function button() {
+        $el = new Html('button');
+        $el->setClosingType(Html::CLOSE_TYPE_TAG);
+        return $el;
     }
 
     /**
