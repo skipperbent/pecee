@@ -137,6 +137,31 @@ class DBColumn {
         return $this;
     }
 
+    public function float() {
+        $this->setType(self::TYPE_FLOAT);
+        return $this;
+    }
+
+    public function double() {
+        $this->setType(self::TYPE_DOUBLE);
+        return $this;
+    }
+
+    public function decimal() {
+        $this->setType(self::TYPE_DECIMAL);
+        return $this;
+    }
+
+    public function timestamp() {
+        $this->setType(self::TYPE_TIMESTAMP);
+        return $this;
+    }
+
+    public function time() {
+        $this->setType(self::TYPE_TIME);
+        return $this;
+    }
+
     public function setName($name) {
         $this->name = $name;
         return $this;
