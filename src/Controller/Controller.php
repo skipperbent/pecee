@@ -8,7 +8,6 @@ abstract class Controller {
 
 	public function __construct() {
 		Debug::getInstance()->add('START CONTROLLER ' . get_class($this));
-		parent::__construct();
 	}
 
 }
