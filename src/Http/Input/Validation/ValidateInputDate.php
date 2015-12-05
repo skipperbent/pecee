@@ -5,17 +5,17 @@ use Pecee\Date;
 class ValidateInputDate extends ValidateInput {
 
 	protected $error;
-	protected $allowNull;
+	protected $format;
 
-	public function __construct($allowNull=false) {
-		$this->allowNull=$allowNull;
+	public function __construct($format = 'Y-m-d H:i:s') {
+		$this->format = $format;
 	}
 
 	public function validate() {
-		if($this->allowNull && !$this->value) {
-			return true;
+		if($this->value) {
+			return Date::isValid($this->value, $this->format);
 		}
-		return Date::isDate($this->value);
+		return true;
 	}
 
 	public function getErrorMessage() {

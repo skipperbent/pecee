@@ -1,12 +1,14 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
+use Pecee\Integer;
+
 class ValidateFileMinSize extends ValidateFile {
 
 	protected $size;
 
 	public function __construct($sizeKB) {
-		if(!\Pecee\Integer::isInteger($sizeKB)) {
+		if(!Integer::isInteger($sizeKB)) {
 			throw new \InvalidArgumentException('Size must be integer');
 		}
 		$this->size = $sizeKB;

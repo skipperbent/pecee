@@ -3,7 +3,10 @@ namespace Pecee\Http\Input\Validation;
 
 class ValidateInputBoolean extends ValidateInput {
 	public function validate() {
-		return ($this->value===true);
+		if($this->value) {
+			return ($this->value === true || $this->value === false);
+		}
+		return true;
 	}
 
 	public function getErrorMessage() {

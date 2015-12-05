@@ -37,8 +37,11 @@ abstract class FileAbstract extends Controller {
         $this->files = $files;
         $this->cacheDate = $this->input('_', '');
 
+        $lastModified = filemtime($this->getTempFile());
+        $md5 = md5_file($this->getTempFile());
+
         // Set headers
-        response()->cache()->headers([
+        response()->cache($md5, $lastModified)->headers([
             'Content-type: '.$this->getHeader(),
             'Charset: ' . Site::getInstance()->getCharset(),
         ]);
