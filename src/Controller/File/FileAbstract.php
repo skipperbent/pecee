@@ -1,12 +1,12 @@
 <?php
 namespace Pecee\Controller\File;
 
-use Pecee\Controller\Controller;
+use Pecee\Controller\ControllerBase;
 use Pecee\Registry;
 use Pecee\Str;
 use Pecee\UI\Site;
 
-abstract class FileAbstract extends Controller {
+abstract class FileAbstract extends ControllerBase {
 
     protected $files;
     protected $cacheDate;
