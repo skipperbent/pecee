@@ -13,13 +13,15 @@ class ValidateInputNotEquals extends ValidateInput {
 	}
 
 	public function validate() {
-		if(!$this->strict) {
-			$this->value=strtolower($this->value);
-			$this->notEquals=strtolower($this->notEquals);
-		}
-		if($this->value==$this->notEquals) {
-			$this->error=lang('%s is required', $this->name);
-			return false;
+		if($this->value) {
+			if (!$this->strict) {
+				$this->value = strtolower($this->value);
+				$this->notEquals = strtolower($this->notEquals);
+			}
+			if ($this->value == $this->notEquals) {
+				$this->error = lang('%s is required', $this->name);
+				return false;
+			}
 		}
 		return true;
 	}

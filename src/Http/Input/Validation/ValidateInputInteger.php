@@ -5,14 +5,11 @@ use Pecee\Integer;
 
 class ValidateInputInteger extends ValidateInput {
 
-	protected $allowEmpty;
-
-	public function __construct($allowEmpty=false) {
-		$this->allowEmpty=$allowEmpty;
-	}
-
 	public function validate() {
-		return ($this->allowEmpty && empty($this->value) || Integer::isInteger($this->value));
+		if($this->value) {
+			return Integer::isInteger($this->value);
+		}
+		return true;
 	}
 
 	public function getErrorMessage() {

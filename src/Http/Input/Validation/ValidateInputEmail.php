@@ -5,7 +5,10 @@ use Pecee\Util;
 class ValidateInputEmail extends ValidateInput {
 
 	public function validate() {
-		return Util::is_email($this->value);
+		if($this->value) {
+			return Util::is_email($this->value);
+		}
+		return true;
 	}
 
 	public function getErrorMessage() {

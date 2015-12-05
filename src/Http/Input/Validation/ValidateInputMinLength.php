@@ -10,7 +10,10 @@ class ValidateInputMinLength extends ValidateInput {
 	}
 
 	public function validate() {
-		return ((strlen($this->value) > $this->minimumLength));
+		if($this->value) {
+			return ((strlen($this->value) > $this->minimumLength));
+		}
+		return true;
 	}
 
 	public function getErrorMessage() {

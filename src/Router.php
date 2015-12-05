@@ -14,8 +14,8 @@ class Router extends SimpleRouter {
         Debug::getInstance()->add('Router initialised.');
 
         // Load framework specific controllers
-        self::get('/js-wrap/{files}', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap')->where(['files' => '[A-Za-z\\-\\.\\,]*?']);
-        self::get('/css-wrap/{files}', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap')->where(['files' => '[A-Za-z\\-\\.\\,]*?']);
+        self::get('/js-wrap/{files}', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap')->where(['files' => '[0-9A-Za-z\\-\\.\\,]*?']);
+        self::get('/css-wrap/{files}', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap')->where(['files' => '[0-9A-Za-z\\-\\.\\,]*?']);
         self::get('/captcha', 'ControllerCaptcha@show', ['namespace' => '\Pecee\Controller']);
 
         // Load routes.php

@@ -5,14 +5,11 @@ use Pecee\FloatUtil;
 
 class ValidateInputFloat extends ValidateInput {
 
-	protected $allowEmpty;
-
-	public function __construct($allowEmpty=false) {
-		$this->allowEmpty = $allowEmpty;
-	}
-
 	public function validate() {
-		return ($this->allowEmpty && empty($this->value) || FloatUtil::isFloat(FloatUtil::parse($this->value)));
+		if($this->value) {
+			return FloatUtil::isFloat(FloatUtil::parse($this->value));
+		}
+		return true;
 	}
 
 	public function getErrorMessage() {

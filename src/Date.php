@@ -2,6 +2,10 @@
 namespace Pecee;
 class Date {
 
+	public static function isValid($date,$format='d-m-Y') {
+		return (DateTime::createFromFormat($format, $date) !== false);
+	}
+
     public static function isDate($str) {
         $stamp = strtotime($str);
         if (!is_numeric($stamp)){
@@ -12,7 +16,7 @@ class Date {
         $year = date( 'Y', $stamp);
         return (checkdate($month, $day, $year));
     }
-	
+
 	/**
 	 * Returns age by given string date.
 	 *
@@ -25,15 +29,15 @@ class Date {
 		$Y = date('Y', $time);
 	    return( date('md') < $m.$d ? date('Y')-$Y-1 : date('Y')-$Y );
 	}
-	
+
 	public static function toDate($time = null) {
 		return date("Y-m-d", (($time === null) ? time() : $time));
 	}
-	
+
 	public static function toDateTime($time = null) {
 		return date("Y-m-d H:i:s", (($time === null) ? time() : $time));
 	}
-	
+
 	/**
 	 * Parse date to unix-time, weather it is dc time or MS datetime.
 	 * @param string $date
@@ -45,7 +49,7 @@ class Date {
    		$timestamp = strtotime($date);  // strtotime() returns -1 on failure
         /*
          * You might think from the php docs at http://us4.php.net/strtotime
-		 * that php strtotime uses gnu strtotime. It doesn't. Rather, it implements its own grammar at: 
+		 * that php strtotime uses gnu strtotime. It doesn't. Rather, it implements its own grammar at:
 		 * http://cvs.php.net/php-src/ext/standard/parsedate.y
 		 * In http://cvs.php.net/php-src/ext/standard/
 		 * As you can see there, the support for parsing ISO8601 dates is poor prior to v1.52 of Mar 1 05:42:27 2004
@@ -63,5 +67,5 @@ class Date {
         }
         return $timestamp;
 	}
-	
+
 }
