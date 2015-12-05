@@ -136,9 +136,9 @@ class ModelNode extends Model {
 	/**
 	 * Get childs
 	 * @param string $alias
-	 * @param string $recursive
+	 * @param bool $recursive
 	 * @param string $order
-	 * @return self
+	 * @return static
 	 */
 	public function getChildsOfType($alias, $recursive=true, $order = null) {
 		$out = array();
@@ -231,7 +231,7 @@ class ModelNode extends Model {
 	 * Order by key
 	 * @param string $key
 	 * @param string $direction
-	 * @return self
+	 * @return static
 	 */
 	public function order($key, $direction = 'DESC') {
 		if($this->hasRows()) {
@@ -256,7 +256,7 @@ class ModelNode extends Model {
 	/**
 	 * Get first or default value
 	 * @param string $default
-	 * @return self
+	 * @return static
 	 */
 	public function getFirstOrDefault($default=null) {
 		if($this->hasRows()) {
@@ -268,7 +268,7 @@ class ModelNode extends Model {
 	/**
 	 * Skip number of rows
 	 * @param int $number
-	 * @return self
+	 * @return static
 	 */
 	public function skip($number) {
 		if($this->hasRows() && $number > 0) {
@@ -281,7 +281,7 @@ class ModelNode extends Model {
 	/**
 	 * Limit the output
 	 * @param int $limit
-	 * @return self
+	 * @return static
 	 */
 	public function limit($limit) {
 		$out = array();
@@ -302,7 +302,7 @@ class ModelNode extends Model {
 	 * @param string $key
 	 * @param string $value
 	 * @param string $delimiter
-	 * @return self
+	 * @return static
 	 */
 	public function where($key, $value, $delimiter = '=') {
 		$out = array();
@@ -370,7 +370,7 @@ class ModelNode extends Model {
      * @param bool|null $active
      * @param int|null $rows
      * @param int|null $page
-	 * @return self
+	 * @return static
 	 */
 	public static function getByIds(array $ids, $active=null, $rows=null,$page=null) {
 		$where='n.`id` IN('.PdoHelper::joinArray($ids).')';
@@ -384,7 +384,7 @@ class ModelNode extends Model {
 	 * Get node by node id.
 	 * @param int $id
      * @param bool|null $active
-	 * @return self
+	 * @return static
 	 */
 	public static function getById($id, $active=null) {
 		$where='n.`id` = %s';
@@ -403,7 +403,7 @@ class ModelNode extends Model {
      * @param string|null $order
      * @param int|null $rows
      * @param int|null $page
-	 * @return self
+	 * @return static
 	 */
 	public static function getByPath($type=null, $query=null, $active=null, $parentId=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');
@@ -438,7 +438,7 @@ class ModelNode extends Model {
      * @param string|null $order
      * @param int|null $rows
      * @param int|null $page
-	 * @return self
+	 * @return static
 	 */
 	public static function get($type=null, $query=null, $active=null, $parentId=null, $path=null, $order=null, $rows=null, $page=null) {
 		$where=array('1=1');

@@ -18,7 +18,7 @@ class Image {
 	}
 
 	public static function create($binary, $mime) {
-		return new self($binary, $mime);
+		return new static($binary, $mime);
 	}
 
 	public static function getExtensionByMimeType($mimeType) {

@@ -42,7 +42,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     /**
      * Save item
      * @see Pecee\Model\Model::save()
-     * @return self
+     * @return static
      * @throws ModelException
      */
     public function save() {
@@ -203,11 +203,25 @@ abstract class Model implements IModel, \IteratorAggregate {
         return new static();
     }
 
+    /**
+     * Fetch all
+     * @param string $query
+     * @param null|string $args
+     * @return static
+     */
     public static function fetchAll($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         return static::query($query, null, null, $args);
     }
 
+    /**
+     * Fetch all page
+     * @param string $query
+     * @param null|int $skip
+     * @param null|int $rows
+     * @param null|string $args
+     * @return static
+     */
     public static function fetchAllPage($query, $skip = null, $rows = null, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $skip = (is_null($skip)) ? 0 : $skip;
@@ -234,11 +248,25 @@ abstract class Model implements IModel, \IteratorAggregate {
         return $model;
     }
 
-    public static function fetchPage($query, $rows = 10, $page = 0, $args=null) {
+    /**
+     * Fetch page
+     * @param $query
+     * @param null|int $rows
+     * @param null|int $page
+     * @param null|string $args
+     * @return static
+     */
+    public static function fetchPage($query, $rows = null, $page = null, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         return static::query($query, $rows, $page, $args);
     }
 
+    /**
+     * Fetch one
+     * @param string $query
+     * @param null|string $args
+     * @return static
+     */
     public static function fetchOne($query, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         $model =  static::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
@@ -341,7 +369,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     /**
      * Get row
      * @param int $index
-     * @return self
+     * @return static
      */
     public function getRow($index) {
         return ($this->hasRows()) ? $this->results['data']['rows'][$index] : null;

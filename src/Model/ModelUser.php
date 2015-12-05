@@ -149,7 +149,7 @@ class ModelUser extends ModelData {
 	/**
 	 * Get current user
      * @param bool $setData
-	 * @return self
+	 * @return static
 	 */
 	public static function current($setData=false) {
 		if(!is_null(self::$instance)) {
@@ -199,7 +199,7 @@ class ModelUser extends ModelData {
 	/**
 	 * Get user by user id.
 	 * @param int $id
-	 * @return self
+	 * @return static
 	 */
 	public static function getById($id) {
 		return self::fetchOne('SELECT u.* FROM {table} u WHERE u.`id` = %s', array($id));

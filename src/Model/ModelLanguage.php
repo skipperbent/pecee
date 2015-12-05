@@ -10,7 +10,7 @@ class ModelLanguage extends Model {
     protected static $instance;
 
     /**
-     * @return self
+     * @return static
      */
     public static function getInstance() {
         if(self::$instance === null) {
@@ -51,7 +51,7 @@ class ModelLanguage extends Model {
             }
 
             // Save new key for translation
-            $lang = new self();
+            $lang = new static();
             $lang->original = $text;
             $lang->translated = $text;
             $lang->save();
