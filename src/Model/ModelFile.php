@@ -93,7 +93,7 @@ class ModelFile extends ModelData {
 	/**
 	 * Get file by file id.
 	 * @param string $id
-	 * @return self
+	 * @return static
 	 */
 	public static function getById($id){
 		return self::fetchOne('SELECT * FROM {table} WHERE `id` = %s', array($id));

@@ -31,7 +31,7 @@ class ModelSession extends Model {
 	/**
 	 * Get Session by key
 	 * @param string $key
-	 * @return self
+	 * @return static
 	 */
 	public static function get($key) {
 		return self::fetchOne('SELECT * FROM {table} WHERE `name` = %s', $key);

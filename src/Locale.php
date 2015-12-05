@@ -11,8 +11,8 @@ class Locale {
 	 * @return \Pecee\Locale
 	 */
 	public static function getInstance() {
-		if(is_null(self::$instance)) {
-			self::$instance=new self();
+		if(self::$instance === null) {
+			self::$instance = new static();
 		}
 		return self::$instance;
 	}

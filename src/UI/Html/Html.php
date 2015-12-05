@@ -51,7 +51,7 @@ class Html {
 	 *
 	 * @param string $name
 	 * @param string $value
-	 * @return self
+	 * @return static
 	 */
 	public function addAttribute($name, $value='') {
 		$this->attributes[$name] = $value;
@@ -76,7 +76,7 @@ class Html {
 	/**
 	 * Add class
 	 * @param string $class
-     * @return self
+     * @return static
 	 */
 	public function addClass($class) {
 		$this->addAttribute('class',$class);

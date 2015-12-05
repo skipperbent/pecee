@@ -60,12 +60,12 @@ class DB {
 
 	/**
 	 * Returns new instance
-	 * @return self
+	 * @return static
 	 */
 	public static function getInstance() {
 		if(!self::$instance) {
 			$registry = Registry::getInstance();
-			self::$instance = new self($registry->Get('DBHost'),
+			self::$instance = new static($registry->Get('DBHost'),
 				$registry->Get('DBUsername'),
 				$registry->Get('DBPassword'),
 				$registry->Get('DBDatabase'));
