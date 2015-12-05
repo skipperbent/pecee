@@ -187,12 +187,16 @@ class Form {
 
     /**
      * Create button element
+     * @param string $text
      * @param string|null $type
      * @param string|null $name
+     * @param string|null $value
      * @return Html
      */
-    public function button($type = null, $name = null) {
+    public function button($text, $type = null, $name = null, $value = null) {
         $el = new Html('button');
+
+        $el->setInnerHtml($text);
 
         if($type !== null) {
             $el->addAttribute('type', $type);
@@ -200,6 +204,10 @@ class Form {
 
         if($name !== null) {
             $el->addAttribute('name', $name);
+        }
+
+        if($value !== null) {
+            $el->addAttribute('value', $value);
         }
 
         $el->setClosingType(Html::CLOSE_TYPE_TAG);
