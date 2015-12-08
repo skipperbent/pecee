@@ -13,14 +13,12 @@ function pecee_autoloader($class) {
     $modules = \Pecee\Module::getInstance();
     $module = $modules->get($appname);
 
-    if($module) {
-        include_once $module . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $file;
+    if($module !== null) {
+        require_once $module . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $file;
     }
 }
 
-if(\Pecee\Module::getInstance()->hasModules()) {
-    spl_autoload_register('pecee_autoloader');
-}
+spl_autoload_register('pecee_autoloader');
 
 require_once 'helpers.php';
 
