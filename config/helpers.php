@@ -41,26 +41,6 @@ function lang($key, $args = null) {
 }
 
 /**
- * Adds flash message
- *
- * @param $message
- * @param $type
- * @param null $form
- * @param null $placement
- * @param null $index
- */
-function message($message, $type, $form = null, $placement = null, $index = null) {
-    $msg = new \Pecee\UI\Form\FormMessage();
-    $msg->setMessage($message);
-    $msg->setForm($form);
-    $msg->setIndex($index);
-    $msg->setPlacement($placement);
-
-    $message = new \Pecee\Session\SessionMessage();
-    $message->set($msg, $type);
-}
-
-/**
  * Get environment variable
  * @param $key
  * @param null $default

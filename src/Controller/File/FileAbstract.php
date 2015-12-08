@@ -2,6 +2,7 @@
 namespace Pecee\Controller\File;
 
 use Pecee\Controller\ControllerBase;
+use Pecee\Module;
 use Pecee\Registry;
 use Pecee\Str;
 use Pecee\UI\Site;
@@ -84,7 +85,7 @@ abstract class FileAbstract extends ControllerBase {
                         if(stream_resolve_include_path($filepath) !== false) {
                             $content = file_get_contents($filepath, FILE_USE_INCLUDE_PATH);
                         } else {
-                            $modules = \Pecee\Module::getInstance()->getModules();
+                            $modules = Module::getInstance()->getList();
                             if($modules) {
                                 foreach($modules as $module) {
                                     $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filepath;

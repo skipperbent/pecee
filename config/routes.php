@@ -18,10 +18,9 @@ function pecee_autoloader($class) {
     }
 }
 
-spl_autoload_register('pecee_autoloader');
-
-// PHP Configuration
-ini_set('short_open_tag', 'On');
+if(\Pecee\Module::getInstance()->hasModules()) {
+    spl_autoload_register('pecee_autoloader');
+}
 
 require_once 'helpers.php';
 
