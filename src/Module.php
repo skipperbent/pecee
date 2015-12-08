@@ -40,7 +40,11 @@ class Module {
 	 * Get modules
 	 * @return array
 	 */
-	public function getModules() {
+	public function getList() {
 		return $this->modules;
+	}
+
+	public function hasModules() {
+		return (count($this->modules) > 0);
 	}
 }

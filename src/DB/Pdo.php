@@ -3,7 +3,6 @@ namespace Pecee\DB;
 
 use Pecee\Collection\CollectionItem;
 use Pecee\Debug;
-use Pecee\Registry;
 
 class Pdo {
 
@@ -23,10 +22,8 @@ class Pdo {
      */
     public static function getInstance() {
         if(self::$instance === null) {
-            $registry = Registry::getInstance();
-            self::$instance = new static($registry->get(self::SETTINGS_CONNECTION_STRING),
-                $registry->get(self::SETTINGS_USERNAME),
-                $registry->get(self::SETTINGS_PASSWORD));
+            self::$instance = new static(env('DB_DRIVER', 'mysql') . ':host='.env('DB_HOST').';dbname='.env('DB_DATABASE').';charset=' . env('DB_CHARSET', 'utf8'),
+                env('DB_USERNAME'), env('DB_PASSWORD'));
         }
         return self::$instance;
     }

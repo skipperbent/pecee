@@ -43,7 +43,7 @@ class Site {
 	 * @return \Pecee\UI\Site
 	 */
 	public static function getInstance() {
-		if(is_null(self::$instance)) {
+		if(self::$instance === null) {
 			self::$instance = new static();
 		}
 		return self::$instance;
@@ -56,7 +56,7 @@ class Site {
 		$this->jsPath = 'js/';
 		$this->cssPath = 'css/';
 		$this->keywords = array();
-		$this->debug = (isset($_GET['__debug']) && strtolower($_GET['__debug']) == 'true' && $this->hasAdminIp());
+		$this->debug = env('DEBUG', false);
 		$this->locale = Locale::getInstance();
         $this->cacheDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
         $this->cacheEnabled = true;

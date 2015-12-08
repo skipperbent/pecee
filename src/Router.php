@@ -9,7 +9,7 @@ class Router extends SimpleRouter {
 
     protected static $defaultExceptionHandler;
 
-    public static function start($defaultNamespace = null) {
+    public static function start() {
 
         Debug::getInstance()->add('Router initialised.');
 
@@ -67,7 +67,7 @@ class Router extends SimpleRouter {
         $class->handleError(RouterBase::getInstance()->getRequest(), $route, $e);
     }
 
-    public static function setDefaultExceptionHandler($handler) {
+    public static function defaultExceptionHandler($handler) {
         self::$defaultExceptionHandler = $handler;
     }
 
