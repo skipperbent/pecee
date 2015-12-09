@@ -3,14 +3,11 @@ namespace Pecee\Controller\File;
 
 use Pecee\Controller\ControllerBase;
 use Pecee\Module;
-use Pecee\Registry;
-use Pecee\Str;
-use Pecee\UI\Site;
+use Pecee\Web\Minify\CSSMin;
 
 abstract class FileAbstract extends ControllerBase {
 
     protected $files;
-    protected $cacheDate;
     protected $type;
     protected $tmpDir;
 
@@ -31,37 +28,44 @@ abstract class FileAbstract extends ControllerBase {
         $this->tmpDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
     }
 
-    public function wrap($files = null) {
+    public function wrap() {
+
+        $files = $this->input('files');
+
         // Set time limit
         set_time_limit(60);
 
         $this->files = $files;
-        $this->cacheDate = $this->input('_', '');
 
-        $lastModified = filemtime($this->getTempFile());
-        $md5 = md5_file($this->getTempFile());
+        if(!$this->debugMode()) {
+            $lastModified = filemtime($this->getTempFile());
+            $md5 = md5_file($this->getTempFile());
 
-        // Set headers
-        response()->cache($md5, $lastModified)->headers([
-            'Content-type: '.$this->getHeader(),
-            'Charset: ' . Site::getInstance()->getCharset(),
-        ]);
+            // Set headers
+            response()->cache($md5, $lastModified);
 
-        if(!in_array('ob_gzhandler', ob_list_handlers())) {
-            ob_start ("ob_gzhandler");
+            if(!in_array('ob_gzhandler', ob_list_handlers())) {
+                ob_start ('ob_gzhandler');
+            }
         }
 
-        if($this->input('__clearcache') && Site::getInstance()->hasAdminIp() && is_dir($this->tmpDir)) {
+        // Set headers
+        response()->headers([
+            'Content-type: '.$this->getHeader(),
+            'Charset: ' . $this->_site->getCharset(),
+        ]);
+
+        if($this->debugMode() && is_dir($this->tmpDir)) {
             $handle = opendir($this->tmpDir);
             while (false !== ($file = readdir($handle))) {
-                if($file == (md5($this->files . $this->cacheDate) . '.' . $this->type)) {
+                if($file === (md5($this->files) . '.' . $this->type)) {
                     unlink($this->tmpDir . DIRECTORY_SEPARATOR . $file);
                 }
             }
             closedir($handle);
         }
 
-        if(!file_exists($this->getTempFile()) || Registry::getInstance()->get('DisableFileWrapperCache', false)) {
+        if(!file_exists($this->getTempFile())) {
             $this->saveTempFile();
         }
 
@@ -70,25 +74,25 @@ abstract class FileAbstract extends ControllerBase {
 
     protected function saveTempFile() {
         if($this->files) {
-            $files = (strpos($this->files, ',')) ? @explode(',', $this->files) : array($this->files);
-            if(count($files) > 0) {
+            $files = (strpos($this->files, ',')) ? explode(',', $this->files) : array($this->files);
+            if(count($files)) {
                 /* Begin wrapping */
                 if(!is_dir($this->tmpDir)) {
                     mkdir($this->tmpDir, 0777, true);
                 }
                 $handle = fopen($this->getTempFile(), 'w+', FILE_USE_INCLUDE_PATH);
                 if($handle) {
-                    foreach($files as $index=>$file) {
+                    foreach($files as $index => $file) {
                         $content = null;
-                        $filepath = 'www/' . $this->getPath() . $file;
+                        $filePath = 'www/' . $this->getPath() . $file;
 
-                        if(stream_resolve_include_path($filepath) !== false) {
-                            $content = file_get_contents($filepath, FILE_USE_INCLUDE_PATH);
+                        if(stream_resolve_include_path($filePath) !== false) {
+                            $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
                         } else {
                             $modules = Module::getInstance()->getList();
                             if($modules) {
                                 foreach($modules as $module) {
-                                    $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filepath;
+                                    $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
                                     if(file_exists($moduleFilePath)) {
                                         $content = file_get_contents($moduleFilePath);
                                         break;
@@ -99,23 +103,19 @@ abstract class FileAbstract extends ControllerBase {
 
                         if(!$content) {
                             // Try ressources folder
-                            $filepath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $this->getPath() . $file;
-                            if(file_exists($filepath)) {
-                                $content = file_get_contents($filepath, FILE_USE_INCLUDE_PATH);
+                            $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $this->getPath() . $file;
+                            if(file_exists($filePath)) {
+                                $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
                             }
                         }
 
                         if($content) {
-                            if($this->type==self::TYPE_JAVASCRIPT && !$this->debugMode()) {
-                                $content=\Pecee\Web\Minify\JSMin\JSMin::minify($content);
+                            if($this->type === self::TYPE_CSS && !$this->debugMode()) {
+                                $content = CSSMin::process($content);
                             }
 
-                            if($this->type==self::TYPE_CSS && !$this->debugMode()) {
-                                $content=\Pecee\Web\Minify\CSSMin::process($content);
-                            }
-
-                            $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */';
-                            $buffer.= ($this->debugMode()) ? $content : Str::removeTabs($content);
+                            $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */' . chr(10);
+                            $buffer.= $content;
 
                             if( $index < count($files)-1 ) {
                                 $buffer .= str_repeat(chr(10),2);
@@ -130,7 +130,7 @@ abstract class FileAbstract extends ControllerBase {
         }
     }
     protected function debugMode() {
-        return (strtolower($this->input('__debug')) === 'true' && Site::getInstance()->hasAdminIp());
+        return (env('DEBUG', false));
     }
 
     protected function getHeader() {
@@ -148,16 +148,16 @@ abstract class FileAbstract extends ControllerBase {
     protected function getPath() {
         switch($this->type) {
             case self::TYPE_JAVASCRIPT:
-                return Site::getInstance()->getJsPath();
+                return $this->_site->getJsPath();
                 break;
             case self::TYPE_CSS:
-                return Site::getInstance()->getCssPath();
+                return $this->_site->getCssPath();
                 break;
         }
         return '';
     }
 
     protected function getTempFile() {
-        return sprintf('%s.%s', $this->tmpDir.DIRECTORY_SEPARATOR.md5($this->files), $this->type);
+        return $this->tmpDir.DIRECTORY_SEPARATOR.md5($this->files) . '.' . $this->type;
     }
 }

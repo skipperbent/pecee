@@ -10,7 +10,6 @@ use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
-use Pecee\Url;
 
 abstract class Widget extends Base  {
 
@@ -80,17 +79,6 @@ abstract class Widget extends Base  {
 			$this->_site->addMeta('keywords', join(', ', $this->_site->getKeywords()));
 		}
 
-		$get=null;
-		if($this->getSite()->hasAdminIp()) {
-			$get=array();
-			if($this->_site->getDebug()) {
-				$get['__clearcache']='true';
-			}
-			if($this->_site->getDebug()) {
-				$get['__debug']='true';
-			}
-		}
-
 		if($includeCss) {
 			$o[] = $this->printCss();
 		}
@@ -107,20 +95,8 @@ abstract class Widget extends Base  {
 	protected function printCss() {
 		$o = array();
 		if($this->_site->getCssFilesWrapped()) {
-			$get=null;
-			if($this->getSite()->hasAdminIp()) {
-				$get=array();
-				if($this->_site->getDebug()) {
-					$get['__clearcache']='true';
-				}
-				if($this->_site->getDebug()) {
-					$get['__debug']='true';
-				}
-			}
-
-			$p = $this->cssWrapRoute;
-			$p .= join($this->_site->getCssFilesWrapped(), ',') . Url::getParamsSeparator($this->cssWrapRoute) . Url::arrayToParams($get);
-			$o[] = new HtmlLink($p);
+			$url = url($this->cssWrapRoute, null, ['files' => join($this->_site->getCssFilesWrapped(), ',')]);
+			$o[] = new HtmlLink($url);
 		}
 
 		$css = $this->_site->getCss();
@@ -135,20 +111,8 @@ abstract class Widget extends Base  {
 	protected function printJs() {
 		$o = array();
 		if($this->_site->getJsFilesWrapped()) {
-			$get=null;
-			if($this->getSite()->hasAdminIp()) {
-				$get=array();
-				if($this->_site->getDebug()) {
-					$get['__clearcache']='true';
-				}
-				if($this->_site->getDebug()) {
-					$get['__debug']='true';
-				}
-			}
-
-			$p = $this->jsWrapRoute;
-			$p .= join($this->_site->getJsFilesWrapped(),',') . Url::getParamsSeparator($this->jsWrapRoute) . Url::arrayToParams($get);
-			$o[] = new HtmlScript($p);
+			$url = url($this->jsWrapRoute, null, ['files' => join($this->_site->getJsFilesWrapped(), ',')]);
+			$o[] = new HtmlScript($url);
 		}
 
 		$js = $this->_site->getJs();
