@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Controller\File;
 
+use Pecee\Boolean;
 use Pecee\Controller\ControllerBase;
 use Pecee\Module;
 use Pecee\Web\Minify\CSSMin;
@@ -30,14 +31,12 @@ abstract class FileAbstract extends ControllerBase {
 
     public function wrap() {
 
-        $files = $this->input('files');
+        $this->files = $this->input('files');
 
         // Set time limit
         set_time_limit(60);
 
-        $this->files = $files;
-
-        if(!$this->debugMode()) {
+        if($this->debugMode() === false) {
             $lastModified = filemtime($this->getTempFile());
             $md5 = md5_file($this->getTempFile());
 
@@ -130,7 +129,7 @@ abstract class FileAbstract extends ControllerBase {
         }
     }
     protected function debugMode() {
-        return (env('DEBUG', false));
+        return Boolean::parse(env('DEBUG'));
     }
 
     protected function getHeader() {

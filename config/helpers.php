@@ -49,7 +49,7 @@ function lang($key, $args = null) {
  */
 function env($key, $default = null) {
     $value = getenv($key);
-    return (!$value) ? $default : $value;
+    return ($value === false) ? $default : $value;
 }
 
 /**
