@@ -16,9 +16,9 @@ class ValidateInputRepeation extends ValidateInput {
 	public function validate() {
 		if($this->value) {
 			if (!$this->caseSensitive) {
-				return ((bool)strtolower($this->compareValue) == strtolower($this->value));
+				return (strtolower($this->compareValue) === strtolower($this->value));
 			} else {
-				return ((bool)$this->compareValue == $this->value);
+				return ($this->compareValue === $this->value);
 			}
 		}
 		return true;
