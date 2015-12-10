@@ -5,19 +5,20 @@
         "This file is @generated automatically"
     ],
     "hash": "89d59d45574e010cd5ca11005872fd3d",
+    "content-hash": "5173952c8e9a46eb44d47d3f58d5b024",
     "packages": [
         {
             "name": "pecee/simple-router",
-            "version": "1.3.1",
+            "version": "1.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skipperbent/simple-php-router.git",
-                "reference": "4447a88894bcc74e01ab25b6187c0530a5ac9d96"
+                "reference": "925b9761f4bf88a400e02a2cd6805afec4750d50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/4447a88894bcc74e01ab25b6187c0530a5ac9d96",
-                "reference": "4447a88894bcc74e01ab25b6187c0530a5ac9d96",
+                "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/925b9761f4bf88a400e02a2cd6805afec4750d50",
+                "reference": "925b9761f4bf88a400e02a2cd6805afec4750d50",
                 "shasum": ""
             },
             "require-dev": {
@@ -46,7 +47,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2015-11-22 19:30:49"
+            "time": "2015-12-10 03:14:58"
         },
         {
             "name": "vlucas/phpdotenv",

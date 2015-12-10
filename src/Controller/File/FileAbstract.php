@@ -26,7 +26,7 @@ abstract class FileAbstract extends ControllerBase {
         }
 
         $this->type = $type;
-        $this->tmpDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
+        $this->tmpDir = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'cache';
     }
 
     public function wrap() {
@@ -40,12 +40,12 @@ abstract class FileAbstract extends ControllerBase {
             $lastModified = filemtime($this->getTempFile());
             $md5 = md5_file($this->getTempFile());
 
-            // Set headers
-            response()->cache($md5, $lastModified);
-
             if(!in_array('ob_gzhandler', ob_list_handlers())) {
                 ob_start ('ob_gzhandler');
             }
+
+            // Set headers
+            response()->cache($md5, $lastModified);
         }
 
         // Set headers
@@ -101,7 +101,7 @@ abstract class FileAbstract extends ControllerBase {
                         }
 
                         if(!$content) {
-                            // Try ressources folder
+                            // Try resources folder
                             $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $this->getPath() . $file;
                             if(file_exists($filePath)) {
                                 $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
