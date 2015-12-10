@@ -58,6 +58,10 @@ class Html {
 		return $this;
 	}
 
+	public function attr($name, $value = '') {
+		return $this->addAttribute($name, $value);
+	}
+
 	protected function writeHtml() {
 		$output = '<'.$this->name;
 		foreach($this->attributes as $key=>$val) {
