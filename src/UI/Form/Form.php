@@ -76,24 +76,25 @@ class Form {
         if(is_null($value) && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
             $value = $this->getValue($name);
         }
-        $element = new HtmlInput($name, $type, Str::htmlEntities($value));
-        // Added: if the input is an radio, then save the god damn post value :-D...
-        if(strtolower($type) == 'radio' && $this->getValue($name) && $value == $this->getValue($name) ) {
-            $element->addAttribute('checked', 'checked');
-        }
-        return $element;
+        return new HtmlInput($name, $type, Str::htmlEntities($value));
     }
 
     /**
      * Create radio element
-     * 
+     *
      * @param string $name
      * @param string $value
      * @param bool $saveValue
      * @return HtmlInput
      */
     public function radio($name, $value, $saveValue = true) {
-        return $this->input($name, 'radio', $value, $saveValue);
+        $element = new HtmlInput($name, 'radio', $value);
+
+        if($saveValue && $this->getValue($name, false) === $value) {
+            $element->addAttribute('checked', 'checked');
+        }
+
+        return $element;
     }
 
     /**
