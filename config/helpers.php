@@ -29,7 +29,7 @@ function redirect($url, $code = null) {
         $response->httpCode($code);
     }
 
-    return $response->redirect($url);
+    $response->redirect($url);
 }
 
 function lang($key, $args = null) {

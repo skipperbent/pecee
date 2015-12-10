@@ -101,6 +101,6 @@ class ModelFile extends ModelData {
 
 	public static function get($order=null, $rows=null, $page=null){
 		$order = (in_array($order, self::$ORDERS)) ? $order : self::ORDER_DATE_DESC;
-		return self::fetchPage('SELECT f.* FROM {table} f ORDER BY ' .$order, $rows=null,$page=null);
+		return self::fetchPage('SELECT f.* FROM {table} f ORDER BY ' .$order, $rows,$page);
 	}
 }

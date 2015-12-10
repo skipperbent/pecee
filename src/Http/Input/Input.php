@@ -40,7 +40,7 @@ class Input {
                     $output[$k] = new InputItem($k, $g);
                 }
 
-                $this->get->{$key} = new InputItem($output);
+                $this->get->{$key} = new InputItem($key, $output);
             }
         }
     }

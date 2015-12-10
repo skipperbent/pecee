@@ -12,7 +12,7 @@ class InputFile extends CollectionItem implements IInputItem {
 
     public function validates() {
         if(count($this->validations)) {
-            /* @var $validation ValidateInput */
+            /* @var $validation \Pecee\Http\Input\Validation\ValidateInput */
             foreach($this->validations as $validation) {
                 if(!$validation->validate()) {
                     $this->validationErrors[] = $validation;
@@ -44,7 +44,7 @@ class InputFile extends CollectionItem implements IInputItem {
         }
 
         if(!($validation instanceof IValidateFile)) {
-            throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($v));
+            throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($validation));
         }
 
         $validation->setFileName($this->name);

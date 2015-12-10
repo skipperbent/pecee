@@ -106,7 +106,7 @@ class XmlElement implements IXmlNode {
 		$result = array();
 		if ($offset >= count($this->children)) {
 			$this->addChild($node);
-			return;
+			return null;
 		}
 		for($i = 0; $i < count($this->children);$i++) {
 			$result[] = $this->children[$i];

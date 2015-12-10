@@ -291,7 +291,7 @@ abstract class Model implements IModel, \IteratorAggregate {
         } catch(\PdoException $e) {
             if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
-                return $model::nonQuery($query, $args);
+                $model::nonQuery($query, $args);
             }
             throw $e;
         }
@@ -456,7 +456,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * @return \Traversable An instance of an object implementing <b>Iterator</b> or
      * <b>Traversable</b>
      * @since 5.0.0
      */

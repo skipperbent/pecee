@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\UI\Html;
-class HtmlSelectOption extends \Pecee\UI\Html\Html {
+class HtmlSelectOption extends Html {
+
 	public function __construct($name, $value, $selected=false) {
 		parent::__construct('option', $value);
 		$this->addAttribute('value',$value);
@@ -9,4 +10,5 @@ class HtmlSelectOption extends \Pecee\UI\Html\Html {
 		}
 		$this->setInnerHtml($name);
 	}
+
 }

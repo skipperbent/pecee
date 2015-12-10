@@ -24,11 +24,9 @@ $p.facebook = {
 					throw 'Facebook ApplicationId must be specified!';
 				}
 				FB.init({ appId: self.settings.appId, cookie: true, xfbml: true, oauth: true });
-				if (true) {
-					FB.Canvas.setAutoGrow();
-				}
+				FB.Canvas.setAutoGrow();
 				/* jQuery event */
-				if (true && jQuery) {
+				if (jQuery) {
 					jQuery(document).trigger('fbAsyncInit');
 				}
 			};

@@ -1,5 +1,9 @@
 <?php
 namespace Pecee\UI\Form;
+use Pecee\Session\Session;
+use Pecee\UI\Html\HtmlImage;
+use Pecee\Util;
+
 class FormCaptcha {
 
 	// Settings
@@ -35,7 +39,7 @@ class FormCaptcha {
 		$relPath=str_replace('.php', DIRECTORY_SEPARATOR, __FILE__);
 		$this->fontPath = $relPath . DIRECTORY_SEPARATOR . 'pakenham.ttf';
 		$this->identifier = $this->createUniqueIdentifier();
-		$this->image = new \Pecee\UI\Html\HtmlImage(url('ControllerCaptcha@show', array($this->name)));
+		$this->image = new HtmlImage(url('ControllerCaptcha@show', array($this->name)));
 	}
 
 	protected function createUniqueIdentifier() {
@@ -55,7 +59,7 @@ class FormCaptcha {
 	}
 
 	public function showCaptcha() {
-		\Pecee\Session::getInstance()->set($this->name, $this->identifier);
+		Session::getInstance()->set($this->name, $this->identifier);
 
 		if($this->backgroundImage) {
 			$image = imagecreatefromjpeg($this->backgroundImage);
@@ -115,7 +119,7 @@ class FormCaptcha {
 	}
 
 	public function __toString() {
-		\Pecee\Session::getInstance()->set($this->name . '_data', $this);
+		Session::getInstance()->set($this->name . '_data', $this);
 		return $this->image->__toString();
 	}
 
@@ -124,7 +128,7 @@ class FormCaptcha {
 	 *
 	 * @param string $attribute
 	 * @param string $value
-	 * @return this
+	 * @return static
 	 */
 	public function addAttribute( $attribute, $value ) {
 		$this->image->addAttribute( $attribute, $value );
@@ -151,8 +155,6 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setUniqueValueLength( $length ) {
-		if( !\Pecee\Integer::isInteger($length) )
-			throw new \InvalidArgumentException('Unknown datatype for length. Must be INT or nummeric string.');
 		$this->uniqueValueLength = $length;
 		$this->identifier = $this->createUniqueIdentifier();
 		return $this;
@@ -179,8 +181,6 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontSize( $size ) {
-		if( !\Pecee\Integer::isInteger($size) )
-			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontSize = $size;
 		return $this;
 	}
@@ -192,29 +192,21 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowSize( $size ) {
-		if( !\Pecee\Integer::isInteger($size) )
-			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontShadowSize = $size;
 		return $this;
 	}
 
 	public function setFontRotation( $degrees ) {
-		if( !\Pecee\Integer::isInteger($degrees) )
-			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontRotationDegrees = $degrees;
 		return $this;
 	}
 
 	public function setFontMarginTop( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
-			throw new \InvalidArgumentException('Unknown datatype for pixels. Must be INT or nummeric string.');
 		$this->fontMarginTop = $pixels;
 		return $this;
 	}
 
 	public function setFontShadowMarginTop( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
-			throw new \InvalidArgumentException('Unknown datatype for pixels. Must be INT or nummeric string.');
 		$this->fontShadowMarginTop = $pixels;
 		return $this;
 	}
@@ -226,8 +218,6 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowRotation( $degrees ) {
-		if( !\Pecee\Integer::isInteger($degrees) )
-			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontShadowRotationDegrees = $degrees;
 		return $this;
 	}
@@ -239,8 +229,6 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontMarginLeft( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
-			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontMarginLeft = $pixels;
 		return $this;
 	}
@@ -252,8 +240,6 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowMarginLeft( $pixels ) {
-		if( !\Pecee\Integer::isInteger($pixels) )
-			throw new \InvalidArgumentException('Unknown datatype for size. Must be INT or nummeric string.');
 		$this->fontShadowMarginLeft = $pixels;
 		return $this;
 	}
@@ -265,7 +251,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontColor( $htmlColor ) {
-		$this->fontColor = \Pecee\Util::html2rgb($htmlColor);
+		$this->fontColor = Util::html2rgb($htmlColor);
 		return $this;
 	}
 
@@ -276,7 +262,7 @@ class FormCaptcha {
 	 * @return \Pecee\UI\Form\FormCaptcha
 	 */
 	public function setFontShadowColor( $htmlColor ) {
-		$this->fontShadowColor = \Pecee\Util::html2rgb($htmlColor);
+		$this->fontShadowColor = Util::html2rgb($htmlColor);
 		return $this;
 	}
 

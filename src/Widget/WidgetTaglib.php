@@ -1,7 +1,10 @@
 <?php
 namespace Pecee\Widget;
 
-abstract class WidgetTaglib extends \Pecee\Widget {
+use Pecee\Str;
+use Pecee\UI\Phtml\Phtml;
+
+abstract class WidgetTaglib extends Widget {
 	public function __construct() {
 		parent::__construct();
 	}
@@ -10,7 +13,7 @@ abstract class WidgetTaglib extends \Pecee\Widget {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        return \Pecee\Str::getFirstOrDefault($this->_contentHtml, '');
+        return Str::getFirstOrDefault($this->_contentHtml, '');
     }
 
     public function renderContent() {
@@ -28,7 +31,7 @@ abstract class WidgetTaglib extends \Pecee\Widget {
                     unlink($cacheFile);
                 }
 
-                $phtml=new \Pecee\UI\Phtml\Phtml();
+                $phtml = new Phtml();
                 $error = false;
                 try {
                     $this->_contentHtml = $phtml->read(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH))->toPHP();

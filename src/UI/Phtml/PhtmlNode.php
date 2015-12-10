@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\UI\Phtml;
 use Pecee\Guid;
+use Pecee\Registry;
 use Pecee\UI\Html\HtmlElement;
 
 class PhtmlNode extends HtmlElement {
@@ -55,7 +56,7 @@ class PhtmlNode extends HtmlElement {
 
 		$str = "<";
 		$method = false;
-		$tagName = '';
+		$body = '';
 
 		if ($this->getNs()) {
 			$method = true;
@@ -94,7 +95,7 @@ class PhtmlNode extends HtmlElement {
 				$str .= $this->getInnerPHP();
 			}
 			if ($method) {
-				$taglibs=\Pecee\Registry::getInstance()->get(\Pecee\UI\Phtml\Phtml::SETTINGS_TAGLIB, array());
+				$taglibs = Registry::getInstance()->get(Phtml::SETTINGS_TAGLIB, array());
 				if($taglibs[$this->getNs()]) {
 					$tag = $this->getTag();
 					$str = $taglibs[$this->getNs()]->callTag($tag,$this->getAttrs(),$body);
@@ -104,7 +105,7 @@ class PhtmlNode extends HtmlElement {
 			}
 		} else {
 			if ($method) {
-				$taglibs=\Pecee\Registry::getInstance()->get(\Pecee\UI\Phtml\Phtml::SETTINGS_TAGLIB, array());
+				$taglibs = Registry::getInstance()->get(Phtml::SETTINGS_TAGLIB, array());
 				if($taglibs[$this->getNs()]) {
 					$tag = $this->getTag();
 					$str = $taglibs[$this->getNs()]->callTag($tag,$this->getAttrs(),null, null);

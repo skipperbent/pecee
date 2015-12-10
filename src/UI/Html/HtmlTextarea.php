@@ -1,10 +1,14 @@
 <?php
 namespace Pecee\UI\Html;
-class HtmlTextarea extends \Pecee\UI\Html\Html {
+
+use Pecee\Str;
+
+class HtmlTextarea extends Html {
+
 	protected $value;
 	public function __construct($name, $rows, $cols, $value=null) {
 		parent::__construct('textarea');
-		$this->value=\Pecee\Str::HtmlEntities($value);
+		$this->value = Str::htmlEntities($value);
 		//$this->closingTag = false;
 		$this->addAttribute('name', $name);
 		$this->addAttribute('rows', $rows);
@@ -15,4 +19,5 @@ class HtmlTextarea extends \Pecee\UI\Html\Html {
 	public function getValue() {
 		return $this->value;
 	}
+
 }

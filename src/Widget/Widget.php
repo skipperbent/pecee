@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Widget;
 
-use Pecee\Auth;
 use Pecee\Base;
 use Pecee\Debug;
 use Pecee\Str;
