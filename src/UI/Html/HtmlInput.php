@@ -24,4 +24,9 @@ class HtmlInput extends Html {
         return $this;
     }
 
+    public function style($css) {
+        $this->addAttribute('style', $css);
+        return $this;
+    }
+
 }
