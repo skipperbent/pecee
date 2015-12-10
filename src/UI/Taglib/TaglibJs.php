@@ -1,5 +1,8 @@
 <?php
 namespace Pecee\UI\Taglib;
+use Pecee\Str;
+use Pecee\UI\Site;
+
 class TaglibJs extends Taglib {
 	protected $containers = array();
 	private static $JS_WRAPPER_TAG = '';
@@ -24,7 +27,7 @@ class TaglibJs extends Taglib {
 		if(count($expressionMatches) > 0) {
 			/* Let's ensure that our js-expression don't get addslashed */
 			foreach($expressionMatches[1] as $match) {
-				$fixedExpressions[] = '"+eval("'.\Pecee\Str::RemoveSlashes($match).'")+"';
+				$fixedExpressions[] = '"+eval("'.Str::removeSlashes($match).'")+"';
 			}
 			/* Now we replace the expression tags, with the fixed js expression */
 			for($i=0;$i<count($expressionMatches[0]);$i++) {
@@ -84,7 +87,7 @@ class TaglibJs extends Taglib {
     }
 
 	protected function tagCollect($attrs) {
-		\Pecee\UI\Site::getInstance()->addWrappedJs('pecee-widget.js');
+		Site::getInstance()->addWrappedJs('pecee-widget.js');
 		$output = array('<!-- JSTaglib start --><script>');
 		if($this->containers) {
 			foreach($this->containers as $c) {

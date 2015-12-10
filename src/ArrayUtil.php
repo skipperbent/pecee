@@ -18,6 +18,7 @@ class ArrayUtil {
 	}
 
 	public static function sortByKey(array $array, $keyIndex){
+		$c = array();
 		foreach($array as $k=>$v) {
 			$b[$k] = strtolower($v[$keyIndex]);
 		}
@@ -43,7 +44,6 @@ class ArrayUtil {
 		sort($arr);
 		$count = count($arr); //total numbers in array
 		$middleval = floor(($count-1)/2); // find the middle value, or the lowest middle value
-		$median=0;
 		if($count % 2) { // odd number, middle is the median
 			$median = $arr[$middleval];
 		} else { // even number, calculate avg of 2 medians

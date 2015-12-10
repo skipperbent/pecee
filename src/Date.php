@@ -3,7 +3,7 @@ namespace Pecee;
 class Date {
 
 	public static function isValid($date,$format='d-m-Y') {
-		return (DateTime::createFromFormat($format, $date) !== false);
+		return (\DateTime::createFromFormat($format, $date) !== false);
 	}
 
     public static function isDate($str) {

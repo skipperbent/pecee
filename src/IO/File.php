@@ -63,7 +63,6 @@ class File {
 			finfo_close($handle);
 			return $mime;
 		}
-		throw new \ErrorException('Unable to determinate mimetime');
 	}
 
 	public static function getExtension($path) {

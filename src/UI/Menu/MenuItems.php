@@ -1,19 +1,21 @@
 <?php
 namespace Pecee\UI\Menu;
+use Pecee\UI\Html\Html;
+
 class MenuItems {
 	protected $data;
 	protected $currentItem;
-	
+
 	/**
 	 * Add menu
 	 * @param \Pecee\UI\Menu\Menu $menu
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
-	public function addMenu(\Pecee\UI\Menu\Menu $menu){
+	public function addMenu(Menu $menu){
 		$this->currentItem['menu'] = $menu;
 		return $this;
 	}
-	
+
 	/**
 	 * Add new item
 	 *
@@ -30,36 +32,36 @@ class MenuItems {
 		$this->currentItem['linkAttributes']=null;
 		return $this;
 	}
-	
+
 	public function getTitle() {
 		return isset($this->currentItem['title']) ? $this->currentItem['title'] : null;
 	}
-	
+
 	public function getValue() {
 		return isset($this->currentItem['value']) ? $this->currentItem['value'] : null;
 	}
-	
+
 	public function setTitle($title) {
 		$this->currentItem['title'] = $title;
 		return $this;
 	}
-	
+
 	public function setValue($value) {
 		$this->currentItem['value'] = $value;
 		return $this;
 	}
-	
+
 	public function getDescription() {
 		return isset($this->currentItem['description']) ? $this->currentItem['description'] : null;
 	}
-	
+
 	/**
 	 * @return \Pecee\UI\Menu\Menu
 	 */
 	public function getMenu() {
 		return isset($this->currentItem['menu']) ? $this->currentItem['menu'] : null;
 	}
-	
+
 	/**
 	 * Moves current element to data array.
 	 */
@@ -69,7 +71,7 @@ class MenuItems {
 			$this->currentItem = array();
 		}
 	}
-	
+
 	/**
 	 * Adds attribute to item.
 	 *
@@ -87,13 +89,13 @@ class MenuItems {
 		$this->currentItem['attributes'][$name] = $value;
 		return $this;
 	}
-	
+
 	public function removeAttribute($name) {
 		if(isset($this->currentItem['attributes'][$name])) {
 			unset($this->currentItem['attributes'][$name]);
 		}
 	}
-	
+
 	/**
 	 * Adds attribute to item.
 	 *
@@ -111,17 +113,17 @@ class MenuItems {
 		$this->currentItem['linkAttributes'][$name] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Add form content
 	 * @param \Pecee\UI\Html\Html $element
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
-	public function addContent(\Pecee\UI\Html\Html $element) {
+	public function addContent(Html $element) {
 		$this->currentItem['content'][] = $element;
 		return $this;
 	}
-	
+
 	/**
 	 * Get form content, if any
 	 * @return \Pecee\UI\Html\Html|null
@@ -129,13 +131,13 @@ class MenuItems {
 	public function getContent() {
 		return $this->currentItem['content'];
 	}
-	
+
 	public function removeLinkAttribute($name) {
 		if(isset($this->currentItem['linkAttributes'][$name])) {
 			unset($this->currentItem['linkAttributes'][$name]);
 		}
 	}
-	
+
 	/**
 	 * Add class to item
 	 * @param string $name
@@ -145,7 +147,7 @@ class MenuItems {
 		$this->addAttribute('class', $name);
 		return $this;
 	}
-	
+
 	public function getItems() {
 		$this->moveItem();
 		return $this->data;

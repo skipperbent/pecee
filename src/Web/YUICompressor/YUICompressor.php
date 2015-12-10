@@ -1,18 +1,18 @@
 <?php
 namespace Pecee\Web\YUICompressor;
 class YUICompressor {
-	
+
 	/**
 	 * @author Simon Sessingø
 	 * @version 1.0
-	 * 
-	 * For information about options - or download of the jarFile, please refer to the 
+	 *
+	 * For information about options - or download of the jarFile, please refer to the
 	 * YUICompressor documentation here:
-	 * 
+	 *
 	 * http://developer.yahoo.com/yui/compressor/
 	 * http://yuilibrary.com/projects/yuicompressor/
 	 */
-	
+
 	const TYPE_JAVASCRIPT = 'js';
 	const TYPE_CSS = 'css';
 
@@ -21,7 +21,7 @@ class YUICompressor {
     protected $javaExecutable;
     private $types = array(self::TYPE_JAVASCRIPT, self::TYPE_CSS);
     protected $items;
-    
+
     public function __construct() {
     	$this->jarFile = null;
     	$this->tempDir = sys_get_temp_dir();
@@ -29,22 +29,22 @@ class YUICompressor {
     	$this->items = array();
     	return $this;
     }
-     
+
     public function addFile($type,$file,$options=array()) {
     	$this->validateType($type);
     	if(!file_exists($file)) {
-    		throw new \Pecee\Web\YUICompressor\YUICompressorException('File does not exist: ' . $file);
+    		throw new YUICompressorException('File does not exist: ' . $file);
     	}
-    	$this->addItem($type,file_get_contents($file),$options, substr($file, 
+    	$this->addItem($type,file_get_contents($file),$options, substr($file,
     					strrpos($file, DIRECTORY_SEPARATOR)+1, strlen($file)),
     					substr($file, 0, strrpos($file, DIRECTORY_SEPARATOR)));
     }
-    
+
     public function addContent($type,$content,$options=array() ) {
     	$this->validateType($type);
     	$this->addItem($type, $content, $options);
     }
-    
+
     private function addItem($type,$content,$options,$filename=null,$filepath=null) {
     	$item = new YUICompressorItem();
     	$item->type=$type;
@@ -54,13 +54,13 @@ class YUICompressor {
     	$item->filepath=$filepath;
     	$this->items[] = $item;
     }
-    
+
 	public function minify($single=false) {
     	if (!is_file($this->jarFile) || !is_dir($this->tempDir) || !is_writable($this->tempDir)) {
-            throw new \Pecee\Web\YUICompressor\YUICompressorException('Minify_YUICompressor : $jarFile must be set or is not a valid ressource.');
+            throw new YUICompressorException('Minify_YUICompressor : $jarFile must be set or is not a valid ressource.');
         }
         if (!($tmpFile = tempnam($this->tempDir, 'yuic_'))) {
-            throw new \Pecee\Web\YUICompressor\YUICompressorException('Minify_YUICompressor : could not create temp file.');
+            throw new YUICompressorException('Minify_YUICompressor : could not create temp file.');
         }
         if(count($this->items) > 0) {
         	/* @var $item YUICompressorItem */
@@ -79,10 +79,10 @@ class YUICompressor {
     }
 	private function validateType($type) {
     	if(!in_array($type, $this->types)) {
-    		throw new \Pecee\Web\YUICompressor\YUICompressorException('Unknown type: '.$type.'. Type must be one of the following: ' . join($this->types, ', '));
+    		throw new YUICompressorException('Unknown type: '.$type.'. Type must be one of the following: ' . join($this->types, ', '));
     	}
     }
-   
+
     private function getCmd($userOptions, $type, $tmpFile) {
         $o = array_merge(
             array(
@@ -104,7 +104,7 @@ class YUICompressor {
         }
         return $cmd . ' ' . escapeshellarg($tmpFile);
     }
-    
+
 	public function getJarFile() {
 		return $this->jarFile;
 	}

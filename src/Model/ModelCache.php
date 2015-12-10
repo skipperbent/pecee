@@ -2,6 +2,7 @@
 namespace Pecee\Model;
 use Pecee\Date;
 use Pecee\DB\DBTable;
+use Pecee\DB\Pdo;
 
 /**
  * Class ModelCache
@@ -39,7 +40,7 @@ class ModelCache extends Model {
 	 * Clear all cache elements.
 	 */
 	public static function clear() {
-		Pdo::NonQuery('TRUNCATE {table}');
+		Pdo::getInstance()->nonQuery('TRUNCATE {table}');
 	}
 
 	public static function set($key, $data, $expireMinutes) {

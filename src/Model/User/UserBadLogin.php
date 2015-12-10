@@ -3,7 +3,6 @@ namespace Pecee\Model\User;
 use Pecee\Date;
 use Pecee\DB\DBTable;
 use Pecee\Model\Model;
-use Pecee\Server;
 
 class UserBadLogin extends Model {
 	public function __construct() {

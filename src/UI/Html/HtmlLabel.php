@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\UI\Html;
-class HtmlLabel extends \Pecee\UI\Html\Html {
+
+class HtmlLabel extends Html {
 	public function __construct($name, $for) {
 		parent::__construct('label');
 		if($for) {
