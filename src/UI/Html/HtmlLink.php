@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\UI\Html;
-class HtmlLink extends \Pecee\UI\Html\Html {
+
+class HtmlLink extends Html {
+
 	public function __construct($href, $rel='stylesheet', $type='text/css') {
 		parent::__construct('link');
 		$this->closingType = self::CLOSE_TYPE_SELF;
@@ -10,4 +12,5 @@ class HtmlLink extends \Pecee\UI\Html\Html {
 			$this->addAttribute('type', $type);
 		}
 	}
+
 }

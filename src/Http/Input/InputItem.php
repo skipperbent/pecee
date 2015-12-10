@@ -3,6 +3,7 @@ namespace Pecee\Http\Input;
 
 use Pecee\Http\Input\Validation\IValidateInput;
 use Pecee\Http\Input\Validation\ValidateInput;
+use Pecee\Str;
 
 class InputItem implements IInputItem {
 
@@ -63,7 +64,7 @@ class InputItem implements IInputItem {
         }
 
         if(!($validation instanceof IValidateInput)) {
-            throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($v));
+            throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($validation));
         }
 
         $validation->setIndex($this->index);

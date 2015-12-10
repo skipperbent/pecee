@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\UI;
-use Pecee\Auth;
+
 use Pecee\Debug;
 use Pecee\Locale;
 use Pecee\UI\Html\Html;

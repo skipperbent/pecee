@@ -26,7 +26,7 @@ class RouterRewrite extends Model {
 	 * Get rewrite by originalpath
 	 * @param string $originalUrl
 	 * @param string|null $host
-	 * @return \Pecee\Model\ModelRouterRewrite
+	 * @return static
 	 */
 	public static function getByOriginalUrl($originalUrl, $host = null) {
 		$where = array('1=1');

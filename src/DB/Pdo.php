@@ -47,7 +47,7 @@ class Pdo {
      * @param string $query
      * @param array|null $parameters
      * @return \PDOStatement
-     * @throws PdoException
+     * @throws \PdoException
      */
     public function query($query, array $parameters = null) {
 
@@ -72,6 +72,8 @@ class Pdo {
             Debug::getInstance()->add('END DB QUERY');
             return $query;
         }
+
+        return null;
     }
 
     public function all($query, array $parameters = null) {

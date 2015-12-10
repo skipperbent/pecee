@@ -3,8 +3,9 @@ namespace Pecee\Model\Node;
 
 use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
+use Pecee\Model\Model;
 
-class NodeData extends \Pecee\Model\Model {
+class NodeData extends Model {
 	public function __construct() {
 
         $table = new DBTable('node_data');

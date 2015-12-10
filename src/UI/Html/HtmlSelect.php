@@ -1,7 +1,9 @@
 <?php
 namespace Pecee\UI\Html;
-class HtmlSelect extends \Pecee\UI\Html\Html {
-	protected $options;	
+
+class HtmlSelect extends Html {
+
+	protected $options;
 	public function __construct($name) {
 		parent::__construct('select');
 		$this->options=array();
@@ -9,15 +11,15 @@ class HtmlSelect extends \Pecee\UI\Html\Html {
 			$this->addAttribute('name', $name);
 		}
 	}
-	
-	public function addOption(\Pecee\UI\Html\HtmlSelectOption $option) {		
+
+	public function addOption(HtmlSelectOption $option) {
 		$this->options[]=$option;
 	}
-	
+
 	public function getOptions() {
 		return $this->options;
 	}
-	
+
 	public function writeHtml() {
 		/* @var $option \Pecee\UI\Html\HtmlSelectOption */
 		foreach($this->options as $option) {
@@ -25,4 +27,5 @@ class HtmlSelect extends \Pecee\UI\Html\Html {
 		}
 		return parent::writeHtml();
 	}
+
 }

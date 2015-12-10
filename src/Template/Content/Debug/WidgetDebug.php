@@ -1,6 +1,6 @@
 <? /* @var $this \Pecee\Widget\Debug\WidgetDebug */ ?>
 
-<h1 style="font-family:Arial;font-size:18px;margin:10px 0px;border-bottom:1px solid #CCC;padding-bottom:5px;">Debug information</h1>
+<h1 style="font-family:Arial;font-size:18px;margin:10px 0;border-bottom:1px solid #CCC;padding-bottom:5px;">Debug information</h1>
 <table cellspacing="0" cellpadding="0" style="width:100%;font-size:12px;font-family:Arial;">
     <thead style="background-color:#EEE;">
         <tr>

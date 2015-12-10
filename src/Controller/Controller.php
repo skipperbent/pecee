@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Controller;
 
-use Pecee\Base;
 use Pecee\Debug;
 
 abstract class Controller {

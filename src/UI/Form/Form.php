@@ -72,7 +72,7 @@ class Form {
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlInput
      */
-    public function input($name, $type, $value = null, $saveValue = true) {
+    public function input($name, $type = 'text', $value = null, $saveValue = true) {
         if(is_null($value) && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
             $value = $this->getValue($name);
         }
@@ -82,6 +82,18 @@ class Form {
             $element->addAttribute('checked', 'checked');
         }
         return $element;
+    }
+
+    /**
+     * Create radio element
+     * 
+     * @param string $name
+     * @param string $value
+     * @param bool $saveValue
+     * @return HtmlInput
+     */
+    public function radio($name, $value, $saveValue = true) {
+        return $this->input($name, 'radio', $value, $saveValue);
     }
 
     /**
