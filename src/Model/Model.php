@@ -405,7 +405,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     }
 
     public function getMaxPages() {
-        return ($this->getMaxRows() && $this->getNumRows()) ? ceil($this->getMaxRows()/$this->getNumRows()) : 0;
+        return ($this->getMaxRows() && count($this->getRows())) ? ceil($this->getMaxRows()/count($this->getRows())) : 0;
     }
 
     public function setPage($page) {

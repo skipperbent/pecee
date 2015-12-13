@@ -181,17 +181,19 @@ class ModelUser extends ModelData {
 		return substr(env('APP_SECRET', md5('NoApplicationSecretDefined')), 0, 15);
 	}
 
-	public static function get($keyword=null, $adminLevel=null, $deleted=null, $order=null, $rows=null, $page=null) {
+	public static function get($query = null, $adminLevel = null, $deleted = null, $order = null, $rows = null, $page = null) {
 		$order=(is_null($order) || !in_array($order, self::$ORDERS)) ? self::ORDER_ID_DESC : $order;
+
 		$where=array('1=1');
-		if(!is_null($adminLevel)) {
+
+		if($adminLevel !== null) {
 			$where[] = PdoHelper::formatQuery('u.`admin_level` = %s', array($adminLevel));
 		}
-		if(!is_null($deleted)) {
+		if($deleted !== null) {
 			$where[] = PdoHelper::formatQuery('u.`deleted` = %s', array($deleted));
 		}
-		if(!is_null($keyword)) {
-			$where[]='`username` LIKE \'%%' . PdoHelper::escape($keyword).'%%\'';
+		if($query !== null) {
+			$where[]='(`username` LIKE \'%%' . PdoHelper::escape($query).'%%\' OR (SELECT `user_id` FROM `user_data` WHERE `user_id` = u.`id` && `value` LIKE \'%%'.PdoHelper::escape($query).'%%\' LIMIT 1))';
 		}
 		return self::fetchPage('SELECT u.* FROM {table} u WHERE ' . join(' && ', $where) . ' ORDER BY '.$order, $rows, $page);
 	}

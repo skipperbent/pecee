@@ -7,6 +7,7 @@ class UserData extends Model {
 	public function __construct($userId = null, $key = null, $value = null) {
 
         $table = new DBTable();
+		$table->column('id')->bigint()->primary();
         $table->column('user_id')->bigint()->index();
         $table->column('key')->string(255)->index();
         $table->column('value')->longtext()->nullable();
