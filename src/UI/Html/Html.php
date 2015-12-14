@@ -62,6 +62,16 @@ class Html {
 		return $this->addAttribute($name, $value);
 	}
 
+	public function id($id) {
+		$this->attr('id', $id);
+		return $this;
+	}
+
+	public function style($css) {
+		$this->attr('style', $css);
+		return $this;
+	}
+
 	protected function writeHtml() {
 		$output = '<'.$this->name;
 		foreach($this->attributes as $key=>$val) {
