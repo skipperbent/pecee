@@ -38,7 +38,7 @@ abstract class FileAbstract extends ControllerBase {
 
         $exists = file_exists($this->getTempFile());
 
-        if($this->debugMode() === false && $exists) {
+        if(!$this->debugMode() && $exists) {
             $lastModified = filemtime($this->getTempFile());
             $md5 = md5_file($this->getTempFile());
 
@@ -56,7 +56,8 @@ abstract class FileAbstract extends ControllerBase {
             'Charset: ' . $this->_site->getCharset(),
         ]);
 
-        if($this->debugMode() === true && is_dir($this->tmpDir)) {
+        if($this->debugMode() && is_dir($this->tmpDir)) {
+            $exists = false;
             $handle = opendir($this->tmpDir);
             while (false !== ($file = readdir($handle))) {
                 if($file === (md5($this->files) . '.' . $this->type)) {
@@ -131,7 +132,7 @@ abstract class FileAbstract extends ControllerBase {
         }
     }
     protected function debugMode() {
-        return Boolean::parse(env('DEBUG'));
+        return env('DEBUG', false);
     }
 
     protected function getHeader() {
