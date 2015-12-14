@@ -32,10 +32,6 @@ class Site {
 	protected $cssPath;
 	protected $jsFilesWrapped = array();
 	protected $cssFilesWrapped = array();
-	protected $debug;
-	protected $locale;
-    protected $cacheEnabled;
-    protected $cacheDir;
 	protected $adminIps;
 
 	/**
@@ -56,11 +52,10 @@ class Site {
 		$this->jsPath = 'js/';
 		$this->cssPath = 'css/';
 		$this->keywords = array();
-		$this->debug = env('DEBUG', false);
-		$this->locale = Locale::getInstance();
-        $this->cacheDir = dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'cache';
         $this->cacheEnabled = true;
 		$this->adminIps = array();
+
+		$this->setDebug(env('DEBUG', false));
 	}
 
 	public function getTitle() {
@@ -117,31 +112,12 @@ class Site {
 	}
 
 	public function setDebug($debug) {
-		// Enable or disable debugging
 		Debug::getInstance()->setEnabled($debug);
-
-		$this->debug = $debug;
 	}
 
 	public function getDebug() {
-		return $this->debug;
+		return Debug::getInstance()->getEnabled();
 	}
-
-    public function getCacheEnabled() {
-        return $this->cacheEnabled;
-    }
-
-    public function setCacheEnabled($bool) {
-        $this->cacheEnabled = $bool;
-    }
-
-    public function getCacheDir() {
-        return $this->cacheDir;
-    }
-
-    public function setCacheDir($dir) {
-        $this->cacheDir = $dir;
-    }
 
 	public function addCss($path) {
 		$css = new HtmlLink($path, 'stylesheet', 'text/css');

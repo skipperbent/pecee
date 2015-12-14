@@ -94,7 +94,14 @@ abstract class Widget extends Base  {
 	protected function printCss() {
 		$o = array();
 		if($this->_site->getCssFilesWrapped()) {
-			$url = url($this->cssWrapRoute, null, ['files' => join($this->_site->getCssFilesWrapped(), ',')]);
+
+			$getParams = array();
+
+			if(env('DEBUG', false)) {
+				$getParams = ['_' => time()];
+			}
+
+			$url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped(), ',')], $getParams));
 			$o[] = new HtmlLink($url);
 		}
 
@@ -110,7 +117,14 @@ abstract class Widget extends Base  {
 	protected function printJs() {
 		$o = array();
 		if($this->_site->getJsFilesWrapped()) {
-			$url = url($this->jsWrapRoute, null, ['files' => join($this->_site->getJsFilesWrapped(), ',')]);
+
+			$getParams = array();
+
+			if(env('DEBUG', false)) {
+				$getParams = ['_' => time()];
+			}
+
+			$url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped(), ',')], $getParams));
 			$o[] = new HtmlScript($url);
 		}
 
