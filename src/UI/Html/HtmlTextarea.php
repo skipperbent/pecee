@@ -20,4 +20,9 @@ class HtmlTextarea extends Html {
 		return $this->value;
 	}
 
+	public function placeholder($text) {
+		$this->addAttribute('placeholder', $text);
+		return $this;
+	}
+
 }
