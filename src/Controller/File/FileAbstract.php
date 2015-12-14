@@ -36,12 +36,14 @@ abstract class FileAbstract extends ControllerBase {
         // Set time limit
         set_time_limit(60);
 
-        if($this->debugMode() === false) {
+        $exists = file_exists($this->getTempFile());
+
+        if($this->debugMode() === false && $exists) {
             $lastModified = filemtime($this->getTempFile());
             $md5 = md5_file($this->getTempFile());
 
-            if(!in_array('ob_gzhandler', ob_list_handlers())) {
-                ob_start ('ob_gzhandler');
+            if (!in_array('ob_gzhandler', ob_list_handlers())) {
+                ob_start('ob_gzhandler');
             }
 
             // Set headers
@@ -64,7 +66,7 @@ abstract class FileAbstract extends ControllerBase {
             closedir($handle);
         }
 
-        if(!file_exists($this->getTempFile())) {
+        if(!$exists) {
             $this->saveTempFile();
         }
 
