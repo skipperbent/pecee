@@ -56,7 +56,7 @@ abstract class FileAbstract extends ControllerBase {
             'Charset: ' . $this->_site->getCharset(),
         ]);
 
-        if($this->debugMode() === false && is_dir($this->tmpDir)) {
+        if($this->debugMode() === true && is_dir($this->tmpDir)) {
             $handle = opendir($this->tmpDir);
             while (false !== ($file = readdir($handle))) {
                 if($file === (md5($this->files) . '.' . $this->type)) {
