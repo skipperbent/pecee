@@ -48,9 +48,17 @@ class Input {
     public function setPost() {
         $this->post = new InputCollection();
 
-        if(count($_POST)) {
+        $postVars = array();
 
-            foreach($_POST as $key => $post) {
+        if(in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'PATCH', 'DELETE'])) {
+            parse_str(file_get_contents('php://input'), $postVars);
+        } else {
+            $postVars = $_POST;
+        }
+
+        if(count($postVars)) {
+
+            foreach($postVars as $key => $post) {
                 if(!is_array($post)) {
                     $this->post->{strtolower($key)} = new InputItem($key, $post);
                     continue;

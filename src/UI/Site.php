@@ -49,10 +49,10 @@ class Site {
 		// Load default settings
 		$this->docType = self::DOCTYPE_HTML_5;
 		$this->charset = self::CHARSET_UTF8;
-		$this->jsPath = 'js/';
-		$this->cssPath = 'css/';
+		$this->jsPath = 'www/js/';
+		$this->cssPath = 'www/css/';
 		$this->keywords = array();
-        $this->cacheEnabled = true;
+		$this->cacheEnabled = true;
 		$this->adminIps = array();
 
 		$this->setDebug(env('DEBUG', false));
