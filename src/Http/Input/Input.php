@@ -50,7 +50,11 @@ class Input {
 
         $postVars = array();
 
-        parse_str(file_get_contents('php://input'), $postVars);
+        if(in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'PATCH', 'DELETE'])) {
+            parse_str(file_get_contents('php://input'), $postVars);
+        } else {
+            $postVars = $_POST;
+        }
 
         if(count($postVars)) {
 
