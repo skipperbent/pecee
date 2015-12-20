@@ -86,7 +86,7 @@ abstract class FileAbstract extends Controller {
                 if($handle) {
                     foreach($files as $index => $file) {
                         $content = null;
-                        $filePath =  $this->getPath() . $file;
+                        $filePath = $this->getPath() . $file;
 
                         if(stream_resolve_include_path($filePath) !== false) {
                             $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
@@ -105,7 +105,8 @@ abstract class FileAbstract extends Controller {
 
                         if(!$content) {
                             // Try resources folder
-                            $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $this->getPath() . $file;
+                            $folder = ($this->type === self::TYPE_JAVASCRIPT) ? 'js' : 'css';
+                            $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $folder . '/' . $file;
                             if(file_exists($filePath)) {
                                 $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
                             }

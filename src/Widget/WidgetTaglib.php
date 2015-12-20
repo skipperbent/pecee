@@ -5,9 +5,14 @@ use Pecee\Str;
 use Pecee\UI\Phtml\Phtml;
 
 abstract class WidgetTaglib extends Widget {
-	public function __construct() {
-		parent::__construct();
-	}
+
+    protected $cacheDir;
+
+    public function __construct() {
+        parent::__construct();
+
+        $this->cacheDir = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'cache';
+    }
 
     public function render()  {
         $this->renderContent();
@@ -17,8 +22,8 @@ abstract class WidgetTaglib extends Widget {
     }
 
     public function renderContent() {
-        if($this->getSite()->getCacheEnabled()) {
-            $cacheDir = $this->getSite()->getCacheDir() . DIRECTORY_SEPARATOR . 'phtml';
+        if($this->getSite()->getDebug()) {
+            $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . 'phtml';
             $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . str_replace(DIRECTORY_SEPARATOR, '_', $this->_contentTemplate);
 
             $cacheExists = file_exists($cacheFile);
