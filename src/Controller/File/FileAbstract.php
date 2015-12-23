@@ -1,12 +1,12 @@
 <?php
 namespace Pecee\Controller\File;
 
-use Pecee\Boolean;
-use Pecee\Controller\ControllerBase;
+use Pecee\Controller\Controller;
 use Pecee\Module;
+use Pecee\UI\Site;
 use Pecee\Web\Minify\CSSMin;
 
-abstract class FileAbstract extends ControllerBase {
+abstract class FileAbstract extends Controller {
 
     protected $files;
     protected $type;
@@ -31,7 +31,7 @@ abstract class FileAbstract extends ControllerBase {
 
     public function wrap() {
 
-        $this->files = $this->input('files');
+        $this->files = $_GET['files'];
 
         // Set time limit
         set_time_limit(60);
@@ -53,7 +53,7 @@ abstract class FileAbstract extends ControllerBase {
         // Set headers
         response()->headers([
             'Content-type: '.$this->getHeader(),
-            'Charset: ' . $this->_site->getCharset(),
+            'Charset: ' . Site::getInstance()->getCharset(),
         ]);
 
         if($this->debugMode() && is_dir($this->tmpDir)) {
@@ -86,7 +86,7 @@ abstract class FileAbstract extends ControllerBase {
                 if($handle) {
                     foreach($files as $index => $file) {
                         $content = null;
-                        $filePath = 'www/' . $this->getPath() . $file;
+                        $filePath = $this->getPath() . $file;
 
                         if(stream_resolve_include_path($filePath) !== false) {
                             $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
@@ -105,7 +105,8 @@ abstract class FileAbstract extends ControllerBase {
 
                         if(!$content) {
                             // Try resources folder
-                            $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $this->getPath() . $file;
+                            $folder = ($this->type === self::TYPE_JAVASCRIPT) ? 'js' : 'css';
+                            $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $folder . '/' . $file;
                             if(file_exists($filePath)) {
                                 $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
                             }
@@ -150,10 +151,10 @@ abstract class FileAbstract extends ControllerBase {
     protected function getPath() {
         switch($this->type) {
             case self::TYPE_JAVASCRIPT:
-                return $this->_site->getJsPath();
+                return Site::getInstance()->getJsPath();
                 break;
             case self::TYPE_CSS:
-                return $this->_site->getCssPath();
+                return Site::getInstance()->getCssPath();
                 break;
         }
         return '';

@@ -97,7 +97,7 @@ class PhtmlNode extends HtmlElement {
 			}
 			if ($method) {
 				$taglibs = Registry::getInstance()->get(Phtml::SETTINGS_TAGLIB, array());
-				if($taglibs[$this->getNs()]) {
+				if(isset($taglibs[$this->getNs()])) {
 					$tag = $this->getTag();
 					$str = $taglibs[$this->getNs()]->callTag($tag,$this->getAttrs(),$body);
 				}
@@ -107,7 +107,7 @@ class PhtmlNode extends HtmlElement {
 		} else {
 			if ($method) {
 				$taglibs = Registry::getInstance()->get(Phtml::SETTINGS_TAGLIB, array());
-				if($taglibs[$this->getNs()]) {
+				if(isset($taglibs[$this->getNs()])) {
 					$tag = $this->getTag();
 					$str = $taglibs[$this->getNs()]->callTag($tag,$this->getAttrs(),null, null);
 				}
