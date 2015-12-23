@@ -39,7 +39,13 @@ abstract class WidgetTaglib extends Widget {
                 $phtml = new Phtml();
                 $error = false;
                 try {
-                    $this->_contentHtml = $phtml->read(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH))->toPHP();
+
+                    ob_start();
+                    eval('?>'. file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
+                    $this->_contentHtml = ob_get_contents();
+                    ob_end_clean();
+
+                    $this->_contentHtml = $phtml->read($this->_contentHtml)->toPHP();
                 } catch(\Exception $e) {
                     $this->_contentHtml = $e->getMessage();
                     $error = true;
@@ -56,10 +62,5 @@ abstract class WidgetTaglib extends Widget {
                 }
             }
         }
-
-        ob_start();
-        eval('?>'. $this->_contentHtml);
-        $this->_contentHtml = ob_get_contents();
-        ob_end_clean();
     }
 }

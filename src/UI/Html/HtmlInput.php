@@ -19,4 +19,9 @@ class HtmlInput extends Html {
         return $this;
     }
 
+	public function autoComplete($bool = false) {
+		$this->addAttribute('autocomplete', (($bool) ? 'on' : 'off'));
+		return $this;
+	}
+
 }

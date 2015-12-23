@@ -47,14 +47,15 @@ class PhtmlNode extends HtmlElement {
 		return $str;
 	}
 	public function toPHP($filename = null) {
-		if ($this->getTag() == 'phtml') {
+		if ($this->getTag() === 'phtml') {
 			$result =  $this->getInnerPHP();
-			if ($filename)
-				file_put_contents($filename,$result);
+			if ($filename !== null) {
+                file_put_contents($filename, $result);
+            }
 			return $result;
 		}
 
-		$str = "<";
+		$str = '<';
 		$method = false;
 		$body = '';
 
@@ -121,7 +122,7 @@ class PhtmlNode extends HtmlElement {
 		}
 
 		$str = $this->processEvals($str);
-		if ($filename) {
+		if ($filename !== null) {
 			file_put_contents($filename,$str);
 		}
 		return $str;
