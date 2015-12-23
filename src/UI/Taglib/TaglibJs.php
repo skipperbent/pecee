@@ -15,7 +15,7 @@ class TaglibJs extends Taglib {
 	}
 
 	protected function makeJsString($string) {
-		return preg_replace('/[\n\r\t]\s*/', '', trim($string));
+		return preg_replace('/[\n\r\t]+|\s\s+/', '', trim($string));
 	}
 
 	protected function replaceJsExpressions($string) {
@@ -73,8 +73,8 @@ class TaglibJs extends Taglib {
 	protected function tagEach($attrs) {
 		$this->requireAttributes($attrs, array('in'));
 		$row = (!isset($attrs->as)) ? 'row' : $attrs->as;
-        $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
-        return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>', $attrs->in, $row, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG, $index);
+		$index = (!isset($attrs->index)) ? 'i' : $attrs->index;
+		return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>', $attrs->in, $row, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG, $index);
 	}
 
 	protected function tagFor($attrs) {
@@ -82,9 +82,9 @@ class TaglibJs extends Taglib {
 		return sprintf('</%5$s>";for(var %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>', $attrs->in, $attrs->start, $attrs->limit, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
 	}
 
-    protected function tagBreak() {
-        return sprintf('</%1$s>"; break; o+="<%1$s>', self::$JS_WRAPPER_TAG);
-    }
+	protected function tagBreak() {
+		return sprintf('</%1$s>"; break; o+="<%1$s>', self::$JS_WRAPPER_TAG);
+	}
 
 	protected function tagCollect($attrs) {
 		Site::getInstance()->addWrappedJs('pecee-widget.js');

@@ -15,6 +15,9 @@ abstract class Model implements IModel, \IteratorAggregate {
     protected $results;
     protected $autoCreate;
 
+    protected $hidden = [];
+    protected $with = [];
+
     public function __construct(DBTable $table) {
         $this->autoCreate = true;
         $this->table = $table;
@@ -145,29 +148,68 @@ abstract class Model implements IModel, \IteratorAggregate {
         return sprintf('SELECT COUNT(`'.$primary->getName().'`) AS `Total` FROM (%s) AS `CountedResult`', $sql);
     }
 
-    public static function query($query, $rows = null, $page = null, $args = null) {
+    public static function queryCollection($query, $rows = null, $page = null, $args = null) {
         /* $var $model Model */
         $model = static::onCreateModel();
         $results = array();
-        $fetchPage = false;
         $countSql = null;
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        if(!is_null($rows)){
-            $page = (is_null($page)) ? 0 : $page;
-            $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
-            if(stripos($query, 'limit') === false) {
-                $query .= sprintf(' LIMIT %s, %s', ($page * $rows), $rows);
-            }
-            $fetchPage = true;
+        $page = (is_null($page)) ? 0 : $page;
+
+        $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
+        if ($rows !== null && stripos($query, 'limit') === false) {
+            $query .= sprintf(' LIMIT %s, %s', ($page * $rows), $rows);
         }
+
+        $sql = PdoHelper::formatQuery($query, $args);
+
+        try {
+            $query =  Pdo::getInstance()->query($sql);
+        } catch(\PdoException $e) {
+            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
+                $model->getTable()->create();
+                return $model::queryCollection($sql, $rows, $page, $args);
+            }
+            throw $e;
+        }
+
+        $results['data']['numFields'] = $query->columnCount();
+        $results['data']['numRows'] = $query->rowCount();
+        $results['query'][] = $sql;
+        $results['data']['rows'] = array();
+        if($results['data']['numRows'] > 0) {
+            foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+                $obj = clone $model;
+                $obj->setRows($row);
+                $results['data']['rows'][]=$obj;
+            }
+        }
+
+        $results['query'][] = $countSql;
+        $maxRows = Pdo::getInstance()->value($countSql);
+        $results['data']['page'] = $page;
+        $results['data']['rowsPerPage'] = $rows;
+        $results['data']['maxRows'] = intval($maxRows);
+
+        $model->setResults($results);
+        return $model;
+    }
+
+    public static function query($query, $args = null) {
+        /* $var $model Model */
+        $model = static::onCreateModel();
+        $results = array();
+        $countSql = null;
+        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
+        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $sql = PdoHelper::formatQuery($query, $args);
         try {
             $query =  Pdo::getInstance()->query($sql);
         } catch(\PdoException $e) {
             if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
-                return $model::query($sql, $rows, $page, $args);
+                return $model::query($sql, $args);
             }
             throw $e;
         }
@@ -177,17 +219,10 @@ abstract class Model implements IModel, \IteratorAggregate {
             $results['query'][] = $sql;
             if($results['data']['numRows'] > 0) {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-                    $obj = static::onCreateModel(new CollectionItem($row));
+                    $obj = clone $model;
                     $obj->setRows($row);
                     $results['data']['rows'][]=$obj;
                 }
-            }
-            if($fetchPage) {
-                $results['query'][] = $countSql;
-                $maxRows = Pdo::getInstance()->value($countSql);
-                $results['data']['page'] = $page;
-                $results['data']['rowsPerPage'] = $rows;
-                $results['data']['maxRows'] = intval($maxRows);
             }
             $model->setResults($results);
         }
@@ -211,7 +246,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      */
     public static function fetchAll($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
-        return static::query($query, null, null, $args);
+        return static::queryCollection($query, null, null, $args);
     }
 
     /**
@@ -231,7 +266,7 @@ abstract class Model implements IModel, \IteratorAggregate {
             if(!is_null($skip) && !is_null($rows)) {
                 $query = $query.' LIMIT ' . $skip . ',' . $rows;
             }
-            $model = static::query($query, null, null, $args);
+            $model = static::queryCollection($query, null, null, $args);
         } catch(\PdoException $e) {
             if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
                 $model->getTable()->create();
@@ -258,7 +293,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      */
     public static function fetchPage($query, $rows = null, $page = null, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        return static::query($query, $rows, $page, $args);
+        return static::queryCollection($query, $rows, $page, $args);
     }
 
     /**
@@ -269,7 +304,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      */
     public static function fetchOne($query, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
-        $model =  static::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), null, null, $args);
+        $model =  static::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), $args);
         if($model->hasRows()){
             $results = $model->getResults();
             if(isset($results['data']['rows'])) {
@@ -314,47 +349,71 @@ abstract class Model implements IModel, \IteratorAggregate {
         }
     }
 
-    protected function parseJsonChild($data) {
-        if($data instanceof self) {
-            return $data->getAsJsonObject();
-        }
+    public function isCollection() {
+        return (array_key_exists('rowsPerPage', $this->results['data']));
+    }
+
+    protected function parseArrayData($data) {
+        // If it's an array of Model instances, we get JSON output here
 
         if(is_array($data)) {
             $out = array();
             foreach($data as $d) {
-                $out[] = $this->parseJsonChild($d);
+                $out[] = $this->parseArrayData($d);
             }
             return $out;
         }
-        return $data;
-    }
 
-    protected function parseJsonData($data) {
-        // If it's an array of Model instances, we get JSON output here
-        $data = $this->parseJsonChild($data);
         $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
         return (Integer::isInteger($data)) ? intval($data) : $data;
     }
 
-    public function getAsJsonObject(){
+    public function parseArrayRow($row) {
+        return $row;
+    }
+
+    public function getArray(){
+        if(!$this->hasRows() && !$this->isCollection()) {
+            return null;
+        }
+
         $arr = array('rows' => null);
         $arr = array_merge($arr, (array)$this->results['data']);
-        if($this->hasRows()){
-            $rows = $this->results['data']['rows'];
-            if($rows && is_array($rows)) {
-                foreach($rows as $key=>$row){
-                    if($row instanceof self) {
-                        $rows[$key] = $row->getAsJsonObject();
-                    } else {
-                        $rows[$key] = $this->parseJsonData($row);
+        $rows = $this->results['data']['rows'];
+        if($rows && is_array($rows)) {
+            foreach($rows as $key=>$row){
+                if($row instanceof self) {
+                    $rows[$key] = $row->getArray();
+                } else {
+
+                    if(in_array($key, $this->hidden)) {
+                        unset($rows[$key]);
+                        continue;
                     }
+
+                    $rows[$key] = $this->parseArrayData($row);
                 }
             }
-            if(count($this->getResults()) == 1) {
-                return $rows;
-            }
-            $arr['rows']=$rows;
         }
+
+        if(count($this->getResults()) === 1) {
+            foreach($this->with as $with) {
+                if(!method_exists($this, $with)) {
+                    throw new ModelException('Missing required method ' . $with);
+                }
+
+                $output = call_user_func([$this, $with]);
+
+                if($output instanceof Model) {
+                    $rows[$with] = $output->getArray();
+                } else {
+                    $rows[$with] = $output;
+                }
+            }
+            return $this->parseArrayRow($rows);
+        }
+
+        $arr['rows'] = $rows;
         return $arr;
     }
 
