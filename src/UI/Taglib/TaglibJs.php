@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Taglib;
+
 use Pecee\Str;
-use Pecee\UI\Site;
 
 class TaglibJs extends Taglib {
 	protected $containers = array();
@@ -87,7 +87,6 @@ class TaglibJs extends Taglib {
 	}
 
 	protected function tagCollect($attrs) {
-		Site::getInstance()->addWrappedJs('pecee-widget.js');
 		$output = array('<!-- JSTaglib start --><script>');
 		if($this->containers) {
 			foreach($this->containers as $c) {
