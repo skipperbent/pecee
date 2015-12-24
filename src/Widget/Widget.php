@@ -37,7 +37,7 @@ abstract class Widget extends Base  {
 	 * @return string
 	 */
 	protected function getTemplatePath() {
-		$path=explode('\\', get_class($this));
+		$path = explode('\\', get_class($this));
 		$path = array_slice($path, 2);
 		return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
 	}
@@ -51,17 +51,17 @@ abstract class Widget extends Base  {
 				$output[] = sprintf('<li>%s</li>', $error->getMessage());
 			}
 			$output[] = '</ul>';
-			return join($output, '');
+			return join('', $output);
 		}
 		return '';
 	}
 
 	/**
-	 * @param bool $includeCss
 	 * @param bool $includeJs
+	 * @param bool $includeCss
 	 * @return string
 	 */
-	public function printHeader($includeCss=true, $includeJs=true) {
+	public function printHeader($includeJs = true, $includeCss = true) {
 
 		$enc=new HtmlMeta('text/html; charset='.$this->_site->getCharset());
 		$enc->addAttribute('http-equiv', 'Content-Type');
@@ -81,17 +81,20 @@ abstract class Widget extends Base  {
 		if($includeCss) {
 			$o[] = $this->printCss();
 		}
+
 		if($includeJs) {
 			$o[] = $this->printJs();
 		}
-		if(count($this->_site->getHeader()) > 0) {
+
+		if(count($this->_site->getHeader())) {
 			$header = $this->_site->getHeader();
-			$o[]=join(chr(10), $header);
+			$o[] = join('', $header);
 		}
+
 		return join('', $o);
 	}
 
-	protected function printCss() {
+	public function printCss() {
 		$o = array();
 		if($this->_site->getCssFilesWrapped()) {
 
@@ -111,10 +114,10 @@ abstract class Widget extends Base  {
 				$o[] = $c;
 			}
 		}
-		return join('',$o);
+		return join('', $o);
 	}
 
-	protected function printJs() {
+	public function printJs() {
 		$o = array();
 		if($this->_site->getJsFilesWrapped()) {
 
@@ -204,15 +207,11 @@ abstract class Widget extends Base  {
 		$this->renderTemplate();
 		$output = Str::getFirstOrDefault($this->_contentHtml, '');
 		Debug::getInstance()->add('END ' . get_class($this));
-		// Output debug info
-		if($this->getSite()->getDebug() && Str::getFirstOrDefault($this->_template, false) && $this->getSite()->hasAdminIp() && strtolower($this->input('__debug')) == 'true') {
-			$output .= Debug::getInstance();
-		}
 		return $output;
 	}
 
 	protected function renderContent() {
-		if(is_null($this->_contentHtml) && !is_null($this->_contentTemplate)) {
+		if($this->_contentHtml === null && $this->_contentTemplate !== null) {
 			ob_start();
 			include $this->_contentTemplate;
 			$this->_contentHtml = ob_get_contents();

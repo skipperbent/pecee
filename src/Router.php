@@ -4,6 +4,7 @@ namespace Pecee;
 use Pecee\Handler\ExceptionHandler;
 use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
+use Pecee\UI\Site;
 
 class Router extends SimpleRouter {
 
@@ -54,6 +55,11 @@ class Router extends SimpleRouter {
             }
 
             throw $e;
+        }
+
+        // Output debug info
+        if(env('DEBUG', false) && Site::getInstance()->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
+            echo Debug::getInstance();
         }
     }
 
