@@ -75,11 +75,9 @@ class Debug {
 	}
 
 	public function add($text) {
-		if(!$this->enabled) {
-			return;
+		if($this->enabled) {
+			$this->addObject($text);
 		}
-
-		$this->addObject($text);
 	}
 
 	public function getEnabled() {

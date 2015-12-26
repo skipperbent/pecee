@@ -2,7 +2,6 @@
 namespace Pecee\UI;
 
 use Pecee\Debug;
-use Pecee\Locale;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
