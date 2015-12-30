@@ -2,10 +2,11 @@
 namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
-use \Pecee\DB\DBTable;
+use Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
 use Pecee\Integer;
+use Pecee\Str;
 
 abstract class Model implements IModel, \IteratorAggregate {
 
@@ -17,6 +18,7 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     protected $hidden = [];
     protected $with = [];
+    protected $rename = [];
 
     public function __construct(DBTable $table) {
         $this->autoCreate = true;
@@ -262,7 +264,6 @@ abstract class Model implements IModel, \IteratorAggregate {
         $skip = (is_null($skip)) ? 0 : $skip;
         $model = static::onCreateModel();
         try {
-            $maxRows = Pdo::getInstance()->value($model->getCountSql(PdoHelper::formatQuery($query, $args)));
             if(!is_null($skip) && !is_null($rows)) {
                 $query = $query.' LIMIT ' . $skip . ',' . $rows;
             }
@@ -276,8 +277,6 @@ abstract class Model implements IModel, \IteratorAggregate {
         }
         $results = $model->getResults();
         $results['data']['rowsPerPage'] = $rows;
-        $results['data']['maxRows'] = intval($maxRows);
-        $results['data']['hasNext'] = ($rows+$skip < intval($maxRows));
         $results['data']['hasPrevious'] = ($skip>0);
         $model->setResults($results);
         return $model;
@@ -382,6 +381,9 @@ abstract class Model implements IModel, \IteratorAggregate {
         $rows = $this->results['data']['rows'];
         if($rows && is_array($rows)) {
             foreach($rows as $key=>$row){
+
+                $key = (isset($this->rename[$key])) ? $this->rename[$key] : $key;
+
                 if($row instanceof self) {
                     $rows[$key] = $row->getArray();
                 } else {
@@ -398,11 +400,16 @@ abstract class Model implements IModel, \IteratorAggregate {
 
         if(count($this->getResults()) === 1) {
             foreach($this->with as $with) {
-                if(!method_exists($this, $with)) {
-                    throw new ModelException('Missing required method ' . $with);
+
+                $method = Str::camelize($with);
+
+                if(!method_exists($this, $method)) {
+                    throw new ModelException('Missing required method ' . $method);
                 }
 
-                $output = call_user_func([$this, $with]);
+                $output = call_user_func([$this, $method]);
+
+                $with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
 
                 if($output instanceof Model) {
                     $rows[$with] = $output->getArray();
