@@ -82,6 +82,7 @@ class XmlElement implements IXmlNode {
 	public function getChildIndex(IXmlNode $node) {
 		return array_search($node,$this->children);
 	}
+
 	public function setChildAt($i,IXmlNode $node) {
 		if ($i < 0 || $i > count($this->children))
 			throw new \Exception ("Child offset out of bounds: $i. Child count : ".count($this->children));
@@ -90,6 +91,7 @@ class XmlElement implements IXmlNode {
 		ksort($this->children);
 		return $this;
 	}
+
 	public function removeChildAt($i) {
 		if ($i < 0 || $i > count($this->children))
 			throw new \Exception ("Child offset out of bounds: $i. Child count : ".count($this->children));
@@ -97,9 +99,11 @@ class XmlElement implements IXmlNode {
 		$this->children = array_values($this->children);
 		return $this;
 	}
+
 	public function removeChild(IXmlNode $node) {
 		return $this->removeChildAt($this->getChildIndex($node));
 	}
+
 	public function addChildAt($offset,IXmlNode $node) {
 		if ($offset < 0)
 			throw new \Exception ("Child offset must be greater than -1".count($this->children));
@@ -118,11 +122,13 @@ class XmlElement implements IXmlNode {
 		$this->children = $result;
 		return $this;
 	}
+
 	public function addChildren($children) {
 		foreach($children as $node) {
 			$this->addChild($node);
 		}
 	}
+
 	public function addChildrenAt($offset,$children) {
 		$i = 0;
 		foreach($children as $node) {
@@ -130,9 +136,11 @@ class XmlElement implements IXmlNode {
 			$i++;
 		}
 	}
+
 	public function detach() {
 		$this->getParent()->removeChild($this);
 	}
+
 	/**
 	 * replace node with other node
 	 */
@@ -142,6 +150,7 @@ class XmlElement implements IXmlNode {
 		$this->detach();
 		$parent->addChildAt($i,$otherNode);
 	}
+
 	public function clear() {
 		foreach ($this->children as $child) {
 			$child->setParent(null);
@@ -162,6 +171,7 @@ class XmlElement implements IXmlNode {
 		}
 		return $result;
 	}
+
 	public function toXml($makeParent = true) {
 		$str = "";
 		if (!$this->parent && $makeParent) {
@@ -191,4 +201,5 @@ class XmlElement implements IXmlNode {
 		}
 		return $str;
 	}
+
 }

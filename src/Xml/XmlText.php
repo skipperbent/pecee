@@ -2,10 +2,10 @@
 namespace Pecee\Xml;
 
 class XmlText implements IXmlNode {
-	private $parent;
-	private $text = '';
+	protected $parent;
+    protected $text = '';
 
-	function __construct($text) {
+	public function __construct($text) {
 		$this->text = $text;
 	}
 
@@ -28,7 +28,9 @@ class XmlText implements IXmlNode {
 	public function __toString() {
 		return $this->text;
 	}
+
 	public function toXml() {
 		return $this->text;
 	}
+
 }

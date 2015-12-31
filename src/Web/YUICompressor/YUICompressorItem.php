@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Web\YUICompressor;
+
 class YUICompressorItem {
 	public $filename;
 	public $filepath;

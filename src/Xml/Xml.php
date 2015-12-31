@@ -2,10 +2,11 @@
 namespace Pecee\Xml;
 class Xml {
 	public static function toXml($data,$parent = 'root') {
-		
+
 		if (!($parent instanceof IXmlNode)) {
 			$parent = new XmlElement((string)$parent);
 		}
+
 		switch(true) {
 			case is_array($data):
 			case is_object($data):
@@ -45,6 +46,7 @@ class Xml {
 				$parent->addChild(new XmlText($data));
 				break;
 		}
+
 		return $parent;
 	}
 }
