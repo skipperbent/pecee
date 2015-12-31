@@ -2,8 +2,8 @@ if(typeof($p)=='undefined') {
     var $p={};
 }
 
-$p.Widget=function(template, container) {
-    var guid=function(length) {
+$p.utils = {
+    generateGuid: function(length) {
         var c=(length==null)?8:length;
         var text = "";
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -11,14 +11,53 @@ $p.Widget=function(template, container) {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return text;
-    };
+    },
+};
 
-    this.guid=guid();
-    this.template=template;
-    this.container=container;
+$p.template = function() {
+    return this;
+}
+
+$p.template.prototype = {
+    widget: null,
+    view: null,
+    snippets: null,
+    bindings: {},
+    init: function(widget) {
+
+        var self = this;
+        this.widget = widget;
+
+        // Render custom bindings
+        this.widget.bind('render', function() {
+            for (var name in self.bindings) {
+                if (self.bindings.hasOwnProperty(name)) {
+                    self.trigger(name);
+                }
+            }
+        });
+    },
+    trigger: function(name, data) {
+        var binding = this.bindings[name];
+        if(binding == null) {
+            throw 'Failed to find binding: ' + name;
+        }
+        data = (data == null) ? binding.data : data;
+        binding.callback(data);
+    }
+};
+
+$p.Widget=function(template, container) {
+
+    this.guid = $p.utils.generateGuid();
+    this.template = template;
+
+    this.container = container;
     $p.Widget.windows[this.guid] = this;
     this.data = null;
     this.events = [];
+
+    this.template.init(this);
     return this;
 };
 
@@ -52,7 +91,7 @@ $p.Widget.prototype = {
     },
     render: function() {
         this.trigger('preRender');
-        $(this.container).html(this.template(this.data, this.guid));
+        $(this.container).html(this.template.view(this.data, this.guid));
         this.trigger('render');
     },
     getData: function() {
@@ -88,7 +127,9 @@ $p.Widget.prototype = {
         }
     }
 };
+
 $p.WidgetList = $p.Widget;
+
 $p.WidgetList.prototype = $.extend($p.Widget.prototype, {
     setData: function(data) {
         this.data = data;
