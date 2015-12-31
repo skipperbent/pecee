@@ -45,7 +45,7 @@ class YUICompressor {
     	$this->addItem($type, $content, $options);
     }
 
-    private function addItem($type,$content,$options,$filename=null,$filepath=null) {
+    protected function addItem($type,$content,$options,$filename=null,$filepath=null) {
     	$item = new YUICompressorItem();
     	$item->type=$type;
     	$item->content=$content;
@@ -77,13 +77,14 @@ class YUICompressor {
         }
         return ($single) ? $this->items[count($this->items)-1] : $this->items;
     }
-	private function validateType($type) {
+
+    protected function validateType($type) {
     	if(!in_array($type, $this->types)) {
     		throw new YUICompressorException('Unknown type: '.$type.'. Type must be one of the following: ' . join($this->types, ', '));
     	}
     }
 
-    private function getCmd($userOptions, $type, $tmpFile) {
+    protected function getCmd($userOptions, $type, $tmpFile) {
         $o = array_merge(
             array(
                 'charset' => ''
@@ -108,21 +109,27 @@ class YUICompressor {
 	public function getJarFile() {
 		return $this->jarFile;
 	}
+
 	public function getTempDir() {
 		return $this->tempDir;
 	}
+
 	public function getJavaExecutable() {
 		return $this->javaExecutable;
 	}
+
 	public function setJarFile($jarFile) {
 		$this->jarFile = $jarFile;
 	}
+
 	public function setTempDir($tempDir) {
 		$this->tempDir = $tempDir;
 	}
+
 	public function setJavaExecutable($javaExecutable) {
 		$this->javaExecutable = $javaExecutable;
 	}
+
 	public function getItems() {
 		return $this->items;
 	}

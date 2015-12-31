@@ -1,6 +1,8 @@
 <?php
 namespace Pecee;
+
 class Locale {
+    
 	protected static $instance;
 	protected $timezone;
 	protected $defaultLocale;
@@ -20,9 +22,10 @@ class Locale {
 	public function __construct() {
 		// Default stuff
 		$this->setTimezone('Europe/Copenhagen');
-		$this->setLocale('en-UK');
-		$this->setDefaultLocale('en-UK');
+		$this->setLocale('en-gb');
+		$this->setDefaultLocale('en-gb');
 	}
+
 	/**
 	 * @return string $timezone
 	 */
@@ -55,4 +58,5 @@ class Locale {
 	public function setDefaultLocale($defaultLocale) {
 		$this->defaultLocale = $defaultLocale;
 	}
+
 }
