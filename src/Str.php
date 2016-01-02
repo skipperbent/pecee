@@ -63,8 +63,8 @@ class Str {
     }
 
     public static function makeLink($text, $format1='<a href="\\0" rel="nofollow" title="">\\0</a>',
-                                    $format2='<a href="http://\\2" title="" rel="nofollow">\\2</a>',
-                                    $format3='<a href="mailto:\\1" title="">\\1</a>') {
+        $format2='<a href="http://\\2" title="" rel="nofollow">\\2</a>',
+        $format3='<a href="mailto:\\1" title="">\\1</a>') {
         // match protocol://address/path/
         $text = preg_replace("/[a-zA-Z]+:\\/\\/([.\\/-]?[a-zA-Z0-9_\\/-\\/&\\/%\\/?\\/=])*/is", $format1, $text);
         // match www.something
@@ -89,15 +89,18 @@ class Str {
     }
 
     public static function decamelize($word) {
-        return preg_replace(
-            '/(^|[a-z])([A-Z])/e',
-            'strtolower(strlen("\\1") ? "\\1_\\2" : "\\2")',
+        return preg_replace_callback('/(^|[a-z])([A-Z])/',
+            function($matches) {
+                return strtolower(strlen($matches[1]) ? $matches[1] . '_' . $matches[2] : $matches[2]);
+            },
             $word
         );
     }
 
     public static function camelize($word) {
-        $word = preg_replace('/(^|_)([a-z])/e', 'strtoupper("\\2")', strtolower($word));
+        $word = preg_replace_callback('/(^|_)([a-z])/', function($matches) {
+            return strtoupper($matches[2]);
+        }, strtolower($word));
         $word[0] = strtolower($word[0]);
         return $word;
     }
