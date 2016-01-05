@@ -35,14 +35,14 @@ class YuiCompressor {
      * @param string $file
      * @param array $options
      *
-     * @return YUICompressor
-     * @throws YUICompressorException
+     * @return YuiCompressor
+     * @throws YuiCompressorException
      */
     public function addFile($type, $file, $options=array()) {
         $this->validateType($type);
 
         if(!file_exists($file)) {
-            throw new YUICompressorException('File does not exist: ' . $file);
+            throw new YuiCompressorException('File does not exist: ' . $file);
         }
 
         $contents = file_get_contents($file);
@@ -57,8 +57,8 @@ class YuiCompressor {
      * @param string $content
      * @param array $options
      *
-     * @return YUICompressor
-     * @throws YUICompressorException
+     * @return YuiCompressor
+     * @throws YuiCompressorException
      */
     public function addContent($type, $content, $options=array() ) {
         $this->validateType($type);
@@ -81,7 +81,7 @@ class YuiCompressor {
      * @return self $this
      */
     protected function addItem($type, $content, $options, $filename = null, $filepath = null) {
-        $item = new YUICompressorItem();
+        $item = new YuiCompressorItem();
         $item->type = $type;
         $item->content = $content;
         $item->options = $options;
@@ -95,20 +95,20 @@ class YuiCompressor {
      * Compress items
      *
      * @param bool $single
-     * @return YUICompressorItem|array
-     * @throws YUICompressorException
+     * @return YuiCompressorItem|array
+     * @throws YuiCompressorException
      */
     public function minify($single = false) {
         if (!is_file($this->jarFile) || !is_dir($this->tempDir) || !is_writable($this->tempDir)) {
-            throw new YUICompressorException('Minify_YUICompressor : $jarFile must be set or is not a valid ressource.');
+            throw new YuiCompressorException('Minify_YuiCompressor : $jarFile must be set or is not a valid ressource.');
         }
 
         if (!($tmpFile = tempnam($this->tempDir, 'yuic_'))) {
-            throw new YUICompressorException('Minify_YUICompressor : could not create temp file.');
+            throw new YuiCompressorException('Minify_YuiCompressor : could not create temp file.');
         }
 
         if(count($this->items)) {
-            /* @var $item YUICompressorItem */
+            /* @var $item YuiCompressorItem */
             foreach( $this->items as $item ) {
                 file_put_contents($tmpFile, $item->content);
                 $output = array();
@@ -126,7 +126,7 @@ class YuiCompressor {
 
     protected function validateType($type) {
         if(!in_array($type, $this->types)) {
-            throw new YUICompressorException('Unknown type: '.$type.'. Type must be one of the following: ' . join($this->types, ', '));
+            throw new YuiCompressorException('Unknown type: '.$type.'. Type must be one of the following: ' . join($this->types, ', '));
         }
     }
 
