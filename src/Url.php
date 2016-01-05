@@ -107,22 +107,26 @@ class Url {
 	}
 
 	public static function urlEncodeString($string, $seperator = '-', $maxLength = 50) {
-		if(strlen($string) > $maxLength) {
+		if($maxLength !== null && strlen($string) > $maxLength) {
 			$string = substr($string, 0, $maxLength);
 		}
+
 		$searchMap = array('æ' => 'ae', 'ø' => 'o', 'å' => 'a', ' ' => $seperator);
 		foreach($searchMap as $search=>$replace) {
 			$string = str_ireplace($search, $replace, $string);
 		}
+
 		$s = strtolower(preg_replace('/[^A-Za-z0-9 _\-\+\&'.join(' ', $searchMap).']/is','',$string));
 		$pastChar = '';
 		$newString = '';
+
 		for($i=0;$i<strlen($s);$i++) {
 			if(!$pastChar || $pastChar != $seperator || $pastChar != $s[$i]) {
 				$newString .= $s[$i];
 			}
 			$pastChar = $s[$i];
 		}
+
 		return $newString;
 	}
 

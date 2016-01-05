@@ -1,8 +1,11 @@
 <?php
 namespace Pecee;
+
 class Registry {
+
 	protected static $instance;
 	protected static $registry;
+
 	/**
 	 * Get instance
 	 * @return static
@@ -23,6 +26,7 @@ class Registry {
 	public function get($key, $default=null) {
 		return (isset(self::$registry[$key]) ? self::$registry[$key] : $default);
 	}
+
 	/**
 	 * Set registry key
 	 * @param string $key
@@ -31,4 +35,5 @@ class Registry {
 	public function set($key, $value) {
 		self::$registry[$key] = $value;
 	}
+
 }

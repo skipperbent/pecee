@@ -2,22 +2,6 @@
 namespace Pecee;
 class Str {
 
-    public static function removeNewlines($input){
-        return preg_replace('/[\n]/', ' ',$input);
-    }
-
-    public static function removeTabs($input) {
-        return preg_replace('/[\t]/','',$input);
-    }
-
-    public static function removeEnters($input) {
-        return preg_replace('/[\r]/','',$input);
-    }
-
-    public static function removeSlashes($string) {
-        return str_replace('\\"', '"', str_replace("\\'", "'", $string));
-    }
-
     public static function getFirstOrDefault($value, $default = null){
         return ($value !== null && trim($value) !== '') ? trim($value) : $default;
     }
@@ -36,12 +20,13 @@ class Str {
         return $text;
     }
 
-    public static function wrap($text, $maxLength = 25) {
-        return preg_replace('/([^\s]{'.$maxLength.'})(?=[^\s])/', '$1', $text);
+    public static function wordWrap($text, $limit) {
+        $words = explode(' ', $text);
+        return join(' ', array_splice($words, 0, $limit));
     }
 
     public static function htmlEntities($value) {
-        if( is_array($value) ) {
+        if(is_array($value)) {
             $newArr = array();
             foreach($value as $key => $v) {
                 $newArr[$key] = htmlentities($v, null, 'UTF-8');
@@ -52,7 +37,7 @@ class Str {
     }
 
     public static function htmlEntitiesDecode($value) {
-        if( is_array($value) ) {
+        if(is_array($value)) {
             $newArr = array();
             foreach($value as $key => $v) {
                 $newArr[$key] = html_entity_decode($v, null, 'UTF-8');
@@ -63,8 +48,8 @@ class Str {
     }
 
     public static function makeLink($text, $format1='<a href="\\0" rel="nofollow" title="">\\0</a>',
-        $format2='<a href="http://\\2" title="" rel="nofollow">\\2</a>',
-        $format3='<a href="mailto:\\1" title="">\\1</a>') {
+        $format2 = '<a href="http://\\2" title="" rel="nofollow">\\2</a>',
+        $format3 = '<a href="mailto:\\1" title="">\\1</a>') {
         // match protocol://address/path/
         $text = preg_replace("/[a-zA-Z]+:\\/\\/([.\\/-]?[a-zA-Z0-9_\\/-\\/&\\/%\\/?\\/=])*/is", $format1, $text);
         // match www.something

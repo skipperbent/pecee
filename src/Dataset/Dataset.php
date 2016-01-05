@@ -29,7 +29,7 @@ abstract class Dataset implements \IteratorAggregate {
 		$this->data = $data;
 	}
 
-	protected function add($value=null, $name) {
+	protected function add($value = null, $name) {
 		$arr = array();
 		if($value !== null) {
 			$arr['value'] = htmlspecialchars($value);
@@ -47,7 +47,16 @@ abstract class Dataset implements \IteratorAggregate {
 	 * @since 5.0.0
 	 */
 	public function getIterator() {
-		return new \ArrayIterator($this->data);
+
+        $tmp = array();
+
+        if(count($this->data)) {
+            foreach ($this->data as $value) {
+                $tmp[$value['name']] = $value['value'];
+            }
+        }
+
+		return new \ArrayIterator($tmp);
 	}
 
 }

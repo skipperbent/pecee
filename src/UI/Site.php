@@ -78,6 +78,7 @@ class Site {
 			throw new \InvalidArgumentException('Unknown doctype.');
 		$this->docType = $doctype;
 	}
+
 	public function getDocType() {
 		return $this->docType;
 	}
@@ -85,11 +86,13 @@ class Site {
 	public function getCharset() {
 		return $this->charset;
 	}
+
 	public function addWrappedJs($filename) {
 		if(!in_array($filename, $this->jsFilesWrapped)) {
 			$this->jsFilesWrapped[] = $filename;
 		}
 	}
+
 	public function removeWrappedJs($filename) {
 		if(in_array($filename, $this->jsFilesWrapped)) {
 			$key = array_search($filename, $this->jsFilesWrapped);
@@ -209,7 +212,6 @@ class Site {
 	public function setAdminIps(array $adminIps) {
 		$this->adminIps = $adminIps;
 	}
-
 
 	public function addAdminIp($ip) {
 		$this->adminIps[] = $ip;

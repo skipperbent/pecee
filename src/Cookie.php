@@ -1,5 +1,6 @@
 <?php
 namespace Pecee;
+
 class Cookie {
 
 	public static function create($id, $value, $time = null, $domain = null, $secure = null) {
@@ -22,4 +23,5 @@ class Cookie {
 	public static function exists($id) {
 		return (isset($_COOKIE[$id]));
 	}
+
 }

@@ -1,8 +1,6 @@
 <?php
 namespace Pecee\UI\Taglib;
 
-use Pecee\Str;
-
 class TaglibJs extends Taglib {
 
     protected $containers = array();
@@ -24,7 +22,7 @@ class TaglibJs extends Taglib {
     }
 
     protected function handleInline($string) {
-        $string = Str::removeSlashes($string);
+        $string = str_replace('\\"', '"', str_replace("\\'", "'", $string));
         $parts = preg_split('/[;\n]{1,2}/s',$string);
         if (count($parts) <= 1)
             return "($string)";
@@ -172,7 +170,7 @@ class TaglibJs extends Taglib {
     }
 
     protected function tagCollect() {
-        $output = array('<!-- JSTaglib start --><script>');
+        $output = array('<script>');
 
         if($this->containers) {
             foreach($this->containers as $c) {
@@ -180,8 +178,8 @@ class TaglibJs extends Taglib {
             }
         }
 
-        $output[] = '</script><!-- JSTaglib -->';
-        return join('', $output);
+        $output[] = '</script>';
+        return join((env('DEBUG') ? chr(10) : ''), $output);
     }
 
 }

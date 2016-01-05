@@ -4,7 +4,7 @@ namespace Pecee\Controller\File;
 use Pecee\Controller\Controller;
 use Pecee\Module;
 use Pecee\UI\Site;
-use Pecee\Web\Minify\CSSMin;
+use Pecee\Http\YuiCompressor\YuiCompressor;
 
 abstract class FileAbstract extends Controller {
 
@@ -113,8 +113,25 @@ abstract class FileAbstract extends Controller {
                         }
 
                         if($content) {
-                            if($this->type === self::TYPE_CSS && !$this->debugMode()) {
-                                $content = CSSMin::process($content);
+
+                            if(env('MINIFY_CSS') && $this->type === self::TYPE_CSS) {
+                                $compressor = new YuiCompressor();
+                                $compressor->addContent($this->type, $content);
+                                $output = $compressor->minify(true);
+
+                                if($output->minified && strlen($output->minified)) {
+                                    $content = $output->minified;
+                                }
+                            }
+
+                            if(env('MINIFY_JAVASCRIPT') && $this->type === self::TYPE_JAVASCRIPT) {
+                                $compressor = new YuiCompressor();
+                                $compressor->addContent($this->type, $content);
+                                $output = $compressor->minify(true);
+
+                                if($output->minified && strlen($output->minified)) {
+                                    $content = $output->minified;
+                                }
                             }
 
                             $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */' . chr(10);
@@ -123,6 +140,7 @@ abstract class FileAbstract extends Controller {
                             if( $index < count($files)-1 ) {
                                 $buffer .= str_repeat(chr(10),2);
                             }
+
                             fwrite($handle, $buffer);
                         }
                     }
@@ -163,4 +181,5 @@ abstract class FileAbstract extends Controller {
     protected function getTempFile() {
         return $this->tmpDir.DIRECTORY_SEPARATOR.md5($this->files) . '.' . $this->type;
     }
+
 }

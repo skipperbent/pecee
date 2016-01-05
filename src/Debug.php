@@ -6,6 +6,7 @@ use Pecee\Widget\Debug\WidgetDebug;
 class Debug {
 
 	protected static $instance;
+
 	protected $enabled;
 	protected $lastTime;
 	protected $stack;

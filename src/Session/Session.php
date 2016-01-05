@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Session;
+
 class Session {
+
 	protected static $instance;
 
 	public static function getInstance() {

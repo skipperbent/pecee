@@ -1,5 +1,6 @@
 <?php
 namespace Pecee;
+
 class Guid {
 
 	public static function create($separator = false) {

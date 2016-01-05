@@ -1,6 +1,8 @@
 <?php
 namespace Pecee;
+
 class ArrayUtil {
+
 	/**
 	 * Remove multiple elements from beginning of array
 	 * @param array $array|null
@@ -92,4 +94,5 @@ class ArrayUtil {
 		}
 		return $array1;
 	}
+
 }
