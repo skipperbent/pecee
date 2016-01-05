@@ -1,5 +1,6 @@
 <?php
 namespace Pecee;
+
 class Boolean {
 
 	public static function parse($str, $default=false) {

@@ -1,5 +1,6 @@
 <?php
 namespace Pecee;
+
 class Cli {
 
     const COLOR_GREY = 'grey';
@@ -126,4 +127,5 @@ class Cli {
         unset($options['']);
         return $options;
     }
+
 }

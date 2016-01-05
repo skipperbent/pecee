@@ -1,7 +1,8 @@
 <?php
-namespace Pecee\Web\YUICompressor;
+namespace Pecee\Http\YuiCompressor;
 
-class YUICompressorItem {
+class YuiCompressorItem {
+
 	public $filename;
 	public $filepath;
 	public $type;
@@ -11,4 +12,5 @@ class YUICompressorItem {
 	public $minified;
 	public $minifiedKB = 0;
 	public $minifiedRatio = 0;
+
 }

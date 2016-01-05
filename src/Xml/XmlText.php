@@ -2,6 +2,7 @@
 namespace Pecee\Xml;
 
 class XmlText implements IXmlNode {
+
 	protected $parent;
     protected $text = '';
 

@@ -1,6 +1,8 @@
 <?php
 namespace Pecee;
+
 class Mcrypt {
+
 	public static function encrypt($dataInput, $key){
 	    $td = mcrypt_module_open(MCRYPT_CAST_256, '', 'ecb', '');
 	    $iv = mcrypt_create_iv (mcrypt_enc_get_iv_size($td), MCRYPT_RAND);
@@ -42,4 +44,5 @@ class Mcrypt {
         }
 		return $pass;
 	}
+
 }

@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\Xml;
+
 use Pecee\ArrayUtil;
 
 class XmlElement implements IXmlNode {

@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Widget;
 
-use Pecee\Str;
 use Pecee\UI\Phtml\Phtml;
 
 abstract class WidgetTaglib extends Widget {
@@ -20,7 +19,7 @@ abstract class WidgetTaglib extends Widget {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        return Str::getFirstOrDefault($this->_contentHtml, '');
+        return $this->_contentHtml;
     }
 
     protected function renderPhp($content) {

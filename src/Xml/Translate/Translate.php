@@ -4,6 +4,7 @@ namespace Pecee\Xml\Translate;
 use Pecee\Locale;
 
 class Translate {
+
 	protected static $instance;
 
 	/**
@@ -68,4 +69,5 @@ class Translate {
 	public function getDir() {
 		return $this->dir;
 	}
+
 }

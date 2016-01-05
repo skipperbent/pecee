@@ -1,8 +1,10 @@
 <?php
 namespace Pecee\Session;
+
 use Pecee\UI\Form\FormMessage;
 
 class SessionMessage {
+
 	protected $session;
 	protected $messages;
 	protected static $instance;

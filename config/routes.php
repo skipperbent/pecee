@@ -1,6 +1,7 @@
 <?php
 $_ENV['base_path'] = substr(get_include_path(), 0, strpos(get_include_path(), PATH_SEPARATOR));
 $_ENV['app_name'] = basename($_ENV['base_path']);
+$_ENV['framework_path'] = dirname(__DIR__);
 
 $loader = require dirname(dirname($_ENV['base_path'])) . '/vendor/autoload.php';
 $loader->addPsr4($_ENV['app_name'] . '\\', $_ENV['base_path'] . 'lib/');
