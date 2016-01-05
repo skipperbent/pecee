@@ -152,7 +152,7 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     public static function queryCollection($query, $rows = null, $page = null, $args = null) {
         /* $var $model Model */
-        $model = static::onCreateModel();
+        $model = new static();
         $results = array();
         $countSql = null;
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
@@ -182,7 +182,7 @@ abstract class Model implements IModel, \IteratorAggregate {
         $results['data']['rows'] = array();
         if($results['data']['numRows'] > 0) {
             foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-                $obj = clone $model;
+                $obj = static::onCreateModel(new CollectionItem($row));
                 $obj->setRows($row);
                 $results['data']['rows'][]=$obj;
             }
@@ -200,7 +200,7 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     public static function query($query, $args = null) {
         /* $var $model Model */
-        $model = static::onCreateModel();
+        $model = new static();
         $results = array();
         $countSql = null;
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
@@ -215,13 +215,14 @@ abstract class Model implements IModel, \IteratorAggregate {
             }
             throw $e;
         }
+
         if($query) {
             $results['data']['numFields'] = $query->columnCount();
             $results['data']['numRows'] = $query->rowCount();
             $results['query'][] = $sql;
             if($results['data']['numRows'] > 0) {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
-                    $obj = clone $model;
+                    $obj = static::onCreateModel(new CollectionItem($row));
                     $obj->setRows($row);
                     $results['data']['rows'][]=$obj;
                 }
@@ -236,7 +237,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      * @param CollectionItem $row
      * @return static
      */
-    protected static function onCreateModel(CollectionItem $row = null) {
+    protected static function onCreateModel(CollectionItem $row) {
         return new static();
     }
 
@@ -262,7 +263,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     public static function fetchAllPage($query, $skip = null, $rows = null, $args=null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $skip = (is_null($skip)) ? 0 : $skip;
-        $model = static::onCreateModel();
+        $model = new static();
         try {
             if(!is_null($skip) && !is_null($rows)) {
                 $query = $query.' LIMIT ' . $skip . ',' . $rows;
@@ -317,7 +318,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     public static function nonQuery($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
-        $model = static::onCreateModel();
+        $model = new static();
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
 
         try {
@@ -334,7 +335,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     public static function scalar($query, $args = null) {
         $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
-        $model = static::onCreateModel();
+        $model = new static();
         $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
 
         try {
