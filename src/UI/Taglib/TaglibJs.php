@@ -91,7 +91,7 @@ class TaglibJs extends Taglib {
     protected function tagContainer($attrs) {
         $this->requireAttributes($attrs, array('id'));
 
-        $output = sprintf('$.%1$s = new $p.template(); $.%1$s.view = function(d,g){var o="<%3$s>%2$s</%3$s>"; return o;};', $attrs->id, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
+        $output = sprintf('$.%1$s = new $p.template(); $.%1$s.view = function(d,g){var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};', $attrs->id, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
         $matches = array();
 
         preg_match_all('%<'.self::$JS_WRAPPER_TAG.'>(.*?)</'.self::$JS_WRAPPER_TAG.'>%', $output, $matches);
@@ -150,7 +150,7 @@ class TaglibJs extends Taglib {
         $data = (isset($attrs->data)) ? $attrs->data : 'null';
         $el = (isset($attrs->el)) ? $attrs->el : 'div';
 
-        return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; this.bindings[key]={}; this.bindings[key].guid = guid;  this.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; this.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>', $attrs->name, $el, $data, $output, self::$JS_WRAPPER_TAG);
+        return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>', $attrs->name, $el, $data, $output, self::$JS_WRAPPER_TAG);
     }
 
     protected function tagEach($attrs) {
