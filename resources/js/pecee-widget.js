@@ -23,19 +23,11 @@ $p.template.prototype = {
     view: null,
     snippets: null,
     bindings: {},
+    bindingsMap: [],
     init: function(widget) {
 
         var self = this;
         this.widget = widget;
-
-        // Render custom bindings
-        this.widget.bind('render', function() {
-            for (var name in self.bindings) {
-                if (self.bindings.hasOwnProperty(name)) {
-                    self.trigger(name);
-                }
-            }
-        });
     },
     trigger: function(name, data) {
         var binding = this.bindings[name];
@@ -44,6 +36,19 @@ $p.template.prototype = {
         }
         data = (data == null) ? binding.data : data;
         binding.callback(data);
+    },
+    triggerAll: function() {
+        var self = this;
+        for (var name in this.bindings) {
+            if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) == -1) {
+                this.trigger(name);
+                self.bindingsMap.push(name);
+                this.triggerAll();
+            }
+        }
+    },
+    clear: function() {
+        this.bindingsMap = [];
     }
 };
 
@@ -92,6 +97,10 @@ $p.Widget.prototype = {
     render: function() {
         this.trigger('preRender');
         $(this.container).html(this.template.view(this.data, this.guid));
+
+        this.template.triggerAll();
+        this.template.clear();
+
         this.trigger('render');
     },
     getData: function() {
