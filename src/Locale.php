@@ -2,7 +2,7 @@
 namespace Pecee;
 
 class Locale {
-    
+
 	protected static $instance;
 	protected $timezone;
 	protected $defaultLocale;
