@@ -7,17 +7,17 @@ use Pecee\Model\Model;
 class UserData extends Model {
 	public function __construct($userId = null, $key = null, $value = null) {
 
-        $table = new DBTable();
+		$table = new DBTable();
 		$table->column('id')->bigint()->primary()->increment();
-        $table->column('user_id')->bigint()->index();
-        $table->column('key')->string(255)->index();
-        $table->column('value')->longtext()->nullable();
+		$table->column('user_id')->bigint()->index();
+		$table->column('key')->string(255)->index();
+		$table->column('value')->longtext()->nullable();
 
 		parent::__construct($table);
 
-        $this->user_id = $userId;
-        $this->key = $key;
-        $this->value = $value;
+		$this->user_id = $userId;
+		$this->key = $key;
+		$this->value = $value;
 	}
 
 	public function save() {

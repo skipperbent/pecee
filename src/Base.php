@@ -30,7 +30,6 @@ abstract class Base {
 		$this->file = $this->_input->file;
 
 		$this->_messages = SessionMessage::getInstance();
-		$this->_messages->clear();
 	}
 
 	protected function validateInput() {

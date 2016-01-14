@@ -8,8 +8,11 @@ class SessionMessage {
 	protected $session;
 	protected $messages;
 	protected static $instance;
-	const KEY='MSG';
+	const KEY = 'MSG';
 
+	/**
+	 * @return static
+	 */
 	public static function getInstance() {
 		if(self::$instance === null) {
 			self::$instance = new static();

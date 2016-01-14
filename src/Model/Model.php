@@ -58,12 +58,9 @@ abstract class Model implements IModel, \IteratorAggregate {
         $keys = array();
         $values = array();
 
-        foreach($this->getRows() as $name => $row) {
-            $column = $this->table->getColumn($name);
-            if ($column !== null) {
-                $keys[] = $column->getName();
-                $values[] = $row;
-            }
+        foreach($this->table->getColumnNames() as $column) {
+            $keys[] = $column;
+            $values[] = $this->{$column};
         }
 
         $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), PdoHelper::joinArray($values));
@@ -123,10 +120,21 @@ abstract class Model implements IModel, \IteratorAggregate {
 
         if($primaryKey && $primaryValue) {
             $concat=array();
+
             foreach($this->table->getColumnNames(false, true) as $key=>$name) {
-                $val = $this->getRow($name);
+                $val = $this->{$name};
+
+                if(isset($this->results['data']['original'][$name]) && $this->results['data']['original'][$name] == $val) {
+                    continue;
+                }
+
                 $concat[] = PdoHelper::formatQuery('`'.$name.'` = %s', array($val));
             }
+
+            if(count($concat) === 0) {
+                return null;
+            }
+
             $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = \'%s\' LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), PdoHelper::escape($primaryValue));
 
             try {
@@ -184,7 +192,7 @@ abstract class Model implements IModel, \IteratorAggregate {
             foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                 $obj = static::onCreateModel(new CollectionItem($row));
                 $obj->setRows($row);
-                $results['data']['rows'][]=$obj;
+                $results['data']['rows'][] = $obj;
             }
         }
 
@@ -453,6 +461,7 @@ abstract class Model implements IModel, \IteratorAggregate {
             $this->results['data']['numRows'] = count($rows);
         }
         $this->results['data']['rows'] = $rows;
+        $this->results['data']['original'] = $rows;
     }
 
     /**
