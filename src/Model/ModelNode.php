@@ -55,12 +55,17 @@ class ModelNode extends Model {
         $table->column('active_to')->datetime()->nullable()->index();
         $table->column('level')->integer()->index();
         $table->column('order')->integer()->index();
+        $table->column('active')->bool()->index()->nullable();
 
         parent::__construct($table);
 
         $this->data = new CollectionItem();
         $this->path = 0;
         $this->created_date = Date::toDateTime();
+    }
+
+    public function isActive() {
+        return ($this->active && ($this->active_from === null || time() >= strtotime($this->active_from)) && ($this->active_to === null || $this->active_to >= time()));
     }
 
     protected function calculatePath() {
