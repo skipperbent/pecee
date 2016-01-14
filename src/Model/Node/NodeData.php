@@ -17,13 +17,13 @@ class NodeData extends Model {
         parent::__construct($table);
     }
 
-    /*public function save() {
+    public function save() {
         if(self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `node_id` = %s', $this->node_id, $this->key)) {
             parent::update();
         } else {
             parent::save();
         }
-    }*/
+    }
 
     public static function clear($nodeId) {
         self::nonQuery('DELETE FROM {table} WHERE `node_id` = %s', array($nodeId));
