@@ -73,7 +73,7 @@ class Form {
      * @return \Pecee\UI\Html\HtmlInput
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true) {
-        if(is_null($value) && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
+        if($saveValue && (is_null($value) && $this->getValue($name) || request()->getMethod() !== 'get')) {
             $value = $this->getValue($name);
         }
         return new HtmlInput($name, $type, Str::htmlEntities($value));
@@ -116,7 +116,7 @@ class Form {
      */
     public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
         $element = new HtmlCheckbox($name, $value);
-        if($saveValue) {
+        if($saveValue !== false) {
             $defaultValue = (count($_GET)) ? null : $defaultValue;
             $checked = Boolean::parse($this->getValue($name, $defaultValue));
             if($checked) {
@@ -152,17 +152,17 @@ class Form {
         $element = new HtmlSelect($name);
         if(!is_null($data)) {
             if($data instanceof Dataset) {
-                $arr=$data->getData();
-                if(count($arr) > 0) {
+                $arr = $data->getData();
+                if(count($arr)) {
                     foreach($data->getData() as $i) {
-                        $val=(!isset($i['value'])) ? $i['name'] : $i['value'];
-                        $selected=($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
+                        $val = (!isset($i['value'])) ? $i['name'] : $i['value'];
+                        $selected = ($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                         $element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
                     }
                 }
             } elseif(is_array($data)) {
                 foreach($data as $val => $key) {
-                    $selected=($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
+                    $selected = ($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                     $element->addOption(new HtmlSelectOption($key, $val, $selected));
                 }
             } else {
@@ -182,7 +182,7 @@ class Form {
      * @return \Pecee\UI\Html\HtmlTextarea
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true) {
-        if(!$value && $this->getValue($name) || $saveValue && request()->getMethod() !== 'get') {
+        if($saveValue && (!$value && $this->getValue($name) || request()->getMethod() !== 'get')) {
             $value = $this->getValue($name);
         }
         return new HtmlTextarea($name, $rows, $cols, $value);
