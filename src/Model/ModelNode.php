@@ -199,11 +199,11 @@ class ModelNode extends Model {
                 $cf[strtolower($field->key)] = $field;
             }
 
-            if(count($this->data->getData()) > 0) {
+            if(count($this->data->getData())) {
                 foreach($this->data->getData() as $key=>$value) {
 
                     if(isset($cf[strtolower($key)])) {
-                        if($cf[$key]->value == $value) {
+                        if($cf[$key]->value === $value) {
                             unset($cf[$key]);
                             continue;
                         } else {
