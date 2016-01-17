@@ -14,8 +14,10 @@ class ModelNode extends Model {
     const ORDER_ID_DESC = 'n.`id` DESC';
     const ORDER_CHANGED_DESC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) DESC';
     const ORDER_CHANGED_ASC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) ASC';
-    const ORDER_DATE_DESC = 'IFNULL(n.`active_from`, n.`created_date`) DESC';
-    const ORDER_DATE_ASC = 'n.`created_date` ASC';
+    const ORDER_CREATED_DESC = 'n.`created_date` DESC';
+    const ORDER_CREATED_ASC = 'n.`created_date` ASC';
+    const ORDER_ACTIVE_CREATED_DESC = 'IFNULL(n.`active_from`, n.`created_date`) DESC';
+    const ORDER_ACTIVE_CREATED_ASC = 'IFNULL(n.`active_from`, n.`created_date`) ASC';
     const ORDER_TITLE_DESC = 'n.`title` DESC';
     const ORDER_TITLE_ASC = 'n.`title` ASC';
     const ORDER_PARENT_DESC = 'n.`parent_id` DESC';
@@ -25,8 +27,8 @@ class ModelNode extends Model {
 
     public static $orders = [
         self::ORDER_ID_DESC,
-        self::ORDER_DATE_ASC,
-        self::ORDER_DATE_DESC,
+        self::ORDER_CREATED_ASC,
+        self::ORDER_CREATED_DESC,
         self::ORDER_TITLE_ASC,
         self::ORDER_TITLE_DESC,
         self::ORDER_PARENT_DESC,
@@ -34,7 +36,9 @@ class ModelNode extends Model {
         self::ORDER_ORDER_ASC,
         self::ORDER_ORDER_DESC,
         self::ORDER_CHANGED_DESC,
-        self::ORDER_CHANGED_ASC
+        self::ORDER_CHANGED_ASC,
+        self::ORDER_ACTIVE_CREATED_DESC,
+        self::ORDER_ACTIVE_CREATED_ASC
     ];
 
     public $data;
@@ -474,7 +478,7 @@ class ModelNode extends Model {
             $where[] = sprintf('(n.`title` LIKE \'%s\' OR n.`content` LIKE \'%s\')', '%'.PdoHelper::escape($query).'%', '%'.PdoHelper::escape($query).'%');
         }
 
-        $order = (!is_null($order) && in_array($order, self::$orders)) ? $order : self::ORDER_DATE_DESC;
+        $order = (!is_null($order) && in_array($order, self::$orders)) ? $order : static::ORDER_CREATED_DESC;
 
         return self::fetchPage('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where) . ' ORDER BY ' . $order, $rows, $page);
     }
@@ -520,7 +524,7 @@ class ModelNode extends Model {
             $where[] = sprintf('(n.`title` LIKE \'%s\' OR n.`content` LIKE \'%s\')', '%'.PdoHelper::escape($query).'%', '%'.PdoHelper::escape($query).'%');
         }
 
-        $order = (!is_null($order) && in_array($order, self::$orders)) ? $order : self::ORDER_ORDER_ASC;
+        $order = (!is_null($order) && in_array($order, self::$orders)) ? $order : static::ORDER_CREATED_DESC;
 
         return self::fetchPage('SELECT n.* FROM {table} n WHERE ' . join(' && ', $where) . ' ORDER BY ' . $order, $rows, $page);
     }
