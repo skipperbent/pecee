@@ -92,7 +92,7 @@ class ModelUser extends ModelData {
                         }
                     } else {
                         $field = new UserData();
-                        $field->node_id = $this->id;
+                        $field->user_id = $this->id;
                         $field->key = $key;
                         $field->value = $value;
                         $field->save();
