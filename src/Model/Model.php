@@ -481,11 +481,15 @@ abstract class Model implements IModel, \IteratorAggregate {
     }
 
     public function getMaxPages() {
-        return ($this->getMaxRows() && count($this->getRows())) ? ceil($this->getMaxRows()/count($this->getRows())) : 0;
+        return ($this->getMaxRows() > 0 && $this->getRowsPerPage() > 0) ? ceil($this->getMaxRows()/$this->getRowsPerPage()) : 0;
     }
 
     public function setPage($page) {
         $this->results['data']['page'] = $page;
+    }
+
+    public function getRowsPerPage() {
+        return isset($this->results['data']['rowsPerPage']) ? $this->results['data']['rowsPerPage'] : 0;
     }
 
     public function getPage() {
