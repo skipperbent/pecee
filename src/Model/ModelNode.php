@@ -202,12 +202,11 @@ class ModelNode extends Model {
             if(count($this->data->getData())) {
                 foreach($this->data->getData() as $key=>$value) {
 
+                    if($value === null) {
+                        continue;
+                    }
+
                     if(isset($cf[strtolower($key)])) {
-
-                        if($cf[$key]->value === null) {
-                            continue;
-                        }
-
                         if($cf[$key]->value === $value) {
                             unset($cf[$key]);
                             continue;
