@@ -63,7 +63,7 @@ class ModelUser extends ModelData {
 
     public function updateData() {
 
-        if($this->data) {
+        if($this->data !== null) {
 
             $currentFields = UserData::getByUserId($this->id);
 
@@ -72,21 +72,27 @@ class ModelUser extends ModelData {
                 $cf[strtolower($field->key)] = $field;
             }
 
-            if(count($this->data->getData()) > 0) {
+            if(count($this->data->getData())) {
                 foreach($this->data->getData() as $key=>$value) {
 
                     if(isset($cf[strtolower($key)])) {
-                        if($cf[$key]->value == $value) {
+
+                        if($cf[$key]->value === null) {
+                            continue;
+                        }
+
+                        if($cf[$key]->value === $value) {
                             unset($cf[$key]);
                             continue;
                         } else {
                             $cf[$key]->value = $value;
+                            $cf[$key]->key = $key;
                             $cf[$key]->update();
                             unset($cf[$key]);
                         }
                     } else {
                         $field = new UserData();
-                        $field->user_id = $this->id;
+                        $field->node_id = $this->id;
                         $field->key = $key;
                         $field->value = $value;
                         $field->save();

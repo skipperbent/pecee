@@ -190,7 +190,7 @@ class ModelNode extends Model {
     }
 
     public function updateFields() {
-        if($this->data) {
+        if($this->data !== null) {
 
             $currentFields = NodeData::getByNodeId($this->id);
 
@@ -203,6 +203,11 @@ class ModelNode extends Model {
                 foreach($this->data->getData() as $key=>$value) {
 
                     if(isset($cf[strtolower($key)])) {
+
+                        if($cf[$key]->value === null) {
+                            continue;
+                        }
+
                         if($cf[$key]->value === $value) {
                             unset($cf[$key]);
                             continue;

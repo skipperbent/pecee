@@ -71,7 +71,7 @@ class ModelFile extends ModelData {
 			/* Remove all fields */
 			FileData::removeAll($this->id);
 			foreach($this->data->getData() as $key=>$value) {
-				$data=new FileData($this->id, $key, $value);
+				$data  =new FileData($this->id, $key, $value);
 				$data->save();
 			}
 		}
