@@ -19,11 +19,9 @@ class Form {
 
     protected $input;
     protected $name;
-    protected $indexes;
 
     public function __construct(Input $input) {
         $this->input = $input;
-        $this->indexes = array();
     }
 
     protected function getValue($name, $defaultValue = null) {
@@ -36,7 +34,7 @@ class Form {
             }
 
             if(strpos($name, '[]') !== false) {
-                $index = $this->indexes[$name];
+                $index = $name;
                 $newName = substr($name, 0, strpos($name, '[]'));
                 if(isset($_POST[$newName][$index])) {
                     return $_POST[$newName][$index];
