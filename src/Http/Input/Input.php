@@ -95,6 +95,8 @@ class Input {
                     continue;
                 }
 
+                $output = array();
+
                 foreach($value['name'] as $k=>$val) {
                     // Strip empty values
                     if($value['error'][$k] != '4') {
@@ -104,9 +106,11 @@ class Input {
                         $file->type = $value['type'][$k];
                         $file->tmpName = $value['tmp_name'][$k];
                         $file->error = $value['error'][$k];
-                        $this->file->{strtolower($key)}[$k] = $file;
+                        $output[$k] = $file;
                     }
                 }
+
+                $this->file->{strtolower($key)} = new InputItem($key, $output);
             }
         }
     }
