@@ -8,6 +8,7 @@ use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
+use Pecee\UI\Site;
 
 abstract class Widget extends Base  {
 
@@ -77,11 +78,11 @@ abstract class Widget extends Base  {
             $this->_site->addMeta('keywords', join(', ', $this->_site->getKeywords()));
         }
 
-        if($includeCss) {
+        if($includeCss === true) {
             $o[] = $this->printCss();
         }
 
-        if($includeJs) {
+        if($includeJs === true) {
             $o[] = $this->printJs();
         }
 
@@ -93,9 +94,9 @@ abstract class Widget extends Base  {
         return join('', $o);
     }
 
-    public function printCss() {
+    public function printCss($section = Site::SECTION_DEFAULT) {
         $o = array();
-        if($this->_site->getCssFilesWrapped()) {
+        if($this->_site->getCssFilesWrapped($section)) {
 
             $getParams = array();
 
@@ -103,11 +104,11 @@ abstract class Widget extends Base  {
                 $getParams = ['_' => time()];
             }
 
-            $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped(), ',')], $getParams));
+            $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped($section), ',')], $getParams));
             $o[] = new HtmlLink($url);
         }
 
-        $css = $this->_site->getCss();
+        $css = $this->_site->getCss($section);
         if(count($css)) {
             foreach($css as $c) {
                 $o[] = $c;
@@ -116,9 +117,9 @@ abstract class Widget extends Base  {
         return join('', $o);
     }
 
-    public function printJs() {
+    public function printJs($section = Site::SECTION_DEFAULT) {
         $o = array();
-        if($this->_site->getJsFilesWrapped()) {
+        if($this->_site->getJsFilesWrapped($section)) {
 
             $getParams = array();
 
@@ -126,11 +127,11 @@ abstract class Widget extends Base  {
                 $getParams = ['_' => time()];
             }
 
-            $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped(), ',')], $getParams));
+            $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped($section), ',')], $getParams));
             $o[] = new HtmlScript($url);
         }
 
-        $js = $this->_site->getJs();
+        $js = $this->_site->getJs($section);
         if(count($js) > 0) {
             foreach($js as $j) {
                 $o[] = $j;
