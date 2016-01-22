@@ -9,6 +9,8 @@ use Pecee\UI\Html\HtmlScript;
 
 class Site {
 
+	const SECTION_DEFAULT = 'default';
+
 	const DOCTYPE_HTML_5 = '<!DOCTYPE html>';
 	const DOCTYPE_XHTML_DEFAULT = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
 	const DOCTYPE_XHTML_STRICT = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">';
@@ -87,29 +89,29 @@ class Site {
 		return $this->charset;
 	}
 
-	public function addWrappedJs($filename) {
+	public function addWrappedJs($filename, $section = self::SECTION_DEFAULT) {
 		if(!in_array($filename, $this->jsFilesWrapped)) {
-			$this->jsFilesWrapped[] = $filename;
+			$this->jsFilesWrapped[$section][] = $filename;
 		}
 	}
 
-	public function removeWrappedJs($filename) {
+	public function addWrappedCss($filename, $section = self::SECTION_DEFAULT) {
+		if(!in_array($filename, $this->cssFilesWrapped)) {
+			$this->cssFilesWrapped[$section][] = $filename;
+		}
+	}
+
+	public function removeWrappedJs($filename, $section = self::SECTION_DEFAULT) {
 		if(in_array($filename, $this->jsFilesWrapped)) {
 			$key = array_search($filename, $this->jsFilesWrapped);
-			unset($this->jsFilesWrapped[$key]);
+			unset($this->jsFilesWrapped[$section][$key]);
 		}
 	}
 
-	public function removeWrappedCss($filename) {
+	public function removeWrappedCss($filename, $section = self::SECTION_DEFAULT) {
 		if(in_array($filename, $this->cssFilesWrapped)) {
 			$key = array_search($filename, $this->cssFilesWrapped);
-			unset($this->cssFilesWrapped[$key]);
-		}
-	}
-
-	public function addWrappedCss($filename) {
-		if(!in_array($filename, $this->cssFilesWrapped)) {
-			$this->cssFilesWrapped[] = $filename;
+			unset($this->cssFilesWrapped[$section][$key]);
 		}
 	}
 
@@ -121,17 +123,17 @@ class Site {
 		return Debug::getInstance()->getEnabled();
 	}
 
-	public function addCss($path) {
+	public function addCss($path, $section = self::SECTION_DEFAULT) {
 		$css = new HtmlLink($path, 'stylesheet', 'text/css');
 		if(!in_array($css, $this->css)) {
-			$this->css[] = $css;
+			$this->css[$section][] = $css;
 		}
 	}
 
-	public function addJs($path) {
+	public function addJs($path, $section = self::SECTION_DEFAULT) {
 		$js = new HtmlScript($path);
 		if(!in_array($js, $this->js)) {
-			$this->js[] = $js;
+			$this->js[$section][] = $js;
 		}
 	}
 
@@ -179,20 +181,20 @@ class Site {
 		return $this;
 	}
 
-	public function getJsFilesWrapped() {
-		return $this->jsFilesWrapped;
+	public function getJsFilesWrapped($section) {
+		return (isset($this->jsFilesWrapped[$section]) ? $this->jsFilesWrapped[$section] : array());
 	}
 
-	public function getCssFilesWrapped() {
-		return $this->cssFilesWrapped;
+	public function getCssFilesWrapped($section) {
+		return (isset($this->cssFilesWrapped[$section]) ? $this->cssFilesWrapped[$section] : array());
 	}
 
-	public function getJs() {
-		return $this->js;
+	public function getJs($section = self::SECTION_DEFAULT) {
+		return (isset($this->js[$section]) ? $this->js[$section] : array());
 	}
 
-	public function getCss() {
-		return $this->css;
+	public function getCss($section = self::SECTION_DEFAULT) {
+		return (isset($this->css[$section]) ? $this->css[$section] : array());
 	}
 
 	public function getHeader() {
