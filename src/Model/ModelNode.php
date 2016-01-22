@@ -16,8 +16,8 @@ class ModelNode extends Model {
     const ORDER_CHANGED_ASC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) ASC';
     const ORDER_CREATED_DESC = 'n.`created_date` DESC';
     const ORDER_CREATED_ASC = 'n.`created_date` ASC';
-    const ORDER_ACTIVE_CREATED_DESC = 'IFNULL(n.`active_from`, n.`created_date`) DESC';
-    const ORDER_ACTIVE_CREATED_ASC = 'IFNULL(n.`active_from`, n.`created_date`) ASC';
+    const ORDER_ACTIVE_CREATED_DESC = 'IFNULL(n.`active_from`, n.`created_date`) DESC, n.`created_date` DESC';
+    const ORDER_ACTIVE_CREATED_ASC = 'IFNULL(n.`active_from`, n.`created_date`) ASC, n.`created_date` ASC';
     const ORDER_TITLE_DESC = 'n.`title` DESC';
     const ORDER_TITLE_ASC = 'n.`title` ASC';
     const ORDER_PARENT_DESC = 'n.`parent_id` DESC';
