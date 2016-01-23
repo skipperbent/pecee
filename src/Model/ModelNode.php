@@ -185,7 +185,7 @@ class ModelNode extends Model {
     public function getChilds($query = null, $active = null, $order = null) {
         $key = md5($query . $active . $order);
         if(!isset($this->childs[$key])) {
-            $this->childs[$key] = self::get(null, $query, $active, $this->id, null, $order, null, null);
+            $this->childs[$key] = static::get($this->type, $query, $active, $this->id, null, $order, null, null);
         }
         return $this->childs[$key];
     }
