@@ -57,16 +57,18 @@ abstract class Model implements IModel, \IteratorAggregate {
 
         $keys = array();
         $values = array();
+        $concat = array();
 
         foreach($this->table->getColumnNames() as $column) {
             $keys[] = $column;
             $values[] = $this->{$column};
+            $concat[] = '?';
         }
 
-        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), PdoHelper::joinArray($values));
+        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), join(',', $concat));
 
         try {
-            $id = Pdo::getInstance()->insert($sql);
+            $id = Pdo::getInstance()->insert($sql, $values);
         }catch(\PDOException $e) {
             if($e->getCode() == '42S02' && $this->getAutoCreateTable()) {
                 $this->table->create();
@@ -90,8 +92,8 @@ abstract class Model implements IModel, \IteratorAggregate {
         $primaryValue = array_values($this->getRows());
         $primaryValue = $primaryValue[0];
         if($primaryKey && $primaryValue) {
-            $sql = sprintf('DELETE FROM `%s` WHERE `%s` = %s;', $this->table->getName(), $primaryKey->getName(), PdoHelper::formatQuery('%s', array($primaryValue)));
-            Pdo::getInstance()->nonQuery($sql);
+            $sql = sprintf('DELETE FROM `%s` WHERE `%s` = ?;', $this->table->getName(), $primaryKey->getName());
+            Pdo::getInstance()->nonQuery($sql, [$primaryValue]);
         }
     }
 
@@ -100,8 +102,8 @@ abstract class Model implements IModel, \IteratorAggregate {
         $primaryValue = array_values($this->getRows());
         $primaryValue = $primaryValue[0];
         if($primaryKey && $primaryValue) {
-            $sql = sprintf('SELECT `%s` FROM `%s` WHERE `%s` = %s;', $primaryKey->getName(), $this->table->getName(), $primaryKey->getName(), PdoHelper::formatQuery('%s', array($primaryValue)));
-            return Pdo::getInstance()->value($sql);
+            $sql = sprintf('SELECT `%s` FROM `%s` WHERE `%s` = ?;', $primaryKey->getName(), $this->table->getName(), $primaryKey->getName());
+            return Pdo::getInstance()->value($sql, [$primaryValue]);
         }
         return false;
     }
@@ -121,6 +123,8 @@ abstract class Model implements IModel, \IteratorAggregate {
         if($primaryKey && $primaryValue) {
             $concat=array();
 
+            $values = array();
+
             foreach($this->table->getColumnNames(false, true) as $key=>$name) {
                 $val = $this->{$name};
 
@@ -128,17 +132,23 @@ abstract class Model implements IModel, \IteratorAggregate {
                     continue;
                 }
 
-                $concat[] = PdoHelper::formatQuery('`'.$name.'` = %s', array($val));
+                $values[] = $val;
+                $concat[] = PdoHelper::formatQuery('`'.$name.'` = ?', array($val));
             }
 
             if(count($concat) === 0) {
                 return null;
             }
 
-            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = \'%s\' LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName(), PdoHelper::escape($primaryValue));
+            $values[] = $primaryValue;
+
+            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = ? LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName());
 
             try {
-                Pdo::getInstance()->nonQuery($sql);
+
+                Pdo::getInstance()->nonQuery($sql, $values);
+
+                //Pdo::getInstance()->nonQuery($sql);
             }catch(\PDOException $e) {
                 if($e->getCode() == '42S02' && $this->getAutoCreateTable()) {
                     $this->table->create();
