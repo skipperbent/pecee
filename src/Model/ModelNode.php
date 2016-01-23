@@ -182,14 +182,19 @@ class ModelNode extends Model {
         return $result;
     }
 
-    public function setChilds($childs) {
-        $this->childs = $childs;
+    public function getChilds($query = null, $active = null, $order = null) {
+        $key = md5($query . $active . $order);
+        if(!isset($this->childs[$key])) {
+            $this->childs[$key] = static::get($this->type, $query, $active, $this->id, null, $order, null, null);
+        }
+        return $this->childs[$key];
     }
 
-    public function getChilds() {
-        if(!$this->parent) {
-            $this->parent = self::get(null, null, null, $this->id, null, null, null, null);
+    public function getParent() {
+        if($this->parent === null && $this->parent_id !== null) {
+            $this->parent = static::getById($this->parent_id);
         }
+
         return $this->parent;
     }
 
@@ -508,7 +513,7 @@ class ModelNode extends Model {
         }
 
         if(!is_null($path)) {
-            $where[] = "n.`path` LIKE '>%".PdoHelper::escape($path)."'";
+            $where[] = "(n.`path` = '".PdoHelper::escape($path)."' || n.`path` LIKE '>%".PdoHelper::escape($path)."')";
         }
 
         if(!is_null($type)) {
