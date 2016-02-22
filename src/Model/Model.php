@@ -502,6 +502,10 @@ abstract class Model implements IModel, \IteratorAggregate {
         return isset($this->results['data']['rowsPerPage']) ? $this->results['data']['rowsPerPage'] : 0;
     }
 
+    public function setRowsPerPage($rows) {
+        $this->results['data']['rowsPerPage'] = $rows;
+    }
+
     public function getPage() {
         return isset($this->results['data']['page']) ? $this->results['data']['page'] : 0;
     }
