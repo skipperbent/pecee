@@ -63,8 +63,9 @@ abstract class Widget extends Base  {
      */
     public function printHeader($includeJs = true, $includeCss = true) {
 
-        $enc = new HtmlMeta('text/html; charset='.$this->_site->getCharset());
-        $enc->addAttribute('http-equiv', 'Content-Type');
+        $enc = new HtmlMeta();
+        $enc->addAttribute('charset', $this->getSite()->getCharset());
+
         $o = array($enc);
 
         if($this->_site->getTitle())  {

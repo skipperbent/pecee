@@ -124,7 +124,8 @@ class Site {
 	}
 
 	public function addCss($path, $section = self::SECTION_DEFAULT) {
-		$css = new HtmlLink($path, 'stylesheet', 'text/css');
+		$type = ($this->getDocType() === self::DOCTYPE_HTML_5) ? null : 'text/css';
+		$css = new HtmlLink($path, 'stylesheet', $type);
 		if(!in_array($css, $this->css)) {
 			$this->css[$section][] = $css;
 		}
