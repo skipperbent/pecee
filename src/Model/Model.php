@@ -19,6 +19,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     protected $hidden = [];
     protected $with = [];
     protected $rename = [];
+    protected $join = [];
 
     public function __construct(DBTable $table) {
         $this->autoCreate = true;
@@ -242,7 +243,7 @@ abstract class Model implements IModel, \IteratorAggregate {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                     $obj = static::onCreateModel(new CollectionItem($row));
                     $obj->setRows($row);
-                    $results['data']['rows'][]=$obj;
+                    $results['data']['rows'][] = $obj;
                 }
             }
             $model->setResults($results);
@@ -472,6 +473,13 @@ abstract class Model implements IModel, \IteratorAggregate {
         }
         $this->results['data']['rows'] = $rows;
         $this->results['data']['original'] = $rows;
+
+        if(count($this->join)) {
+            foreach($this->join as $join) {
+                $method = Str::camelize($join);
+                $this->{$join} = $this->$method();
+            }
+        }
     }
 
     /**
