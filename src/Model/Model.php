@@ -416,6 +416,9 @@ abstract class Model implements IModel, \IteratorAggregate {
                     $rows[$key] = $this->parseArrayData($row);
                 }
             }
+
+            $arr['hasNext'] = $this->hasNext();
+            $arr['hasPrevious'] = $this->hasPrevious();
         }
 
         if(count($this->getResults()) === 1) {
