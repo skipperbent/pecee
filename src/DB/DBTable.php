@@ -2,14 +2,34 @@
 namespace Pecee\DB;
 class DBTable {
 
+    const ENGINE_INNODB = 'InnoDB';
+    const ENGINE_MEMORY = 'MEMORY';
+    const ENGINE_ARCHIVE = 'ARCHIVE';
+    const ENGINE_CSV = 'CSV';
+    const ENGINE_BLACKHOLE = 'BLACKHOLE';
+    const ENGINE_MRG_MYISAM = 'MRG_MYISAM';
+    const ENGINE_MYISAM = 'MyISAM';
+
+    public static $ENGINES = [
+        self::ENGINE_INNODB,
+        self::ENGINE_ARCHIVE,
+        self::ENGINE_CSV,
+        self::ENGINE_BLACKHOLE,
+        self::ENGINE_MEMORY,
+        self::ENGINE_MRG_MYISAM,
+        self::ENGINE_MYISAM
+    ];
+
     /**
      * @var array
      */
     protected $columns;
     protected $name;
+    protected $engine;
 
     public function __construct($name = null) {
         $this->name = $name;
+        $this->engine = self::ENGINE_INNODB;
     }
 
     /**
@@ -79,6 +99,17 @@ class DBTable {
         return $this->name;
     }
 
+    public function setEngine($engine) {
+        if(!in_array($engine, self::$ENGINES)) {
+            throw new \InvalidArgumentException('Invalid or unsupported engine');
+        }
+        $this->engine = $engine;
+    }
+
+    public function getEngine() {
+        return $this->engine;
+    }
+
     /**
      * Create table
      */
@@ -116,7 +147,7 @@ class DBTable {
         }
 
         $query = array_merge($query,$keys);
-        $sql = sprintf('CREATE TABLE `'. $this->name .'` (%s) ENGINE = InnoDB;', join(', ', $query));
+        $sql = sprintf('CREATE TABLE `'. $this->name .'` (%s) ENGINE = '. $this->engine .';', join(', ', $query));
 
         Pdo::getInstance()->nonQuery($sql);
     }
