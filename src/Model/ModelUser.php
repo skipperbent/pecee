@@ -158,8 +158,8 @@ class ModelUser extends ModelData {
     }
 
     protected function signIn($cookieExp){
-        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, self::generateLoginKey());
-        $ticket = Mcrypt::encrypt(join('|',$user), self::generateLoginKey());
+        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, self::getSalt());
+        $ticket = Mcrypt::encrypt(join('|',$user), self::getSalt());
         Cookie::create('ticket', $ticket, $cookieExp);
     }
 
@@ -182,10 +182,10 @@ class ModelUser extends ModelData {
     public static function getFromCookie($setData = false) {
         $ticket = Cookie::get('ticket');
         if(trim($ticket) != ''){
-            $ticket = Mcrypt::decrypt($ticket, self::generateLoginKey());
+            $ticket = Mcrypt::decrypt($ticket, self::getSalt());
             $user = explode('|', $ticket);
 
-            if (is_array($user) && end($user) === self::generateLoginKey()) {
+            if (is_array($user) && end($user) === self::getSalt()) {
                 if ($setData) {
                     self::$instance = self::getById($user[0]);
                 } else {
@@ -219,8 +219,8 @@ class ModelUser extends ModelData {
         return self::$instance;
     }
 
-    protected static function generateLoginKey() {
-        return env('APP_SECRET', md5('NoApplicationSecretDefined'));
+    public static function getSalt() {
+        return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 
     public static function get($query = null, $adminLevel = null, $deleted = null, $order = null, $rows = null, $page = null) {
