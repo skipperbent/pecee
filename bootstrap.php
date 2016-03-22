@@ -17,4 +17,4 @@ function pecee_autoloader($class) {
 
 spl_autoload_register('pecee_autoloader');
 
-require_once 'config/helpers.php';
+require_once 'helpers.php';
