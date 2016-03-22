@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\DB;
+
 class DBColumn {
+    
     protected $name;
     protected $type;
     protected $length;
@@ -11,6 +13,8 @@ class DBColumn {
     protected $index;
     protected $increment;
     protected $comment;
+    protected $relationTable;
+    protected $relationColumn;
 
     const INDEX_PRIMARY = 'PRIMARY KEY';
     const INDEX_UNIQUE = 'UNIQUE';
@@ -57,16 +61,60 @@ class DBColumn {
     const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
     const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
-    public static $INDEXES = array(self::INDEX_PRIMARY, self::INDEX_UNIQUE, self::INDEX_INDEX, self::INDEX_FULLTEXT);
+    public static $INDEXES = [
+        self::INDEX_PRIMARY,
+        self::INDEX_UNIQUE,
+        self::INDEX_INDEX,
+        self::INDEX_FULLTEXT
+    ];
 
-    public static $TYPES = array(self::TYPE_VARCHAR, self::TYPE_LONGTEXT, self::TYPE_TEXT, self::TYPE_MEDIUMTEXT, self::TYPE_TINYTEXT,
-        self::TYPE_INT, self::TYPE_TINYINT, self::TYPE_SMALLINT, self::TYPE_MEDIUMINT, self::TYPE_BIGINT, self::TYPE_DECIMAL, self::TYPE_FLOAT,
-        self::TYPE_DOUBLE, self::TYPE_REAL, self::TYPE_BIT, self::TYPE_BOOLEAN, self::TYPE_SERIAL, self::TYPE_DATE, self::TYPE_DATETIME,
-        self::TYPE_TIMESTAMP, self::TYPE_TIME, self::TYPE_YEAR, self::TYPE_CHAR, self::TYPE_BINARY, self::TYPE_VARBINARY, self::TYPE_TINYBLOB,
-        self::TYPE_MEDIUMBLOB, self::TYPE_BLOB, self::TYPE_LONGBLOB, self::TYPE_ENUM, self::TYPE_SET, self::TYPE_GEOMETRY, self::TYPE_POINT,
-        self::TYPE_LINESTRING, self::TYPE_POLYGON, self::TYPE_MULTIPOINT, self::TYPE_MULTILINESTRING, self::TYPE_MULTIPOLYGON, self::TYPE_GEOMETRYCOLLECTION);
+    public static $TYPES = [
+        self::TYPE_VARCHAR,
+        self::TYPE_LONGTEXT,
+        self::TYPE_TEXT,
+        self::TYPE_MEDIUMTEXT,
+        self::TYPE_TINYTEXT,
+        self::TYPE_INT,
+        self::TYPE_TINYINT,
+        self::TYPE_SMALLINT,
+        self::TYPE_MEDIUMINT,
+        self::TYPE_BIGINT,
+        self::TYPE_DECIMAL,
+        self::TYPE_FLOAT,
+        self::TYPE_DOUBLE,
+        self::TYPE_REAL,
+        self::TYPE_BIT,
+        self::TYPE_BOOLEAN,
+        self::TYPE_SERIAL,
+        self::TYPE_DATE,
+        self::TYPE_DATETIME,
+        self::TYPE_TIMESTAMP,
+        self::TYPE_TIME,
+        self::TYPE_YEAR,
+        self::TYPE_CHAR,
+        self::TYPE_BINARY,
+        self::TYPE_VARBINARY,
+        self::TYPE_TINYBLOB,
+        self::TYPE_MEDIUMBLOB,
+        self::TYPE_BLOB,
+        self::TYPE_LONGBLOB,
+        self::TYPE_ENUM,
+        self::TYPE_SET,
+        self::TYPE_GEOMETRY,
+        self::TYPE_POINT,
+        self::TYPE_LINESTRING,
+        self::TYPE_POLYGON,
+        self::TYPE_MULTIPOINT,
+        self::TYPE_MULTILINESTRING,
+        self::TYPE_MULTIPOLYGON,
+        self::TYPE_GEOMETRYCOLLECTION
+    ];
 
     // Default values
+
+    public function __construct() {
+        $this->relation = array();
+    }
 
     public function primary() {
         $this->setIndex(self::INDEX_PRIMARY);
@@ -162,6 +210,12 @@ class DBColumn {
         return $this;
     }
 
+    public function relation($table, $column) {
+        $this->relationTable = $table;
+        $this->relationColumn = $column;
+        return $this;
+    }
+
     public function setName($name) {
         $this->name = $name;
         return $this;
@@ -250,6 +304,14 @@ class DBColumn {
 
     public function getComment() {
         return $this->comment;
+    }
+
+    public function getRelationTable() {
+        return $this->relationTable;
+    }
+
+    public function getRelationColumn() {
+        return $this->relationColumn;
     }
 
 }

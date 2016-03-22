@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\DB;
+
 class DBTable {
 
     const ENGINE_INNODB = 'InnoDB';
@@ -9,16 +10,6 @@ class DBTable {
     const ENGINE_BLACKHOLE = 'BLACKHOLE';
     const ENGINE_MRG_MYISAM = 'MRG_MYISAM';
     const ENGINE_MYISAM = 'MyISAM';
-
-    // auto-create Relations
-
-    /**
-     * CREATE TABLE bla PRIMARY KEY ( account_id ), FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ) ENGINE=INNODB;
-     */
-
-    /*
-     * ALTER TABLE `calendar_rule` ADD FOREIGN KEY (`company_id`) REFERENCES `bookandbegin`.`company`(`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
-     */
 
     public static $ENGINES = [
         self::ENGINE_INNODB,
@@ -133,6 +124,8 @@ class DBTable {
             $keys  = array();
             $query = array();
 
+            //CREATE TABLE bla PRIMARY KEY ( account_id ), FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ) ENGINE=INNODB;
+
             /* @var $column DBColumn */
             foreach ($this->columns as $column) {
                 $length = '';
@@ -161,6 +154,10 @@ class DBTable {
 
                 if ($column->getIndex()) {
                     $keys[] = sprintf('%s (`%s`)', $column->getIndex(), $column->getName());
+                }
+
+                if($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
+                    $keys[] = sprintf('FOREIGN KEY(%s) REFERENCES %s(`%s`)', $column->getName(), $column->getRelationTable(), $column->getRelationColumn());
                 }
             }
 
