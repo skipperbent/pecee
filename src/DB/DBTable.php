@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\DB;
+
 class DBTable {
 
     const ENGINE_INNODB = 'InnoDB';
@@ -110,46 +111,61 @@ class DBTable {
         return $this->engine;
     }
 
+    public function exists() {
+        return (Pdo::getInstance()->value('SHOW TABLES LIKE ?', [$this->name]) !== false);
+    }
+
     /**
      * Create table
      */
     public function create() {
-        $keys = array();
-        $query = array();
-        /* @var $column DBColumn */
-        foreach($this->columns as $column) {
-            $length = '';
-            if($column->getLength()) {
-                $length = '('.$column->getLength().')';
+
+        if(!$this->exists()) {
+            $keys  = array();
+            $query = array();
+
+            //CREATE TABLE bla PRIMARY KEY ( account_id ), FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ) ENGINE=INNODB;
+
+            /* @var $column DBColumn */
+            foreach ($this->columns as $column) {
+                $length = '';
+                if ($column->getLength()) {
+                    $length = '(' . $column->getLength() . ')';
+                }
+
+                $tmp = sprintf('`%s` %s%s %s ', $column->getName(), $column->getType(), $length,
+                    $column->getAttributes());
+
+                $tmp .= (!$column->getNullable()) ? 'NOT null' : 'null';
+
+                if ($column->getDefaultValue()) {
+                    $tmp .= PdoHelper::formatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
+                }
+
+                if ($column->getComment()) {
+                    $tmp .= PdoHelper::formatQuery(' COMMENT %s', array($column->getComment()));
+                }
+
+                if ($column->getIncrement()) {
+                    $tmp .= ' AUTO_INCREMENT';
+                }
+
+                $query[] = $tmp;
+
+                if ($column->getIndex()) {
+                    $keys[] = sprintf('%s (`%s`)', $column->getIndex(), $column->getName());
+                }
+
+                if($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
+                    $keys[] = sprintf('FOREIGN KEY(%s) REFERENCES %s(`%s`)', $column->getName(), $column->getRelationTable(), $column->getRelationColumn());
+                }
             }
 
-            $tmp = sprintf('`%s` %s%s %s ', $column->getName(), $column->getType(), $length, $column->getAttributes());
+            $query = array_merge($query, $keys);
+            $sql = sprintf('CREATE TABLE `' . $this->name . '` (%s) ENGINE = ' . $this->engine . ';', join(', ', $query));
 
-            $tmp .= (!$column->getNullable()) ? 'NOT null' : 'null';
-
-            if($column->getDefaultValue()) {
-                $tmp .= PdoHelper::formatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
-            }
-
-            if($column->getComment()) {
-                $tmp .= PdoHelper::formatQuery(' COMMENT %s', array($column->getComment()));
-            }
-
-            if($column->getIncrement()) {
-                $tmp .= ' AUTO_INCREMENT';
-            }
-
-            $query[] = $tmp;
-
-            if($column->getIndex()) {
-                $keys[] = sprintf('%s (`%s`)', $column->getIndex(), $column->getName());
-            }
+            Pdo::getInstance()->nonQuery($sql);
         }
-
-        $query = array_merge($query,$keys);
-        $sql = sprintf('CREATE TABLE `'. $this->name .'` (%s) ENGINE = '. $this->engine .';', join(', ', $query));
-
-        Pdo::getInstance()->nonQuery($sql);
     }
 
 }
