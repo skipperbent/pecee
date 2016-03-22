@@ -24,7 +24,7 @@
     "autoload": {
         "psr-4": {
             "Pecee\\": "src/"
-        }
+        },
         "files": ["bootstrap.php"]
     },
     "config": {
