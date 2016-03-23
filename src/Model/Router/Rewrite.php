@@ -1,24 +1,21 @@
 <?php
 namespace Pecee\Model\Router;
 
-use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Model;
 
 class Rewrite extends Model {
 
-	public function __construct() {
-		
-        $table = new DBTable();
-        $table->column('id')->integer()->primary()->increment();
-        $table->column('original_url')->string(355)->index();
-        $table->column('rewrite_url')->string(355)->index();
-        $table->column('host')->string(255)->index()->nullable();
-        $table->column('regex')->string(255)->index()->nullable();
-        $table->column('order')->integer()->index()->nullable();
+    protected $table = 'rewrite';
 
-        parent::__construct($table);
-	}
+	protected $columns = [
+		'id',
+		'original_url',
+		'rewrite_url',
+		'host',
+		'regex',
+		'order'
+	];
 
 	public function exists() {
 		return (self::scalar('SELECT `originalPath` FROM {table} WHERE `originalPath` = %s', $this->original_url));

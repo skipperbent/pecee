@@ -1,8 +1,8 @@
 <?php
 namespace Pecee\Model;
+
 use Pecee\Cookie;
 use Pecee\Date;
-use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
 use Pecee\Mcrypt;
 use Pecee\Model\User\UserBadLogin;
@@ -24,17 +24,18 @@ class ModelUser extends ModelData {
 
     public static $ORDERS = array(self::ORDER_ID_ASC, self::ORDER_ID_DESC, self::ORDER_LASTACTIVITY_ASC, self::ORDER_LASTACTIVITY_DESC);
 
+    protected $columns = [
+        'id',
+        'username',
+        'password',
+        'last_activity',
+        'admin_level',
+        'deleted'
+    ];
+
     public function __construct($username = null, $password = null, $email = null) {
 
-        $table = new DBTable('user');
-        $table->column('id')->bigint()->primary()->increment();
-        $table->column('username')->string(300)->index();
-        $table->column('password')->string(32)->index();
-        $table->column('last_activity')->datetime()->nullable()->index();
-        $table->column('admin_level')->integer(1)->nullable()->index();
-        $table->column('deleted')->bool()->index();
-
-        parent::__construct($table);
+        parent::__construct();
 
         $this->username = $username;
         $this->password = md5($password);

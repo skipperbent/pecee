@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model;
+
 use Pecee\Date;
-use Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
 
 /**
@@ -9,14 +9,16 @@ use Pecee\DB\Pdo;
  * @package Pecee\Model
  */
 class ModelCache extends Model {
+
+	protected $columns = [
+		'key',
+		'data',
+		'expire_date'
+	];
+
 	public function __construct($key = null, $data = null, $expireDate = null) {
 
-        $table = new DBTable();
-        $table->column('key')->string()->primary();
-        $table->column('data')->longtext();
-        $table->column('expire_date')->datetime()->index();
-
-        parent::__construct($table);
+        parent::__construct();
 
         $this->key = $key;
         if(!is_null($data)) {

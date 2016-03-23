@@ -1,8 +1,8 @@
 <?php
-namespace Pecee\DB;
+namespace Pecee\DB\Schema;
 
-class DBColumn {
-    
+class Column {
+    protected $table;
     protected $name;
     protected $type;
     protected $length;
@@ -112,8 +112,10 @@ class DBColumn {
 
     // Default values
 
-    public function __construct() {
+    public function __construct($table) {
         $this->relation = array();
+        $this->table = $table;
+        $this->change = false;
     }
 
     public function primary() {
@@ -209,11 +211,47 @@ class DBColumn {
         $this->setType(self::TYPE_TIME);
         return $this;
     }
-
+    
     public function relation($table, $column) {
         $this->relationTable = $table;
         $this->relationColumn = $column;
         return $this;
+    }
+
+    public function change() {
+        $index = '';
+
+        if($this->getIndex() !== null) {
+            $index = sprintf(', ADD %s (`%s`)', $this->getIndex(), $this->getName());
+        }
+
+        $query = 'ALTER TABLE `'. $this->table .'` MODIFY COLUMN '. $this->getQuery() . $index . ';';
+        Pdo::getInstance()->nonQuery($query);
+    }
+
+    public function getQuery() {
+        $length = '';
+        if($this->getLength()) {
+            $length = '('.$this->getLength().')';
+        }
+
+        $query = sprintf('`%s` %s%s %s ', $this->getName(), $this->getType(), $length, $this->getAttributes());
+
+        $query .= (!$this->getNullable()) ? 'NOT null' : 'null';
+
+        if($this->getDefaultValue()) {
+            $query .= PdoHelper::formatQuery(' DEFAULT %s', array($this->getDefaultValue()));;
+        }
+
+        if($this->getComment()) {
+            $query .= PdoHelper::formatQuery(' COMMENT %s', array($this->getComment()));
+        }
+
+        if($this->getIncrement()) {
+            $query .= ' AUTO_INCREMENT';
+        }
+
+        return $query;
     }
 
     public function setName($name) {

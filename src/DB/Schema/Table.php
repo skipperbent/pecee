@@ -1,7 +1,7 @@
 <?php
-namespace Pecee\DB;
+namespace Pecee\DB\Schema;
 
-class DBTable {
+class Table {
 
     const ENGINE_INNODB = 'InnoDB';
     const ENGINE_MEMORY = 'MEMORY';
@@ -33,12 +33,17 @@ class DBTable {
         $this->engine = self::ENGINE_INNODB;
     }
 
+    public function name($name) {
+        $this->name = $name;
+        return $this;
+    }
+
     /**
      * @param $name
-     * @return DBColumn
+     * @return Column
      */
     public function column($name) {
-        $column = new DBColumn();
+        $column = new Column($this->name);
         $column->setName($name);
 
         $this->columns[] = $column;
@@ -47,9 +52,9 @@ class DBTable {
 
     public function getPrimary($default = null) {
         if(count($this->columns) > 0) {
-            /* @var $column DBColumn */
+            /* @var $column Column */
             foreach($this->columns as $column) {
-                if($column->getIndex() == DBColumn::INDEX_PRIMARY) {
+                if($column->getIndex() == Column::INDEX_PRIMARY) {
                     return $column;
                 }
             }
@@ -64,9 +69,9 @@ class DBTable {
 
     public function getColumnNames($lower = false, $excludePrimary = false) {
         $names = array();
-        /* @var $column DBColumn */
+        /* @var $column Column */
         foreach($this->columns as $column) {
-            if($excludePrimary && $column->getIndex() === DBColumn::INDEX_PRIMARY) {
+            if($excludePrimary && $column->getIndex() === Column::INDEX_PRIMARY) {
                 continue;
             }
             if($lower) {
@@ -79,7 +84,7 @@ class DBTable {
     }
 
     public function getColumn($name, $strict = false) {
-        /* @var $column DBColumn */
+        /* @var $column Column */
         foreach($this->columns as $column) {
             if(!$strict && strtolower($column->getName()) == strtolower($name) || $strict && $column->getName() == $name) {
                 return $column;
@@ -124,39 +129,15 @@ class DBTable {
             $keys  = array();
             $query = array();
 
-            //CREATE TABLE bla PRIMARY KEY ( account_id ), FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ) ENGINE=INNODB;
-
             /* @var $column DBColumn */
             foreach ($this->columns as $column) {
-                $length = '';
-                if ($column->getLength()) {
-                    $length = '(' . $column->getLength() . ')';
-                }
-
-                $tmp = sprintf('`%s` %s%s %s ', $column->getName(), $column->getType(), $length,
-                    $column->getAttributes());
-
-                $tmp .= (!$column->getNullable()) ? 'NOT null' : 'null';
-
-                if ($column->getDefaultValue()) {
-                    $tmp .= PdoHelper::formatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
-                }
-
-                if ($column->getComment()) {
-                    $tmp .= PdoHelper::formatQuery(' COMMENT %s', array($column->getComment()));
-                }
-
-                if ($column->getIncrement()) {
-                    $tmp .= ' AUTO_INCREMENT';
-                }
-
-                $query[] = $tmp;
+                $query[] = $column->getQuery();
 
                 if ($column->getIndex()) {
                     $keys[] = sprintf('%s (`%s`)', $column->getIndex(), $column->getName());
                 }
 
-                if($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
+                if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
                     $keys[] = sprintf('FOREIGN KEY(%s) REFERENCES %s(`%s`)', $column->getName(), $column->getRelationTable(), $column->getRelationColumn());
                 }
             }
@@ -166,6 +147,16 @@ class DBTable {
 
             Pdo::getInstance()->nonQuery($sql);
         }
+    }
+
+    public function dropIfExists() {
+        if($this->exists()) {
+            $this->drop();
+        }
+    }
+
+    public function drop() {
+         Pdo::getInstance()->nonQuery('DROP TABLE `'. $this->name .'`;');
     }
 
 }

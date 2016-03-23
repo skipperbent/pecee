@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model;
+
 use Pecee\Date;
-use Pecee\DB\DBTable;
 use Pecee\Guid;
 use Pecee\IO\Directory;
 use Pecee\IO\File;
@@ -13,22 +13,23 @@ class ModelFile extends ModelData {
 
 	public static $ORDERS = array(self::ORDER_DATE_ASC, self::ORDER_DATE_DESC);
 
+    protected $columns = [
+        'id',
+        'filename',
+        'original_filename',
+        'path',
+        'type',
+        'bytes',
+        'created_date'
+    ];
+
 	public function __construct($name = null, $path = null) {
 		$fullPath=null;
 		if(!is_null($name) && !is_null($path)) {
 			$fullPath = Directory::normalize($path);
 		}
 
-        $table = new DBTable();
-        $table->column('id')->string(40)->primary();
-        $table->column('filename')->string(355)->index();
-        $table->column('original_filename')->string(355)->index();
-        $table->column('path')->string(355)->index();
-        $table->column('type')->string(255)->index();
-        $table->column('bytes')->integer()->index();
-        $table->column('created_date')->datetime()->index();
-
-		parent::__construct($table);
+		parent::__construct();
 
         $this->id = Guid::create();
         $this->filename = $name;

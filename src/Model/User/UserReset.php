@@ -1,18 +1,20 @@
 <?php
 namespace Pecee\Model\User;
+
 use Pecee\Date;
-use Pecee\DB\DBTable;
 use Pecee\Model\Model;
 
 class UserReset extends Model {
+
+	protected $columns = [
+		'user_id',
+		'key',
+		'created_date'
+	];
+
 	public function __construct($userId = null) {
 
-        $table = new DBTable();
-        $table->column('user_id')->bigint()->index();
-        $table->column('key')->string(32)->index();
-        $table->column('created_date')->datetime()->index();
-
-		parent::__construct($table);
+		parent::__construct();
 
         $this->user_id = $userId;
         $this->key = md5(uniqid());

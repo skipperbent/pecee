@@ -1,17 +1,19 @@
 <?php
 namespace Pecee\Model\File;
-use Pecee\DB\DBTable;
+
 use Pecee\Model\Model;
 
 class FileData extends Model {
+
+    protected $columns = [
+        'id',
+        'file_id',
+        'key',
+        'value'
+    ];
+
     public function __construct($fileId = null, $key = null, $value = null) {
-
-        $table = new DBTable();
-        $table->column('file_id')->string(40)->index();
-        $table->column('key')->string(255);
-        $table->column('value')->longtext();
-
-        parent::__construct($table);
+        parent::__construct();
 
         $this->file_id = $fileId;
         $this->key = $key;

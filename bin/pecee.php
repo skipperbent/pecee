@@ -5,7 +5,6 @@ require_once $appPath . '/config/bootstrap.php';
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
-// TODO: check framework migrations as fallback
 
 function getClassInfo($file) {
     $contents = file_get_contents($file);
@@ -26,6 +25,13 @@ function changeNamespace($newNamespace, $file) {
 }
 
 switch(strtolower($argv[2])) {
+    case 'copy-migrations':
+
+        \Pecee\IO\Directory::copy(dirname(__DIR__) . '/database/migrations', $appPath . '/database/migrations');
+        echo 'Copy complete!';
+        exit(0);
+
+        break;
     case 'migrations':
         $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
         $config = $appPath . '/config/phinx-config.php';
@@ -38,7 +44,7 @@ switch(strtolower($argv[2])) {
         exec($phinx . ' ' . join(' ', $argv) . ' -c ' . $config, $output);
         echo join(chr(10), $output);
 
-        die();
+        exit(0);
         break;
     case 'change-namespace':
         die('yet not implemented');

@@ -3,7 +3,6 @@ namespace Pecee\Model;
 
 use Pecee\Boolean;
 use Pecee\Date;
-use Pecee\DB\DBTable;
 use Pecee\Collection\CollectionItem;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Node\NodeData;
@@ -44,28 +43,31 @@ class ModelNode extends Model {
     public $data;
     protected $parent, $next, $prev, $childs, $type;
 
+    protected $table = 'node';
+    protected $columns = [
+        'id',
+        'parent_id',
+        'path',
+        'type',
+        'title',
+        'content',
+        'created_date',
+        'changed_date',
+        'active_from',
+        'active_to',
+        'level',
+        'order',
+        'active'
+    ];
+
     public function __construct() {
-
-        $table = new DBTable('node');
-        $table->column('id')->bigint()->primary()->increment();
-        $table->column('parent_id')->bigint()->nullable()->index();
-        $table->column('path')->string(255)->index();
-        $table->column('type')->string(255)->index();
-        $table->column('title')->string(255);
-        $table->column('content')->longtext()->nullable();
-        $table->column('created_date')->datetime()->index();
-        $table->column('changed_date')->datetime()->nullable()->index();
-        $table->column('active_from')->datetime()->nullable()->index();
-        $table->column('active_to')->datetime()->nullable()->index();
-        $table->column('level')->integer()->index();
-        $table->column('order')->integer()->index();
-        $table->column('active')->bool()->index()->nullable();
-
-        parent::__construct($table);
+        parent::__construct();
 
         $this->data = new CollectionItem();
         $this->path = 0;
         $this->created_date = Date::toDateTime();
+        $this->order = 0;
+        $this->active = false;
     }
 
     public function isActive() {
