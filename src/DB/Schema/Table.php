@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\DB\Schema;
 
+use Pecee\DB\Pdo;
+
 class Table {
 
     const ENGINE_INNODB = 'InnoDB';
@@ -124,7 +126,6 @@ class Table {
      * Create table
      */
     public function create() {
-
         if(!$this->exists()) {
             $keys  = array();
             $query = array();
@@ -146,6 +147,31 @@ class Table {
             $sql = sprintf('CREATE TABLE `' . $this->name . '` (%s) ENGINE = ' . $this->engine . ';', join(', ', $query));
 
             Pdo::getInstance()->nonQuery($sql);
+        }
+    }
+
+    public function rename($name) {
+        Pdo::getInstance()->nonQuery('RENAME TABLE `'.$this->name.'` TO `'.$name.'`;');
+        $this->name = $name;
+    }
+
+    public function dropIndex(array $indexes) {
+        foreach($indexes as $index) {
+            Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP INDEX `' . $index . '`');
+        }
+    }
+
+    public function dropPrimary() {
+        Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP PRIMARY KEY');
+    }
+
+    /*public function dropUnique() {
+
+    }*/
+
+    public function dropForeign(array $indexes) {
+        foreach($indexes as $index) {
+            Pdo::getInstance()->nonQuery('ALTER TABLE `'. $this->name .'` DROP FOREIGN KEY `'. $index .'`');
         }
     }
 
