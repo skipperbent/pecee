@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\DB\Schema;
 
+use Pecee\DB\Pdo;
+
 class Column {
     protected $table;
     protected $name;
@@ -211,11 +213,15 @@ class Column {
         $this->setType(self::TYPE_TIME);
         return $this;
     }
-    
+
     public function relation($table, $column) {
         $this->relationTable = $table;
         $this->relationColumn = $column;
         return $this;
+    }
+
+    public function drop() {
+        Pdo::getInstance()->nonQuery('ALTER TABLE `'. $this->table .'` DROP COLUMN `'. $this->name .'`');
     }
 
     public function change() {

@@ -21,7 +21,7 @@ class Directory {
         @rmdir($path);
     }
 
-    public static function copy($source, $destination) {
+    public static function copy($source, $destination, $overwrite = false) {
         $dir = opendir($source);
         if(!is_dir($destination)) {
             mkdir($destination, 0777, true);
@@ -32,7 +32,9 @@ class Directory {
                 if ( is_dir($source . '/' . $file) ) {
                     self::copy($source . '/' . $file, $destination . '/' . $file);
                 } else {
-                    copy($source . '/' . $file, $destination . '/' . $file);
+                    if($overwrite === false && file_exists($destination . '/' . $file) || $overwrite === true) {
+                        copy($source . '/' . $file, $destination . '/' . $file);
+                    }
                 }
             }
         }
