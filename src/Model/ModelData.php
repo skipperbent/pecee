@@ -1,15 +1,14 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\DB\DBTable;
 use Pecee\Collection\CollectionItem;
 
 abstract class ModelData extends Model {
 
 	public $data;
 
-	public function __construct(DBTable $table) {
-		parent::__construct($table);
+	public function __construct() {
+		parent::__construct();
 		$this->data = new CollectionItem();
 	}
 

@@ -1,16 +1,19 @@
 <?php
 namespace Pecee\Model;
+
 use Pecee\Date;
-use Pecee\DB\DBTable;
 
 class ModelSession extends Model {
-	public function __construct($name = null, $value = null) {
-        $table = new DBTable();
-        $table->column('name')->string()->primary();
-        $table->column('value')->longtext();
-        $table->column('time')->datetime()->index();
 
-		parent::__construct($table);
+    protected $columns = [
+        'name',
+        'value',
+        'time'
+    ];
+
+	public function __construct($name = null, $value = null) {
+
+		parent::__construct();
 
         $this->name = $name;
         $this->value = $value;

@@ -1,6 +1,6 @@
 <?php
 namespace Pecee\Model;
-use Pecee\DB\DBTable;
+
 use Pecee\DB\PdoHelper;
 use Pecee\Locale;
 use Pecee\SimpleRouter\RouterBase;
@@ -8,6 +8,14 @@ use Pecee\SimpleRouter\RouterBase;
 class ModelLanguage extends Model {
 
     protected static $instance;
+
+    protected $columns = [
+        'id',
+        'original',
+        'translated',
+        'locale',
+        'context'
+    ];
 
     /**
      * @return static
@@ -28,16 +36,7 @@ class ModelLanguage extends Model {
     }
 
     public function __construct() {
-
-        $table = new DBTable();
-        $table->column('id')->integer()->primary()->increment();
-        $table->column('original')->longtext();
-        $table->column('translated')->longtext();
-        $table->column('locale')->string(10)->index();
-        $table->column('context')->string(255)->index();
-
-        parent::__construct($table);
-
+        parent::__construct();
         $this->context = self::getContext();
     }
 

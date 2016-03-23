@@ -1,21 +1,18 @@
 <?php
 namespace Pecee\Model\Node;
 
-use Pecee\DB\DBTable;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Model;
 
 class NodeData extends Model {
-    public function __construct() {
 
-        $table = new DBTable('node_data');
-        $table->column('id')->bigint()->primary()->increment();
-        $table->column('node_id')->bigint()->index();
-        $table->column('key')->string(255)->index();
-        $table->column('value')->longtext();
-
-        parent::__construct($table);
-    }
+    protected $table = 'node_data';
+    protected $columns = [
+        'id',
+        'node_id',
+        'key',
+        'value'
+    ];
 
     public function save() {
         if(self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `node_id` = %s', $this->node_id, $this->key)) {

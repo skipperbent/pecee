@@ -1,19 +1,20 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\DB\DBTable;
 use Pecee\Model\Model;
 
 class UserData extends Model {
+
+	protected $columns = [
+		'id',
+		'user_id',
+		'key',
+		'value'
+	];
+
 	public function __construct($userId = null, $key = null, $value = null) {
 
-		$table = new DBTable();
-		$table->column('id')->bigint()->primary()->increment();
-		$table->column('user_id')->bigint()->index();
-		$table->column('key')->string(255)->index();
-		$table->column('value')->longtext()->nullable();
-
-		parent::__construct($table);
+		parent::__construct();
 
 		$this->user_id = $userId;
 		$this->key = $key;
