@@ -16,13 +16,11 @@
     "require": {
         "pecee/simple-router": "1.*",
         "vlucas/phpdotenv": "2.0",
-        "illuminate/database": "^5.2",
         "robmorgan/phinx": "^0.5.3"
     },
     "require-dev": {
         "pecee/simple-router": "1.*",
         "vlucas/phpdotenv": "2.0",
-        "illuminate/database": "^5.2",
         "robmorgan/phinx": "^0.5.3"
     },
     "autoload": {
