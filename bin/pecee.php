@@ -1,12 +1,11 @@
 <?php
+global $argv, $appPath;
 
-require_once 'config/bootstrap.php';
+require_once $appPath . '/config/bootstrap.php';
 
-global $argv;
-
-// TODO: use Cli tool
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
+// TODO: check framework migrations as fallback
 
 function getClassInfo($file) {
     $contents = file_get_contents($file);
@@ -26,21 +25,25 @@ function changeNamespace($newNamespace, $file) {
     file_put_contents($file, $contents);
 }
 
-switch(strtolower($argv[1])) {
+switch(strtolower($argv[2])) {
     case 'migrations':
         $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
-        $config = 'config/phinx-config.php';
+        $config = $appPath . '/config/phinx-config.php';
 
+        array_shift($argv);
         array_shift($argv);
         array_shift($argv);
 
         // Run Phinx
-        exec($phinx . ' ' . $cmd . ' '. join(' ', $argv) . ' -c ' . $config, $output);
+        exec($phinx . ' ' . join(' ', $argv) . ' -c ' . $config, $output);
         echo join(chr(10), $output);
 
         die();
         break;
     case 'change-namespace':
+        die('yet not implemented');
+        break;
+    case 'key:generate':
         die('yet not implemented');
         break;
 }
