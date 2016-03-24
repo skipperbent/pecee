@@ -126,7 +126,13 @@ class ModelUser extends ModelData {
     }
 
 
-    public static function isLoggedIn() {
+    public static function isLoggedIn($force = false) {
+        if($force === true) {
+            if(self::getFromCookie(true) !== null) {
+                return true;
+            }
+            return false;
+        }
         return (Cookie::exists('ticket') && self::getFromCookie() !== null);
     }
 
@@ -189,6 +195,7 @@ class ModelUser extends ModelData {
             if (is_array($user) && end($user) === self::getSalt()) {
                 if ($setData) {
                     self::$instance = self::getById($user[0]);
+                    return self::$instance;
                 } else {
                     $obj = new static();
                     $obj->setRow('id', $user[0]);

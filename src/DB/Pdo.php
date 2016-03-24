@@ -37,7 +37,7 @@ class Pdo {
      * Closing connection
      * http://php.net/manual/en/pdo.connections.php
      */
-    public function __destruct() {
+    public function close() {
         $this->connection = null;
     }
 
