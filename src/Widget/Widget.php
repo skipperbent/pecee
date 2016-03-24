@@ -37,8 +37,7 @@ abstract class Widget extends Base  {
      * @return string
      */
     protected function getTemplatePath() {
-        $path = explode('\\', get_class($this));
-        $path = array_slice($path, 2);
+        $path = array_slice(explode('\\', get_class($this)), 2);
         return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
@@ -66,10 +65,10 @@ abstract class Widget extends Base  {
         $enc = new HtmlMeta();
         $enc->addAttribute('charset', $this->getSite()->getCharset());
 
-        $o = array($enc);
+        $o = $enc->__toString();
 
         if($this->_site->getTitle())  {
-            $o[] = '<title>' . $this->_site->getTitle() . '</title>';
+            $o .= '<title>' . $this->_site->getTitle() . '</title>';
         }
 
         if($this->_site->getDescription()) {
@@ -80,23 +79,23 @@ abstract class Widget extends Base  {
         }
 
         if($includeCss === true) {
-            $o[] = $this->printCss();
+            $o .= $this->printCss();
         }
 
         if($includeJs === true) {
-            $o[] = $this->printJs();
+            $o .= $this->printJs();
         }
 
         if(count($this->_site->getHeader())) {
             $header = $this->_site->getHeader();
-            $o[] = join('', $header);
+            $o .= $header;
         }
 
-        return join('', $o);
+        return $o;
     }
 
     public function printCss($section = Site::SECTION_DEFAULT) {
-        $o = array();
+        $o = '';
         if($this->_site->getCssFilesWrapped($section)) {
 
             $getParams = array();
@@ -106,20 +105,20 @@ abstract class Widget extends Base  {
             }
 
             $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped($section), ',')], $getParams));
-            $o[] = new HtmlLink($url);
+            $o .= new HtmlLink($url);
         }
 
         $css = $this->_site->getCss($section);
         if(count($css)) {
             foreach($css as $c) {
-                $o[] = $c;
+                $o .= $c;
             }
         }
-        return join('', $o);
+        return $o;
     }
 
     public function printJs($section = Site::SECTION_DEFAULT) {
-        $o = array();
+        $o = '';
         if($this->_site->getJsFilesWrapped($section)) {
 
             $getParams = array();
@@ -129,16 +128,16 @@ abstract class Widget extends Base  {
             }
 
             $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped($section), ',')], $getParams));
-            $o[] = new HtmlScript($url);
+            $o .= new HtmlScript($url);
         }
 
         $js = $this->_site->getJs($section);
         if(count($js) > 0) {
             foreach($js as $j) {
-                $o[] = $j;
+                $o .= $j;
             }
         }
-        return join('', $o);
+        return $o;
     }
 
     protected function getTemplate() {
@@ -180,7 +179,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require('Template'.DIRECTORY_SEPARATOR.'Snippet'.DIRECTORY_SEPARATOR.$file);
+        require('Template' . DIRECTORY_SEPARATOR . 'Snippet' . DIRECTORY_SEPARATOR . $file);
     }
 
     /**

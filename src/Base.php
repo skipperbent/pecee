@@ -71,13 +71,13 @@ abstract class Base {
 		return (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 	}
 
-	protected function appendSiteTitle($title, $seperator='-') {
-		$seperator=is_null($seperator) ? '': sprintf(' %s ', $seperator);
-		$this->_site->setTitle(($this->_site->getTitle() . $seperator . $title));
+	protected function appendSiteTitle($title, $separator = '-') {
+		$separator = ($separator === null) ? '': sprintf(' %s ', $separator);
+		$this->_site->setTitle(($this->_site->getTitle() . $separator . $title));
 	}
 
-	protected function prependSiteTitle($title, $seperator=' - ') {
-		$this->_site->setTitle(($title . $seperator .$this->_site->getTitle()));
+	protected function prependSiteTitle($title, $separator = ' - ') {
+		$this->_site->setTitle(($title . $separator .$this->_site->getTitle()));
 	}
 
 	/**
@@ -215,9 +215,10 @@ abstract class Base {
 	/**
 	 * Set error
 	 * @param string $message
+	 * @param string|null $form
 	 */
-	protected function setError($message) {
-		$this->setMessage($message, $this->errorType);
+	protected function setError($message, $form = null) {
+		$this->setMessage($message, $this->errorType, $form);
 	}
 
 	/**

@@ -1,6 +1,7 @@
 <?php
 namespace Pecee;
 
+use Pecee\DB\Pdo;
 use Pecee\Handler\ExceptionHandler;
 use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
@@ -15,9 +16,9 @@ class Router extends SimpleRouter {
         Debug::getInstance()->add('Router initialised.');
 
         // Load framework specific controllers
-        self::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
-        self::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
-        self::get('/captcha', 'ControllerCaptcha@show', ['namespace' => '\Pecee\Controller']);
+        static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
+        static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
+        static::get('/captcha', 'ControllerCaptcha@show', ['namespace' => '\Pecee\Controller']);
 
         // Load routes.php
         $file = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';
@@ -61,6 +62,8 @@ class Router extends SimpleRouter {
         if(env('DEBUG', false) && Site::getInstance()->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
             echo Debug::getInstance();
         }
+
+        Pdo::getInstance()->close();
     }
 
     protected static function loadExceptionHandler($class, $route, $e) {
@@ -74,7 +77,7 @@ class Router extends SimpleRouter {
     }
 
     public static function defaultExceptionHandler($handler) {
-        self::$defaultExceptionHandler = $handler;
+        static::$defaultExceptionHandler = $handler;
     }
 
 }

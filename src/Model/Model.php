@@ -7,10 +7,9 @@ use Pecee\DB\PdoHelper;
 use Pecee\Integer;
 use Pecee\Str;
 
-abstract class Model implements IModel, \IteratorAggregate {
+abstract class Model implements \IteratorAggregate {
 
     protected $table;
-    protected $query;
     protected $results;
 
     protected $primary = 'id';
@@ -48,9 +47,8 @@ abstract class Model implements IModel, \IteratorAggregate {
         }
 
         $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table, PdoHelper::joinArray($keys, true), join(',', $concat));
-        $id = Pdo::getInstance()->insert($sql, $values);
 
-        $this->{$this->primary} = $id;
+        $this->{$this->primary} = Pdo::getInstance()->insert($sql, $values);
         return $this;
     }
 
@@ -112,23 +110,20 @@ abstract class Model implements IModel, \IteratorAggregate {
         /* $var $model Model */
         $model = new static();
         $results = array();
-        $countSql = null;
         $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        $page = (is_null($page)) ? 0 : $page;
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $page = ($page === null) ? 0 : $page;
 
-        $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
-        if ($rows !== null && stripos($query, 'limit') === false) {
+        $sql = PdoHelper::formatQuery($query, $args);
+        $query =  Pdo::getInstance()->query($sql);
+
+        if ($page !== null && $rows !== null && stripos($query, 'limit') === false) {
             $query .= sprintf(' LIMIT %s, %s', ($page * $rows), $rows);
         }
 
-        $sql = PdoHelper::formatQuery($query, $args);
-
-        $query =  Pdo::getInstance()->query($sql);
-
         $results['data']['numFields'] = $query->columnCount();
         $results['data']['numRows'] = $query->rowCount();
-        $results['query'][] = $sql;
+        $results['query'] = array($sql);
         $results['data']['rows'] = array();
         if($results['data']['numRows'] > 0) {
             foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
@@ -138,11 +133,18 @@ abstract class Model implements IModel, \IteratorAggregate {
             }
         }
 
-        $results['query'][] = $countSql;
-        $maxRows = Pdo::getInstance()->value($countSql);
-        $results['data']['page'] = $page;
-        $results['data']['rowsPerPage'] = $rows;
-        $results['data']['maxRows'] = intval($maxRows);
+        if($rows !== null && $page !== null) {
+            $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
+            $results['query'][] = $countSql;
+            $maxRows = Pdo::getInstance()->value($countSql);
+            $results['data']['page'] = $page;
+            $results['data']['rowsPerPage'] = $rows;
+            $results['data']['maxRows'] = intval($maxRows);
+        } else {
+            $results['data']['page'] = 0;
+            $results['data']['rowsPerPage'] = null;
+            $results['data']['maxRows'] = intval($results['data']['numRows']);
+        }
 
         $model->setResults($results);
         return $model;
@@ -152,16 +154,15 @@ abstract class Model implements IModel, \IteratorAggregate {
         /* $var $model Model */
         $model = new static();
         $results = array();
-        $countSql = null;
         $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $sql = PdoHelper::formatQuery($query, $args);
         $query =  Pdo::getInstance()->query($sql);
 
         if($query !== null) {
             $results['data']['numFields'] = $query->columnCount();
             $results['data']['numRows'] = $query->rowCount();
-            $results['query'][] = $sql;
+            $results['query'] = $sql;
             $results['data']['rows'] = array();
             if($results['data']['numRows'] > 0) {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
@@ -191,7 +192,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      * @return static
      */
     public static function fetchAll($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         return static::queryCollection($query, null, null, $args);
     }
 
@@ -204,9 +205,9 @@ abstract class Model implements IModel, \IteratorAggregate {
      * @return static
      */
     public static function fetchAllPage($query, $skip = null, $rows = null, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        $skip = (is_null($skip)) ? 0 : $skip;
-        if(!is_null($skip) && !is_null($rows)) {
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $skip = ($skip === null) ? 0 : $skip;
+        if($skip !== null && $rows !== null) {
             $query = $query.' LIMIT ' . $skip . ',' . $rows;
         }
         $model = static::queryCollection($query, null, null, $args);
@@ -226,7 +227,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      * @return static
      */
     public static function fetchPage($query, $rows = null, $page = null, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         return static::queryCollection($query, $rows, $page, $args);
     }
 
@@ -237,7 +238,7 @@ abstract class Model implements IModel, \IteratorAggregate {
      * @return static
      */
     public static function fetchOne($query, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         $model =  static::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), $args);
         if($model->hasRows()){
             return $model->getRow(0);
@@ -247,7 +248,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     }
 
     public static function nonQuery($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
         $model = new static();
         $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
@@ -256,7 +257,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     }
 
     public static function scalar($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
         $model = new static();
         $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
@@ -348,7 +349,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     }
 
     public function hasRow() {
-        return (isset($this->results['data']['rows']));
+        return (bool)(count($this->results['data']['rows']));
     }
 
     /**
@@ -424,7 +425,7 @@ abstract class Model implements IModel, \IteratorAggregate {
     }
 
     public function hasNext() {
-        return ($this->getPage()+1 < $this->getMaxPages());
+        return ($this->getPage() + 1 < $this->getMaxPages());
     }
 
     public function hasPrevious() {
@@ -452,6 +453,20 @@ abstract class Model implements IModel, \IteratorAggregate {
      */
     public function getIterator() {
         return new \ArrayIterator(($this->hasRows()) ? $this->getRows() : array());
+    }
+
+    public function getPrimary() {
+        return $this->primary;
+    }
+
+    public static function getById($id) {
+        $static = new static();
+        return static::fetchOne('SELECT * FROM {table} WHERE `'. $static->getPrimary() .'` = %s', $id);
+    }
+
+    public static function get($rows = null, $page = null) {
+        $static = new static();
+        return static::fetchPage('SELECT * FROM {table} ORDER BY `'. $static->getPrimary() .'` DESC', $rows, $page);
     }
 
 }

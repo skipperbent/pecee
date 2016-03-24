@@ -4,7 +4,9 @@ namespace Pecee\DB\Schema;
 class Schema {
 
     public function create($name, $callback) {
-        $callback(new Table($name));
+        $table = new Table($name);
+        $callback($table);
+        $table->create();
     }
 
     public function drop($name) {
