@@ -464,9 +464,4 @@ abstract class Model implements \IteratorAggregate {
         return static::fetchOne('SELECT * FROM {table} WHERE `'. $static->getPrimary() .'` = %s', $id);
     }
 
-    public static function get($rows = null, $page = null) {
-        $static = new static();
-        return static::fetchPage('SELECT * FROM {table} ORDER BY `'. $static->getPrimary() .'` DESC', $rows, $page);
-    }
-
 }
