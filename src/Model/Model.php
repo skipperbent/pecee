@@ -114,12 +114,12 @@ abstract class Model implements \IteratorAggregate {
         $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $page = ($page === null) ? 0 : $page;
 
-        $sql = PdoHelper::formatQuery($query, $args);
-        $query =  Pdo::getInstance()->query($sql);
-
         if ($page !== null && $rows !== null && stripos($query, 'limit') === false) {
             $query .= sprintf(' LIMIT %s, %s', ($page * $rows), $rows);
         }
+
+        $sql = PdoHelper::formatQuery($query, $args);
+        $query =  Pdo::getInstance()->query($sql);
 
         $results['data']['numFields'] = $query->columnCount();
         $results['data']['numRows'] = $query->rowCount();
@@ -134,7 +134,7 @@ abstract class Model implements \IteratorAggregate {
         }
 
         if($rows !== null && $page !== null) {
-            $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
+            $countSql = $model->getCountSql(PdoHelper::formatQuery($sql, $args));
             $results['query'][] = $countSql;
             $maxRows = Pdo::getInstance()->value($countSql);
             $results['data']['page'] = $page;

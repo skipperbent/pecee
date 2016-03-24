@@ -88,7 +88,7 @@ abstract class Widget extends Base  {
 
         if(count($this->_site->getHeader())) {
             $header = $this->_site->getHeader();
-            $o .= $header;
+            $o .= join('', $header);
         }
 
         return $o;
