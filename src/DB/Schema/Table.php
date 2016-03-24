@@ -127,25 +127,14 @@ class Table {
      */
     public function create() {
         if(!$this->exists()) {
-            $keys  = array();
             $query = array();
 
             /* @var $column DBColumn */
             foreach ($this->columns as $column) {
                 $query[] = $column->getQuery();
-
-                if ($column->getIndex()) {
-                    $keys[] = sprintf('%s (`%s`)', $column->getIndex(), $column->getName());
-                }
-
-                if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
-                    $keys[] = sprintf('FOREIGN KEY(%s) REFERENCES %s(`%s`)', $column->getName(), $column->getRelationTable(), $column->getRelationColumn());
-                }
             }
 
-            $query = array_merge($query, $keys);
             $sql = sprintf('CREATE TABLE `' . $this->name . '` (%s) ENGINE = ' . $this->engine . ';', join(', ', $query));
-
             Pdo::getInstance()->nonQuery($sql);
         }
     }
@@ -182,7 +171,7 @@ class Table {
     }
 
     public function drop() {
-         Pdo::getInstance()->nonQuery('DROP TABLE `'. $this->name .'`;');
+        Pdo::getInstance()->nonQuery('DROP TABLE `'. $this->name .'`;');
     }
 
 }

@@ -128,7 +128,8 @@ class ModelUser extends ModelData {
 
     public static function isLoggedIn($force = false) {
         if($force === true) {
-            if(self::getFromCookie(true) !== null) {
+            $user = self::getFromCookie(true);
+            if($user !== null && $user->hasRow()) {
                 return true;
             }
             return false;
