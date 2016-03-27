@@ -18,9 +18,9 @@ class Html {
 	public function __construct($name, $value = null) {
 		$this->name = $name;
 		$this->value = $value;
-		$this->attributes=array();
-		$this->closingType=self::CLOSE_TYPE_TAG;
-		$this->innerHtml=array();
+		$this->attributes = array();
+		$this->closingType = self::CLOSE_TYPE_TAG;
+		$this->innerHtml = array();
 	}
 
 	/**
@@ -43,7 +43,7 @@ class Html {
 	}
 
 	public function setElement(Html $el) {
-		$this->innerHtml[]=$el->writeHtml();
+		$this->innerHtml[] = $el->writeHtml();
 	}
 
 	/**
@@ -75,15 +75,13 @@ class Html {
 	protected function writeHtml() {
 		$output = '<'.$this->name;
 		foreach($this->attributes as $key=>$val) {
-			$output .= ' '.$key. ((!is_null($val) || strtolower($key) == 'value') ? '="'.$val.'"' : '');
+			$output .= ' '.$key. (($val !== null || strtolower($key) === 'value') ? '="'.$val.'"' : '');
 		}
-		$output .= ($this->closingType==self::CLOSE_TYPE_SELF) ? '/>' : '>';
-		if($this->innerHtml) {
-			foreach($this->innerHtml as $html) {
-				$output.=$html;
-			}
-		}
-		$output .= (($this->closingType == self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->name) : '');
+		$output .= ($this->closingType === self::CLOSE_TYPE_SELF) ? '/>' : '>';
+        foreach($this->innerHtml as $html) {
+            $output.=$html;
+        }
+		$output .= (($this->closingType === self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->name) : '');
 		return $output;
 	}
 

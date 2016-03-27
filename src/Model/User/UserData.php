@@ -5,6 +5,8 @@ use Pecee\Model\Model;
 
 class UserData extends Model {
 
+	const USER_IDENTIFIER_KEY = 'user_id';
+
 	protected $columns = [
 		'id',
 		'user_id',
@@ -21,8 +23,18 @@ class UserData extends Model {
 		$this->value = $value;
 	}
 
-	public function save() {
-		if(self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `user_id` = %s', $this->key, $this->userId)) {
+    public function exists()
+    {
+        if($this->{$this->primary} === null) {
+            return false;
+        }
+
+        return self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `'. static::USER_IDENTIFIER_KEY .'` = %s', $this->key, $this->user_id);
+    }
+
+
+    public function save() {
+		if($this->exists()) {
 			parent::update();
 		} else {
 			parent::save();
@@ -30,10 +42,10 @@ class UserData extends Model {
 	}
 
 	public static function removeAll($userId) {
-		self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', array($userId));
+		self::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY .'` = %s', array($userId));
 	}
 
 	public static function getByUserId($userId) {
-		return self::fetchAll('SELECT * FROM {table} WHERE `user_id` = %s', array($userId));
+		return self::fetchAll('SELECT * FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY .'` = %s', array($userId));
 	}
 }

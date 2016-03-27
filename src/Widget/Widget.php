@@ -23,7 +23,7 @@ abstract class Widget extends Base  {
 
         parent::__construct();
 
-        Debug::getInstance()->add('START ' . get_class($this));
+        Debug::getInstance()->add('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
         $this->jsWrapRoute = url('pecee.js.wrap');
@@ -65,7 +65,7 @@ abstract class Widget extends Base  {
         $enc = new HtmlMeta();
         $enc->addAttribute('charset', $this->getSite()->getCharset());
 
-        $o = $enc->__toString();
+        $o = $enc;
 
         if($this->_site->getTitle())  {
             $o .= '<title>' . $this->_site->getTitle() . '</title>';
@@ -96,7 +96,7 @@ abstract class Widget extends Base  {
 
     public function printCss($section = Site::SECTION_DEFAULT) {
         $o = '';
-        if($this->_site->getCssFilesWrapped($section)) {
+        if(count($this->_site->getCssFilesWrapped($section))) {
 
             $getParams = array();
 
@@ -108,18 +108,15 @@ abstract class Widget extends Base  {
             $o .= new HtmlLink($url);
         }
 
-        $css = $this->_site->getCss($section);
-        if(count($css)) {
-            foreach($css as $c) {
-                $o .= $c;
-            }
+        foreach($this->_site->getCss($section) as $c) {
+            $o .= $c;
         }
         return $o;
     }
 
     public function printJs($section = Site::SECTION_DEFAULT) {
         $o = '';
-        if($this->_site->getJsFilesWrapped($section)) {
+        if(count($this->_site->getJsFilesWrapped($section))) {
 
             $getParams = array();
 
@@ -131,11 +128,8 @@ abstract class Widget extends Base  {
             $o .= new HtmlScript($url);
         }
 
-        $js = $this->_site->getJs($section);
-        if(count($js) > 0) {
-            foreach($js as $j) {
-                $o .= $j;
-            }
+        foreach($this->_site->getJs($section) as $j) {
+            $o .= $j;
         }
         return $o;
     }
@@ -144,8 +138,8 @@ abstract class Widget extends Base  {
         return $this->_template;
     }
 
-    protected function setTemplate($path,$relative=true) {
-        $this->_template = (($relative && !empty($path)) ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
+    protected function setTemplate($path,$relative = true) {
+        $this->_template = (($relative === true && trim($path) !== '') ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
     protected function setContentTemplate($template) {
@@ -187,7 +181,7 @@ abstract class Widget extends Base  {
      * @param \Pecee\Widget\Widget $widget
      */
     public function widget(Widget $widget) {
-        if($widget->getTemplate() === 'Template\Default.php') {
+        if($widget->getTemplate() === 'Template'. DIRECTORY_SEPARATOR .'Default.php') {
             $widget->setTemplate(null);
         }
         echo $widget;
@@ -205,27 +199,31 @@ abstract class Widget extends Base  {
     public function render()  {
         $this->renderContent();
         $this->renderTemplate();
-        Debug::getInstance()->add('END ' . get_class($this));
         $this->_messages->clear();
+        Debug::getInstance()->add('END WIDGET: ' . static::class);
         return $this->_contentHtml;
     }
 
     protected function renderContent() {
+        Debug::getInstance()->add('START: rendering content-template: ' . $this->_contentTemplate);
         if($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
+        Debug::getInstance()->add('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
     protected function renderTemplate() {
+        Debug::getInstance()->add('START: rendering template: ' . $this->_template);
         if($this->_template !== '') {
             ob_start();
             include $this->_template;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
+        Debug::getInstance()->add('END: rendering template ' . $this->_template);
     }
 
     protected function setJsWrapRoute($route) {
