@@ -37,7 +37,7 @@ abstract class Widget extends Base  {
      * @return string
      */
     protected function getTemplatePath() {
-        $path = array_slice(explode('\\', get_class($this)), 2);
+        $path = array_slice(explode('\\', static::class), 2);
         return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
