@@ -6,33 +6,50 @@ use Pecee\Model\Model;
 
 class UserReset extends Model {
 
-	protected $columns = [
-		'user_id',
-		'key',
-		'created_date'
-	];
+    protected $columns = [
+        'id',
+        'user_id',
+        'key',
+        'created_date'
+    ];
 
-	public function __construct($userId = null) {
+    public function __construct($userId = null) {
 
-		parent::__construct();
+        parent::__construct();
 
         $this->user_id = $userId;
         $this->key = md5(uniqid());
         $this->created_date = Date::ToDateTime();
-	}
+    }
 
-	public static function getByKey($key) {
-		return self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', array($key));
-	}
+    public function clean() {
+        self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', $this->user_id);
+    }
 
-	public static function confirm($key, $newPassword) {
-		$reset = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
-		if($reset->hasRow()) {
-			$reset->delete();
-			self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', $reset->user_id);
-			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `id` = %s LIMIT 1', md5($newPassword), $reset->user_id);
-			return $reset->user_id;
-		}
-		return null;
-	}
+    public function save() {
+        $this->clean();
+        parent::save();
+    }
+
+    public static function getByKey($key) {
+        return self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
+    }
+
+    public static function confirm($key) {
+        $reset = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
+        if($reset->hasRow()) {
+            $reset->delete();
+            self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', $reset->user_id);
+            return $reset->user_id;
+        }
+        return false;
+    }
+
+    public function getUserId() {
+        return $this->user_id;
+    }
+
+    public function getKey() {
+        return $this->key;
+    }
 }
