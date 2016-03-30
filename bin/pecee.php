@@ -1,7 +1,7 @@
 <?php
 global $argv, $appPath;
 
-require_once $appPath . '/config/bootstrap.php';
+require_once $appPath . '/bootstrap.php';
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
@@ -25,7 +25,7 @@ function changeNamespace($newNamespace, $file) {
     file_put_contents($file, $contents);
 }
 
-switch(strtolower($argv[2])) {
+switch(strtolower($argv[1])) {
     case 'copy-migrations':
 
         \Pecee\IO\Directory::copy(dirname(__DIR__) . '/database/migrations', $appPath . '/database/migrations');
@@ -39,7 +39,6 @@ switch(strtolower($argv[2])) {
 
         $template = dirname(__DIR__) . '/database/stubs/migration.php';
 
-        array_shift($argv);
         array_shift($argv);
         array_shift($argv);
 

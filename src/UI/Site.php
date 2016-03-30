@@ -50,8 +50,8 @@ class Site {
 		// Load default settings
 		$this->docType = self::DOCTYPE_HTML_5;
 		$this->charset = self::CHARSET_UTF8;
-		$this->jsPath = 'www/js/';
-		$this->cssPath = 'www/css/';
+		$this->jsPath = 'public/js/';
+		$this->cssPath = 'public/css/';
 		$this->keywords = array();
 		$this->cacheEnabled = true;
 		$this->adminIps = array();

@@ -179,7 +179,7 @@ abstract class FileAbstract extends Controller {
     }
 
     protected function getTempFile() {
-        return $this->tmpDir.DIRECTORY_SEPARATOR.md5($this->files) . '.' . $this->type;
+        return $this->tmpDir . DIRECTORY_SEPARATOR . md5($this->files) . '.' . $this->type;
     }
 
 }

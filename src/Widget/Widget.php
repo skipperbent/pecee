@@ -37,7 +37,7 @@ abstract class Widget extends Base  {
      */
     protected function getTemplatePath() {
         $path = array_slice(explode('\\', static::class), 2);
-        return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return '../views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     public function showMessages($type, $form = null, $placement = null) {
@@ -139,8 +139,8 @@ abstract class Widget extends Base  {
         return $this->_template;
     }
 
-    protected function setTemplate($path,$relative = true) {
-        $this->_template = (($relative === true && trim($path) !== '') ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
+    protected function setTemplate($path, $relative = true) {
+        $this->_template = (($relative === true && trim($path) !== '') ? '../views' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
     protected function setContentTemplate($template) {
@@ -174,7 +174,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require('Template' . DIRECTORY_SEPARATOR . 'Snippet' . DIRECTORY_SEPARATOR . $file);
+        require '../views/snippet/' . $file;
     }
 
     /**
@@ -182,7 +182,7 @@ abstract class Widget extends Base  {
      * @param \Pecee\Widget\Widget $widget
      */
     public function widget(Widget $widget) {
-        if($widget->getTemplate() === 'Template'. DIRECTORY_SEPARATOR .'Default.php') {
+        if($widget->getTemplate() === $this->getTemplatePath()) {
             $widget->setTemplate(null);
         }
         echo $widget;
