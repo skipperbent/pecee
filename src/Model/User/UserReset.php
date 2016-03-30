@@ -19,7 +19,7 @@ class UserReset extends Model {
 
         $this->user_id = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Date::ToDateTime();
+        $this->created_date = Date::toDateTime();
     }
 
     public function clean() {

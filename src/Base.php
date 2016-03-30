@@ -10,7 +10,7 @@ use Pecee\UI\Site;
 abstract class Base {
 
     protected $errorType = 'danger';
-    protected $defaultMessagePlacement;
+    protected $defaultMessagePlacement = 'default';
     protected $_messages;
     protected $_site;
     protected $_input;
@@ -41,7 +41,8 @@ abstract class Base {
             if($item instanceof IInputItem && !$item->validates()) {
                 /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
                 foreach($item->getValidationErrors() as $error) {
-                    $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $this->defaultMessagePlacement, $error->getIndex());
+                    $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
+                    $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
                 }
             }
         }
@@ -52,7 +53,8 @@ abstract class Base {
                 if($item instanceof IInputItem && !$item->validates()) {
                     /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
                     foreach ($item->getValidationErrors() as $error) {
-                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $this->defaultMessagePlacement, $error->getIndex());
+                        $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
+                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
                     }
                 }
             }
@@ -61,7 +63,8 @@ abstract class Base {
                 if($item instanceof IInputItem && !$item->validates()) {
                     /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
                     foreach($item->getValidationErrors() as $error) {
-                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $this->defaultMessagePlacement, $error->getIndex());
+                        $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
+                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
                     }
                 }
             }
@@ -165,18 +168,17 @@ abstract class Base {
      * @param string $type
      * @param string|null $form
      * @param string|null $placement
-     * @return FormMessage|null
+     * @return array
      */
     public function getMessages($type, $form = null, $placement = null) {
         // Trigger validation
         $this->validateInput();
 
-        $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
-
         $messages = array();
 
         if($this->_messages->get($type) !== null) {
             foreach ($this->_messages->get($type) as $message) {
+
                 if (($form === null || $message->getForm() === $form) && ($placement === null || $message->getPlacement() === $placement)) {
                     $messages[] = $message;
                 }

@@ -57,5 +57,5 @@ switch(strtolower($argv[2])) {
         break;
 }
 
-die('No input specified');
-return;
+echo 'No input specified';
+exit(1);

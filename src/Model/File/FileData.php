@@ -20,7 +20,7 @@ class FileData extends Model {
         $this->value = $value;
     }
     public function save() {
-        if(self::Scalar('SELECT `Key` FROM {table} WHERE `key` = %s AND `file_id` = %s', $this->key, $this->file_id)) {
+        if(self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `file_id` = %s', $this->key, $this->file_id)) {
             parent::update();
         } else {
             parent::save();

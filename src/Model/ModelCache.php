@@ -46,7 +46,7 @@ class ModelCache extends Model {
 	}
 
 	public static function set($key, $data, $expireMinutes) {
-		$expireDate = Date::ToDateTime(time() + ($expireMinutes*60));
+		$expireDate = Date::toDateTime(time() + ($expireMinutes*60));
 		self::remove($key);
 		$model = new static($key, $data, $expireDate);
 		return ($model->save());

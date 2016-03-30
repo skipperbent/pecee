@@ -10,6 +10,9 @@ use Pecee\Model\User\UserData;
 use Pecee\Model\User\UserException;
 
 class ModelUser extends ModelData {
+
+    const COOKIE_NAME = 'ticket';
+
     // Errors
     const ERROR_TYPE_BANNED = 0x1;
     const ERROR_TYPE_INVALID_LOGIN = 0x2;
@@ -141,12 +144,12 @@ class ModelUser extends ModelData {
             }
             return false;
         }
-        return (Cookie::exists('ticket') && static::getFromCookie() !== null);
+        return (Cookie::exists(static::COOKIE_NAME) && static::getFromCookie() !== null);
     }
 
     public function signOut() {
-        if(Cookie::exists('ticket')) {
-            Cookie::delete('ticket');
+        if(Cookie::exists(static::COOKIE_NAME)) {
+            Cookie::delete(static::COOKIE_NAME);
         }
     }
 
@@ -155,7 +158,7 @@ class ModelUser extends ModelData {
     }
 
     public function registerActivity() {
-        if($this->IsLoggedIn()) {
+        if($this->isLoggedIn()) {
             static::nonQuery('UPDATE {table} SET `last_activity` = NOW() WHERE `id` = %s', $this->id);
         }
     }
@@ -163,7 +166,7 @@ class ModelUser extends ModelData {
     protected function signIn($cookieExp){
         $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSalt());
         $ticket = Mcrypt::encrypt(join('|',$user), static::getSalt());
-        Cookie::create('ticket', $ticket, $cookieExp);
+        Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
     }
 
     /**
@@ -183,12 +186,11 @@ class ModelUser extends ModelData {
     }
 
     public static function getFromCookie($setData = false) {
-        $ticket = Cookie::get('ticket');
-        if(trim($ticket) != ''){
+        $ticket = Cookie::get(static::COOKIE_NAME);
+        if(trim($ticket) !== ''){
             $ticket = Mcrypt::decrypt($ticket, static::getSalt());
             $user = explode('|', $ticket);
-
-            if (is_array($user) && end($user) === static::getSalt()) {
+            if (is_array($user) && trim(end($user)) === static::getSalt()) {
                 if ($setData) {
                     static::$instance = static::getById($user[0]);
                     return static::$instance;

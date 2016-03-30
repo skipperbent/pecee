@@ -12,7 +12,7 @@ class PhtmlNode extends HtmlElement {
 
 	public static function getNextClosure() {
 		self::$closureCount++;
-		$basis = self::$closureCount.Guid::Create();
+		$basis = self::$closureCount . Guid::create();
 		return "closure".md5($basis);
 	}
 

@@ -232,8 +232,5 @@ class Form {
     public function end() {
         return '</form>';
     }
-
-    public function setPrefixElements($bool) {
-        $this->prefixElements = $bool;
-    }
+    
 }

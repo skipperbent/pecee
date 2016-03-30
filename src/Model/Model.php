@@ -18,7 +18,8 @@ abstract class Model implements \IteratorAggregate {
     public function __construct() {
         // Set table name if its not already defined
         if($this->table === null) {
-            $name = str_ireplace('model', '', end(explode('\\', get_called_class())));
+            $name = explode('\\', get_called_class());
+            $name = str_ireplace('model', '', end($name));
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 

@@ -4,7 +4,6 @@ namespace Pecee\Widget;
 use Pecee\Base;
 use Pecee\Debug;
 use Pecee\UI\Form\Form;
-use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
@@ -41,16 +40,18 @@ abstract class Widget extends Base  {
         return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
-    public function showMessages($type) {
-        if($this->hasMessages($type)) {
-            $output = array();
-            $output[] = sprintf('<ul class="msg %s">', $type);
-            /* @var $error FormMessage */
-            foreach($this->getMessages($type) as $error) {
-                $output[] = sprintf('<li>%s</li>', $error->getMessage());
+    public function showMessages($type, $form = null, $placement = null) {
+        $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
+        if($this->hasMessages($type, $form, $placement)) {
+            $o = sprintf('<div class="alert alert-%s">', $type);
+            $msg = array();
+            /* @var $error \Pecee\UI\Form\FormMessage */
+            foreach($this->getMessages($type, $form, $placement) as $error) {
+                $msg[] = sprintf('%s', $error->getMessage());
             }
-            $output[] = '</ul>';
-            return join('', $output);
+
+            $o .= join('<br/>', $msg) . '</div>';
+            return $o;
         }
         return '';
     }
