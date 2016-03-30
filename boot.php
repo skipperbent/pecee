@@ -11,6 +11,11 @@ $dotenv->load();
 require_once 'helpers.php';
 
 $_ENV['app_name'] = env('APP_NAME');
+
+if($_ENV['app_name'] === null) {
+    throw new \ErrorException('Missing required .env configuration: APP_NAME');
+}
+
 $loader->addPsr4($_ENV['app_name'] . '\\', $_ENV['base_path'] . 'app/');
 
 function pecee_autoloader($class) {
