@@ -7,6 +7,7 @@ abstract class ValidateInput implements IValidateInput {
 	protected $value;
 	protected $index;
 	protected $form;
+	protected $placement;
 	
 	abstract public function validate();
 
@@ -43,5 +44,19 @@ abstract class ValidateInput implements IValidateInput {
 	public function setForm($form) {
 		$this->form = $form;
 	}
+
+    /**
+     * @return string|null
+     */
+    public function getPlacement() {
+        return $this->placement;
+    }
+
+    /**
+     * @param string|null $placement
+     */
+    public function setPlacement($placement) {
+        $this->placement = $placement;
+    }
 
 }

@@ -4,7 +4,16 @@
  * Contain helper functions which provides shortcuts for various classes.
  */
 
-function url($controller = null, $parameters = null, $getParams = null) {
+/**
+ * Get url
+ * 
+ * @param string|null $controller
+ * @param array|null $parameters
+ * @param array|null $getParams
+ *
+ * @return string
+ */
+function url($controller = null, array $parameters = null, array $getParams = null) {
     return \Pecee\Router::getRoute($controller, $parameters, $getParams);
 }
 

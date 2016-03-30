@@ -17,11 +17,18 @@ class Column {
     protected $comment;
     protected $relationTable;
     protected $relationColumn;
+    protected $relationUpdateType;
+    protected $relationDeleteType;
 
     const INDEX_PRIMARY = 'PRIMARY KEY';
     const INDEX_UNIQUE = 'UNIQUE';
     const INDEX_INDEX = 'INDEX';
     const INDEX_FULLTEXT = 'FULLTEXT';
+
+    const RELATION_TYPE_RESTRICT = 'RESTRICT';
+    const RELATION_TYPE_CASCADE = 'CASCADE';
+    const RELATION_TYPE_SET_NULL = 'SET NULL';
+    const RELATION_TYPE_NO_ACTION = 'NO ACTION';
 
     const TYPE_VARCHAR = 'VARCHAR';
     const TYPE_LONGTEXT = 'LONGTEXT';
@@ -110,6 +117,13 @@ class Column {
         self::TYPE_MULTILINESTRING,
         self::TYPE_MULTIPOLYGON,
         self::TYPE_GEOMETRYCOLLECTION
+    ];
+
+    public static $RELATION_TYPES = [
+        self::RELATION_TYPE_CASCADE,
+        self::RELATION_TYPE_NO_ACTION,
+        self::RELATION_TYPE_RESTRICT,
+        self::RELATION_TYPE_SET_NULL
     ];
 
     // Default values
@@ -214,9 +228,20 @@ class Column {
         return $this;
     }
 
-    public function relation($table, $column) {
+    public function relation($table, $column, $delete = self::RELATION_TYPE_CASCADE, $update = self::RELATION_TYPE_RESTRICT) {
+
+        if(!in_array($delete, self::$RELATION_TYPES)) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', self::$RELATION_TYPES));
+        }
+
+        if(!in_array($update, self::$RELATION_TYPES)) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', self::$RELATION_TYPES));
+        }
+
         $this->relationTable = $table;
         $this->relationColumn = $column;
+        $this->relationUpdateType = $update;
+        $this->relationDeleteType = $delete;
         return $this;
     }
 
@@ -255,6 +280,19 @@ class Column {
 
         if($this->getIncrement()) {
             $query .= ' AUTO_INCREMENT';
+        }
+
+        if ($this->getIndex()) {
+            $query .= sprintf(', %s (`%s`)', $this->getIndex(), $this->getName());
+        }
+
+        if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
+            $query .= sprintf(', FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
+                $this->getName(),
+                $this->getRelationTable(),
+                $this->getRelationColumn(),
+                $this->getRelationUpdateType(),
+                $this->getRelationDeleteType());
         }
 
         return $query;
@@ -356,6 +394,14 @@ class Column {
 
     public function getRelationColumn() {
         return $this->relationColumn;
+    }
+
+    public function getRelationUpdateType() {
+        return $this->relationUpdateType;
+    }
+
+    public function getRelationDeleteType() {
+        return $this->relationDeleteType;
     }
 
 }

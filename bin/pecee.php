@@ -5,6 +5,7 @@ require_once $appPath . '/config/bootstrap.php';
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
+// TODO: use migration
 
 function getClassInfo($file) {
     $contents = file_get_contents($file);
@@ -36,12 +37,14 @@ switch(strtolower($argv[2])) {
         $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
         $config = $appPath . '/config/phinx-config.php';
 
+        $template = dirname(__DIR__) . '/database/stubs/migration.php';
+
         array_shift($argv);
         array_shift($argv);
         array_shift($argv);
 
         // Run Phinx
-        exec($phinx . ' ' . join(' ', $argv) . ' -c ' . $config, $output);
+        exec($phinx . ' ' . join(' ', $argv) . ' -c ' . $config . ' --template="'. $template .'"', $output);
         echo join(chr(10), $output);
 
         exit(0);
@@ -54,5 +57,5 @@ switch(strtolower($argv[2])) {
         break;
 }
 
-die('No input specified');
-return;
+echo 'No input specified';
+exit(1);

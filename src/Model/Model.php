@@ -18,7 +18,8 @@ abstract class Model implements \IteratorAggregate {
     public function __construct() {
         // Set table name if its not already defined
         if($this->table === null) {
-            $name = str_ireplace('model', '', end(explode('\\', get_called_class())));
+            $name = explode('\\', get_called_class());
+            $name = str_ireplace('model', '', end($name));
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 
@@ -62,7 +63,12 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function exists() {
-        $sql = sprintf('SELECT `%1$s` FROM `%s` WHERE `%1$s` = ?;', $this->primary, $this->table);
+
+        if($this->{$this->primary} === null) {
+            return false;
+        }
+
+        $sql = sprintf('SELECT `%1$s` FROM `%2$s` WHERE `%1$s` = ?;', $this->primary, $this->table);
         return Pdo::getInstance()->value($sql, [ $this->{$this->primary} ]);
     }
 
