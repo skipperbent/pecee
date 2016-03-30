@@ -42,7 +42,7 @@ class InputItem implements IInputItem {
         return (count($this->validationErrors) === 0);
     }
 
-    public function addValidation($validation) {
+    public function addValidation($validation, $placement = null) {
         if(is_array($validation)) {
             $this->validations = array();
 
@@ -56,6 +56,7 @@ class InputItem implements IInputItem {
                 $v->setName($this->name);
                 $v->setValue($this->value);
                 $v->setForm($this->form);
+                $v->setPlacement($placement);
                 $this->validations[] = $v;
             }
 
@@ -71,6 +72,7 @@ class InputItem implements IInputItem {
         $validation->setName($this->name);
         $validation->setValue($this->value);
         $validation->setForm($this->form);
+        $validation->setPlacement($placement);
 
         $this->validations = array($validation);
     }
@@ -108,6 +110,10 @@ class InputItem implements IInputItem {
      */
     public function getForm() {
         return $this->form;
+    }
+
+    public function setName($name) {
+        $this->name = $name;
     }
 
     /**

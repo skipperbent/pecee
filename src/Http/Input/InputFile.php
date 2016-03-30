@@ -22,7 +22,7 @@ class InputFile extends CollectionItem implements IInputItem {
         return (count($this->validationErrors) === 0);
     }
 
-    public function addValidation($validation) {
+    public function addValidation($validation, $placement = null) {
         if(is_array($validation)) {
             $this->validations = array();
 
@@ -37,6 +37,7 @@ class InputFile extends CollectionItem implements IInputItem {
                 $v->setFileTmpName($this->tmpName);
                 $v->setFileError($this->error);
                 $v->setFileSize($this->size);
+                $v->setPlacement($placement);
 
                 $this->validations[] = $v;
             }
@@ -52,6 +53,7 @@ class InputFile extends CollectionItem implements IInputItem {
         $validation->setFileTmpName($this->tmpName);
         $validation->setFileError($this->error);
         $validation->setFileSize($this->size);
+        $validation->setPlacement($placement);
 
         $this->validations = array($validation);
     }
@@ -108,6 +110,10 @@ class InputFile extends CollectionItem implements IInputItem {
      */
     public function getValidationErrors() {
         return $this->validationErrors;
+    }
+
+    public function setName($name) {
+        $this->name = $name;
     }
 
 }
