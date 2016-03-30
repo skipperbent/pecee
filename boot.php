@@ -22,7 +22,7 @@ function pecee_autoloader($class) {
     $module = $modules->get($app);
 
     if($module !== null) {
-        require_once $module . $file;
+        require_once $module . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . $file;
     }
 }
 
