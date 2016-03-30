@@ -42,8 +42,14 @@ switch(strtolower($argv[1])) {
         array_shift($argv);
         array_shift($argv);
 
+        $cmd = $phinx . ' ' . join(' ', $argv) . ' -c ' . $config;
+
+        if(isset($argv[0]) && strtolower($argv[0]) === 'create') {
+            $cmd .= ' --template="'. $template .'"';
+        }
+
         // Run Phinx
-        exec($phinx . ' ' . join(' ', $argv) . ' -c ' . $config . ' --template="'. $template .'"', $output);
+        exec($cmd, $output);
         echo join(chr(10), $output);
 
         exit(0);
