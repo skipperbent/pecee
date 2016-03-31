@@ -6,6 +6,8 @@ use Pecee\Model\Model;
 
 class UserBadLogin extends Model {
 
+    protected $table = 'user_bad_login';
+
     protected $columns = [
         'id',
         'username',
@@ -13,6 +15,9 @@ class UserBadLogin extends Model {
         'ip',
         'active'
     ];
+
+    const TIMEOUT_MINUTES = 30;
+    const MAX_REQUEST_PER_IP = 20;
 
 	public function __construct() {
 
@@ -24,24 +29,25 @@ class UserBadLogin extends Model {
 
     public static function track($username) {
         $login = new static ();
-        $login->username = $username;
+        $login->username = trim($username);
         $login->save();
     }
 
-	public static function checkBadLogin() {
+	public static function checkBadLogin($username) {
 
-        $trackQuery = self::fetchOne('SELECT `created_date`, COUNT(`ip`) AS `request_count` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `request_count` DESC', request()->getIp());
+        $trackQuery = static::fetchOne('SELECT `created_date`, COUNT(`ip`) AS `request_count` FROM {table} WHERE `username` = %s && `active` = 1 GROUP BY `ip` ORDER BY `request_count` DESC', trim($username));
 
         if($trackQuery->hasRow()) {
             $lastLoginTimeStamp = $trackQuery->created_date;
             $countRequestsFromIP = $trackQuery->request_count;
             $lastLoginMinutesAgo = round((time()-strtotime($lastLoginTimeStamp))/60);
-            return ($lastLoginMinutesAgo < 30 && $countRequestsFromIP > 20);
+            return ((self::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < self::TIMEOUT_MINUTES) &&
+                    (self::MAX_REQUEST_PER_IP === null || $countRequestsFromIP > self::MAX_REQUEST_PER_IP));
         }
         return false;
 	}
 
-	public static function reset() {
-        self::nonQuery('UPDATE {table} SET `active` = 0 WHERE `ip` = %s', request()->getIp());
+	public static function reset($username) {
+        static::nonQuery('UPDATE {table} SET `active` = 0 WHERE `username` = %s', trim($username));
 	}
 }

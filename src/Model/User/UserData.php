@@ -9,7 +9,6 @@ class UserData extends Model {
 
 	protected $columns = [
 		'id',
-		'user_id',
 		'key',
 		'value'
 	];
@@ -17,6 +16,10 @@ class UserData extends Model {
 	public function __construct($userId = null, $key = null, $value = null) {
 
 		parent::__construct();
+
+		$this->columns = array_merge($this->columns, [
+			static::USER_IDENTIFIER_KEY
+		]);
 
 		$this->user_id = $userId;
 		$this->key = $key;

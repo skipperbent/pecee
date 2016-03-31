@@ -11,24 +11,4 @@ $dotenv->load();
 require_once 'helpers.php';
 
 $_ENV['app_name'] = env('APP_NAME');
-
-if($_ENV['app_name'] === null) {
-    throw new \ErrorException('Missing required .env configuration: APP_NAME');
-}
-
 $loader->addPsr4($_ENV['app_name'] . '\\', $_ENV['base_path'] . 'app/');
-
-function pecee_autoloader($class) {
-    $file = explode('\\', $class);
-    $app = array_shift($file);
-    $file = join(DIRECTORY_SEPARATOR, $file) . '.php';
-
-    $modules = \Pecee\Module::getInstance();
-    $module = $modules->get($app);
-
-    if($module !== null) {
-        require_once $module . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . $file;
-    }
-}
-
-spl_autoload_register('pecee_autoloader');
