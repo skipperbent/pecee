@@ -274,7 +274,7 @@ class ModelUser extends ModelData {
     }
 
     public static function authenticate($username, $password, $remember = false) {
-        static::onLoginStart();
+        static::onLoginStart($username, $password);
         $user = static::fetchOne('SELECT u.* FROM {table} u WHERE u.`deleted` = 0 && u.`username` = %s', $username);
         if(!$user->hasRows()) {
             throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
@@ -302,11 +302,11 @@ class ModelUser extends ModelData {
     }
 
     protected static function onLoginSuccess(ModelUser $user) {
-        UserBadLogin::reset();
+        UserBadLogin::reset($user->username);
     }
 
-    protected static function onLoginStart() {
-        if(UserBadLogin::checkBadLogin()) {
+    protected static function onLoginStart($username, $password) {
+        if(UserBadLogin::checkBadLogin($username)) {
             throw new UserException('User has been banned', static::ERROR_TYPE_BANNED);
         }
     }
