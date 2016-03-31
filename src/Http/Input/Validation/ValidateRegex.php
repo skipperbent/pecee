@@ -12,7 +12,7 @@ class ValidateRegex extends ValidateInput {
     }
 
     public function validate() {
-        return (preg_match($this->regex, $this->value) === 0);
+        return (preg_match($this->regex, $this->value) !== 0);
     }
 
     public function getErrorMessage() {
