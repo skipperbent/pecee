@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
-abstract class ValidateInput implements IValidateInput {
+abstract class ValidateInput {
 
 	protected $name;
 	protected $value;
@@ -10,19 +10,18 @@ abstract class ValidateInput implements IValidateInput {
 	protected $placement;
 	
 	abstract public function validate();
-
 	abstract public function getErrorMessage();
 	
 	public function setName($name) {
-		$this->name=$name;
+		$this->name = $name;
 	}
 
 	public function setValue($value) {
-		$this->value=$value;
+		$this->value = $value;
 	}
 
 	public function setIndex($index) {
-		$this->index=$index;
+		$this->index = $index;
 	}
 
 	public function getIndex() {

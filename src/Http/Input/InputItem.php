@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Http\Input;
 
-use Pecee\Http\Input\Validation\IValidateInput;
 use Pecee\Http\Input\Validation\ValidateInput;
 use Pecee\Str;
 
@@ -48,12 +47,17 @@ class InputItem implements IInputItem {
 
             foreach($validation as $v) {
 
-                if(!($v instanceof IValidateInput)) {
+                if(!($v instanceof ValidateInput)) {
                     throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($v));
                 }
 
                 $v->setIndex($this->index);
-                $v->setName($this->name);
+
+                // Only set name if it's not already set
+                if($v->getName() === null) {
+                    $v->setName($this->name);
+                }
+
                 $v->setValue($this->value);
                 $v->setForm($this->form);
                 $v->setPlacement($placement);
@@ -64,12 +68,17 @@ class InputItem implements IInputItem {
 
         }
 
-        if(!($validation instanceof IValidateInput)) {
+        if(!($validation instanceof ValidateInput)) {
             throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($validation));
         }
 
         $validation->setIndex($this->index);
-        $validation->setName($this->name);
+
+        // Only set name if it's not already set
+        if($validation->getName() === null) {
+            $validation->setName($this->name);
+        }
+
         $validation->setValue($this->value);
         $validation->setForm($this->form);
         $validation->setPlacement($placement);
