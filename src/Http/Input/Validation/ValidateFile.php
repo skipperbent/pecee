@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Http\Input\Validation;
 
-abstract class ValidateFile extends ValidateInput implements IValidateFile {
+abstract class ValidateFile extends ValidateInput {
 
 	protected $fileName;
 	protected $fileType;
