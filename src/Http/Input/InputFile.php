@@ -2,10 +2,10 @@
 namespace Pecee\Http\Input;
 
 use Pecee\Collection\CollectionItem;
-use Pecee\Http\Input\Validation\IValidateFile;
+use Pecee\Http\Input\Validation\ValidateFile;
 use Pecee\IO\File;
 
-class InputFile extends CollectionItem implements IInputItem {
+class InputFile extends CollectionItem {
 
     protected $validationErrors = array();
     protected $validations = array();
@@ -28,8 +28,8 @@ class InputFile extends CollectionItem implements IInputItem {
 
             foreach($validation as $v) {
 
-                if(!($v instanceof IValidateFile)) {
-                    throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($v));
+                if(!($v instanceof ValidateFile)) {
+                    throw new \ErrorException('Validation type must be an instance of ValidateFile - type given: ' . get_class($v));
                 }
 
                 $v->setFileName($this->name);
@@ -39,13 +39,18 @@ class InputFile extends CollectionItem implements IInputItem {
                 $v->setFileSize($this->size);
                 $v->setPlacement($placement);
 
+                // Only set name if it's not already set
+                if($v->getName() !== null) {
+                    $v->setName($this->name);
+                }
+
                 $this->validations[] = $v;
             }
             return;
         }
 
-        if(!($validation instanceof IValidateFile)) {
-            throw new \ErrorException('Validation type must be an instance of ValidateInput - type given: ' . get_class($validation));
+        if(!($validation instanceof ValidateFile)) {
+            throw new \ErrorException('Validation type must be an instance of ValidateFile - type given: ' . get_class($validation));
         }
 
         $validation->setFileName($this->name);
@@ -54,6 +59,11 @@ class InputFile extends CollectionItem implements IInputItem {
         $validation->setFileError($this->error);
         $validation->setFileSize($this->size);
         $validation->setPlacement($placement);
+
+        // Only set name if it's not already set
+        if($validation->getName() !== null) {
+            $validation->setName($this->name);
+        }
 
         $this->validations = array($validation);
     }
