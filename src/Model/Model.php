@@ -272,7 +272,7 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function isCollection() {
-        return (array_key_exists('rows_per_page', $this->results['data']));
+        return (array_key_exists('max_rows', $this->results['data']));
     }
 
     protected function parseArrayData($data) {
@@ -296,7 +296,7 @@ abstract class Model implements \IteratorAggregate {
 
     public function getArray(){
         if(!$this->hasRows() && !$this->isCollection()) {
-            return null;
+            return array();
         }
 
         $arr = array('rows' => null);
