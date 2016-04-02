@@ -296,11 +296,7 @@ abstract class Model implements \IteratorAggregate {
 
     public function getArray(){
 
-        if($this->isCollection()) {
-            if(!$this->hasRows()) {
-                return array();
-            }
-        } else {
+        if(!$this->isCollection()) {
             if(!$this->hasRow()) {
                 return null;
             }
