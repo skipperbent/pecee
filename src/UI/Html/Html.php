@@ -133,4 +133,13 @@ class Html {
     public function getInnerHtml() {
         return $this->innerHtml;
     }
+
+    public function getAttribute($name) {
+        return (isset($this->attributes[$name]) ? $this->attributes[$name] : null);
+    }
+
+    public function getAttributes() {
+        return $this->attributes;
+    }
+
 }
