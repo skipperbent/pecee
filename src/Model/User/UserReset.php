@@ -45,13 +45,13 @@ class UserReset extends Model {
         if($reset->hasRow()) {
             $reset->delete();
             self::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY . '` = %s', $reset->{static::USER_IDENTIFIER_KEY});
-            return $reset->user_id;
+            return $reset->{static::USER_IDENTIFIER_KEY};
         }
         return false;
     }
 
-    public function getUserId() {
-        return $this->user_id;
+    public function getIdentifier() {
+        return $this->{static::USER_IDENTIFIER_KEY};
     }
 
     public function getKey() {

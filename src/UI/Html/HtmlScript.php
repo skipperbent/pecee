@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\UI\Html;
+
 class HtmlScript extends Html {
 
 	public function __construct($src, $type = null) {
