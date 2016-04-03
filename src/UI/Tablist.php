@@ -13,7 +13,7 @@ class Tablist {
 		$btn->addAttribute('href','#');
 		$btn->addAttribute('class','pecee-tablist');
 		$btn->addAttribute('data-id', $id);
-		$btn->setInnerHtml($value);
+		$btn->addInnerHtml($value);
 		return $btn;
 	}
 

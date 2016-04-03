@@ -5,45 +5,48 @@ use Pecee\UI\Menu\Menu;
 use Pecee\Widget\Widget;
 
 class Html {
-	protected $name;
-	protected $value;
+
+	protected $type;
 	protected $innerHtml;
 	protected $closingType;
 	protected $attributes;
 
-	const CLOSE_TYPE_SELF='self';
-	const CLOSE_TYPE_TAG='tag';
-	const CLOSE_TYPE_NONE='none';
+	const CLOSE_TYPE_SELF = 'self';
+	const CLOSE_TYPE_TAG = 'tag';
+	const CLOSE_TYPE_NONE = 'none';
 
-	public function __construct($name, $value = null) {
-		$this->name = $name;
-		$this->value = $value;
+	public function __construct($type) {
+		$this->type = $type;
 		$this->attributes = array();
 		$this->closingType = self::CLOSE_TYPE_TAG;
 		$this->innerHtml = array();
 	}
 
 	/**
-	 * @param string $innerHtml
+	 * @param array $html
+     * @return self
 	 */
-	public function setInnerHtml($innerHtml) {
-		$this->innerHtml[] = $innerHtml;
+	public function setInnerHtml(array $html) {
+		$this->innerHtml = $html;
+        return $this;
 	}
 
+
+    public function addInnerHtml($html) {
+        $this->innerHtml[] = $html;
+        return $this;
+    }
+
 	public function addWidget(Widget $widget) {
-		$this->setInnerHtml($widget->__toString());
+		return $this->addInnerHtml($widget->__toString());
 	}
 
 	public function addMenu(Menu $menu) {
-		$this->setInnerHtml($menu->__toString());
+		return $this->addInnerHtml($menu->__toString());
 	}
 
 	public function addItem(Html $htmlItem) {
-		$this->setInnerHtml($htmlItem->__toString());
-	}
-
-	public function setElement(Html $el) {
-		$this->innerHtml[] = $el->writeHtml();
+		return $this->addInnerHtml($htmlItem->__toString());
 	}
 
 	/**
@@ -73,7 +76,7 @@ class Html {
 	}
 
 	protected function writeHtml() {
-		$output = '<'.$this->name;
+		$output = '<'.$this->type;
 		foreach($this->attributes as $key=>$val) {
 			$output .= ' '.$key. (($val !== null || strtolower($key) === 'value') ? '="'.$val.'"' : '');
 		}
@@ -81,7 +84,7 @@ class Html {
         foreach($this->innerHtml as $html) {
             $output.=$html;
         }
-		$output .= (($this->closingType === self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->name) : '');
+		$output .= (($this->closingType === self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->type) : '');
 		return $output;
 	}
 
@@ -102,12 +105,8 @@ class Html {
 		return $this->closingType;
 	}
 
-	public function getName() {
-		return $this->name;
-	}
-
-	public function getValue() {
-		return $this->value;
+	public function getType() {
+		return $this->type;
 	}
 
 	/**
@@ -120,4 +119,8 @@ class Html {
 	public function __toString() {
 		return $this->writeHtml();
 	}
+
+    public function getInnerHtml() {
+        return $this->innerHtml;
+    }
 }
