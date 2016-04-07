@@ -121,8 +121,14 @@ class InputItem implements IInputItem {
         return $this->form;
     }
 
+    /**
+     * Set input name
+     * @param string $name
+     * @return static $this
+     */
     public function setName($name) {
         $this->name = $name;
+        return $this;
     }
 
     /**
