@@ -50,6 +50,18 @@ class Html {
     }
 
     /**
+     * Replace attribute
+     *
+     * @param string $name
+     * @param string $value
+     * @return static
+     */
+    public function replaceAttribute($name, $value = '') {
+        $this->attributes[$name] = array($value);
+        return $this;
+    }
+
+    /**
      * Adds new attribute to the element.
      *
      * @param string $name
@@ -71,7 +83,10 @@ class Html {
         return $this;
     }
 
-    public function attr($name, $value = '') {
+    public function attr($name, $value = '', $replace = false) {
+        if($replace) {
+            return $this->replaceAttribute($name, $value);
+        }
         return $this->addAttribute($name, $value);
     }
 

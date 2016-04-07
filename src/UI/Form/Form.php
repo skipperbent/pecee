@@ -14,7 +14,7 @@ use Pecee\UI\Html\HtmlSelectOption;
 use Pecee\UI\Html\HtmlTextarea;
 
 class Form {
-    
+
     const FORM_ENCTYPE_FORM_DATA = 'multipart/form-data';
 
     protected $input;
@@ -113,9 +113,13 @@ class Form {
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
     public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
-        $element = new HtmlCheckbox($name, $value);
+        $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
         if($saveValue !== false) {
-            $defaultValue = (count($_GET)) ? null : $defaultValue;
+            if($defaultValue === null) {
+                $defaultValue = $value;
+            } else {
+                $defaultValue = (count($_GET)) ? null : $defaultValue;
+            }
             $checked = Boolean::parse($this->getValue($name, $defaultValue));
             if($checked) {
                 $element->addAttribute('checked', 'checked');
