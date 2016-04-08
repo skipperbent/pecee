@@ -112,7 +112,7 @@ class Form {
      * @param bool $defaultValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
+    public function bool($name, $value = true, $saveValue = true, $defaultValue = null) {
         $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
         if($saveValue !== false) {
             if($defaultValue === null) {
