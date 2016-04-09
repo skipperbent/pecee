@@ -39,17 +39,6 @@ class Router extends SimpleRouter {
 
             $route = RouterBase::getInstance()->getLoadedRoute();
 
-            $exceptionHandler = null;
-
-            // Load and use exception-handler defined on group
-            if($route && $route->getGroup()) {
-                $exceptionHandler = $route->getGroup()->getExceptionHandler();
-
-                if($exceptionHandler !== null) {
-                    self::loadExceptionHandler($exceptionHandler, $route, $e);
-                }
-            }
-
             // Otherwise use the fallback default exceptions handler
             if(self::$defaultExceptionHandler !== null) {
                 self::loadExceptionHandler(self::$defaultExceptionHandler, $route, $e);

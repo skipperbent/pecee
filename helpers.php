@@ -6,7 +6,7 @@
 
 /**
  * Get url
- * 
+ *
  * @param string|null $controller
  * @param array|null $parameters
  * @param array|null $getParams
@@ -63,9 +63,12 @@ function env($key, $default = null) {
 
 /**
  * Get current csrf-token
- * @return null|string
+ * @return string|null
  */
 function csrf_token() {
-    $token = new \Pecee\CsrfToken();
-    return $token->getToken();
+    $baseVerifier = \Pecee\SimpleRouter\RouterBase::getInstance()->getBaseCsrfVerifier();
+    if($baseVerifier !== null) {
+        return $baseVerifier->getToken();
+    }
+    return null;
 }

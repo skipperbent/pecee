@@ -14,7 +14,7 @@ class HtmlForm extends Html {
 		$this->addAttribute('action', ((!$action) ? url() : $action));
 
 		// Add csrf token
-		if(strtolower($method) === 'post') {
+		if(strtolower($method) !== 'get') {
 			$this->addItem(new HtmlInput(BaseCsrfVerifier::POST_KEY, 'hidden', csrf_token()));
 		}
 
