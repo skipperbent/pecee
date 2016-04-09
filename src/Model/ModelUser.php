@@ -41,7 +41,7 @@ class ModelUser extends ModelData {
         'deleted'
     ];
 
-    public function __construct($username = null, $password = null, $email = null) {
+    public function __construct($username = null, $password = null) {
 
         parent::__construct();
 
@@ -50,16 +50,6 @@ class ModelUser extends ModelData {
         $this->admin_level = 0;
         $this->last_activity = Date::toDateTime();
         $this->deleted = false;
-
-        $this->setEmail($email);
-    }
-
-    public function setEmail($email) {
-        $this->data->email = $email;
-    }
-
-    public function getEmail() {
-        return $this->data->email;
     }
 
     public function save() {
