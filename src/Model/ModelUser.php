@@ -1,8 +1,8 @@
 <?php
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Cookie;
-use Pecee\Date;
 use Pecee\DB\PdoHelper;
 use Pecee\Mcrypt;
 use Pecee\Model\User\UserBadLogin;
@@ -48,7 +48,7 @@ class ModelUser extends ModelData {
         $this->username = $username;
         $this->password = md5($password);
         $this->admin_level = 0;
-        $this->last_activity = Date::toDateTime();
+        $this->last_activity = Carbon::now()->toDateTimeString();
         $this->deleted = false;
     }
 

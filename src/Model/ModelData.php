@@ -3,7 +3,7 @@ namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
 
-abstract class ModelData extends Model {
+abstract class ModelData extends LegacyModel {
 
 	public $data;
 

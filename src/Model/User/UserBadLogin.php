@@ -1,10 +1,10 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\Date;
-use Pecee\Model\Model;
+use Carbon\Carbon;
+use Pecee\Model\LegacyModel;
 
-class UserBadLogin extends Model {
+class UserBadLogin extends LegacyModel {
 
     protected $table = 'user_bad_login';
 
@@ -24,7 +24,7 @@ class UserBadLogin extends Model {
 		parent::__construct();
 
         $this->ip = request()->getIp();
-        $this->created_date = Date::toDateTime();
+        $this->created_date = Carbon::now()->toDateTimeString();
 	}
 
     public static function track($username) {

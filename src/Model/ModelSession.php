@@ -1,9 +1,9 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 
-class ModelSession extends Model {
+class ModelSession extends LegacyModel {
 
     protected $columns = [
         'name',
@@ -20,11 +20,11 @@ class ModelSession extends Model {
 	}
 
 	public function save() {
-		self::nonQuery('DELETE FROM {table} WHERE `time` <= %s', Date::toDateTime(time()-(60*30)));
+		self::nonQuery('DELETE FROM {table} WHERE `time` <= %s', Carbon::createFromTimestamp(time() - (60*30))->toDateTimeString());
 
 		$session = $this->get($this->name);
 		if($session->hasRows()) {
-			$session->time = Date::toDateTime();
+			$session->time = Carbon::now()->toDateTimeString();
 			$session->update();
 		} else {
 			parent::save();

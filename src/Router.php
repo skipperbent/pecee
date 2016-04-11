@@ -1,7 +1,6 @@
 <?php
 namespace Pecee;
 
-use Pecee\DB\Pdo;
 use Pecee\Handler\ExceptionHandler;
 use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
@@ -51,8 +50,6 @@ class Router extends SimpleRouter {
         if(env('DEBUG', false) && Site::getInstance()->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
             echo Debug::getInstance();
         }
-
-        Pdo::getInstance()->close();
     }
 
     protected static function loadExceptionHandler($class, $route, $e) {

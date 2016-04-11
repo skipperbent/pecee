@@ -1,20 +1,28 @@
 <?php
 namespace Pecee\Http\Input\Validation;
-use Pecee\Date;
+
+use Carbon\Carbon;
 
 class ValidateInputDate extends ValidateInput {
 
-	protected $error;
 	protected $format;
 
-	public function __construct($format = 'Y-m-d H:i:s') {
+	public function __construct($format = null) {
 		$this->format = $format;
 	}
 
 	public function validate() {
-		if($this->value) {
-			return Date::isValid($this->value, $this->format);
+
+		try {
+			if($this->format === null) {
+				Carbon::parse($this->value, 'UTC');
+			} else {
+				Carbon::createFromFormat($this->format, $this->value, 'UTC');
+			}
+		} catch(\Exception $e) {
+			return false;
 		}
+
 		return true;
 	}
 

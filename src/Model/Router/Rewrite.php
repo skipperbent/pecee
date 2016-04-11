@@ -2,9 +2,9 @@
 namespace Pecee\Model\Router;
 
 use Pecee\DB\PdoHelper;
-use Pecee\Model\Model;
+use Pecee\Model\LegacyModel;
 
-class Rewrite extends Model {
+class Rewrite extends LegacyModel {
 
     protected $table = 'rewrite';
 

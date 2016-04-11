@@ -2,9 +2,9 @@
 namespace Pecee\Model\Node;
 
 use Pecee\DB\PdoHelper;
-use Pecee\Model\Model;
+use Pecee\Model\LegacyModel;
 
-class NodeData extends Model {
+class NodeData extends LegacyModel {
 
     protected $table = 'node_data';
     protected $columns = [

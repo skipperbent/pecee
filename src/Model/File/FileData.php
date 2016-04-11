@@ -1,9 +1,9 @@
 <?php
 namespace Pecee\Model\File;
 
-use Pecee\Model\Model;
+use Pecee\Model\LegacyModel;
 
-class FileData extends Model {
+class FileData extends LegacyModel {
 
     protected $columns = [
         'id',

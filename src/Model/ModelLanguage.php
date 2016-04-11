@@ -5,7 +5,7 @@ use Pecee\DB\PdoHelper;
 use Pecee\Locale;
 use Pecee\SimpleRouter\RouterBase;
 
-class ModelLanguage extends Model {
+class ModelLanguage extends LegacyModel {
 
     protected static $instance;
 

@@ -1,14 +1,14 @@
 <?php
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Boolean;
-use Pecee\Date;
 use Pecee\Collection\CollectionItem;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Node\NodeData;
 use Pecee\Str;
 
-class ModelNode extends Model {
+class ModelNode extends LegacyModel {
 
     const ORDER_ID_DESC = 'n.`id` DESC';
     const ORDER_CHANGED_DESC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) DESC';
@@ -65,7 +65,7 @@ class ModelNode extends Model {
 
         $this->data = new CollectionItem();
         $this->path = 0;
-        $this->created_date = Date::toDateTime();
+        $this->created_date = Carbon::now()->toDateTimeString();
         $this->order = 0;
         $this->active = false;
     }
@@ -250,7 +250,7 @@ class ModelNode extends Model {
     }
 
     public function update() {
-        $this->changed_date = Date::toDateTime();
+        $this->changed_date = Carbon::now()->toDateTimeString();
         $this->calculatePath();
         $this->updateFields();
         parent::update();

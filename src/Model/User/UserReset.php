@@ -1,10 +1,10 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\Date;
-use Pecee\Model\Model;
+use Carbon\Carbon;
+use Pecee\Model\LegacyModel;
 
-class UserReset extends Model {
+class UserReset extends LegacyModel {
 
     const USER_IDENTIFIER_KEY = 'user_id';
 
@@ -24,7 +24,7 @@ class UserReset extends Model {
 
         $this->{static::USER_IDENTIFIER_KEY} = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Date::toDateTime();
+        $this->created_date = Carbon::now()->toDateTimeString();
     }
 
     public function clean() {

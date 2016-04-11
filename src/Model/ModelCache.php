@@ -1,14 +1,14 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 use Pecee\DB\Pdo;
 
 /**
  * Class ModelCache
  * @package Pecee\Model
  */
-class ModelCache extends Model {
+class ModelCache extends LegacyModel {
 
 	protected $columns = [
 		'key',
@@ -46,7 +46,7 @@ class ModelCache extends Model {
 	}
 
 	public static function set($key, $data, $expireMinutes) {
-		$expireDate = Date::toDateTime(time() + ($expireMinutes*60));
+		$expireDate = Carbon::createFromTimestamp(time() + ($expireMinutes + 60))->toDateTimeString();
 		self::remove($key);
 		$model = new static($key, $data, $expireDate);
 		return ($model->save());

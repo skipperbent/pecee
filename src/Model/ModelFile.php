@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 use Pecee\Guid;
 use Pecee\IO\Directory;
 use Pecee\IO\File;
@@ -40,7 +40,7 @@ class ModelFile extends ModelData {
             $this->bytes = filesize($fullPath);
         }
 
-        $this->created_date = Date::toDateTime();
+        $this->created_date = Carbon::now()->toDateTimeString();
 	}
 
 	public function setFilename($filename) {
