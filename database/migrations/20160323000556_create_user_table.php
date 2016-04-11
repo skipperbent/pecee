@@ -9,9 +9,10 @@ class CreateUserTable extends Migration {
             $table->column('id')->bigint()->primary()->increment();
             $table->column('username')->string(300)->index();
             $table->column('password')->string(32)->index();
-            $table->column('last_activity')->datetime()->nullable()->index();
             $table->column('admin_level')->integer(1)->nullable()->index();
             $table->column('deleted')->bool()->index();
+            $table->column('created_date')->datetime()->nullable()->index();
+            $table->column('last_activity')->datetime()->nullable()->index();
         });
     }
 

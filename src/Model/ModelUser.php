@@ -36,9 +36,10 @@ class ModelUser extends ModelData {
         'id',
         'username',
         'password',
-        'last_activity',
         'admin_level',
-        'deleted'
+        'deleted',
+        'created_date',
+        'last_activity'
     ];
 
     public function __construct($username = null, $password = null) {
