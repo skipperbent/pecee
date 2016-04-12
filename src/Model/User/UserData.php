@@ -35,7 +35,7 @@ class UserData extends Model {
     }
 
 	public static function destroyByIdentifier($identifierId) {
-        static::where(static::USER_IDENTIFIER_KEY, '=', array($identifierId))->delete();
+        static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->delete();
 	}
 
 	public static function getByIdentifier($identifierId) {

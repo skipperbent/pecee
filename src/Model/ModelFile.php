@@ -8,10 +8,6 @@ use Pecee\IO\File;
 use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData {
-	const ORDER_DATE_ASC = 'f.`created_date` ASC';
-	const ORDER_DATE_DESC = 'f.`created_date` DESC';
-
-	public static $ORDERS = array(self::ORDER_DATE_ASC, self::ORDER_DATE_DESC);
 
     protected $columns = [
         'id',
@@ -70,16 +66,16 @@ class ModelFile extends ModelData {
 	public function updateData() {
 		if($this->data) {
 			/* Remove all fields */
-			FileData::removeAll($this->id);
-			foreach($this->data->getData() as $key=>$value) {
-				$data  =new FileData($this->id, $key, $value);
+			FileData::destroyByFileId($this->id);
+			foreach($this->data->getData() as $key => $value) {
+				$data = new FileData($this->id, $key, $value);
 				$data->save();
 			}
 		}
 	}
 
 	protected function fetchData() {
-		$data = FileData::getByFileId($this->id);
+		$data = FileData::getByIdentifier($this->id);
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
 				$this->setDataValue($d->key, $d->value);
@@ -91,17 +87,4 @@ class ModelFile extends ModelData {
 		return $this->path . Directory::normalize($this->path) . $this->Filename;
 	}
 
-	/**
-	 * Get file by file id.
-	 * @param string $id
-	 * @return static
-	 */
-	public static function getById($id){
-		return self::fetchOne('SELECT * FROM {table} WHERE `id` = %s', array($id));
-	}
-
-	public static function get($order=null, $rows=null, $page=null){
-		$order = (in_array($order, self::$ORDERS)) ? $order : self::ORDER_DATE_DESC;
-		return self::fetchPage('SELECT f.* FROM {table} f ORDER BY ' .$order, $rows,$page);
-	}
 }

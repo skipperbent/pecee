@@ -1,11 +1,10 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\DB\PdoHelper;
 use Pecee\Locale;
 use Pecee\SimpleRouter\RouterBase;
 
-class ModelLanguage extends LegacyModel {
+class ModelLanguage extends Model {
 
     protected static $instance;
 
@@ -21,10 +20,10 @@ class ModelLanguage extends LegacyModel {
      * @return static
      */
     public static function getInstance() {
-        if(self::$instance === null) {
-            self::$instance = new static();
+        if(static::$instance === null) {
+            static::$instance = new static();
         }
-        return self::$instance;
+        return static::$instance;
     }
 
     protected static function getContext() {
@@ -37,11 +36,11 @@ class ModelLanguage extends LegacyModel {
 
     public function __construct() {
         parent::__construct();
-        $this->context = self::getContext();
+        $this->context = static::getContext();
     }
 
     public function lookup($text) {
-        if(Locale::getInstance()->getDefaultLocale() != Locale::getInstance()->getLocale() && $this->hasRows()) {
+        if(Locale::getInstance()->getDefaultLocale() !== Locale::getInstance()->getLocale() && $this->hasRows()) {
 
             foreach($this->getRows() as $lang) {
                 if(trim($lang->original) == trim($text)) {
@@ -58,19 +57,11 @@ class ModelLanguage extends LegacyModel {
         return $text;
     }
 
-    public static function getPages($rows=15, $page=0) {
-        return self::fetchPage('SELECT * FROM {table} GROUP BY `path` ORDER BY `path` ASC', $rows, $page);
+    public static function filterLocale($locale) {
+        return static::where('locale', '=', $locale);
     }
 
-    public static function getByContext($context, $locale=null, $rows=null, $page=null) {
-        $where=array(sprintf("`context` = '%s'", PdoHelper::escape($context)));
-        if(!is_null($locale)) {
-            $where[]=sprintf("`locale` = '%s'", PdoHelper::escape($locale));
-        }
-        return self::fetchPage('SELECT * FROM {table} WHERE ' . join(' && ', $where), $rows, $page);
-    }
-
-    public static function getById($id) {
-        return self::fetchOne('SELECT * FROM {table} WHERE `id` = %s', $id);
+    public static function filterContext($context) {
+        return static::where('context', '=', $context);
     }
 }

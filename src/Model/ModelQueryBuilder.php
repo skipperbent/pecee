@@ -31,12 +31,12 @@ class ModelQueryBuilder {
 
     public function limit($limit) {
         $this->query->limit($limit);
-        return $this;
+        return $this->model;
     }
 
     public function skip($skip) {
         $this->query->offset($skip);
-        return $this;
+        return $this->model;
     }
 
     public function take($amount) {
@@ -49,7 +49,7 @@ class ModelQueryBuilder {
 
     public function where($key, $operator = null, $value = null) {
         $this->query->where($key, $operator, $value);
-        return $this;
+        return $this->model;
     }
 
     public function get() {
@@ -184,22 +184,22 @@ class ModelQueryBuilder {
 
     public function destroy($ids) {
         $this->query->whereIn('id', $ids)->delete();
-        return $this;
+        return $this->model;
     }
 
     public function select(array $fields) {
         $this->query->select($fields);
-        return $this;
+        return $this->model;
     }
 
     public function groupBy($field) {
         $this->query->groupBy($field);
-        return $this;
+        return $this->model;
     }
 
     public function orderBy($fields, $defaultDirection = 'ASC') {
         $this->query->orderBy($fields, $defaultDirection);
-        return $this;
+        return $this->model;
     }
 
     /**

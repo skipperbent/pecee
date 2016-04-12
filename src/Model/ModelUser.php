@@ -202,50 +202,49 @@ class ModelUser extends ModelData {
         return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 
-    public function filterQuery($query) {
-        $userDataClassName = $this->getUserDataClass();
-        /* @var $userDataClass UserData */
-        $userDataClass = new $userDataClassName();
+    public static  function filterQuery($query) {
 
-        $userDataQuery = $this->newQuery($userDataClass->getTable())
-            ->getQuery()
-            ->select($userDataClassName::USER_IDENTIFIER_KEY)
-            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
-            ->where('value', 'LIKE', '%'. str_replace('%', '%%', $query) .'%')
-            ->limit(1);
+        $class = new static();
 
-        $this->getQuery()
-            ->where('username', 'LIKE', '%'.str_replace('%', '%%', $query).'%')
-            ->orWhere($this->primary, '=', $userDataQuery);
-
-        return $this;
-    }
-
-    public function filterDeleted($deleted) {
-        $this->where('deleted', '=', $deleted);
-        return $this;
-    }
-
-    public function filterAdminLevel($level) {
-        $this->where('admin_level', '=', $level);
-        return $this;
-    }
-
-    public function filterUsername($username) {
-        $this->where('username', '=', $username);
-        return $this;
-    }
-
-    public function filterKeyValue($key, $value) {
         $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
-        $this->getQuery()
-            ->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary())
+
+        $userDataQuery = static::newQuery($userDataClass->getTable())
+            ->getQuery()
+            ->select($userDataClassName::USER_IDENTIFIER_KEY)
+            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($class->getTable() . '.' . $class->getPrimary()))
+            ->where('value', 'LIKE', '%'. str_replace('%', '%%', $query) .'%')
+            ->limit(1);
+
+        return static::getQuery()
+            ->where('username', 'LIKE', '%'.str_replace('%', '%%', $query).'%')
+            ->orWhere($class->getPrimary(), '=', $userDataQuery);
+    }
+
+    public static function filterDeleted($deleted) {
+        return static::where('deleted', '=', $deleted);
+    }
+
+    public static function filterAdminLevel($level) {
+        return static::where('admin_level', '=', $level);
+    }
+
+    public static function filterUsername($username) {
+        return static::where('username', '=', $username);
+    }
+
+    public static function filterKeyValue($key, $value) {
+        $userDataClassName = static::getUserDataClass();
+        /* @var $userDataClass UserData */
+        $userDataClass = new $userDataClassName();
+
+        $class = new static();
+
+        return static::getQuery()
+            ->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $class->getTable() . '.' . $class->getPrimary())
             ->where($userDataClass->getTable() . '.' . 'key', $key)
             ->where($userDataClass->getTable() . '.' . 'value', $value);
-
-        return $this;
     }
 
     public static function authenticate($username, $password, $remember = false) {
@@ -282,11 +281,11 @@ class ModelUser extends ModelData {
     }
 
     // Events
-    protected static function onLoginFailed(static $user){
+    protected static function onLoginFailed(ModelUser $user){
         UserBadLogin::track($user->username);
     }
 
-    protected static function onLoginSuccess(static $user) {
+    protected static function onLoginSuccess(ModelUser $user) {
         UserBadLogin::reset($user->username);
     }
 
