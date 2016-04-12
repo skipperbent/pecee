@@ -7,6 +7,11 @@ use Pecee\DB\PdoHelper;
 use Pecee\Integer;
 use Pecee\Str;
 
+/**
+ * Class LegacyModel
+ * @package Pecee\Model
+ * @deprecated This class is deprecated and will be removed in later releases. Please use Model class instead.
+ */
 abstract class LegacyModel implements \IteratorAggregate {
 
     protected $table;

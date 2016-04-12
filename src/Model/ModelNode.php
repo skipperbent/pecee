@@ -77,30 +77,27 @@ class ModelNode extends LegacyModel {
     protected function calculatePath() {
         $path = array('0');
         $fetchingPath = true;
-        if($this->parent_id) {
-            $parent = self::getById($this->parent_id);
+        if($this->parent_id !== null) {
+            $parent = static::getById($this->parent_id);
             $i = 0;
             while($fetchingPath) {
                 if($parent->hasRow()) {
                     $path[] = $parent->id;
                     $p = $parent->parent_id;
                     if(!empty($p)) {
-                        $parent = self::getById($parent->parent_id);
-                    } else {
-                        $fetchingPath = false;
+                        $fetchingPath = true;
+                        $parent = static::getById($parent->parent_id);
                     }
                     $i++;
-                } else {
-                    $fetchingPath = false;
                 }
             }
 
             if($i === 0) {
-                $path[]=$this->parent_id;
+                $path[] = $this->parent_id;
             }
         }
-        $this->Path = join('>', $path);
-        $this->Level = count($path);
+        $this->path = join('>', $path);
+        $this->level = count($path);
     }
 
     public function removeData($name) {
@@ -178,8 +175,7 @@ class ModelNode extends LegacyModel {
                 }
             }
         }
-        $result = get_called_class();
-        $result = new $result();
+        $result = new static();
         $result->setRows($out);
         return $result;
     }
