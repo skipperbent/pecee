@@ -3,9 +3,29 @@ namespace Pecee\Model;
 
 use Pecee\Integer;
 use Pecee\Model\Exceptions\ModelException;
-use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pecee\Str;
-use Pixie\QueryBuilder\QueryBuilderHandler;
+
+/**
+ * @method static Model limit(int $id)
+ * @method static Model skip(int $id)
+ * @method static Model take(int $id)
+ * @method static Model offset(int $id)
+ * @method static Model where(int $id)
+ * @method static Model get()
+ * @method static Model all()
+ * @method static Model find(string $id)
+ * @method static Model findOrfail(string $id)
+ * @method static Model first()
+ * @method static Model firstOrFail()
+ * @method static Model count()
+ * @method static Model max(string $field)
+ * @method static Model sum(string $field)
+ * @method static Model update(array $data)
+ * @method static Model create(array $data)
+ * @method static Model firstOrCreate(array $data)
+ * @method static Model firstOrNew(array $data)
+ * @method static Model destroy(array $ids)
+ */
 
 abstract class Model implements \IteratorAggregate {
 
@@ -20,9 +40,9 @@ abstract class Model implements \IteratorAggregate {
     protected $columns = [];
 
     /**
-     * @var QueryBuilderHandler
+     * @var ModelQueryBuilder
      */
-    protected $query;
+    protected $queryable;
 
     public function __construct() {
 
@@ -33,177 +53,8 @@ abstract class Model implements \IteratorAggregate {
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name)) . 's';
         }
 
-        $qb = new QueryBuilderHandler();
-        $this->query = $qb->table($this->table);
+        $this->queryable = new ModelQueryBuilder($this);
         $this->results = array();
-    }
-
-    protected function createInstance(\stdClass $item) {
-        $model = new static();
-        $model->setRows((array)$item);
-        return $model;
-    }
-
-    public function limit($limit) {
-        $this->query->limit($limit);
-        return $this;
-    }
-
-    public function skip($skip) {
-        $this->query->offset($skip);
-        return $this;
-    }
-
-    public function take($amount) {
-        return $this->limit($amount);
-    }
-
-    public function offset($offset) {
-        return $this->skip($offset);
-    }
-
-    public function where($key, $operator = null, $value = null) {
-        $this->query->where($key, $operator, $value);
-        return $this;
-    }
-
-    public function get() {
-        return $this->all();
-    }
-
-    public function all() {
-        $collection = (array)$this->query->get();
-
-        $model = new static();
-
-        $models = array();
-
-        if(count($collection)) {
-            foreach($collection as $item) {
-                $models[] = $this->createInstance($item);
-            }
-        }
-
-        $model->setResults(array('rows' => $models, 'collection' => true));
-
-        return $model;
-    }
-
-    public function find($id) {
-        $item = $this->query->where($this->primary, '=', $id)->first();
-        if($item !== null) {
-            return $this->createInstance($item);
-        }
-        return null;
-    }
-
-    public function findOrfail($id) {
-        $item = $this->find($id);
-        if($item === null) {
-            throw new ModelNotFoundException('Item was not found');
-        }
-        return $item;
-    }
-
-    public function first() {
-        $item = $this->query->first();
-        if($item !== null) {
-            return $this->createInstance($item);
-        }
-        return null;
-    }
-
-    public function firstOrFail() {
-        $item = $this->first();
-        if($item === null) {
-            throw new ModelNotFoundException('Item was not found');
-        }
-        return $item;
-    }
-
-    public function count() {
-        return $this->query->count();
-    }
-
-    public function max($field) {
-        $result = $this->query->select($this->query->raw('MAX('. $field .') AS max'))->get();
-        return (int)$result[0]->max;
-    }
-
-    public function sum($field) {
-        $result = $this->query->select($this->query->raw('SUM('. $field .') AS sum'))->get();
-        return (int)$result[0]->sum;
-    }
-
-    protected function getValidData($data) {
-        $out = array();
-        foreach($data as $key => $value) {
-            if(in_array($key, $this->columns)) {
-                $out[$key] = $value;
-            }
-        }
-        return $out;
-    }
-
-    public function update(array $data) {
-        $data = $this->getValidData($data);
-
-        if(!isset($data[$this->primary])) {
-            throw new ModelException('Primary identifier not defined.');
-        }
-
-        if(count($data) === 0) {
-            throw new ModelException('Not valid columns found to update.');
-        }
-
-        $this->query->update($data);
-        $this->setRows($data);
-        return $this;
-    }
-
-    public function create(array $data) {
-        $data = $this->getValidData($data);
-
-        if(!isset($data[$this->primary])) {
-            throw new ModelException('Primary identifier not defined.');
-        }
-
-        if(count($data) === 0) {
-            throw new ModelException('Not valid columns found to update.');
-        }
-
-        $id = $this->query->insert($data);
-
-        if($id) {
-
-            $this->setRows($data);
-            $this->{$this->primary} = $id;
-            return $this;
-        }
-
-        return false;
-    }
-
-    public function firstOrCreate(array $data) {
-        $item = $this->first();
-        if($item === null) {
-            $item = $this->createInstance((object)$data);
-            $item->save();
-        }
-        return $item;
-    }
-
-    public function firstOrNew(array $data) {
-        $item = $this->first();
-        if($item === null) {
-            return $this->createInstance((object)$data);
-        }
-        return $item;
-    }
-
-    public function destroy($ids) {
-        $this->query->whereIn('id', $ids)->delete();
-        return $this;
     }
 
     /**
@@ -223,9 +74,9 @@ abstract class Model implements \IteratorAggregate {
         }
 
         if($this->exists()) {
-            $this->query->where($this->primary, '=', $this->{$this->primary})->update($data);
+            $this->queryable->where($this->primary, '=', $this->{$this->primary})->update($data);
         } else {
-            $this->{$this->primary} = $this->query->insert($data);
+            $this->{$this->primary} = $this->queryable->getQuery()->insert($data);
         }
 
         return $this;
@@ -236,16 +87,15 @@ abstract class Model implements \IteratorAggregate {
             throw new ModelException('Columns property not defined.');
         }
 
-        $this->query->where($this->primary, '=', $this->{$this->primary})->delete();
+        $this->queryable->where($this->primary, '=', $this->{$this->primary})->getQuery()->delete();
     }
 
     public function exists() {
-
         if($this->{$this->primary} === null) {
             return false;
         }
 
-        return ($this->query->where($this->primary, '=', $this->{$this->primary})->count() > 0);
+        return ($this->queryable->where($this->primary, '=', $this->{$this->primary})->count() > 0);
     }
 
     public function isCollection() {
@@ -367,8 +217,41 @@ abstract class Model implements \IteratorAggregate {
         return $arr;
     }
 
-    public function getQuery() {
-        return $this->query;
+    public function getColumns() {
+        return $this->columns;
+    }
+
+    public function getQueryable() {
+        return $this->queryable;
+    }
+
+    /**
+     * @param $method
+     * @param $parameters
+     * @return ModelQueryBuilder|null
+     */
+    public function __call($method, $parameters) {
+        $query = $this->queryable;
+        if(method_exists($query, $method)) {
+            return call_user_func_array([$query, $method], $parameters);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $method
+     * @param $parameters
+     * @return ModelQueryBuilder|null
+     */
+    public static function __callStatic($method, $parameters) {
+        $instance = new static;
+
+        if(method_exists($instance->queryable, $method)) {
+            return call_user_func_array([$instance, $method], $parameters);
+        }
+
+        return null;
     }
 
     /**
@@ -380,13 +263,6 @@ abstract class Model implements \IteratorAggregate {
      */
     public function getIterator() {
         return new \ArrayIterator(($this->hasRows()) ? $this->getRows() : array());
-    }
-
-    public static function __callStatic($name, $arguments)
-    {
-        // Note: value of $name is case sensitive.
-        echo "Calling static method '$name' "
-            . implode(', ', $arguments). "\n";
     }
 
 }
