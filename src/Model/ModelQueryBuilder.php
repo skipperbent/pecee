@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Model;
 
+use Pecee\Model\Exceptions\ModelException;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelQueryBuilder {
@@ -16,9 +17,9 @@ class ModelQueryBuilder {
      */
     protected $query;
 
-    public function __construct(Model $model) {
+    public function __construct(Model $model, $table) {
         $this->model = $model;
-        $this->query = (new QueryBuilderHandler())->table($this->model->getTable());
+        $this->query = (new QueryBuilderHandler())->table($table);
     }
 
     protected function createInstance(\stdClass $item) {
@@ -57,6 +58,8 @@ class ModelQueryBuilder {
 
     public function all() {
         $collection = (array)$this->query->get();
+
+        echo var_dump($collection);
 
         $class = get_class($this->model);
         $model = new $class();
@@ -133,10 +136,6 @@ class ModelQueryBuilder {
     public function update(array $data) {
         $data = $this->getValidData($data);
 
-        if(!isset($data[$this->model->getPrimary()])) {
-            throw new ModelException('Primary identifier not defined.');
-        }
-
         if(count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
         }
@@ -188,6 +187,21 @@ class ModelQueryBuilder {
 
     public function destroy($ids) {
         $this->query->whereIn('id', $ids)->delete();
+        return $this;
+    }
+
+    public function select(array $fields) {
+        $this->query->select($fields);
+        return $this;
+    }
+
+    public function groupBy($field) {
+        $this->query->groupBy($field);
+        return $this;
+    }
+
+    public function orderBy($fields, $defaultDirection = 'ASC') {
+        $this->query->orderBy($fields, $defaultDirection);
         return $this;
     }
 

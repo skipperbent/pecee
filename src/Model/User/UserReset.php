@@ -2,9 +2,9 @@
 namespace Pecee\Model\User;
 
 use Carbon\Carbon;
-use Pecee\Model\LegacyModel;
+use Pecee\Model\Model;
 
-class UserReset extends LegacyModel {
+class UserReset extends Model {
 
     const USER_IDENTIFIER_KEY = 'user_id';
 
@@ -28,7 +28,7 @@ class UserReset extends LegacyModel {
     }
 
     public function clean() {
-        static::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY .'` = %s', $this->{static::USER_IDENTIFIER_KEY});
+        $this->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->delete();
     }
 
     public function save() {
@@ -37,14 +37,17 @@ class UserReset extends LegacyModel {
     }
 
     public static function getByKey($key) {
-        return static::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
+        $model = new static();
+        return $model->where('key', '=', $key)->first();
     }
 
     public static function confirm($key) {
-        $reset = static::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
-        if($reset->hasRow()) {
+
+        $reset = self::getByKey($key);
+
+        if($reset !== null) {
+            $reset->clean();
             $reset->delete();
-            self::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY . '` = %s', $reset->{static::USER_IDENTIFIER_KEY});
             return $reset->{static::USER_IDENTIFIER_KEY};
         }
         return false;

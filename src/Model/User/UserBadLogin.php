@@ -2,9 +2,9 @@
 namespace Pecee\Model\User;
 
 use Carbon\Carbon;
-use Pecee\Model\LegacyModel;
+use Pecee\Model\Model;
 
-class UserBadLogin extends LegacyModel {
+class UserBadLogin extends Model {
 
     protected $table = 'user_bad_login';
 
@@ -17,7 +17,7 @@ class UserBadLogin extends LegacyModel {
     ];
 
     const TIMEOUT_MINUTES = 30;
-    const MAX_REQUEST_PER_IP = 20;
+    const MAX_REQUEST_PER_IP = 10;
 
 	public function __construct() {
 
@@ -25,22 +25,29 @@ class UserBadLogin extends LegacyModel {
 
         $this->ip = request()->getIp();
         $this->created_date = Carbon::now()->toDateTimeString();
+        $this->active = true;
 	}
 
     public static function track($username) {
-        $login = new static ();
+        $login = new static();
         $login->username = trim($username);
         $login->save();
     }
 
 	public static function checkBadLogin($username) {
 
-        $trackQuery = static::fetchOne('SELECT `created_date`, COUNT(`ip`) AS `request_count` FROM {table} WHERE `username` = %s && `active` = 1 GROUP BY `ip` ORDER BY `request_count` DESC', trim($username));
+        $track = static::where('username', '=', trim($username))
+            ->where('active', '=', '1')
+            ->select(['*', static::getQuery()->raw('COUNT(ip) as request_count')])
+            ->groupBy('ip')
+            ->orderBy('created_date', 'DESC')
+            ->first();
 
-        if($trackQuery->hasRow()) {
-            $lastLoginTimeStamp = $trackQuery->created_date;
-            $countRequestsFromIP = $trackQuery->request_count;
+        if($track !== null) {
+            $lastLoginTimeStamp = $track->created_date;
+            $countRequestsFromIP = $track->request_count;
             $lastLoginMinutesAgo = round((time()-strtotime($lastLoginTimeStamp))/60);
+
             return ((self::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < self::TIMEOUT_MINUTES) &&
                     (self::MAX_REQUEST_PER_IP === null || $countRequestsFromIP > self::MAX_REQUEST_PER_IP));
         }
@@ -48,6 +55,8 @@ class UserBadLogin extends LegacyModel {
 	}
 
 	public static function reset($username) {
-        static::nonQuery('UPDATE {table} SET `active` = 0 WHERE `username` = %s', trim($username));
+        static::where('username', '=', $username)->update([
+            'active' => 0
+        ]);
 	}
 }

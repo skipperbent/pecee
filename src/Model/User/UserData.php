@@ -1,9 +1,9 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\Model\LegacyModel;
+use Pecee\Model\Model;
 
-class UserData extends LegacyModel {
+class UserData extends Model {
 
 	const USER_IDENTIFIER_KEY = 'user_id';
 

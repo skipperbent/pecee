@@ -3,7 +3,7 @@ namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
 
-abstract class ModelData extends LegacyModel {
+abstract class ModelData extends Model {
 
 	public $data;
 
@@ -15,11 +15,6 @@ abstract class ModelData extends LegacyModel {
 	abstract protected function updateData();
 
 	abstract protected function fetchData();
-
-	public function update() {
-		$this->updateData();
-		return parent::update();
-	}
 
 	public function save() {
 		parent::save();

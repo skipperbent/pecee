@@ -1,16 +1,18 @@
 <?php
 namespace Pecee\Model;
 
+use Pecee\Debug;
 use Pecee\Integer;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Str;
+use Pixie\QueryBuilder\QueryBuilderHandler;
 
 /**
  * @method static Model limit(int $id)
  * @method static Model skip(int $id)
  * @method static Model take(int $id)
  * @method static Model offset(int $id)
- * @method static Model where(int $id)
+ * @method static \Pixie\QueryBuilder\QueryBuilderHandler where(string $key, string $operator = null, string $value = null)
  * @method static Model get()
  * @method static Model all()
  * @method static Model find(string $id)
@@ -25,6 +27,7 @@ use Pecee\Str;
  * @method static Model firstOrCreate(array $data)
  * @method static Model firstOrNew(array $data)
  * @method static Model destroy(array $ids)
+ * @method static \Pixie\QueryBuilder\QueryBuilderHandler getQuery()
  */
 
 abstract class Model implements \IteratorAggregate {
@@ -50,11 +53,29 @@ abstract class Model implements \IteratorAggregate {
         if($this->table === null) {
             $name = explode('\\', get_called_class());
             $name = str_ireplace('model', '', end($name));
-            $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name)) . 's';
+            $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 
-        $this->queryable = new ModelQueryBuilder($this);
+        $this->queryable = $this->newQuery($this->getTable());
+
+        if(env('DEBUG')) {
+
+            $this->queryable->getQuery()->registerEvent('before-*', $this->table,
+                function (QueryBuilderHandler $qb) {
+                    Debug::getInstance()->add('START QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+
+            $this->queryable->getQuery()->registerEvent('after-*', $this->table,
+                function (QueryBuilderHandler $qb) {
+                    Debug::getInstance()->add('END QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+        }
+
         $this->results = array();
+    }
+
+    public function newQuery($table) {
+        return new ModelQueryBuilder($this, $table);
     }
 
     /**
@@ -219,10 +240,6 @@ abstract class Model implements \IteratorAggregate {
 
     public function getColumns() {
         return $this->columns;
-    }
-
-    public function getQueryable() {
-        return $this->queryable;
     }
 
     /**

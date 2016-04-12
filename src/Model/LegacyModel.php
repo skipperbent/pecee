@@ -2,48 +2,32 @@
 namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
-use Pecee\DB\DBTable;
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
 use Pecee\Integer;
-use Pecee\Model\Exceptions\ModelException;
 use Pecee\Str;
 
 abstract class LegacyModel implements \IteratorAggregate {
 
     protected $table;
-    protected $columns;
-    protected $query;
     protected $results;
-    protected $autoCreate;
 
+    protected $primary = 'id';
     protected $hidden = [];
     protected $with = [];
     protected $rename = [];
     protected $join = [];
+    protected $columns = [];
 
-    public function __construct(DBTable $table) {
-        $this->autoCreate = true;
-        $this->table = $table;
-
+    public function __construct() {
         // Set table name if its not already defined
-        if(is_null($this->table->getName())) {
+        if($this->table === null) {
             $name = explode('\\', get_called_class());
-            $name = $name[count($name)-1];
-            $name = str_ireplace('model', '', $name);
-            $name = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
-            $this->table->setName($name);
+            $name = str_ireplace('model', '', end($name));
+            $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 
-        $defaultRows = array();
-        if(count($this->table->getColumns()) > 0) {
-            /* @var $column \Pecee\DB\DBColumn */
-            foreach($this->table->getColumns() as $column) {
-                $defaultRows[$column->getName()] = ($column->getNullable()) ? null : '';
-            }
-        }
-
-        $this->results = array('data' => array('rows' => $defaultRows));
+        $this->results = array('data' => array());
     }
 
     /**
@@ -53,61 +37,43 @@ abstract class LegacyModel implements \IteratorAggregate {
      * @throws ModelException
      */
     public function save() {
-        if(!$this->hasRows() || !is_array($this->getRows())) {
-            throw new ModelException('Table rows missing from constructor.');
+        if(!is_array($this->columns)) {
+            throw new ModelException('Columns property not defined.');
         }
 
         $keys = array();
         $values = array();
         $concat = array();
 
-        foreach($this->table->getColumnNames() as $column) {
+        foreach($this->columns as $column) {
             $keys[] = $column;
             $values[] = $this->{$column};
             $concat[] = '?';
         }
 
-        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), join(',', $concat));
+        $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table, PdoHelper::joinArray($keys, true), join(',', $concat));
 
-        try {
-            $id = Pdo::getInstance()->insert($sql, $values);
-        }catch(\PDOException $e) {
-            if($e->getCode() == '42S02' && $this->getAutoCreateTable()) {
-                $this->table->create();
-                return $this->save();
-            }
-            throw $e;
-        }
-        $primary = $this->table->getPrimary($this->table->getColumnByIndex(0));
-        if($primary) {
-            $this->results['data']['rows'][$primary->getName()] = $id;
-        }
+        $this->{$this->primary} = Pdo::getInstance()->insert($sql, $values);
         return $this;
     }
 
     public function delete() {
-        if(!$this->hasRows() || !is_array($this->getRows())) {
-            throw new ModelException('Table rows missing from constructor.');
+        if(!is_array($this->columns)) {
+            throw new ModelException('Columns property not defined.');
         }
 
-        $primaryKey = $this->table->getPrimary($this->table->getColumnByIndex(0));
-        $primaryValue = array_values($this->getRows());
-        $primaryValue = $primaryValue[0];
-        if($primaryKey && $primaryValue) {
-            $sql = sprintf('DELETE FROM `%s` WHERE `%s` = ?;', $this->table->getName(), $primaryKey->getName());
-            Pdo::getInstance()->nonQuery($sql, [$primaryValue]);
-        }
+        $sql = sprintf('DELETE FROM `%s` WHERE `%s` = ?;', $this->table, $this->primary);
+        Pdo::getInstance()->nonQuery($sql, [ $this->{$this->primary} ]);
     }
 
     public function exists() {
-        $primaryKey = $this->table->getPrimary($this->table->getColumnByIndex(0));
-        $primaryValue = array_values($this->getRows());
-        $primaryValue = $primaryValue[0];
-        if($primaryKey && $primaryValue) {
-            $sql = sprintf('SELECT `%s` FROM `%s` WHERE `%s` = ?;', $primaryKey->getName(), $this->table->getName(), $primaryKey->getName());
-            return Pdo::getInstance()->value($sql, [$primaryValue]);
+
+        if($this->{$this->primary} === null) {
+            return false;
         }
-        return false;
+
+        $sql = sprintf('SELECT `%1$s` FROM `%2$s` WHERE `%1$s` = ?;', $this->primary, $this->table);
+        return Pdo::getInstance()->value($sql, [ $this->{$this->primary} ]);
     }
 
     /**
@@ -115,92 +81,61 @@ abstract class LegacyModel implements \IteratorAggregate {
      * @throws ModelException
      */
     public function update() {
-        if(!$this->hasRows() || !is_array($this->getRows())) {
-            throw new ModelException('Table rows missing from constructor.');
+        if(!is_array($this->columns)) {
+            throw new ModelException('Columns property not defined.');
         }
-        $primaryKey = $this->table->getPrimary($this->table->getColumnByIndex(0));
-        $primaryValue = array_values($this->getRows());
-        $primaryValue = $primaryValue[0];
 
-        if($primaryKey && $primaryValue) {
-            $concat=array();
+        $concat = array();
+        $values = array();
 
-            $values = array();
+        foreach($this->columns as $name) {
+            $value = $this->{$name};
 
-            foreach($this->table->getColumnNames(false, true) as $key=>$name) {
-                $val = $this->{$name};
-
-                if(isset($this->results['data']['original'][$name]) && $this->results['data']['original'][$name] == $val) {
-                    continue;
-                }
-
-                $values[] = $val;
-                $concat[] = PdoHelper::formatQuery('`'.$name.'` = ?', array($val));
+            if(isset($this->results['data']['original'][$name]) && $this->results['data']['original'][$name] == $value) {
+                continue;
             }
 
-            if(count($concat) === 0) {
-                return null;
-            }
-
-            $values[] = $primaryValue;
-
-            $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = ? LIMIT 1;', $this->table->getName(), join(', ', $concat), $primaryKey->getName());
-
-            try {
-
-                Pdo::getInstance()->nonQuery($sql, $values);
-
-                //Pdo::getInstance()->nonQuery($sql);
-            }catch(\PDOException $e) {
-                if($e->getCode() == '42S02' && $this->getAutoCreateTable()) {
-                    $this->table->create();
-                    return $this->save();
-                }
-                throw $e;
-            }
+            $values[] = $value;
+            $concat[] = PdoHelper::formatQuery('`'.$name.'` = ?', array($value));
         }
-        return null;
+
+        if(count($concat) === 0) {
+            return null;
+        }
+
+        $values[] = $this->{$this->primary};
+
+        $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = ? LIMIT 1;', $this->table, join(', ', $concat), $this->primary);
+        Pdo::getInstance()->nonQuery($sql, $values);
     }
 
     protected function getCountSql($sql) {
         $sql = (strripos($sql, 'LIMIT') <= 1 && strripos($sql, 'LIMIT') > -1) ? substr($sql, 0, strripos($sql, 'LIMIT')) : $sql;
         $sql = (strripos($sql, 'OFFSET') <= 1 && strripos($sql, 'OFFSET') > -1) ? substr($sql, 0, strripos($sql, 'OFFSET')) : $sql;
 
-        $primary = $this->table->getPrimary($this->table->getColumnByIndex(0));
-        return sprintf('SELECT COUNT(`'.$primary->getName().'`) AS `Total` FROM (%s) AS `CountedResult`', $sql);
+        return sprintf('SELECT COUNT(`' . $this->primary . '`) AS `Total` FROM (%s) AS `CountedResult`', $sql);
     }
 
     public static function queryCollection($query, $rows = null, $page = null, $args = null) {
         /* $var $model Model */
         $model = new static();
         $results = array();
-        $countSql = null;
-        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        $page = (is_null($page)) ? 0 : $page;
+        $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $page = ($page === null) ? 0 : $page;
 
-        $countSql = $model->getCountSql(PdoHelper::formatQuery($query, $args));
-        if ($rows !== null && stripos($query, 'limit') === false) {
+        if ($page !== null && $rows !== null && stripos($query, 'limit') === false) {
             $query .= sprintf(' LIMIT %s, %s', ($page * $rows), $rows);
         }
 
         $sql = PdoHelper::formatQuery($query, $args);
+        $query =  Pdo::getInstance()->query($sql);
 
-        try {
-            $query =  Pdo::getInstance()->query($sql);
-        } catch(\PdoException $e) {
-            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                return $model::queryCollection($sql, $rows, $page, $args);
-            }
-            throw $e;
-        }
-
-        $results['data']['numFields'] = $query->columnCount();
-        $results['data']['numRows'] = $query->rowCount();
-        $results['query'][] = $sql;
+        $results['data']['max_fields'] = $query->columnCount();
+        $results['data']['max_rows'] = $query->rowCount();
+        $results['query'] = array($sql);
         $results['data']['rows'] = array();
-        if($results['data']['numRows'] > 0) {
+        if($results['data']['max_rows'] > 0) {
             foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                 $obj = static::onCreateModel(new CollectionItem($row));
                 $obj->setRows($row);
@@ -208,11 +143,14 @@ abstract class LegacyModel implements \IteratorAggregate {
             }
         }
 
-        $results['query'][] = $countSql;
-        $maxRows = Pdo::getInstance()->value($countSql);
-        $results['data']['page'] = $page;
-        $results['data']['rowsPerPage'] = $rows;
-        $results['data']['maxRows'] = intval($maxRows);
+        if($rows !== null && $page !== null) {
+            $countSql = $model->getCountSql(PdoHelper::formatQuery($sql, $args));
+            $results['query'][] = $countSql;
+            $maxRows = Pdo::getInstance()->value($countSql);
+            $results['data']['page'] = $page;
+            $results['data']['rows_per_page'] = $rows;
+            $results['data']['max_rows'] = intval($maxRows);
+        }
 
         $model->setResults($results);
         return $model;
@@ -222,25 +160,17 @@ abstract class LegacyModel implements \IteratorAggregate {
         /* $var $model Model */
         $model = new static();
         $results = array();
-        $countSql = null;
-        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         $sql = PdoHelper::formatQuery($query, $args);
-        try {
-            $query =  Pdo::getInstance()->query($sql);
-        } catch(\PdoException $e) {
-            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                return $model::query($sql, $args);
-            }
-            throw $e;
-        }
+        $query =  Pdo::getInstance()->query($sql);
 
-        if($query) {
-            $results['data']['numFields'] = $query->columnCount();
-            $results['data']['numRows'] = $query->rowCount();
-            $results['query'][] = $sql;
-            if($results['data']['numRows'] > 0) {
+        if($query !== null) {
+            $results['data']['max_fields'] = $query->columnCount();
+            $results['data']['max_rows'] = $query->rowCount();
+            $results['query'] = $sql;
+            $results['data']['rows'] = array();
+            if($results['data']['max_rows'] > 0) {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                     $obj = static::onCreateModel(new CollectionItem($row));
                     $obj->setRows($row);
@@ -268,7 +198,7 @@ abstract class LegacyModel implements \IteratorAggregate {
      * @return static
      */
     public static function fetchAll($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         return static::queryCollection($query, null, null, $args);
     }
 
@@ -281,24 +211,15 @@ abstract class LegacyModel implements \IteratorAggregate {
      * @return static
      */
     public static function fetchAllPage($query, $skip = null, $rows = null, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
-        $skip = (is_null($skip)) ? 0 : $skip;
-        $model = new static();
-        try {
-            if(!is_null($skip) && !is_null($rows)) {
-                $query = $query.' LIMIT ' . $skip . ',' . $rows;
-            }
-            $model = static::queryCollection($query, null, null, $args);
-        } catch(\PdoException $e) {
-            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                return model::fetchAllPage($query, $skip, $rows, $args);
-            }
-            throw $e;
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $skip = ($skip === null) ? 0 : $skip;
+        if($skip !== null && $rows !== null) {
+            $query = $query.' LIMIT ' . $skip . ',' . $rows;
         }
+        $model = static::queryCollection($query, null, null, $args);
         $results = $model->getResults();
-        $results['data']['rowsPerPage'] = $rows;
-        $results['data']['hasPrevious'] = ($skip>0);
+        $results['data']['rows_per_page'] = $rows;
+        $results['data']['has_previous'] = ($skip > 0);
         $model->setResults($results);
         return $model;
     }
@@ -312,7 +233,7 @@ abstract class LegacyModel implements \IteratorAggregate {
      * @return static
      */
     public static function fetchPage($query, $rows = null, $page = null, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 3));
         return static::queryCollection($query, $rows, $page, $args);
     }
 
@@ -323,54 +244,35 @@ abstract class LegacyModel implements \IteratorAggregate {
      * @return static
      */
     public static function fetchOne($query, $args=null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
         $model =  static::query($query . ((stripos($query, 'LIMIT') > 0) ? '' : ' LIMIT 1'), $args);
         if($model->hasRows()){
-            $results = $model->getResults();
-            if(isset($results['data']['rows'])) {
-                return $results['data']['rows'][0];
-            }
+            return $model->getRow(0);
         }
 
         return $model;
     }
 
     public static function nonQuery($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
         $model = new static();
-        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
+        $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
 
-        try {
-            Pdo::getInstance()->nonQuery(PdoHelper::formatQuery($query, $args));
-        } catch(\PdoException $e) {
-            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                $model::nonQuery($query, $args);
-            }
-            throw $e;
-        }
+        Pdo::getInstance()->nonQuery(PdoHelper::formatQuery($query, $args));
     }
 
     public static function scalar($query, $args = null) {
-        $args = (is_null($args) || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
+        $args = ($args === null || is_array($args) ? $args : PdoHelper::parseArgs(func_get_args(), 1));
 
         $model = new static();
-        $query = str_ireplace('{table}', '`' . $model->getTable()->getName() . '`', $query);
+        $query = str_ireplace('{table}', '`' . $model->getTable() . '`', $query);
 
-        try {
-            return Pdo::getInstance()->value(PdoHelper::formatQuery($query, $args));
-        } catch(\PdoException $e) {
-            if($e->getCode() == '42S02' && $model->getAutoCreateTable()) {
-                $model->getTable()->create();
-                return $model::scalar($query, $args);
-            }
-            throw $e;
-        }
+        return Pdo::getInstance()->value(PdoHelper::formatQuery($query, $args));
     }
 
     public function isCollection() {
-        return (array_key_exists('rowsPerPage', $this->results['data']));
+        return (array_key_exists('max_rows', $this->results['data']));
     }
 
     protected function parseArrayData($data) {
@@ -393,12 +295,15 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function getArray(){
-        if(!$this->hasRows() && !$this->isCollection()) {
-            return null;
+
+        if(!$this->isCollection()) {
+            if(!$this->hasRow()) {
+                return null;
+            }
         }
 
         $arr = array('rows' => null);
-        $arr = array_merge($arr, (array)$this->results['data']);
+        $arr = array_merge($arr, $this->results['data']);
         $rows = $this->results['data']['rows'];
         if($rows && is_array($rows)) {
             foreach($rows as $key=>$row){
@@ -418,8 +323,10 @@ abstract class LegacyModel implements \IteratorAggregate {
                 }
             }
 
-            $arr['hasNext'] = $this->hasNext();
-            $arr['hasPrevious'] = $this->hasPrevious();
+            if($this->isCollection()) {
+                $arr['has_next'] = $this->hasNext();
+                $arr['has_previous'] = $this->hasPrevious();
+            }
         }
 
         if(count($this->getResults()) === 1) {
@@ -453,7 +360,7 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function hasRow() {
-        return (isset($this->results['data']['rows']));
+        return (bool)(count($this->results['data']['rows']));
     }
 
     /**
@@ -466,14 +373,12 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function setRow($key, $value) {
-        $column = $this->table->getColumn($key);
-        $name = ($column) ? $column->getName() : $key;
-        $this->results['data']['rows'][$name] = $value;
+        $this->results['data']['rows'][$key] = $value;
     }
 
     public function setRows(array $rows) {
-        if(!isset($this->results['data']['numRows'])) {
-            $this->results['data']['numRows'] = count($rows);
+        if(!isset($this->results['data']['max_rows'])) {
+            $this->results['data']['max_rows'] = count($rows);
         }
         $this->results['data']['rows'] = $rows;
         $this->results['data']['original'] = $rows;
@@ -495,11 +400,11 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function getMaxRows() {
-        return isset($this->results['data']['maxRows']) ? $this->results['data']['maxRows'] : 0;
+        return isset($this->results['data']['max_rows']) ? $this->results['data']['max_rows'] : 0;
     }
 
     public function setMaxRows($rows) {
-        $this->results['data']['maxRows'] = $rows;
+        $this->results['data']['max_rows'] = $rows;
     }
 
     public function getMaxPages() {
@@ -511,11 +416,11 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function getRowsPerPage() {
-        return isset($this->results['data']['rowsPerPage']) ? $this->results['data']['rowsPerPage'] : 0;
+        return isset($this->results['data']['rows_per_page']) ? $this->results['data']['rows_per_page'] : 0;
     }
 
     public function setRowsPerPage($rows) {
-        $this->results['data']['rowsPerPage'] = $rows;
+        $this->results['data']['rows_per_page'] = $rows;
     }
 
     public function getPage() {
@@ -531,7 +436,7 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function hasNext() {
-        return ($this->getPage()+1 < $this->getMaxPages());
+        return ($this->getPage() + 1 < $this->getMaxPages());
     }
 
     public function hasPrevious() {
@@ -543,20 +448,11 @@ abstract class LegacyModel implements \IteratorAggregate {
     }
 
     public function __get($name) {
-        $name = ($this->table && $this->table->getColumn($name)) ? $this->table->getColumn($name)->getName() : strtolower($name);
         return (isset($this->results['data']['rows'][$name])) ? $this->results['data']['rows'][$name] : null;
     }
 
     public function __set($name, $value) {
         $this->results['data']['rows'][strtolower($name)] = $value;
-    }
-
-    public function setAutoCreateTable($bool) {
-        $this->autoCreate = $bool;
-    }
-
-    public function getAutoCreateTable() {
-        return $this->autoCreate;
     }
 
     /**
@@ -568,6 +464,15 @@ abstract class LegacyModel implements \IteratorAggregate {
      */
     public function getIterator() {
         return new \ArrayIterator(($this->hasRows()) ? $this->getRows() : array());
+    }
+
+    public function getPrimary() {
+        return $this->primary;
+    }
+
+    public static function getById($id) {
+        $static = new static();
+        return static::fetchOne('SELECT * FROM {table} WHERE `'. $static->getPrimary() .'` = %s', $id);
     }
 
 }
