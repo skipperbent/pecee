@@ -12,7 +12,7 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static Model skip(int $id)
  * @method static Model take(int $id)
  * @method static Model offset(int $id)
- * @method static \Pixie\QueryBuilder\QueryBuilderHandler where(string $key, string $operator = null, string $value = null)
+ * @method static Model where(string $key, string $operator = null, string $value = null)
  * @method static Model get()
  * @method static Model all()
  * @method static Model find(string $id)
@@ -27,6 +27,9 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static Model firstOrCreate(array $data)
  * @method static Model firstOrNew(array $data)
  * @method static Model destroy(array $ids)
+ * @method static Model select(array $fields)
+ * @method static Model groupBy(string $field)
+ * @method static Model orderBy(string $field, string $defaultDirection = 'ASC')
  * @method static \Pixie\QueryBuilder\QueryBuilderHandler getQuery()
  */
 
@@ -143,7 +146,7 @@ abstract class Model implements \IteratorAggregate {
     public function setRows(array $rows) {
         $this->results['rows'] = $rows;
 
-        if(!$this->isCollection()) {
+        if($this->isCollection() === false) {
             if (count($this->join)) {
                 foreach ($this->join as $join) {
                     $method = Str::camelize($join);

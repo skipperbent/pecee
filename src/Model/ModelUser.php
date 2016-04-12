@@ -16,20 +16,7 @@ class ModelUser extends ModelData {
     const ERROR_TYPE_BANNED = 0x1;
     const ERROR_TYPE_INVALID_LOGIN = 0x2;
     const ERROR_TYPE_EXISTS = 0x3;
-
-    const ORDER_ID_DESC = 'u.`id` DESC';
-    const ORDER_ID_ASC = 'u.`id` ASC';
-    const ORDER_LASTACTIVITY_ASC = 'u.`last_activity` DESC';
-    const ORDER_LASTACTIVITY_DESC = 'u.`last_activity` ASC';
-
     protected static $instance;
-
-    public static $ORDERS = [
-        self::ORDER_ID_ASC,
-        self::ORDER_ID_DESC,
-        self::ORDER_LASTACTIVITY_ASC,
-        self::ORDER_LASTACTIVITY_DESC
-    ];
 
     protected $columns = [
         'id',
@@ -48,8 +35,9 @@ class ModelUser extends ModelData {
         $this->username = $username;
         $this->password = md5($password);
         $this->admin_level = 0;
-        $this->last_activity = Carbon::now()->toDateTimeString();
         $this->deleted = false;
+        $this->last_activity = Carbon::now()->toDateTimeString();
+        $this->created_date = Carbon::now()->toDateTimeString();
     }
 
     public function save() {
@@ -65,7 +53,7 @@ class ModelUser extends ModelData {
         if($this->data !== null) {
 
             $userDataClass = static::getUserDataClass();
-            $currentFields = $userDataClass::getByUserId($this->id);
+            $currentFields = $userDataClass::getByIdentifier($this->id);
 
             $cf = array();
             foreach($currentFields as $field) {
@@ -73,7 +61,8 @@ class ModelUser extends ModelData {
             }
 
             if(count($this->data->getData())) {
-                foreach($this->data->getData() as $key=>$value) {
+
+                foreach($this->data->getData() as $key => $value) {
 
                     if($value === null) {
                         continue;
@@ -86,10 +75,11 @@ class ModelUser extends ModelData {
                         } else {
                             $cf[$key]->value = $value;
                             $cf[$key]->key = $key;
-                            $cf[$key]->update();
+                            $cf[$key]->save();
                             unset($cf[$key]);
                         }
                     } else {
+                        /* @var $field UserData */
                         $field = new $userDataClass();
                         $field->{$userDataClass::USER_IDENTIFIER_KEY} = $this->id;
                         $field->key = $key;
@@ -106,17 +96,16 @@ class ModelUser extends ModelData {
     }
 
     protected function fetchData() {
-        /*$class = static::getUserDataClass();
-        $data = $class::getByUserId($this->id);
+        $class = static::getUserDataClass();
+        $data = $class::getByIdentifier($this->id);
         if($data->hasRows()) {
             foreach($data->getRows() as $d) {
                 $this->setDataValue($d->key, $d->value);
             }
-        }*/
+        }
     }
 
     public function delete() {
-        //\Pecee\Model\User\UserData::RemoveAll($this->id);
         $this->deleted = true;
         $this->save();
     }
@@ -125,10 +114,7 @@ class ModelUser extends ModelData {
     public static function isLoggedIn($force = false) {
         if($force === true) {
             $user = static::getFromCookie(true);
-            if($user !== null && $user->hasRow()) {
-                return true;
-            }
-            return false;
+            return ($user !== null);
         }
         return (Cookie::exists(static::COOKIE_NAME) && static::getFromCookie() !== null);
     }
@@ -218,12 +204,13 @@ class ModelUser extends ModelData {
 
     public function filterQuery($query) {
         $userDataClassName = $this->getUserDataClass();
+        /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
         $userDataQuery = $this->newQuery($userDataClass->getTable())
             ->getQuery()
             ->select($userDataClassName::USER_IDENTIFIER_KEY)
-            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', \QB::raw($this->getTable() . '.' . $this->getPrimary()))
+            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
             ->where('value', 'LIKE', '%'. str_replace('%', '%%', $query) .'%')
             ->limit(1);
 
@@ -251,6 +238,7 @@ class ModelUser extends ModelData {
 
     public function filterKeyValue($key, $value) {
         $userDataClassName = static::getUserDataClass();
+        /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
         $this->getQuery()
             ->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary())
@@ -264,6 +252,7 @@ class ModelUser extends ModelData {
 
         static::onLoginStart($username, $password, $remember);
 
+        /* @var $user ModelUser */
         $user = static::where('username', '=', $username)->first();
 
         if($user === null) {
@@ -293,11 +282,11 @@ class ModelUser extends ModelData {
     }
 
     // Events
-    protected static function onLoginFailed(ModelUser $user){
+    protected static function onLoginFailed(static $user){
         UserBadLogin::track($user->username);
     }
 
-    protected static function onLoginSuccess(ModelUser $user) {
+    protected static function onLoginSuccess(static $user) {
         UserBadLogin::reset($user->username);
     }
 

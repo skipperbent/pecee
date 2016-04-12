@@ -59,8 +59,6 @@ class ModelQueryBuilder {
     public function all() {
         $collection = (array)$this->query->get();
 
-        echo var_dump($collection);
-
         $class = get_class($this->model);
         $model = new $class();
 
@@ -141,7 +139,6 @@ class ModelQueryBuilder {
         }
 
         $this->query->update($data);
-        $this->model->setRows($data);
         return $this->model;
     }
 

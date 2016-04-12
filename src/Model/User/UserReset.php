@@ -43,7 +43,7 @@ class UserReset extends Model {
 
     public static function confirm($key) {
 
-        $reset = self::getByKey($key);
+        $reset = static::getByKey($key);
 
         if($reset !== null) {
             $reset->clean();

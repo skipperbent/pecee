@@ -11,9 +11,9 @@ class UserBadLogin extends Model {
     protected $columns = [
         'id',
         'username',
-        'created_date',
         'ip',
-        'active'
+        'active',
+        'created_date',
     ];
 
     const TIMEOUT_MINUTES = 30;
@@ -24,8 +24,8 @@ class UserBadLogin extends Model {
 		parent::__construct();
 
         $this->ip = request()->getIp();
-        $this->created_date = Carbon::now()->toDateTimeString();
         $this->active = true;
+        $this->created_date = Carbon::now()->toDateTimeString();
 	}
 
     public static function track($username) {
@@ -45,11 +45,10 @@ class UserBadLogin extends Model {
 
         if($track !== null) {
             $lastLoginTimeStamp = $track->created_date;
-            $countRequestsFromIP = $track->request_count;
             $lastLoginMinutesAgo = round((time()-strtotime($lastLoginTimeStamp))/60);
 
-            return ((self::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < self::TIMEOUT_MINUTES) &&
-                    (self::MAX_REQUEST_PER_IP === null || $countRequestsFromIP > self::MAX_REQUEST_PER_IP));
+            return ((static::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < static::TIMEOUT_MINUTES) &&
+                    (static::MAX_REQUEST_PER_IP === null || $track->request_count > static::MAX_REQUEST_PER_IP));
         }
         return false;
 	}
