@@ -52,6 +52,71 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
+    public function whereIn($key, array $values) {
+        $this->query->whereIn($key, $values);
+        return $this->model;
+    }
+
+    public function whereNot($key, $operator = null, $value = null) {
+        $this->query->whereNot($key, $operator, $value);
+        return $this->model;
+    }
+
+    public function whereNotIn($key, array $values) {
+        $this->query->whereNotIn($key, $values);
+        return $this->model;
+    }
+
+    public function whereNull($key) {
+        $this->query->whereNull($key);
+        return $this->model;
+    }
+
+    public function whereNotNull($key) {
+        $this->query->orWhereNotNull($key);
+        return $this->model;
+    }
+
+    public function whereBetween($key, $valueFrom, $valueTo) {
+        $this->query->whereBetween($key, $valueFrom, $valueTo);
+        return $this->model;
+    }
+
+    public function orWhere($key, $operator = null, $value = null) {
+        $this->query->orWhere($key, $operator, $value);
+        return $this->model;
+    }
+
+    public function orWhereIn($key, array $values) {
+        $this->query->orWhereIn($key, $values);
+        return $this->model;
+    }
+
+    public function orWhereNotIn($key, array $values) {
+        $this->query->orWhereNotIn($key, $values);
+        return $this->model;
+    }
+
+    public function orWhereNot($key, $operator = null, $value = null) {
+        $this->query->orWhereNot($key, $operator, $value);
+        return $this->model;
+    }
+
+    public function orWhereNull($key) {
+        $this->query->orWhereNull($key);
+        return $this->model;
+    }
+
+    public function orWhereNotNull($key) {
+        $this->query->orWhereNotNull($key);
+        return $this->model;
+    }
+
+    public function orWhereBetween($key, $valueFrom, $valueTo) {
+        $this->query->orWhereBetween($key, $valueFrom, $valueTo);
+        return $this->model;
+    }
+
     public function get() {
         return $this->all();
     }
@@ -200,6 +265,19 @@ class ModelQueryBuilder {
     public function orderBy($fields, $defaultDirection = 'ASC') {
         $this->query->orderBy($fields, $defaultDirection);
         return $this->model;
+    }
+
+    public function join($table, $key, $operator = null, $value = null, $type = 'inner') {
+        $this->query->join($table, $key, $operator, $value, $type);
+        return $this->model;
+    }
+
+    public function raw($value, array $bindings = array()) {
+        return $this->query->raw($value, $bindings);
+    }
+
+    public function subQuery(QueryBuilderHandler $queryBuilder, $alias = null) {
+        $this->query->subQuery($queryBuilder, $alias);
     }
 
     /**

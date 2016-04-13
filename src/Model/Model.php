@@ -8,11 +8,27 @@ use Pecee\Str;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
 /**
+ *
+ * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
+ *
  * @method static Model limit(int $id)
  * @method static Model skip(int $id)
  * @method static Model take(int $id)
  * @method static Model offset(int $id)
  * @method static Model where(string $key, string $operator = null, string $value = null)
+ * @method static Model whereIn(string $key, array $values)
+ * @method static Model whereNot(string $key, string $operator = null, string $value = null)
+ * @method static Model whereNotIn(string $key, array $values)
+ * @method static Model whereNull(string $key)
+ * @method static Model whereNotNull(string $key)
+ * @method static Model whereBetween(string $key, string $valueFrom, string $valueTo)
+ * @method static Model orWhere(string $key, string $operator = null, string $value = null)
+ * @method static Model orWhereIn(string $key, array $values)
+ * @method static Model orWhereNotIn(string $key, array $values)
+ * @method static Model orWhereNot(string $key, string $operator = null, string $value = null)
+ * @method static Model orWhereNull(string $key)
+ * @method static Model orWhereNotNull(string $key)
+ * @method static Model orWhereBetween(string $key, string $valueFrom, string $valueTo)
  * @method static Model get()
  * @method static Model all()
  * @method static Model find(string $id)
@@ -30,7 +46,10 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static Model select(array $fields)
  * @method static Model groupBy(string $field)
  * @method static Model orderBy(string $field, string $defaultDirection = 'ASC')
- * @method static \Pixie\QueryBuilder\QueryBuilderHandler getQuery()
+ * @method static Model join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
+ * @method static QueryBuilderHandler getQuery()
+ * @method static string raw(string $value, array $bindings = array())
+ * @method static string subQuery(QueryBuilderHandler $queryBuilder, string $alias = null)
  */
 
 abstract class Model implements \IteratorAggregate {
@@ -248,7 +267,7 @@ abstract class Model implements \IteratorAggregate {
     /**
      * @param $method
      * @param $parameters
-     * @return ModelQueryBuilder|null
+     * @return static|null
      */
     public function __call($method, $parameters) {
         $query = $this->queryable;
@@ -262,7 +281,7 @@ abstract class Model implements \IteratorAggregate {
     /**
      * @param $method
      * @param $parameters
-     * @return ModelQueryBuilder|null
+     * @return static|null
      */
     public static function __callStatic($method, $parameters) {
         $instance = new static;
