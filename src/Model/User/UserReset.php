@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\Date;
+use Carbon\Carbon;
 use Pecee\Model\Model;
 
 class UserReset extends Model {
@@ -24,11 +24,11 @@ class UserReset extends Model {
 
         $this->{static::USER_IDENTIFIER_KEY} = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Date::toDateTime();
+        $this->created_date = Carbon::now()->toDateTimeString();
     }
 
     public function clean() {
-        static::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY .'` = %s', $this->{static::USER_IDENTIFIER_KEY});
+        $this->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->delete();
     }
 
     public function save() {
@@ -37,14 +37,17 @@ class UserReset extends Model {
     }
 
     public static function getByKey($key) {
-        return static::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
+        $model = new static();
+        return $model->where('key', '=', $key)->first();
     }
 
     public static function confirm($key) {
-        $reset = static::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
-        if($reset->hasRow()) {
+
+        $reset = static::getByKey($key);
+
+        if($reset !== null) {
+            $reset->clean();
             $reset->delete();
-            self::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY . '` = %s', $reset->{static::USER_IDENTIFIER_KEY});
             return $reset->{static::USER_IDENTIFIER_KEY};
         }
         return false;

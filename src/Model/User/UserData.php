@@ -26,29 +26,19 @@ class UserData extends Model {
 		$this->value = $value;
 	}
 
-    public function exists()
-    {
+    public function exists() {
         if($this->{$this->primary} === null) {
             return false;
         }
 
-        return self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `'. static::USER_IDENTIFIER_KEY .'` = %s', $this->key, $this->user_id);
+		return ($this->where('key', '=', $this->key)->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->first() !== null);
     }
 
-
-    public function save() {
-		if($this->exists()) {
-			parent::update();
-		} else {
-			parent::save();
-		}
+	public static function destroyByIdentifier($identifierId) {
+        static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->delete();
 	}
 
-	public static function removeAll($userId) {
-		self::nonQuery('DELETE FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY .'` = %s', array($userId));
-	}
-
-	public static function getByUserId($userId) {
-		return self::fetchAll('SELECT * FROM {table} WHERE `'. static::USER_IDENTIFIER_KEY .'` = %s', array($userId));
+	public static function getByIdentifier($identifierId) {
+        return static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->all();
 	}
 }

@@ -16,11 +16,6 @@ abstract class ModelData extends Model {
 
 	abstract protected function fetchData();
 
-	public function update() {
-		$this->updateData();
-		return parent::update();
-	}
-
 	public function save() {
 		parent::save();
 		$this->updateData();
@@ -32,7 +27,10 @@ abstract class ModelData extends Model {
 
 	public function setRows(array $rows) {
 		parent::setRows($rows);
-		$this->fetchData();
+
+        if(!$this->isCollection()) {
+            $this->fetchData();
+        }
 	}
 
 	public function setData(array $data) {
@@ -42,11 +40,6 @@ abstract class ModelData extends Model {
 				$this->data->$key = $d;
 			}
 		}
-	}
-
-	public function parseArrayRow($row) {
-		$row = array_merge($row, $this->data->getData());
-		return parent::parseArrayRow($row);
 	}
 
 }

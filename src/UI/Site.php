@@ -54,7 +54,7 @@ class Site {
 		$this->cssPath = 'public/css/';
 		$this->keywords = array();
 		$this->cacheEnabled = true;
-		$this->adminIps = array();
+		$this->adminIps = array('127.0.0.1', '::1');
 
 		$this->setDebug(env('DEBUG', false));
 	}
