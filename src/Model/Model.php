@@ -100,6 +100,10 @@ abstract class Model implements \IteratorAggregate {
         return new ModelQueryBuilder($this, $table);
     }
 
+    public function createModel() {
+        return new static();
+    }
+
     /**
      * Save item
      * @see Pecee\Model\Model::save()

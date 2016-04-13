@@ -165,7 +165,7 @@ class ModelUser extends ModelData {
             $user = explode('|', $ticket);
             if (is_array($user) && trim(end($user)) === static::getSalt()) {
                 if ($setData) {
-                    static::$instance = static::findOrfail($user[0]);
+                    static::$instance = static::find($user[0]);
                     return static::$instance;
                 } else {
                     $obj = new static();
