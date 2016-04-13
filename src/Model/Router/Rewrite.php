@@ -25,16 +25,16 @@ class Rewrite extends Model {
 	 * @param string $originalUrl
 	 * @return static
 	 */
-	public static function filterOriginalUrl($originalUrl) {
-        return static::where('original_url', '=', $originalUrl);
+	public function filterOriginalUrl($originalUrl) {
+        return $this->where('original_url', '=', $originalUrl);
 	}
 
-    public static function filterRewritePath($rewriteUrl) {
-        return static::where('rewrite_url', '=', $rewriteUrl);
+    public function filterRewritePath($rewriteUrl) {
+        return $this->where('rewrite_url', '=', $rewriteUrl);
     }
 
-	public static function filterHost($host) {
-		return static::where('host', '=', $host);
+	public function filterHost($host) {
+		return $this->where('host', '=', $host);
 	}
 
 }
