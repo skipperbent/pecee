@@ -1,14 +1,14 @@
 <?php
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Boolean;
-use Pecee\Date;
 use Pecee\Collection\CollectionItem;
 use Pecee\DB\PdoHelper;
 use Pecee\Model\Node\NodeData;
 use Pecee\Str;
 
-class ModelNode extends Model {
+class ModelNode extends LegacyModel {
 
     const ORDER_ID_DESC = 'n.`id` DESC';
     const ORDER_CHANGED_DESC = 'IFNULL(n.`changed_date`, IFNULL(n.`active_from`, n.`created_date`)) DESC';
@@ -65,7 +65,7 @@ class ModelNode extends Model {
 
         $this->data = new CollectionItem();
         $this->path = 0;
-        $this->created_date = Date::toDateTime();
+        $this->created_date = Carbon::now()->toDateTimeString();
         $this->order = 0;
         $this->active = false;
     }
@@ -77,30 +77,27 @@ class ModelNode extends Model {
     protected function calculatePath() {
         $path = array('0');
         $fetchingPath = true;
-        if($this->parent_id) {
-            $parent = self::getById($this->parent_id);
+        if($this->parent_id !== null) {
+            $parent = static::getById($this->parent_id);
             $i = 0;
             while($fetchingPath) {
                 if($parent->hasRow()) {
                     $path[] = $parent->id;
                     $p = $parent->parent_id;
                     if(!empty($p)) {
-                        $parent = self::getById($parent->parent_id);
-                    } else {
-                        $fetchingPath = false;
+                        $fetchingPath = true;
+                        $parent = static::getById($parent->parent_id);
                     }
                     $i++;
-                } else {
-                    $fetchingPath = false;
                 }
             }
 
             if($i === 0) {
-                $path[]=$this->parent_id;
+                $path[] = $this->parent_id;
             }
         }
-        $this->Path = join('>', $path);
-        $this->Level = count($path);
+        $this->path = join('>', $path);
+        $this->level = count($path);
     }
 
     public function removeData($name) {
@@ -178,8 +175,7 @@ class ModelNode extends Model {
                 }
             }
         }
-        $result = get_called_class();
-        $result = new $result();
+        $result = new static();
         $result->setRows($out);
         return $result;
     }
@@ -250,7 +246,7 @@ class ModelNode extends Model {
     }
 
     public function update() {
-        $this->changed_date = Date::toDateTime();
+        $this->changed_date = Carbon::now()->toDateTimeString();
         $this->calculatePath();
         $this->updateFields();
         parent::update();

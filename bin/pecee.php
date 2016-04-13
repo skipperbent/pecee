@@ -56,7 +56,9 @@ switch(strtolower($argv[1])) {
         die('yet not implemented');
         break;
     case 'key:generate':
-        die('yet not implemented');
+        $token = new \Pecee\CsrfToken();
+        echo 'New key: ' . md5($token->generateToken()) . chr(10);
+        exit(0);
         break;
 }
 

@@ -46,7 +46,7 @@
                 <?= $log['file']; ?>
             </td>
             <td style="vertical-align:top; padding:5px;" align="center">
-                <?= $log['debug'][count($log['debug'])-1]['line']; ?>
+                <?= !isset($log['debug'][count($log['debug'])-1]['line']) ? '-' : $log['debug'][count($log['debug'])-1]['line']; ?>
             </td>
         </tr>
     <? endforeach; ?>
