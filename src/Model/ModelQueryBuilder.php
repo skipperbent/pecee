@@ -2,6 +2,7 @@
 namespace Pecee\Model;
 
 use Pecee\Model\Exceptions\ModelException;
+use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelQueryBuilder {
@@ -23,9 +24,12 @@ class ModelQueryBuilder {
     }
 
     protected function createInstance(\stdClass $item) {
-        $class = get_class($this->model);
-        $model = new $class();
-        $model->setRows((array)$item);
+        $model = $this->model->createModel();
+
+        foreach($item as $key => $value) {
+            $model->{$key} = $value;
+        }
+
         return $model;
     }
 
