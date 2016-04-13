@@ -100,8 +100,8 @@ abstract class Model implements \IteratorAggregate {
         return new ModelQueryBuilder($this, $table);
     }
 
-    public function createModel() {
-        return new static();
+    public function onInstanceCreate() {
+        
     }
 
     /**

@@ -25,12 +25,8 @@ abstract class ModelData extends Model {
 		$this->data->$name = $value;
 	}
 
-	public function setRows(array $rows) {
-		parent::setRows($rows);
-
-        if(!$this->isCollection()) {
-            $this->fetchData();
-        }
+	public function onInstanceCreate() {
+        $this->fetchData();
 	}
 
 	public function setData(array $data) {

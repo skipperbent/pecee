@@ -24,11 +24,16 @@ class ModelQueryBuilder {
     }
 
     protected function createInstance(\stdClass $item) {
-        $model = $this->model->createModel();
+
+        $model = get_class($this->model);
+
+        $model = new $model();
 
         foreach($item as $key => $value) {
             $model->{$key} = $value;
         }
+
+        $model->onInstanceCreate($item);
 
         return $model;
     }
