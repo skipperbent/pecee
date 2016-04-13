@@ -57,11 +57,11 @@ class ModelLanguage extends Model {
         return $text;
     }
 
-    public static function filterLocale($locale) {
-        return static::where('locale', '=', $locale);
+    public function filterLocale($locale) {
+        return $this->where('locale', '=', $locale);
     }
 
-    public static function filterContext($context) {
-        return static::where('context', '=', $context);
+    public function filterContext($context) {
+        return $this->where('context', '=', $context);
     }
 }

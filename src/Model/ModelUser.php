@@ -202,47 +202,41 @@ class ModelUser extends ModelData {
         return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 
-    public static  function filterQuery($query) {
+    public function filterQuery($query) {
 
-        $class = new static();
-
-        $userDataClassName = static::getUserDataClass();
+        $userDataClassName = $this->getUserDataClass();
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $userDataQuery = static::newQuery($userDataClass->getTable())
+        $userDataQuery = $this->newQuery($userDataClass->getTable())
             ->getQuery()
             ->select($userDataClassName::USER_IDENTIFIER_KEY)
-            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($class->getTable() . '.' . $class->getPrimary()))
+            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
             ->where('value', 'LIKE', '%'. str_replace('%', '%%', $query) .'%')
             ->limit(1);
 
-        return static::getQuery()
-            ->where('username', 'LIKE', '%'.str_replace('%', '%%', $query).'%')
-            ->orWhere($class->getPrimary(), '=', $userDataQuery);
+        return $this->where('username', 'LIKE', '%'.str_replace('%', '%%', $query).'%')
+            ->orWhere($this->getPrimary(), '=', $this->raw($userDataQuery));
     }
 
-    public static function filterDeleted($deleted) {
-        return static::where('deleted', '=', $deleted);
+    public function filterDeleted($deleted) {
+        return $this->where('deleted', '=', $deleted);
     }
 
-    public static function filterAdminLevel($level) {
-        return static::where('admin_level', '=', $level);
+    public function filterAdminLevel($level) {
+        return $this->where('admin_level', '=', $level);
     }
 
-    public static function filterUsername($username) {
-        return static::where('username', '=', $username);
+    public function filterUsername($username) {
+        return $this->where('username', '=', $username);
     }
 
-    public static function filterKeyValue($key, $value) {
+    public function filterKeyValue($key, $value) {
         $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $class = new static();
-
-        return static::getQuery()
-            ->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $class->getTable() . '.' . $class->getPrimary())
+        return $this->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary())
             ->where($userDataClass->getTable() . '.' . 'key', $key)
             ->where($userDataClass->getTable() . '.' . 'value', $value);
     }
