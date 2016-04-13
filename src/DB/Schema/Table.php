@@ -1,6 +1,9 @@
 <?php
-namespace Pecee\DB;
-class DBTable {
+namespace Pecee\DB\Schema;
+
+use Pecee\DB\Pdo;
+
+class Table {
 
     const ENGINE_INNODB = 'InnoDB';
     const ENGINE_MEMORY = 'MEMORY';
@@ -32,12 +35,17 @@ class DBTable {
         $this->engine = self::ENGINE_INNODB;
     }
 
+    public function name($name) {
+        $this->name = $name;
+        return $this;
+    }
+
     /**
      * @param $name
-     * @return DBColumn
+     * @return Column
      */
     public function column($name) {
-        $column = new DBColumn();
+        $column = new Column($this->name);
         $column->setName($name);
 
         $this->columns[] = $column;
@@ -46,9 +54,9 @@ class DBTable {
 
     public function getPrimary($default = null) {
         if(count($this->columns) > 0) {
-            /* @var $column DBColumn */
+            /* @var $column Column */
             foreach($this->columns as $column) {
-                if($column->getIndex() == DBColumn::INDEX_PRIMARY) {
+                if($column->getIndex() == Column::INDEX_PRIMARY) {
                     return $column;
                 }
             }
@@ -63,9 +71,9 @@ class DBTable {
 
     public function getColumnNames($lower = false, $excludePrimary = false) {
         $names = array();
-        /* @var $column DBColumn */
+        /* @var $column Column */
         foreach($this->columns as $column) {
-            if($excludePrimary && $column->getIndex() === DBColumn::INDEX_PRIMARY) {
+            if($excludePrimary && $column->getIndex() === Column::INDEX_PRIMARY) {
                 continue;
             }
             if($lower) {
@@ -78,7 +86,7 @@ class DBTable {
     }
 
     public function getColumn($name, $strict = false) {
-        /* @var $column DBColumn */
+        /* @var $column Column */
         foreach($this->columns as $column) {
             if(!$strict && strtolower($column->getName()) == strtolower($name) || $strict && $column->getName() == $name) {
                 return $column;
@@ -110,46 +118,60 @@ class DBTable {
         return $this->engine;
     }
 
+    public function exists() {
+        return (Pdo::getInstance()->value('SHOW TABLES LIKE ?', [$this->name]) !== false);
+    }
+
     /**
      * Create table
      */
     public function create() {
-        $keys = array();
-        $query = array();
-        /* @var $column DBColumn */
-        foreach($this->columns as $column) {
-            $length = '';
-            if($column->getLength()) {
-                $length = '('.$column->getLength().')';
+        if(!$this->exists()) {
+            $query = array();
+
+            /* @var $column DBColumn */
+            foreach ($this->columns as $column) {
+                $query[] = $column->getQuery();
             }
 
-            $tmp = sprintf('`%s` %s%s %s ', $column->getName(), $column->getType(), $length, $column->getAttributes());
-
-            $tmp .= (!$column->getNullable()) ? 'NOT null' : 'null';
-
-            if($column->getDefaultValue()) {
-                $tmp .= PdoHelper::formatQuery(' DEFAULT %s', array($column->getDefaultValue()));;
-            }
-
-            if($column->getComment()) {
-                $tmp .= PdoHelper::formatQuery(' COMMENT %s', array($column->getComment()));
-            }
-
-            if($column->getIncrement()) {
-                $tmp .= ' AUTO_INCREMENT';
-            }
-
-            $query[] = $tmp;
-
-            if($column->getIndex()) {
-                $keys[] = sprintf('%s (`%s`)', $column->getIndex(), $column->getName());
-            }
+            $sql = sprintf('CREATE TABLE `' . $this->name . '` (%s) ENGINE = ' . $this->engine . ';', join(', ', $query));
+            Pdo::getInstance()->nonQuery($sql);
         }
+    }
 
-        $query = array_merge($query,$keys);
-        $sql = sprintf('CREATE TABLE `'. $this->name .'` (%s) ENGINE = '. $this->engine .';', join(', ', $query));
+    public function rename($name) {
+        Pdo::getInstance()->nonQuery('RENAME TABLE `'.$this->name.'` TO `'.$name.'`;');
+        $this->name = $name;
+    }
 
-        Pdo::getInstance()->nonQuery($sql);
+    public function dropIndex(array $indexes) {
+        foreach($indexes as $index) {
+            Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP INDEX `' . $index . '`');
+        }
+    }
+
+    public function dropPrimary() {
+        Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP PRIMARY KEY');
+    }
+
+    /*public function dropUnique() {
+
+    }*/
+
+    public function dropForeign(array $indexes) {
+        foreach($indexes as $index) {
+            Pdo::getInstance()->nonQuery('ALTER TABLE `'. $this->name .'` DROP FOREIGN KEY `'. $index .'`');
+        }
+    }
+
+    public function dropIfExists() {
+        if($this->exists()) {
+            $this->drop();
+        }
+    }
+
+    public function drop() {
+        Pdo::getInstance()->nonQuery('DROP TABLE `'. $this->name .'`;');
     }
 
 }

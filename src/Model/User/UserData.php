@@ -1,38 +1,44 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\DB\DBTable;
 use Pecee\Model\Model;
 
 class UserData extends Model {
+
+	const USER_IDENTIFIER_KEY = 'user_id';
+
+	protected $columns = [
+		'id',
+		'key',
+		'value'
+	];
+
 	public function __construct($userId = null, $key = null, $value = null) {
 
-		$table = new DBTable();
-		$table->column('id')->bigint()->primary()->increment();
-		$table->column('user_id')->bigint()->index();
-		$table->column('key')->string(255)->index();
-		$table->column('value')->longtext()->nullable();
+		parent::__construct();
 
-		parent::__construct($table);
+		$this->columns = array_merge($this->columns, [
+			static::USER_IDENTIFIER_KEY
+		]);
 
 		$this->user_id = $userId;
 		$this->key = $key;
 		$this->value = $value;
 	}
 
-	public function save() {
-		if(self::scalar('SELECT `key` FROM {table} WHERE `key` = %s AND `user_id` = %s', $this->key, $this->userId)) {
-			parent::update();
-		} else {
-			parent::save();
-		}
+    public function exists() {
+        if($this->{$this->primary} === null) {
+            return false;
+        }
+
+		return ($this->where('key', '=', $this->key)->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->first() !== null);
+    }
+
+	public static function destroyByIdentifier($identifierId) {
+        static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->delete();
 	}
 
-	public static function removeAll($userId) {
-		self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', array($userId));
-	}
-
-	public static function getByUserId($userId) {
-		return self::fetchAll('SELECT * FROM {table} WHERE `user_id` = %s', array($userId));
+	public static function getByIdentifier($identifierId) {
+        return static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->all();
 	}
 }

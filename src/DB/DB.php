@@ -65,10 +65,10 @@ class DB {
 	public static function getInstance() {
 		if(!self::$instance) {
 			$registry = Registry::getInstance();
-			self::$instance = new static($registry->Get('DBHost'),
-				$registry->Get('DBUsername'),
-				$registry->Get('DBPassword'),
-				$registry->Get('DBDatabase'));
+			self::$instance = new static($registry->get('DBHost'),
+				$registry->get('DBUsername'),
+				$registry->get('DBPassword'),
+				$registry->get('DBDatabase'));
 		}
 		return self::$instance;
 	}

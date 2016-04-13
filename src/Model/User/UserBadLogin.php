@@ -1,45 +1,61 @@
 <?php
 namespace Pecee\Model\User;
-use Pecee\Date;
-use Pecee\DB\DBTable;
+
+use Carbon\Carbon;
 use Pecee\Model\Model;
 
 class UserBadLogin extends Model {
+
+    protected $table = 'user_bad_login';
+
+    protected $columns = [
+        'id',
+        'username',
+        'ip',
+        'active',
+        'created_date',
+    ];
+
+    const TIMEOUT_MINUTES = 30;
+    const MAX_REQUEST_PER_IP = 10;
+
 	public function __construct() {
 
-        $table = new DBTable();
-        $table->column('id')->bigint()->primary()->increment();
-        $table->column('username')->string(300)->index();
-        $table->column('created_date')->datetime()->index();
-        $table->column('ip')->string(50)->index();
-        $table->column('active')->bool()->nullable()->index();
-
-		parent::__construct($table);
+		parent::__construct();
 
         $this->ip = request()->getIp();
-        $this->created_date = Date::toDateTime();
+        $this->active = true;
+        $this->created_date = Carbon::now()->toDateTimeString();
 	}
 
     public static function track($username) {
-        $login = new static ();
-        $login->username = $username;
+        $login = new static();
+        $login->username = trim($username);
         $login->save();
     }
 
-	public static function checkBadLogin() {
+	public static function checkBadLogin($username) {
 
-        $trackQuery = self::fetchOne('SELECT `created_date`, COUNT(`ip`) AS `request_count` FROM {table} WHERE `ip` = %s AND `active` = 1 GROUP BY `ip` ORDER BY `request_count` DESC', request()->getIp());
+        $track = static::where('username', '=', trim($username))
+            ->where('active', '=', '1')
+            ->select(['*', static::getQuery()->raw('COUNT(ip) as request_count')])
+            ->groupBy('ip')
+            ->orderBy('created_date', 'DESC')
+            ->first();
 
-        if($trackQuery->hasRow()) {
-            $lastLoginTimeStamp = $trackQuery->created_date;
-            $countRequestsFromIP = $trackQuery->request_count;
+        if($track !== null) {
+            $lastLoginTimeStamp = $track->created_date;
             $lastLoginMinutesAgo = round((time()-strtotime($lastLoginTimeStamp))/60);
-            return ($lastLoginMinutesAgo < 30 && $countRequestsFromIP > 20);
+
+            return ((static::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < static::TIMEOUT_MINUTES) &&
+                    (static::MAX_REQUEST_PER_IP === null || $track->request_count > static::MAX_REQUEST_PER_IP));
         }
         return false;
 	}
 
-	public static function reset() {
-        self::nonQuery('UPDATE {table} SET `active` = 0 WHERE `ip` = %s', request()->getIp());
+	public static function reset($username) {
+        static::where('username', '=', $username)->update([
+            'active' => 0
+        ]);
 	}
 }

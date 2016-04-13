@@ -1,62 +1,49 @@
 <?php
 namespace Pecee\Model;
+
+use Carbon\Carbon;
 use Pecee\Cookie;
-use Pecee\Date;
-use Pecee\DB\DBTable;
-use Pecee\DB\PdoHelper;
 use Pecee\Mcrypt;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
 use Pecee\Model\User\UserException;
 
 class ModelUser extends ModelData {
+
+    const COOKIE_NAME = 'ticket';
+
     // Errors
     const ERROR_TYPE_BANNED = 0x1;
     const ERROR_TYPE_INVALID_LOGIN = 0x2;
     const ERROR_TYPE_EXISTS = 0x3;
-
-    const ORDER_ID_DESC = 'u.`id` DESC';
-    const ORDER_ID_ASC = 'u.`id` ASC';
-    const ORDER_LASTACTIVITY_ASC = 'u.`last_activity` DESC';
-    const ORDER_LASTACTIVITY_DESC = 'u.`last_activity` ASC';
-
     protected static $instance;
 
-    public static $ORDERS = array(self::ORDER_ID_ASC, self::ORDER_ID_DESC, self::ORDER_LASTACTIVITY_ASC, self::ORDER_LASTACTIVITY_DESC);
+    protected $columns = [
+        'id',
+        'username',
+        'password',
+        'admin_level',
+        'deleted',
+        'created_date',
+        'last_activity'
+    ];
 
-    public function __construct($username = null, $password = null, $email = null) {
+    public function __construct($username = null, $password = null) {
 
-        $table = new DBTable('user');
-        $table->column('id')->bigint()->primary()->increment();
-        $table->column('username')->string(300)->index();
-        $table->column('password')->string(32)->index();
-        $table->column('last_activity')->datetime()->nullable()->index();
-        $table->column('admin_level')->integer(1)->nullable()->index();
-        $table->column('deleted')->bool()->index();
-
-        parent::__construct($table);
+        parent::__construct();
 
         $this->username = $username;
         $this->password = md5($password);
         $this->admin_level = 0;
-        $this->last_activity = Date::toDateTime();
         $this->deleted = false;
-
-        $this->setEmail($email);
-    }
-
-    public function setEmail($email) {
-        $this->data->email = $email;
-    }
-
-    public function getEmail() {
-        return $this->data->email;
+        $this->last_activity = Carbon::now()->toDateTimeString();
+        $this->created_date = Carbon::now()->toDateTimeString();
     }
 
     public function save() {
-        $user = self::getByUsername($this->username);
-        if($user->hasRow()) {
-            throw new UserException(sprintf('The username %s already exists', $this->data->username), self::ERROR_TYPE_EXISTS);
+        $user = $this->filterUsername($this->username)->first();
+        if($user != null && $user->id != $this->id) {
+            throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
         }
         parent::save();
     }
@@ -65,7 +52,8 @@ class ModelUser extends ModelData {
 
         if($this->data !== null) {
 
-            $currentFields = UserData::getByUserId($this->id);
+            $userDataClass = static::getUserDataClass();
+            $currentFields = $userDataClass::getByIdentifier($this->id);
 
             $cf = array();
             foreach($currentFields as $field) {
@@ -73,7 +61,8 @@ class ModelUser extends ModelData {
             }
 
             if(count($this->data->getData())) {
-                foreach($this->data->getData() as $key=>$value) {
+
+                foreach($this->data->getData() as $key => $value) {
 
                     if($value === null) {
                         continue;
@@ -86,12 +75,13 @@ class ModelUser extends ModelData {
                         } else {
                             $cf[$key]->value = $value;
                             $cf[$key]->key = $key;
-                            $cf[$key]->update();
+                            $cf[$key]->save();
                             unset($cf[$key]);
                         }
                     } else {
-                        $field = new UserData();
-                        $field->user_id = $this->id;
+                        /* @var $field UserData */
+                        $field = new $userDataClass();
+                        $field->{$userDataClass::USER_IDENTIFIER_KEY} = $this->id;
                         $field->key = $key;
                         $field->value = $value;
                         $field->save();
@@ -106,7 +96,8 @@ class ModelUser extends ModelData {
     }
 
     protected function fetchData() {
-        $data = UserData::getByUserId($this->id);
+        $class = static::getUserDataClass();
+        $data = $class::getByIdentifier($this->id);
         if($data->hasRows()) {
             foreach($data->getRows() as $d) {
                 $this->setDataValue($d->key, $d->value);
@@ -114,53 +105,41 @@ class ModelUser extends ModelData {
         }
     }
 
-    public function update() {
-        return parent::update();
-    }
-
     public function delete() {
-        //\Pecee\Model\User\UserData::RemoveAll($this->id);
         $this->deleted = true;
-        return parent::update();
+        $this->save();
     }
 
 
-    public static function isLoggedIn() {
-        return (Cookie::exists('ticket') && self::getFromCookie() !== null);
+    public static function isLoggedIn($force = false) {
+        if($force === true) {
+            $user = static::getFromCookie(true);
+            return ($user !== null);
+        }
+        return (Cookie::exists(static::COOKIE_NAME) && static::getFromCookie() !== null);
     }
 
     public function signOut() {
-        if(Cookie::exists('ticket')) {
-            Cookie::delete('ticket');
+        if(Cookie::exists(static::COOKIE_NAME)) {
+            Cookie::delete(static::COOKIE_NAME);
         }
     }
 
     public function exist() {
-        return $this->scalar('SELECT u.`username` FROM {table} u WHERE u.`username` = %s && u.`deleted` = 0 LIMIT 1', $this->username);
+        return $this->filterUsername($this->username)->filterDeleted(false)->first();
     }
 
     public function registerActivity() {
-        if($this->IsLoggedIn()) {
-            self::nonQuery('UPDATE {table} SET `last_activity` = NOW() WHERE `id` = %s', $this->id);
+        if($this->isLoggedIn()) {
+            $this->last_activity = Carbon::now()->toDateTimeString();
+            $this->save();
         }
     }
 
-    public function trackBadLogin() {
-        UserBadLogin::track($this->username);
-    }
-
-    protected static function checkBadLogin() {
-        return UserBadLogin::checkBadLogin();
-    }
-
-    protected function resetBadLogin() {
-        UserBadLogin::reset();
-    }
-
     protected function signIn($cookieExp){
-        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, self::getSalt());
-        $ticket = Mcrypt::encrypt(join('|',$user), self::getSalt());
-        Cookie::create('ticket', $ticket, $cookieExp);
+        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSalt());
+        $ticket = Mcrypt::encrypt(join('|',$user), static::getSalt());
+        Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
     }
 
     /**
@@ -180,14 +159,14 @@ class ModelUser extends ModelData {
     }
 
     public static function getFromCookie($setData = false) {
-        $ticket = Cookie::get('ticket');
-        if(trim($ticket) != ''){
-            $ticket = Mcrypt::decrypt($ticket, self::getSalt());
+        $ticket = Cookie::get(static::COOKIE_NAME);
+        if(trim($ticket) !== ''){
+            $ticket = Mcrypt::decrypt($ticket, static::getSalt());
             $user = explode('|', $ticket);
-
-            if (is_array($user) && end($user) === self::getSalt()) {
+            if (is_array($user) && trim(end($user)) === static::getSalt()) {
                 if ($setData) {
-                    self::$instance = self::getById($user[0]);
+                    static::$instance = static::find($user[0]);
+                    return static::$instance;
                 } else {
                     $obj = new static();
                     $obj->setRow('id', $user[0]);
@@ -207,101 +186,112 @@ class ModelUser extends ModelData {
      * @return static
      */
     public static function current($setData = false) {
-        if(!is_null(self::$instance)) {
-            return self::$instance;
+        if(!is_null(static::$instance)) {
+            return static::$instance;
         }
-        if(self::isLoggedIn()){
-            $user = self::getFromCookie($setData);
+        if(static::isLoggedIn()){
+            $user = static::getFromCookie($setData);
             if($user !== null) {
                 return $user;
             }
         }
-        return self::$instance;
+        return static::$instance;
     }
 
     public static function getSalt() {
         return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 
-    public static function get($query = null, $adminLevel = null, $deleted = null, $order = null, $rows = null, $page = null) {
-        $order=(is_null($order) || !in_array($order, self::$ORDERS)) ? self::ORDER_ID_DESC : $order;
+    public static  function filterQuery($query) {
 
-        $where=array('1=1');
+        $class = new static();
 
-        if($adminLevel !== null) {
-            $where[] = PdoHelper::formatQuery('u.`admin_level` = %s', array($adminLevel));
-        }
-        if($deleted !== null) {
-            $where[] = PdoHelper::formatQuery('u.`deleted` = %s', array($deleted));
-        }
-        if($query !== null) {
-            $where[]='(`username` LIKE \'%%' . PdoHelper::escape($query).'%%\' OR (SELECT `user_id` FROM `user_data` WHERE `user_id` = u.`id` && `value` LIKE \'%%'.PdoHelper::escape($query).'%%\' LIMIT 1))';
-        }
-        return self::fetchPage('SELECT u.* FROM {table} u WHERE ' . join(' && ', $where) . ' ORDER BY '.$order, $rows, $page);
+        $userDataClassName = static::getUserDataClass();
+        /* @var $userDataClass UserData */
+        $userDataClass = new $userDataClassName();
+
+        $userDataQuery = static::newQuery($userDataClass->getTable())
+            ->getQuery()
+            ->select($userDataClassName::USER_IDENTIFIER_KEY)
+            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($class->getTable() . '.' . $class->getPrimary()))
+            ->where('value', 'LIKE', '%'. str_replace('%', '%%', $query) .'%')
+            ->limit(1);
+
+        return static::getQuery()
+            ->where('username', 'LIKE', '%'.str_replace('%', '%%', $query).'%')
+            ->orWhere($class->getPrimary(), '=', $userDataQuery);
     }
 
-    /**
-     * Get user by user id.
-     * @param int $id
-     * @return static
-     */
-    public static function getById($id) {
-        return self::fetchOne('SELECT u.* FROM {table} u WHERE u.`id` = %s', array($id));
+    public static function filterDeleted($deleted) {
+        return static::where('deleted', '=', $deleted);
     }
 
-    public static function getByIds(array $ids) {
-        return self::fetchAll('SELECT u.* FROM {table} u WHERE u.`id` IN ('.PdoHelper::joinArray($ids).')' );
+    public static function filterAdminLevel($level) {
+        return static::where('admin_level', '=', $level);
     }
 
-    public static function getByUsernameOrEmail($query, $rows = 10, $page = 0) {
-        return self::fetchPage('SELECT u.* FROM {table} u JOIN `user_data` ud ON(ud.`user_id` = u.`id`) WHERE (ud.`key` = \'email\' && ud.`value` LIKE %s || u.`username` LIKE %s) && u.`deleted` = 0', $rows, $page, $query, $query);
+    public static function filterUsername($username) {
+        return static::where('username', '=', $username);
     }
 
-    public static function getByUsername($username) {
-        return self::fetchOne('SELECT u.* FROM {table} u WHERE u.`username` = %s && u.`deleted` = 0', $username);
-    }
+    public static function filterKeyValue($key, $value) {
+        $userDataClassName = static::getUserDataClass();
+        /* @var $userDataClass UserData */
+        $userDataClass = new $userDataClassName();
 
-    public static function getByEmail($email) {
-        return self::fetchOne('SELECT u.* FROM {table} u JOIN `user_data` ud ON(ud.`user_id` = u.`id`) WHERE ud.`key` = \'email\' && ud.`value` = %s && u.`deleted` = 0', $email);
-    }
+        $class = new static();
 
-    public function auth() {
-        return self::authenticate($this->username, $this->password, false);
-    }
-
-    public static function authenticateByEmail($email, $password, $remember=false) {
-        if(self::checkBadLogin()) {
-            throw new UserException('User has been banned', self::ERROR_TYPE_BANNED);
-        }
-        $user = self::fetchOne('SELECT u.`id`, u.`username`, u.`password`, u.`admin_level` FROM {table} u JOIN `user_data` ud ON(ud.`user_id` = u.`id`) WHERE u.`deleted` = 0 && ud.`key` = \'email\' && ud.`value` = %s', $email);
-        if(!$user->hasRows()) {
-            throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
-        }
-        // Incorrect user login (track bad request).
-        if(strtolower($user->email) != strtolower($email) || $user->password != md5($password) && $user->password != $password) {
-            $user->trackBadLogin();
-            throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
-        }
-        $user->resetBadLogin();
-        $user->signIn(($remember) ? null : 0);
-        return $user;
+        return static::getQuery()
+            ->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $class->getTable() . '.' . $class->getPrimary())
+            ->where($userDataClass->getTable() . '.' . 'key', $key)
+            ->where($userDataClass->getTable() . '.' . 'value', $value);
     }
 
     public static function authenticate($username, $password, $remember = false) {
-        if(self::checkBadLogin()) {
-            throw new UserException('User has been banned', self::ERROR_TYPE_BANNED);
+
+        static::onLoginStart($username, $password, $remember);
+
+        /* @var $user ModelUser */
+        $user = static::where('username', '=', $username)->first();
+
+        if($user === null) {
+            throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
         }
-        $user = self::fetchOne('SELECT u.* FROM {table} u WHERE u.`deleted` = 0 && u.`username` = %s', $username);
-        if(!$user->hasRows()) {
-            throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
-        }
-        // Incorrect user login (track bad request).
+
+        // Incorrect user login.
         if(strtolower($user->username) != strtolower($username) || $user->password != md5($password) && $user->password != $password) {
-            $user->trackBadLogin();
-            throw new UserException('Invalid login', self::ERROR_TYPE_INVALID_LOGIN);
+            static::onLoginFailed($user);
+            throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
         }
-        $user->resetBadLogin();
+
+        static::onLoginSuccess($user);
         $user->signIn(($remember) ? null : 0);
         return $user;
+    }
+
+    public function auth() {
+        return static::authenticate($this->username, $this->password, false);
+    }
+
+    /**
+     * @return UserData
+     */
+    public static function getUserDataClass() {
+        return UserData::class;
+    }
+
+    // Events
+    protected static function onLoginFailed(ModelUser $user){
+        UserBadLogin::track($user->username);
+    }
+
+    protected static function onLoginSuccess(ModelUser $user) {
+        UserBadLogin::reset($user->username);
+    }
+
+    protected static function onLoginStart($username, $password, $remember) {
+        if(UserBadLogin::checkBadLogin($username)) {
+            throw new UserException('User has been banned', static::ERROR_TYPE_BANNED);
+        }
     }
 }

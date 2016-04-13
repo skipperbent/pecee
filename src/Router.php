@@ -15,12 +15,12 @@ class Router extends SimpleRouter {
         Debug::getInstance()->add('Router initialised.');
 
         // Load framework specific controllers
-        self::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
-        self::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
-        self::get('/captcha', 'ControllerCaptcha@show', ['namespace' => '\Pecee\Controller']);
+        static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
+        static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
+        static::get('/captcha', 'ControllerCaptcha@show', ['namespace' => '\Pecee\Controller']);
 
         // Load routes.php
-        $file = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';
+        $file = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
         if(file_exists($file)) {
             require_once $file;
         }
@@ -37,17 +37,6 @@ class Router extends SimpleRouter {
         } catch(\Exception $e) {
 
             $route = RouterBase::getInstance()->getLoadedRoute();
-
-            $exceptionHandler = null;
-
-            // Load and use exception-handler defined on group
-            if($route && $route->getGroup()) {
-                $exceptionHandler = $route->getGroup()->getExceptionHandler();
-
-                if($exceptionHandler !== null) {
-                    self::loadExceptionHandler($exceptionHandler, $route, $e);
-                }
-            }
 
             // Otherwise use the fallback default exceptions handler
             if(self::$defaultExceptionHandler !== null) {
@@ -74,7 +63,7 @@ class Router extends SimpleRouter {
     }
 
     public static function defaultExceptionHandler($handler) {
-        self::$defaultExceptionHandler = $handler;
+        static::$defaultExceptionHandler = $handler;
     }
 
 }

@@ -1,6 +1,10 @@
 <?php
-namespace Pecee\DB;
-class DBColumn {
+namespace Pecee\DB\Schema;
+
+use Pecee\DB\Pdo;
+
+class Column {
+    protected $table;
     protected $name;
     protected $type;
     protected $length;
@@ -11,11 +15,20 @@ class DBColumn {
     protected $index;
     protected $increment;
     protected $comment;
+    protected $relationTable;
+    protected $relationColumn;
+    protected $relationUpdateType;
+    protected $relationDeleteType;
 
     const INDEX_PRIMARY = 'PRIMARY KEY';
     const INDEX_UNIQUE = 'UNIQUE';
     const INDEX_INDEX = 'INDEX';
     const INDEX_FULLTEXT = 'FULLTEXT';
+
+    const RELATION_TYPE_RESTRICT = 'RESTRICT';
+    const RELATION_TYPE_CASCADE = 'CASCADE';
+    const RELATION_TYPE_SET_NULL = 'SET NULL';
+    const RELATION_TYPE_NO_ACTION = 'NO ACTION';
 
     const TYPE_VARCHAR = 'VARCHAR';
     const TYPE_LONGTEXT = 'LONGTEXT';
@@ -57,16 +70,69 @@ class DBColumn {
     const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
     const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
-    public static $INDEXES = array(self::INDEX_PRIMARY, self::INDEX_UNIQUE, self::INDEX_INDEX, self::INDEX_FULLTEXT);
+    public static $INDEXES = [
+        self::INDEX_PRIMARY,
+        self::INDEX_UNIQUE,
+        self::INDEX_INDEX,
+        self::INDEX_FULLTEXT
+    ];
 
-    public static $TYPES = array(self::TYPE_VARCHAR, self::TYPE_LONGTEXT, self::TYPE_TEXT, self::TYPE_MEDIUMTEXT, self::TYPE_TINYTEXT,
-        self::TYPE_INT, self::TYPE_TINYINT, self::TYPE_SMALLINT, self::TYPE_MEDIUMINT, self::TYPE_BIGINT, self::TYPE_DECIMAL, self::TYPE_FLOAT,
-        self::TYPE_DOUBLE, self::TYPE_REAL, self::TYPE_BIT, self::TYPE_BOOLEAN, self::TYPE_SERIAL, self::TYPE_DATE, self::TYPE_DATETIME,
-        self::TYPE_TIMESTAMP, self::TYPE_TIME, self::TYPE_YEAR, self::TYPE_CHAR, self::TYPE_BINARY, self::TYPE_VARBINARY, self::TYPE_TINYBLOB,
-        self::TYPE_MEDIUMBLOB, self::TYPE_BLOB, self::TYPE_LONGBLOB, self::TYPE_ENUM, self::TYPE_SET, self::TYPE_GEOMETRY, self::TYPE_POINT,
-        self::TYPE_LINESTRING, self::TYPE_POLYGON, self::TYPE_MULTIPOINT, self::TYPE_MULTILINESTRING, self::TYPE_MULTIPOLYGON, self::TYPE_GEOMETRYCOLLECTION);
+    public static $TYPES = [
+        self::TYPE_VARCHAR,
+        self::TYPE_LONGTEXT,
+        self::TYPE_TEXT,
+        self::TYPE_MEDIUMTEXT,
+        self::TYPE_TINYTEXT,
+        self::TYPE_INT,
+        self::TYPE_TINYINT,
+        self::TYPE_SMALLINT,
+        self::TYPE_MEDIUMINT,
+        self::TYPE_BIGINT,
+        self::TYPE_DECIMAL,
+        self::TYPE_FLOAT,
+        self::TYPE_DOUBLE,
+        self::TYPE_REAL,
+        self::TYPE_BIT,
+        self::TYPE_BOOLEAN,
+        self::TYPE_SERIAL,
+        self::TYPE_DATE,
+        self::TYPE_DATETIME,
+        self::TYPE_TIMESTAMP,
+        self::TYPE_TIME,
+        self::TYPE_YEAR,
+        self::TYPE_CHAR,
+        self::TYPE_BINARY,
+        self::TYPE_VARBINARY,
+        self::TYPE_TINYBLOB,
+        self::TYPE_MEDIUMBLOB,
+        self::TYPE_BLOB,
+        self::TYPE_LONGBLOB,
+        self::TYPE_ENUM,
+        self::TYPE_SET,
+        self::TYPE_GEOMETRY,
+        self::TYPE_POINT,
+        self::TYPE_LINESTRING,
+        self::TYPE_POLYGON,
+        self::TYPE_MULTIPOINT,
+        self::TYPE_MULTILINESTRING,
+        self::TYPE_MULTIPOLYGON,
+        self::TYPE_GEOMETRYCOLLECTION
+    ];
+
+    public static $RELATION_TYPES = [
+        self::RELATION_TYPE_CASCADE,
+        self::RELATION_TYPE_NO_ACTION,
+        self::RELATION_TYPE_RESTRICT,
+        self::RELATION_TYPE_SET_NULL
+    ];
 
     // Default values
+
+    public function __construct($table) {
+        $this->relation = array();
+        $this->table = $table;
+        $this->change = false;
+    }
 
     public function primary() {
         $this->setIndex(self::INDEX_PRIMARY);
@@ -162,6 +228,76 @@ class DBColumn {
         return $this;
     }
 
+    public function relation($table, $column, $delete = self::RELATION_TYPE_CASCADE, $update = self::RELATION_TYPE_RESTRICT) {
+
+        if(!in_array($delete, self::$RELATION_TYPES)) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', self::$RELATION_TYPES));
+        }
+
+        if(!in_array($update, self::$RELATION_TYPES)) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', self::$RELATION_TYPES));
+        }
+
+        $this->relationTable = $table;
+        $this->relationColumn = $column;
+        $this->relationUpdateType = $update;
+        $this->relationDeleteType = $delete;
+        return $this;
+    }
+
+    public function drop() {
+        Pdo::getInstance()->nonQuery('ALTER TABLE `'. $this->table .'` DROP COLUMN `'. $this->name .'`');
+    }
+
+    public function change() {
+        $index = '';
+
+        if($this->getIndex() !== null) {
+            $index = sprintf(', ADD %s (`%s`)', $this->getIndex(), $this->getName());
+        }
+
+        $query = 'ALTER TABLE `'. $this->table .'` MODIFY COLUMN '. $this->getQuery() . $index . ';';
+        Pdo::getInstance()->nonQuery($query);
+    }
+
+    public function getQuery() {
+        $length = '';
+        if($this->getLength()) {
+            $length = '('.$this->getLength().')';
+        }
+
+        $query = sprintf('`%s` %s%s %s ', $this->getName(), $this->getType(), $length, $this->getAttributes());
+
+        $query .= (!$this->getNullable()) ? 'NOT null' : 'null';
+
+        if($this->getDefaultValue()) {
+            $query .= PdoHelper::formatQuery(' DEFAULT %s', array($this->getDefaultValue()));;
+        }
+
+        if($this->getComment()) {
+            $query .= PdoHelper::formatQuery(' COMMENT %s', array($this->getComment()));
+        }
+
+        if($this->getIncrement()) {
+            $query .= ' AUTO_INCREMENT';
+        }
+
+        if ($this->getIndex()) {
+            $query .= sprintf(', %s (`%s`)', $this->getIndex(), $this->getName());
+        }
+
+        if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
+            $query .= sprintf(', FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
+                $this->getName(),
+                $this->getRelationTable(),
+                $this->getRelationColumn(),
+                $this->getRelationUpdateType(),
+                $this->getRelationDeleteType());
+        }
+
+        return $query;
+    }
+
     public function setName($name) {
         $this->name = $name;
         return $this;
@@ -250,6 +386,22 @@ class DBColumn {
 
     public function getComment() {
         return $this->comment;
+    }
+
+    public function getRelationTable() {
+        return $this->relationTable;
+    }
+
+    public function getRelationColumn() {
+        return $this->relationColumn;
+    }
+
+    public function getRelationUpdateType() {
+        return $this->relationUpdateType;
+    }
+
+    public function getRelationDeleteType() {
+        return $this->relationDeleteType;
     }
 
 }

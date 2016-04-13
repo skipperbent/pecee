@@ -19,7 +19,7 @@ class WidgetDebug extends Widget {
     protected function getTemplatePath() {
         $path=explode('\\', get_class($this));
         $path = array_slice($path, 2);
-        return dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR .  'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return $_ENV['framework_path'] . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     public function render() {

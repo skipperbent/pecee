@@ -11,12 +11,12 @@ $p.utils = {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return text;
-    },
+    }
 };
 
 $p.template = function() {
     return this;
-}
+};
 
 $p.template.prototype = {
     widget: null,
@@ -184,7 +184,7 @@ $p.WidgetList.prototype = $.extend($p.Widget.prototype, {
     setPage: function(pageIndex) {
         var start = this.data.totalRows*pageIndex;
         var end = ((start+this.data.rowsPerPage) > this.data.maxRows) ? this.data.maxRows : (start+this.data.rowsPerPage);
-        var newRows = new Array();
+        var newRows = [];
         for(var i=start;i<end;i++) {
             newRows.push(this.rows[i]);
         }
@@ -209,14 +209,14 @@ $p.WidgetList.prototype = $.extend($p.Widget.prototype, {
                 ix = parseInt(nameIndex);
             }
             switch ($.type(d[p])) {
+                default:
+                    d = d[p];
+                    break;
                 case 'array':
                     if (!last) {
                         d = d[p][ix];
                         break;
                     }
-                default:
-                    d = d[p];
-                    break;
             }
         }
         return d;

@@ -4,7 +4,6 @@ namespace Pecee\UI\Form;
 use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
 use Pecee\Http\Input\Input;
-use Pecee\Str;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
@@ -15,6 +14,7 @@ use Pecee\UI\Html\HtmlSelectOption;
 use Pecee\UI\Html\HtmlTextarea;
 
 class Form {
+
     const FORM_ENCTYPE_FORM_DATA = 'multipart/form-data';
 
     protected $input;
@@ -74,7 +74,7 @@ class Form {
         if($saveValue && (is_null($value) && $this->getValue($name) || request()->getMethod() !== 'get')) {
             $value = $this->getValue($name);
         }
-        return new HtmlInput($name, $type, Str::htmlEntities($value));
+        return new HtmlInput($name, $type, $value);
     }
 
     /**
@@ -112,10 +112,14 @@ class Form {
      * @param bool $defaultValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = true, $saveValue = true, $defaultValue = false) {
-        $element = new HtmlCheckbox($name, $value);
+    public function bool($name, $value = true, $saveValue = true, $defaultValue = null) {
+        $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
         if($saveValue !== false) {
-            $defaultValue = (count($_GET)) ? null : $defaultValue;
+            if($defaultValue === null) {
+                $defaultValue = $value;
+            } else {
+                $defaultValue = (count($_GET)) ? null : $defaultValue;
+            }
             $checked = Boolean::parse($this->getValue($name, $defaultValue));
             if($checked) {
                 $element->addAttribute('checked', 'checked');
@@ -207,7 +211,7 @@ class Form {
     public function button($text, $type = null, $name = null, $value = null) {
         $el = new Html('button');
 
-        $el->setInnerHtml($text);
+        $el->addInnerHtml($text);
 
         if($type !== null) {
             $el->addAttribute('type', $type);
@@ -233,7 +237,4 @@ class Form {
         return '</form>';
     }
 
-    public function setPrefixElements($bool) {
-        $this->prefixElements = $bool;
-    }
 }

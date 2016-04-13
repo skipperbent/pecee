@@ -1,36 +1,64 @@
 <?php
 namespace Pecee\Model\User;
-use Pecee\Date;
-use Pecee\DB\DBTable;
+
+use Carbon\Carbon;
 use Pecee\Model\Model;
 
 class UserReset extends Model {
-	public function __construct($userId = null) {
 
-        $table = new DBTable();
-        $table->column('user_id')->bigint()->index();
-        $table->column('key')->string(32)->index();
-        $table->column('created_date')->datetime()->index();
+    const USER_IDENTIFIER_KEY = 'user_id';
 
-		parent::__construct($table);
+    protected $table = 'user_reset';
 
-        $this->user_id = $userId;
+    protected $columns = [
+        'id',
+        'key',
+        'created_date'
+    ];
+
+    public function __construct($userId = null) {
+
+        parent::__construct();
+
+        $this->columns = array_merge($this->columns, [ static::USER_IDENTIFIER_KEY ]);
+
+        $this->{static::USER_IDENTIFIER_KEY} = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Date::ToDateTime();
-	}
+        $this->created_date = Carbon::now()->toDateTimeString();
+    }
 
-	public static function getByKey($key) {
-		return self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', array($key));
-	}
+    public function clean() {
+        $this->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->delete();
+    }
 
-	public static function confirm($key, $newPassword) {
-		$reset = self::fetchOne('SELECT * FROM {table} WHERE `key` = %s', $key);
-		if($reset->hasRow()) {
-			$reset->delete();
-			self::nonQuery('DELETE FROM {table} WHERE `user_id` = %s', $reset->user_id);
-			self::nonQuery('UPDATE `user` SET `password` = %s WHERE `id` = %s LIMIT 1', md5($newPassword), $reset->user_id);
-			return $reset->user_id;
-		}
-		return null;
-	}
+    public function save() {
+        $this->clean();
+        parent::save();
+    }
+
+    public static function getByKey($key) {
+        $model = new static();
+        return $model->where('key', '=', $key)->first();
+    }
+
+    public static function confirm($key) {
+
+        $reset = static::getByKey($key);
+
+        if($reset !== null) {
+            $reset->clean();
+            $reset->delete();
+            return $reset->{static::USER_IDENTIFIER_KEY};
+        }
+        return false;
+    }
+
+    public function getIdentifier() {
+        return $this->{static::USER_IDENTIFIER_KEY};
+    }
+
+    public function getKey() {
+        return $this->key;
+    }
+
 }

@@ -1,35 +1,39 @@
 <?php
 namespace Pecee\Model\File;
-use Pecee\DB\DBTable;
+
 use Pecee\Model\Model;
 
 class FileData extends Model {
+
+    protected $columns = [
+        'id',
+        'file_id',
+        'key',
+        'value'
+    ];
+
     public function __construct($fileId = null, $key = null, $value = null) {
-
-        $table = new DBTable();
-        $table->column('file_id')->string(40)->index();
-        $table->column('key')->string(255);
-        $table->column('value')->longtext();
-
-        parent::__construct($table);
+        parent::__construct();
 
         $this->file_id = $fileId;
         $this->key = $key;
         $this->value = $value;
     }
-    public function save() {
-        if(self::Scalar('SELECT `Key` FROM {table} WHERE `key` = %s AND `file_id` = %s', $this->key, $this->file_id)) {
-            parent::update();
-        } else {
-            parent::save();
+
+    public function exists() {
+        if($this->{$this->primary} === null) {
+            return false;
         }
+
+        return ($this->where('key', '=', $this->key)->where('file_id', '=', $this->file_id)->first() !== null);
     }
 
-    public static function removeAll($fileId) {
-        self::nonQuery('DELETE FROM {table} WHERE `file_id` = %s', array($fileId));
+    public static function destroyByFileId($fileId) {
+        static::where('file_id', '=', $fileId)->delete();
     }
 
-    public static function getByFileId($fileId) {
-        return self::fetchAll('SELECT * FROM {table} WHERE `file_id` = %s', array($fileId));
+    public static function getByIdentifier($fileId) {
+        return static::where('file_id', '=', $fileId)->all();
     }
+
 }

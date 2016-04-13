@@ -4,7 +4,6 @@ namespace Pecee\Widget;
 use Pecee\Base;
 use Pecee\Debug;
 use Pecee\UI\Form\Form;
-use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
 use Pecee\UI\Html\HtmlScript;
@@ -23,7 +22,7 @@ abstract class Widget extends Base  {
 
         parent::__construct();
 
-        Debug::getInstance()->add('START ' . get_class($this));
+        Debug::getInstance()->add('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
         $this->jsWrapRoute = url('pecee.js.wrap');
@@ -37,21 +36,22 @@ abstract class Widget extends Base  {
      * @return string
      */
     protected function getTemplatePath() {
-        $path = explode('\\', get_class($this));
-        $path = array_slice($path, 2);
-        return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        $path = array_slice(explode('\\', static::class), 2);
+        return '../views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
-    public function showMessages($type) {
-        if($this->hasMessages($type)) {
-            $output = array();
-            $output[] = sprintf('<ul class="msg %s">', $type);
-            /* @var $error FormMessage */
-            foreach($this->getMessages($type) as $error) {
-                $output[] = sprintf('<li>%s</li>', $error->getMessage());
+    public function showMessages($type, $form = null, $placement = null) {
+        $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
+        if($this->hasMessages($type, $form, $placement)) {
+            $o = sprintf('<div class="alert alert-%s">', $type);
+            $msg = array();
+            /* @var $error \Pecee\UI\Form\FormMessage */
+            foreach($this->getMessages($type, $form, $placement) as $error) {
+                $msg[] = sprintf('%s', $error->getMessage());
             }
-            $output[] = '</ul>';
-            return join('', $output);
+
+            $o .= join('<br/>', $msg) . '</div>';
+            return $o;
         }
         return '';
     }
@@ -66,10 +66,10 @@ abstract class Widget extends Base  {
         $enc = new HtmlMeta();
         $enc->addAttribute('charset', $this->getSite()->getCharset());
 
-        $o = array($enc);
+        $o = $enc;
 
         if($this->_site->getTitle())  {
-            $o[] = '<title>' . $this->_site->getTitle() . '</title>';
+            $o .= '<title>' . $this->_site->getTitle() . '</title>';
         }
 
         if($this->_site->getDescription()) {
@@ -80,24 +80,24 @@ abstract class Widget extends Base  {
         }
 
         if($includeCss === true) {
-            $o[] = $this->printCss();
+            $o .= $this->printCss();
         }
 
         if($includeJs === true) {
-            $o[] = $this->printJs();
+            $o .= $this->printJs();
         }
 
         if(count($this->_site->getHeader())) {
             $header = $this->_site->getHeader();
-            $o[] = join('', $header);
+            $o .= join('', $header);
         }
 
-        return join('', $o);
+        return $o;
     }
 
     public function printCss($section = Site::SECTION_DEFAULT) {
-        $o = array();
-        if($this->_site->getCssFilesWrapped($section)) {
+        $o = '';
+        if(count($this->_site->getCssFilesWrapped($section))) {
 
             $getParams = array();
 
@@ -106,21 +106,18 @@ abstract class Widget extends Base  {
             }
 
             $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped($section), ',')], $getParams));
-            $o[] = new HtmlLink($url);
+            $o .= new HtmlLink($url);
         }
 
-        $css = $this->_site->getCss($section);
-        if(count($css)) {
-            foreach($css as $c) {
-                $o[] = $c;
-            }
+        foreach($this->_site->getCss($section) as $c) {
+            $o .= $c;
         }
-        return join('', $o);
+        return $o;
     }
 
     public function printJs($section = Site::SECTION_DEFAULT) {
-        $o = array();
-        if($this->_site->getJsFilesWrapped($section)) {
+        $o = '';
+        if(count($this->_site->getJsFilesWrapped($section))) {
 
             $getParams = array();
 
@@ -129,24 +126,21 @@ abstract class Widget extends Base  {
             }
 
             $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped($section), ',')], $getParams));
-            $o[] = new HtmlScript($url);
+            $o .= new HtmlScript($url);
         }
 
-        $js = $this->_site->getJs($section);
-        if(count($js) > 0) {
-            foreach($js as $j) {
-                $o[] = $j;
-            }
+        foreach($this->_site->getJs($section) as $j) {
+            $o .= $j;
         }
-        return join('', $o);
+        return $o;
     }
 
     protected function getTemplate() {
         return $this->_template;
     }
 
-    protected function setTemplate($path,$relative=true) {
-        $this->_template = (($relative && !empty($path)) ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
+    protected function setTemplate($path, $relative = true) {
+        $this->_template = (($relative === true && trim($path) !== '') ? '../views' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
     protected function setContentTemplate($template) {
@@ -180,7 +174,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require('Template'.DIRECTORY_SEPARATOR.'Snippet'.DIRECTORY_SEPARATOR.$file);
+        require '../views/snippet/' . $file;
     }
 
     /**
@@ -188,7 +182,7 @@ abstract class Widget extends Base  {
      * @param \Pecee\Widget\Widget $widget
      */
     public function widget(Widget $widget) {
-        if($widget->getTemplate() === 'Template\Default.php') {
+        if($widget->getTemplate() === $this->getTemplatePath()) {
             $widget->setTemplate(null);
         }
         echo $widget;
@@ -206,27 +200,31 @@ abstract class Widget extends Base  {
     public function render()  {
         $this->renderContent();
         $this->renderTemplate();
-        Debug::getInstance()->add('END ' . get_class($this));
         $this->_messages->clear();
+        Debug::getInstance()->add('END WIDGET: ' . static::class);
         return $this->_contentHtml;
     }
 
     protected function renderContent() {
+        Debug::getInstance()->add('START: rendering content-template: ' . $this->_contentTemplate);
         if($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
+        Debug::getInstance()->add('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
     protected function renderTemplate() {
+        Debug::getInstance()->add('START: rendering template: ' . $this->_template);
         if($this->_template !== '') {
             ob_start();
             include $this->_template;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
+        Debug::getInstance()->add('END: rendering template ' . $this->_template);
     }
 
     protected function setJsWrapRoute($route) {

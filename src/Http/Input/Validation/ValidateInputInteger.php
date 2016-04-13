@@ -7,7 +7,7 @@ class ValidateInputInteger extends ValidateInput {
 
 	public function validate() {
 		if($this->value) {
-			return Integer::isInteger($this->value);
+			return Integer::isNummeric($this->value);
 		}
 		return true;
 	}

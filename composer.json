@@ -14,12 +14,19 @@
         }
     ],
     "require": {
+        "php": ">=5.4.0",
         "pecee/simple-router": "1.*",
-        "vlucas/phpdotenv": "2.0"
+        "vlucas/phpdotenv": "2.0",
+        "robmorgan/phinx": "^0.5.3",
+        "nesbot/carbon": "1.*",
+        "usmanhalalit/pixie": "2.*@dev"
     },
     "require-dev": {
         "pecee/simple-router": "1.*",
-        "vlucas/phpdotenv": "2.0"
+        "vlucas/phpdotenv": "2.0",
+        "robmorgan/phinx": "^0.5.3",
+        "nesbot/carbon": "1.*",
+        "usmanhalalit/pixie": "2.*@dev"
     },
     "autoload": {
         "psr-4": {
