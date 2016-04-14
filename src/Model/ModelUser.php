@@ -241,6 +241,10 @@ class ModelUser extends ModelData {
             ->where($userDataClass->getTable() . '.' . 'value', $value);
     }
 
+    public static function getByUsername($username) {
+        return static::instance()->filterDeleted(false)->filterUsername($username);
+    }
+
     public static function authenticate($username, $password, $remember = false) {
 
         static::onLoginStart($username, $password, $remember);

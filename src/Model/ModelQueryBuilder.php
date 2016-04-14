@@ -212,6 +212,9 @@ class ModelQueryBuilder {
             throw new ModelException('Not valid columns found to update.');
         }
 
+        // Remove primary key
+        unset($data[$this->model->getPrimary()]);
+
         $this->query->update($data);
         return $this->model;
     }
