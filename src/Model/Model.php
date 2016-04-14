@@ -78,7 +78,7 @@ abstract class Model implements \IteratorAggregate {
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 
-        $this->queryable = $this->newQuery($this->getTable());
+        $this->queryable = $this->newQuery();
 
         if(env('DEBUG')) {
 
@@ -96,8 +96,8 @@ abstract class Model implements \IteratorAggregate {
         $this->results = array();
     }
 
-    public function newQuery($table) {
-        return new ModelQueryBuilder($this, $table);
+    public function newQuery($table = null) {
+        return new ModelQueryBuilder($this, (($table === null) ? $this->table : $table));
     }
 
     public static function instance() {
@@ -105,7 +105,14 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function onInstanceCreate() {
-
+        if($this->isCollection() === false) {
+            if (count($this->join)) {
+                foreach ($this->join as $join) {
+                    $method = Str::camelize($join);
+                    $this->{$join} = $this->$method();
+                }
+            }
+        }
     }
 
     /**
@@ -125,9 +132,9 @@ abstract class Model implements \IteratorAggregate {
         }
 
         if($this->exists()) {
-            $this->queryable->where($this->primary, '=', $this->{$this->primary})->update($data);
+            $this->instance()->where($this->primary, '=', $this->{$this->primary})->update($data);
         } else {
-            $this->{$this->primary} = $this->queryable->getQuery()->insert($data);
+            $this->{$this->primary} = $this->instance()->getQuery()->insert($data);
         }
 
         return $this;
@@ -146,7 +153,7 @@ abstract class Model implements \IteratorAggregate {
             return false;
         }
 
-        return ($this->queryable->where($this->primary, '=', $this->{$this->primary})->count() > 0);
+        return ($this->instance()->where($this->primary, '=', $this->{$this->primary})->count() > 0);
     }
 
     public function isCollection() {
@@ -172,15 +179,6 @@ abstract class Model implements \IteratorAggregate {
 
     public function setRows(array $rows) {
         $this->results['rows'] = $rows;
-
-        if($this->isCollection() === false) {
-            if (count($this->join)) {
-                foreach ($this->join as $join) {
-                    $method = Str::camelize($join);
-                    $this->{$join} = $this->$method();
-                }
-            }
-        }
     }
 
     /**
@@ -255,11 +253,7 @@ abstract class Model implements \IteratorAggregate {
                 }
                 $output = call_user_func([$this, $method]);
                 $with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
-                if($output instanceof self) {
-                    $rows[$with] = $output->toArray();
-                } else {
-                    $rows[$with] = $output;
-                }
+                $rows[$with] = ($output instanceof self) ? $output->toArray() : $output;
             }
             return $rows;
         }
