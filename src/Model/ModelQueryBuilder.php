@@ -82,7 +82,7 @@ class ModelQueryBuilder {
     }
 
     public function whereNotNull($key) {
-        $this->query->orWhereNotNull($key);
+        $this->query->whereNotNull($key);
         return $this->model;
     }
 

@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\Input\Validation;
+namespace Pecee\Http\InputValidation;
 
 use Pecee\Session\Session;
 
@@ -11,15 +11,15 @@ class ValidateInputCaptcha extends ValidateInput {
 		$this->captchaName = $name;
 	}
 
-	public function validate() {
-		$result = (Session::getInstance()->exists($this->captchaName) && strtolower($this->value) == strtolower(Session::getInstance()->get($this->captchaName)));
+	public function validates() {
+		$result = (Session::getInstance()->exists($this->captchaName) && strtolower($this->input->getValue()) == strtolower(Session::getInstance()->get($this->captchaName)));
 		if($result) {
 			Session::getInstance()->destroy($this->captchaName);
 		}
 		return $result;
 	}
 
-	public function getErrorMessage() {
+	public function getError() {
 		return lang('Invalid captcha verification');
 	}
 

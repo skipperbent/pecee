@@ -236,9 +236,23 @@ class ModelUser extends ModelData {
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        return $this->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary())
-            ->where($userDataClass->getTable() . '.' . 'key', $key)
-            ->where($userDataClass->getTable() . '.' . 'value', $value);
+        $hasJoin = false;
+        $statements = $this->getQuery()->getStatements();
+
+        if(isset($statements['joins'])) {
+            foreach ($this->getQuery()->getStatements()['joins'] as $joins) {
+                if ($joins['table'] === $userDataClass->getTable()) {
+                    $hasJoin = true;
+                    break;
+                }
+            }
+        }
+
+        if(!$hasJoin) {
+            $this->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary());
+        }
+
+        return $this->where($userDataClass->getTable() . '.' . 'key', '=', $key)->where($userDataClass->getTable() . '.' . 'value', '=', $value);
     }
 
     public static function getByUsername($username) {

@@ -3,7 +3,6 @@ namespace Pecee\UI\Form;
 
 use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
-use Pecee\Http\Input\Input;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
@@ -17,37 +16,7 @@ class Form {
 
     const FORM_ENCTYPE_FORM_DATA = 'multipart/form-data';
 
-    protected $input;
     protected $name;
-
-    public function __construct(Input $input) {
-        $this->input = $input;
-    }
-
-    protected function getValue($name, $defaultValue = null) {
-
-        $method = request()->getMethod();
-
-        if($method !== 'get') {
-            if($this->input->post->get($name) !== null && count($_POST)) {
-                return $this->input->post->get($name)->getValue();
-            }
-
-            if(strpos($name, '[]') !== false) {
-                $index = $name;
-                $newName = substr($name, 0, strpos($name, '[]'));
-                if(isset($_POST[$newName][$index])) {
-                    return $_POST[$newName][$index];
-                }
-            }
-        }
-
-        if($this->input->get->get($name) !== null && count($_GET)) {
-            return $this->input->get->get($name)->getValue();
-        }
-
-        return $defaultValue;
-    }
 
     /**
      * Starts new form
@@ -71,8 +40,8 @@ class Form {
      * @return \Pecee\UI\Html\HtmlInput
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true) {
-        if($saveValue && (is_null($value) && $this->getValue($name) || request()->getMethod() !== 'get')) {
-            $value = $this->getValue($name);
+        if($saveValue && (is_null($value) && input()->get($name) || request()->getMethod() !== 'get')) {
+            $value = input()->get($name);
         }
         return new HtmlInput($name, $type, $value);
     }
@@ -88,7 +57,7 @@ class Form {
     public function radio($name, $value, $saveValue = true) {
         $element = new HtmlInput($name, 'radio', $value);
 
-        if($saveValue && $this->getValue($name, false) === $value) {
+        if($saveValue && input()->get($name, false) === $value) {
             $element->addAttribute('checked', 'checked');
         }
 
@@ -120,7 +89,7 @@ class Form {
             } else {
                 $defaultValue = (count($_GET)) ? null : $defaultValue;
             }
-            $checked = Boolean::parse($this->getValue($name, $defaultValue));
+            $checked = Boolean::parse(input()->get($name, $defaultValue));
             if($checked) {
                 $element->addAttribute('checked', 'checked');
             }
@@ -158,13 +127,13 @@ class Form {
                 if(count($arr)) {
                     foreach($data->getData() as $i) {
                         $val = (!isset($i['value'])) ? $i['name'] : $i['value'];
-                        $selected = ($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
+                        $selected = ($saveValue && input()->get($name) == $val  || input()->get($name) == $val || !input()->get($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                         $element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
                     }
                 }
             } elseif(is_array($data)) {
                 foreach($data as $val => $key) {
-                    $selected = ($saveValue && $this->getValue($name) == $val  || $this->getValue($name) == $val || !$this->getValue($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
+                    $selected = ($saveValue && input()->get($name) == $val  || input()->get($name) == $val || !input()->get($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                     $element->addOption(new HtmlSelectOption($key, $val, $selected));
                 }
             } else {
@@ -184,8 +153,8 @@ class Form {
      * @return \Pecee\UI\Html\HtmlTextarea
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true) {
-        if($saveValue && (!$value && $this->getValue($name) || request()->getMethod() !== 'get')) {
-            $value = $this->getValue($name);
+        if($saveValue && (!$value && input()->get($name) || request()->getMethod() !== 'get')) {
+            $value = input()->get($name);
         }
         return new HtmlTextarea($name, $rows, $cols, $value);
     }
