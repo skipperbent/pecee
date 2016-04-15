@@ -27,7 +27,7 @@ abstract class Widget extends Base  {
         $this->setContentTemplate($this->getTemplatePath());
         $this->jsWrapRoute = url('pecee.js.wrap');
         $this->cssWrapRoute = url('pecee.css.wrap');
-        $this->form = new Form($this->_input);
+        $this->form = new Form();
     }
 
     /**
