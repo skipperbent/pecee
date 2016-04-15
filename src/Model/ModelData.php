@@ -38,4 +38,12 @@ abstract class ModelData extends Model {
 		}
 	}
 
+	public function toArray() {
+		$output = parent::toArray();
+		if(is_array($output)) {
+			return array_merge($this->data->getData(), $output);
+		}
+		return $output;
+	}
+
 }

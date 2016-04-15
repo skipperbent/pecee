@@ -31,6 +31,14 @@ function request() {
     return \Pecee\Http\Request::getInstance();
 }
 
+/**
+ * Get input class
+ * @return \Pecee\Http\Input\Input
+ */
+function input() {
+    return \Pecee\Http\Request::getInstance()->getInput();
+}
+
 function redirect($url, $code = null) {
     $response = new \Pecee\Http\Response();
 
@@ -54,7 +62,7 @@ function lang($key, $args = null) {
  * @param $key
  * @param null $default
  *
- * @return null
+ * @return string|null
  */
 function env($key, $default = null) {
     $value = getenv($key);

@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\Input\Validation;
+namespace Pecee\Http\InputValidation;
 
 class ValidateInputRepeation extends ValidateInput {
 
@@ -13,19 +13,18 @@ class ValidateInputRepeation extends ValidateInput {
 		$this->caseSensitive = $caseSensitive;
 	}
 
-	public function validate() {
-		if($this->value) {
+	public function validates() {
+		if($this->input->getValue()) {
 			if (!$this->caseSensitive) {
-				return (strtolower($this->compareValue) === strtolower($this->value));
-			} else {
-				return ($this->compareValue === $this->value);
+				return (strtolower($this->compareValue) === strtolower($this->input->getValue()));
 			}
+			return ($this->compareValue === $this->input->getValue());
 		}
 		return true;
 	}
 
-	public function getErrorMessage() {
-		return lang('%s is not equal to %s', $this->compareName, $this->name);
+	public function getError() {
+		return lang('%s is not equal to %s', $this->compareName, $this->input->getName());
 	}
 
 }

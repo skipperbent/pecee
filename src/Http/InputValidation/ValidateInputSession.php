@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\Input\Validation;
+namespace Pecee\Http\InputValidation;
 
 use Pecee\Session\Session;
 
@@ -11,12 +11,12 @@ class ValidateInputSession extends ValidateInput {
 		$this->sessionName = $sessionName;
 	}
 
-	public function validate() {
+	public function validates() {
 		return ((bool)Session::getInstance()->exists($this->sessionName));
 	}
 
-	public function getErrorMessage() {
-		return lang('%s does not exist', $this->name);
+	public function getError() {
+		return lang('%s does not exist', $this->input->getName());
 	}
 
 }
