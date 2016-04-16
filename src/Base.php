@@ -35,6 +35,11 @@ abstract class Base {
 
     protected function validate(array $validation) {
         foreach($validation as $key => $validations) {
+
+            if(!is_array($validations)) {
+                $validations = array($validations);
+            }
+
             $this->validations[$key] = $validations;
         }
     }
@@ -112,6 +117,7 @@ abstract class Base {
         $messages = array();
 
         if($this->_messages->get($type) !== null) {
+            /* @var $message FormMessage */
             foreach ($this->_messages->get($type) as $message) {
 
                 if (($placement === null || $message->getPlacement() === $placement)) {

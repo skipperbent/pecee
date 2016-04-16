@@ -3,9 +3,7 @@ namespace Pecee\UI;
 
 use Pecee\Debug;
 use Pecee\UI\Html\Html;
-use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
-use Pecee\UI\Html\HtmlScript;
 
 class Site {
 
@@ -90,27 +88,27 @@ class Site {
 	}
 
 	public function addWrappedJs($filename, $section = self::SECTION_DEFAULT) {
-		if(!in_array($filename, $this->jsFilesWrapped)) {
-			$this->jsFilesWrapped[$section][] = $filename;
+		if(!in_array(urlencode($filename), $this->jsFilesWrapped)) {
+			$this->jsFilesWrapped[$section][] = urlencode($filename);
 		}
 	}
 
 	public function addWrappedCss($filename, $section = self::SECTION_DEFAULT) {
-		if(!in_array($filename, $this->cssFilesWrapped)) {
-			$this->cssFilesWrapped[$section][] = $filename;
+		if(!in_array(urlencode($filename), $this->cssFilesWrapped)) {
+			$this->cssFilesWrapped[$section][] = urlencode($filename);
 		}
 	}
 
 	public function removeWrappedJs($filename, $section = self::SECTION_DEFAULT) {
-		if(in_array($filename, $this->jsFilesWrapped)) {
-			$key = array_search($filename, $this->jsFilesWrapped);
+		if(in_array(urlencode($filename), $this->jsFilesWrapped)) {
+			$key = array_search(urlencode($filename), $this->jsFilesWrapped);
 			unset($this->jsFilesWrapped[$section][$key]);
 		}
 	}
 
 	public function removeWrappedCss($filename, $section = self::SECTION_DEFAULT) {
-		if(in_array($filename, $this->cssFilesWrapped)) {
-			$key = array_search($filename, $this->cssFilesWrapped);
+		if(in_array(urlencode($filename), $this->cssFilesWrapped)) {
+			$key = array_search(urlencode($filename), $this->cssFilesWrapped);
 			unset($this->cssFilesWrapped[$section][$key]);
 		}
 	}
@@ -124,17 +122,14 @@ class Site {
 	}
 
 	public function addCss($path, $section = self::SECTION_DEFAULT) {
-		$type = ($this->getDocType() === self::DOCTYPE_HTML_5) ? null : 'text/css';
-		$css = new HtmlLink($path, 'stylesheet', $type);
-		if(!in_array($css, $this->css)) {
-			$this->css[$section][] = $css;
+		if(!in_array($path, $this->css)) {
+			$this->css[$section][] = $path;
 		}
 	}
 
 	public function addJs($path, $section = self::SECTION_DEFAULT) {
-		$js = new HtmlScript($path);
-		if(!in_array($js, $this->js)) {
-			$this->js[$section][] = $js;
+		if(!in_array($path, $this->js)) {
+			$this->js[$section][] = $path;
 		}
 	}
 
@@ -172,7 +167,7 @@ class Site {
 	}
 
 	public function addMeta($name, $content) {
-		$meta=new HtmlMeta($content);
+		$meta = new HtmlMeta($content);
 		$meta->addAttribute('name', $name);
 		return $this->addHeader($meta);
 	}

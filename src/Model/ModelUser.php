@@ -231,28 +231,14 @@ class ModelUser extends ModelData {
         return $this->where('username', '=', $username);
     }
 
-    public function filterKeyValue($key, $value) {
+    public function filterKeyValue($key, $value, $like = false) {
         $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $hasJoin = false;
-        $statements = $this->getQuery()->getStatements();
+        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', (($like) ? 'LIKE' : '='), (string)$value);
 
-        if(isset($statements['joins'])) {
-            foreach ($this->getQuery()->getStatements()['joins'] as $joins) {
-                if ($joins['table'] === $userDataClass->getTable()) {
-                    $hasJoin = true;
-                    break;
-                }
-            }
-        }
-
-        if(!$hasJoin) {
-            $this->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary());
-        }
-
-        return $this->where($userDataClass->getTable() . '.' . 'key', '=', $key)->where($userDataClass->getTable() . '.' . 'value', '=', $value);
+        return $this->where($this->primary, '=', $this->subQuery($subQuery));
     }
 
     public static function getByUsername($username) {

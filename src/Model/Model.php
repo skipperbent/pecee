@@ -132,7 +132,7 @@ abstract class Model implements \IteratorAggregate {
         }
 
         if($this->exists()) {
-            $this->instance()->where($this->primary, '=', $this->{$this->primary})->update($data);
+            $this->update($data);
         } else {
             $this->{$this->primary} = $this->instance()->getQuery()->insert($data);
         }
@@ -183,10 +183,10 @@ abstract class Model implements \IteratorAggregate {
 
     /**
      * Get rows
-     * @return array|null
+     * @return array
      */
     public function getRows() {
-        return ($this->hasRows()) ? $this->results['rows'] : null;
+        return (isset($this->results['rows'])) ? $this->results['rows'] : array();
     }
 
     public function setResults($results) {
@@ -303,7 +303,7 @@ abstract class Model implements \IteratorAggregate {
      * @since 5.0.0
      */
     public function getIterator() {
-        return new \ArrayIterator(($this->hasRows()) ? $this->getRows() : array());
+        return new \ArrayIterator($this->getRows());
     }
 
 }
