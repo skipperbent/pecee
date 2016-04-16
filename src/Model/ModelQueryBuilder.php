@@ -27,13 +27,14 @@ class ModelQueryBuilder {
 
         $model = get_class($this->model);
 
+        /* @var $model Model */
         $model = new $model();
 
         foreach($item as $key => $value) {
             $model->{$key} = $value;
         }
 
-        $model->onInstanceCreate($item);
+        $model->onInstanceCreate();
 
         return $model;
     }
@@ -134,6 +135,7 @@ class ModelQueryBuilder {
         $collection = (array)$this->query->get();
 
         $class = get_class($this->model);
+        /* @var $model Model */
         $model = new $class();
 
         $models = array();
@@ -288,8 +290,8 @@ class ModelQueryBuilder {
         return $this->query->raw($value, $bindings);
     }
 
-    public function subQuery(QueryBuilderHandler $queryBuilder, $alias = null) {
-        $this->query->subQuery($queryBuilder, $alias);
+    public function subQuery(Model $model, $alias = null) {
+        return $this->query->subQuery($model->getQuery(), $alias);
     }
 
     /**
