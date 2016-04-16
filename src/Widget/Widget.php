@@ -110,7 +110,8 @@ abstract class Widget extends Base  {
         }
 
         foreach($this->_site->getCss($section) as $c) {
-            $o .= $c;
+            $type = ($this->getSite()->getDocType() === Site::DOCTYPE_HTML_5) ? null : 'text/css';
+            $o .= new HtmlLink($c, 'stylesheet', $type);
         }
         return $o;
     }
@@ -130,7 +131,7 @@ abstract class Widget extends Base  {
         }
 
         foreach($this->_site->getJs($section) as $j) {
-            $o .= $j;
+            $o .= new HtmlScript($j);
         }
         return $o;
     }
