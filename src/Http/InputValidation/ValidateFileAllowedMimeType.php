@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Http\InputValidation;
 
+use Pecee\Http\Input\InputFile;
+
 class ValidateFileAllowedMimeType extends ValidateFile {
 
 	protected $mimeTypes;
@@ -10,6 +12,11 @@ class ValidateFileAllowedMimeType extends ValidateFile {
 	}
 
 	public function validates() {
+
+		if(!($this->input instanceof InputFile)) {
+			return true;
+		}
+
 		return (in_array(strtolower($this->input->getType()), $this->mimeTypes));
 	}
 
