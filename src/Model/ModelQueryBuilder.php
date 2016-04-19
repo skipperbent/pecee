@@ -29,7 +29,7 @@ class ModelQueryBuilder {
 
         /* @var $model Model */
         $model = new $model();
-        $model->setRows((array)$item);
+        $model->mergeRows((array)$item);
         $model->onInstanceCreate();
 
         return $model;
@@ -229,7 +229,7 @@ class ModelQueryBuilder {
 
         if($id) {
 
-            $this->model->setRows($data);
+            $this->model->mergeRows($data);
             $this->model->{$this->model->getPrimary()} = $id;
             return $this->model;
         }

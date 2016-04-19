@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Http\InputValidation;
 
+use Pecee\Http\Input\InputFile;
 use Pecee\Integer;
 
 class ValidateFileMinSize extends ValidateFile {
@@ -15,6 +16,11 @@ class ValidateFileMinSize extends ValidateFile {
 	}
 
 	public function validates() {
+
+		if(!($this->input instanceof InputFile)) {
+			return true;
+		}
+		
 		return (($this->size*1024) >= $this->input->getSize());
 	}
 

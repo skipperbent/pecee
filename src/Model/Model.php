@@ -93,6 +93,8 @@ abstract class Model implements \IteratorAggregate {
                 });
         }
 
+        $this->queryable->select([ $this->table . '.*' ]);
+
         $this->results = array();
     }
 
@@ -153,7 +155,14 @@ abstract class Model implements \IteratorAggregate {
             return false;
         }
 
-        return ($this->instance()->where($this->primary, '=', $this->{$this->primary})->count() > 0);
+        $id = $this->instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
+
+        if($id !== null) {
+            $this->{$this->primary} = $id->{$this->primary};
+            return true;
+        }
+
+        return false;
     }
 
     public function isCollection() {
@@ -179,6 +188,10 @@ abstract class Model implements \IteratorAggregate {
 
     public function setRows(array $rows) {
         $this->results['rows'] = $rows;
+    }
+
+    public function mergeRows(array $rows) {
+        $this->results['rows'] = array_merge($this->results['rows'], $rows);
     }
 
     /**
