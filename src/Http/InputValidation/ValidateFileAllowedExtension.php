@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Http\InputValidation;
 
+use Pecee\Http\Input\InputFile;
 use Pecee\IO\File;
 
 class ValidateFileAllowedExtension extends ValidateFile {
@@ -12,8 +13,12 @@ class ValidateFileAllowedExtension extends ValidateFile {
 	}
 
 	public function validates() {
-		$ext = File::getExtension($this->input->getName());
-		return (in_array($ext, $this->extensions));
+
+		if(!($this->input instanceof InputFile)) {
+			return true;
+		}
+
+		return (in_array(File::getExtension($this->input->getName()), $this->extensions));
 	}
 
 	public function getError() {
