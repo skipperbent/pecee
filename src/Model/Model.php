@@ -93,8 +93,6 @@ abstract class Model implements \IteratorAggregate {
                 });
         }
 
-        $this->queryable->select([ $this->table . '.*' ]);
-
         $this->results = array();
     }
 
