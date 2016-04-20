@@ -213,7 +213,7 @@ class ModelQueryBuilder {
         // Remove primary key
         unset($data[$this->model->getPrimary()]);
 
-        $this->query->where($this->model->getPrimary(), '=', $this->model->{$this->model->getPrimary()})->update($data);
+        $this->model->instance()->getQuery()->where($this->model->getPrimary(), '=', $this->model->{$this->model->getPrimary()})->update($data);
         return $this->model;
     }
 
