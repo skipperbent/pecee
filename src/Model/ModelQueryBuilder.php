@@ -155,7 +155,7 @@ class ModelQueryBuilder {
         return null;
     }
 
-    public function findOrfail($id) {
+    public function findOrFail($id) {
         $item = $this->find($id);
         if($item === null) {
             throw new ModelNotFoundException('Item was not found');
@@ -241,8 +241,9 @@ class ModelQueryBuilder {
         $item = $this->first();
         if($item === null) {
             $item = $this->createInstance((object)$data);
-            $item->save();
         }
+        $item->mergeRows($data);
+        $item->save();
         return $item;
     }
 
