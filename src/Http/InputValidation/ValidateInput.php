@@ -35,4 +35,11 @@ abstract class ValidateInput {
 		$this->input = $input;
 	}
 
+	/**
+	 * @return InputItem
+	 */
+	public function getInput() {
+		return $this->input;
+	}
+
 }
