@@ -41,7 +41,7 @@ class ModelUser extends ModelData {
     }
 
     public function save() {
-        $user = $this->filterUsername($this->username)->first();
+        $user = $this->filterDeleted(false)->filterUsername($this->username)->first();
         if($user != null && $user->id != $this->id) {
             throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
         }
@@ -229,6 +229,10 @@ class ModelUser extends ModelData {
 
     public function filterUsername($username) {
         return $this->where('username', '=', $username);
+    }
+
+    public function filterPassword($password) {
+        return $this->where('password', '=', md5($password));
     }
 
     public function filterKeyValue($key, $value, $like = false) {
