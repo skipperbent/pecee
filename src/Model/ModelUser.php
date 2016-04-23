@@ -250,10 +250,10 @@ class ModelUser extends ModelData {
         static::onLoginStart($username, $password, $remember);
 
         /* @var $user ModelUser */
-        $user = static::where('username', '=', $username)->first();
+        $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
 
         if($user === null) {
-            throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
+            throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
         }
 
         // Incorrect user login.
