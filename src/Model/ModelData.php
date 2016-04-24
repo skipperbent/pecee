@@ -7,6 +7,9 @@ abstract class ModelData extends Model {
 
 	public $data;
 
+	protected $dataKeyField = 'key';
+	protected $dataValueField = 'value';
+
 	public function __construct() {
 		parent::__construct();
 		$this->data = new CollectionItem();
@@ -26,7 +29,7 @@ abstract class ModelData extends Model {
 
 			$cf = array();
 			foreach($currentFields as $field) {
-				$cf[strtolower($field->key)] = $field;
+				$cf[strtolower($field->{$this->dataKeyField})] = $field;
 			}
 
 			if(count($this->data->getData())) {
@@ -42,8 +45,8 @@ abstract class ModelData extends Model {
 							unset($cf[$key]);
 							continue;
 						} else {
-							$cf[$key]->value = $value;
-							$cf[$key]->key = $key;
+							$cf[$key]->{$this->dataKeyField} = $key;
+                            $cf[$key]->{$this->dataValueField} = $value;
 							$cf[$key]->save();
 							unset($cf[$key]);
 						}
@@ -69,7 +72,7 @@ abstract class ModelData extends Model {
 		$data = $this->fetchData();
 		if($data->hasRows()) {
 			foreach($data->getRows() as $d) {
-				$this->data->{$d->key} = $d->value;
+				$this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
 			}
 		}
 	}
