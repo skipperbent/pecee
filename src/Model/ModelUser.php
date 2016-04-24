@@ -41,68 +41,29 @@ class ModelUser extends ModelData {
     }
 
     public function save() {
-        $user = $this->filterDeleted(false)->filterUsername($this->username)->first();
+        $user = $this->filterUsername($this->username)->first();
         if($user != null && $user->id != $this->id) {
             throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
         }
         parent::save();
     }
 
-    public function updateData() {
+    protected function getDataClass() {
+        return static::getUserDataClass();
+    }
 
-        if($this->data !== null) {
-
-            $userDataClass = static::getUserDataClass();
-            $currentFields = $userDataClass::getByIdentifier($this->id);
-
-            $cf = array();
-            foreach($currentFields as $field) {
-                $cf[strtolower($field->key)] = $field;
-            }
-
-            if(count($this->data->getData())) {
-
-                foreach($this->data->getData() as $key => $value) {
-
-                    if($value === null) {
-                        continue;
-                    }
-
-                    if(isset($cf[strtolower($key)])) {
-                        if($cf[$key]->value === $value) {
-                            unset($cf[$key]);
-                            continue;
-                        } else {
-                            $cf[$key]->value = $value;
-                            $cf[$key]->key = $key;
-                            $cf[$key]->save();
-                            unset($cf[$key]);
-                        }
-                    } else {
-                        /* @var $field UserData */
-                        $field = new $userDataClass();
-                        $field->{$userDataClass::USER_IDENTIFIER_KEY} = $this->id;
-                        $field->key = $key;
-                        $field->value = $value;
-                        $field->save();
-                    }
-                }
-            }
-
-            foreach($cf as $field) {
-                $field->delete();
-            }
-        }
+    protected function createNewDataItem($key, $value) {
+        $data = static::getDataClass();
+        $data = new $data();
+        $data->{$data::USER_IDENTIFIER_KEY} = $this->id;
+        $data->key = $key;
+        $data->value = $value;
+        return $data;
     }
 
     protected function fetchData() {
         $class = static::getUserDataClass();
-        $data = $class::getByIdentifier($this->id);
-        if($data->hasRows()) {
-            foreach($data->getRows() as $d) {
-                $this->setDataValue($d->key, $d->value);
-            }
-        }
+        return $class::getByIdentifier($this->id);
     }
 
     public function delete() {
