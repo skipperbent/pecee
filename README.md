@@ -13,6 +13,13 @@ The framework is inspired by many other frameworks in both syntax and design. We
 
 Pecee is not a framework that gives you everything out of the box. For example; though there is functionality to handle users-logins, resets etc - you still have to manually implement it in your site. Also; we're a big believer in composer - so instead of inventing the deep plate twice; use the dependencies you like for templating; file-management etc.
 
+# Overview
+
+- Test
+ - Test
+- Test
+ - Test
+
 ## Demo project
 
 Demo project available here: https://github.com/skipperbent/pecee-project
