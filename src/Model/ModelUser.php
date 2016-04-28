@@ -52,13 +52,9 @@ class ModelUser extends ModelData {
         return static::getUserDataClass();
     }
 
-    protected function createNewDataItem($key, $value) {
-        $data = static::getDataClass();
-        $data = new $data();
+    protected function onNewDataItemCreate(UserData $data) {
         $data->{$data::USER_IDENTIFIER_KEY} = $this->id;
-        $data->key = $key;
-        $data->value = $value;
-        return $data;
+        parent::onNewDataItemCreate($data);
     }
 
     protected function fetchData() {

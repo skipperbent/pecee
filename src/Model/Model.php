@@ -93,7 +93,7 @@ abstract class Model implements \IteratorAggregate {
                 });
         }
 
-        $this->results = array();
+        $this->results = array('rows' => array());
     }
 
     public function newQuery($table = null) {

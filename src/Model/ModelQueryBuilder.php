@@ -203,7 +203,7 @@ class ModelQueryBuilder {
         return $out;
     }
 
-    public function update(array $data) {
+    public function update(array $data = array()) {
         $data = $this->getValidData($data);
 
         if(count($data) === 0) {
@@ -217,7 +217,7 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
-    public function create(array $data) {
+    public function create(array $data = array()) {
 
         $data = array_merge($this->model->getRows(), $this->getValidData($data));
 
