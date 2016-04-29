@@ -52,13 +52,9 @@ class ModelUser extends ModelData {
         return static::getUserDataClass();
     }
 
-    protected function createNewDataItem($key, $value) {
-        $data = static::getDataClass();
-        $data = new $data();
+    protected function onNewDataItemCreate(Model &$data) {
         $data->{$data::USER_IDENTIFIER_KEY} = $this->id;
-        $data->key = $key;
-        $data->value = $value;
-        return $data;
+        parent::onNewDataItemCreate($data);
     }
 
     protected function fetchData() {
@@ -98,8 +94,8 @@ class ModelUser extends ModelData {
     }
 
     protected function signIn($cookieExp){
-        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSalt());
-        $ticket = Mcrypt::encrypt(join('|',$user), static::getSalt());
+        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSecret());
+        $ticket = Mcrypt::encrypt(join('|', $user), static::getSecret());
         Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
     }
 
@@ -122,9 +118,9 @@ class ModelUser extends ModelData {
     public static function getFromCookie($setData = false) {
         $ticket = Cookie::get(static::COOKIE_NAME);
         if(trim($ticket) !== ''){
-            $ticket = Mcrypt::decrypt($ticket, static::getSalt());
+            $ticket = Mcrypt::decrypt($ticket, static::getSecret());
             $user = explode('|', $ticket);
-            if (is_array($user) && trim(end($user)) === static::getSalt()) {
+            if (is_array($user) && trim(end($user)) === static::getSecret()) {
                 if ($setData) {
                     static::$instance = static::find($user[0]);
                     return static::$instance;
@@ -159,7 +155,7 @@ class ModelUser extends ModelData {
         return static::$instance;
     }
 
-    public static function getSalt() {
+    public static function getSecret() {
         return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 

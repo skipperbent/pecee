@@ -12,9 +12,9 @@ class ValidateInputCaptcha extends ValidateInput {
 	}
 
 	public function validates() {
-		$result = (Session::getInstance()->exists($this->captchaName) && strtolower($this->input->getValue()) == strtolower(Session::getInstance()->get($this->captchaName)));
+		$result = (Session::exists($this->captchaName) && strtolower($this->input->getValue()) == strtolower(Session::get($this->captchaName)));
 		if($result) {
-			Session::getInstance()->destroy($this->captchaName);
+			Session::destroy($this->captchaName);
 		}
 		return $result;
 	}

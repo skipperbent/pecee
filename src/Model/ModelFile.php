@@ -67,8 +67,9 @@ class ModelFile extends ModelData {
         return FileData::class;
     }
 
-    protected function createNewDataItem($key, $value) {
-        return new FileData($this->id, $key, $value);
+    protected function onNewDataItemCreate(Model &$field) {
+        $field->file_id = $this->id;
+	    parent::onNewDataItemCreate($field);
     }
 
 	protected function fetchData() {

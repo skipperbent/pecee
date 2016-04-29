@@ -59,7 +59,7 @@ class FormCaptcha {
 	}
 
 	public function showCaptcha() {
-		Session::getInstance()->set($this->name, $this->identifier);
+		Session::set($this->name, $this->identifier);
 
 		if($this->backgroundImage) {
 			$image = imagecreatefromjpeg($this->backgroundImage);
@@ -119,7 +119,7 @@ class FormCaptcha {
 	}
 
 	public function __toString() {
-		Session::getInstance()->set($this->name . '_data', $this);
+		Session::set($this->name . '_data', $this);
 		return $this->image->__toString();
 	}
 

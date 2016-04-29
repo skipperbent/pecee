@@ -203,7 +203,7 @@ class ModelQueryBuilder {
         return $out;
     }
 
-    public function update(array $data) {
+    public function update(array $data = array()) {
         $data = $this->getValidData($data);
 
         if(count($data) === 0) {
@@ -217,7 +217,7 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
-    public function create(array $data) {
+    public function create(array $data = array()) {
 
         $data = array_merge($this->model->getRows(), $this->getValidData($data));
 
@@ -237,7 +237,7 @@ class ModelQueryBuilder {
         return false;
     }
 
-    public function firstOrCreate(array $data) {
+    public function firstOrCreate(array $data = array()) {
         $item = $this->first();
         if($item === null) {
             $item = $this->createInstance((object)$data);
@@ -247,7 +247,7 @@ class ModelQueryBuilder {
         return $item;
     }
 
-    public function firstOrNew(array $data) {
+    public function firstOrNew(array $data = array()) {
         $item = $this->first();
         if($item === null) {
             return $this->createInstance((object)$data);
