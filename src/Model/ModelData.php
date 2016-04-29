@@ -5,90 +5,103 @@ use Pecee\Collection\CollectionItem;
 
 abstract class ModelData extends Model {
 
-	public $data;
+    public $data;
 
-	public function __construct() {
-		parent::__construct();
-		$this->data = new CollectionItem();
-	}
+    protected $dataKeyField = 'key';
+    protected $dataValueField = 'value';
 
-	abstract protected function getDataClass();
+    public function __construct() {
+        parent::__construct();
+        $this->data = new CollectionItem();
+    }
 
-	abstract protected function createNewDataItem($key, $value);
+    abstract protected function getDataClass();
 
-	abstract protected function fetchData();
+    abstract protected function fetchData();
 
-	protected function updateData() {
+    protected function onNewDataItemCreate(Model &$field) {
+        $field->save();
+    }
 
-		if($this->data !== null) {
+    protected function updateData() {
 
-			$currentFields = $this->fetchData();
+        if($this->data !== null) {
 
-			$cf = array();
-			foreach($currentFields as $field) {
-				$cf[strtolower($field->key)] = $field;
-			}
+            $currentFields = $this->fetchData();
 
-			if(count($this->data->getData())) {
+            if($currentFields === null) {
+                return;
+            }
 
-				foreach($this->data->getData() as $key => $value) {
+            $cf = array();
+            foreach($currentFields as $field) {
+                $cf[strtolower($field->{$this->dataKeyField})] = $field;
+            }
 
-					if($value === null) {
-						continue;
-					}
+            if(count($this->data->getData())) {
 
-					if(isset($cf[strtolower($key)])) {
-						if($cf[$key]->value === $value) {
-							unset($cf[$key]);
-							continue;
-						} else {
-							$cf[$key]->value = $value;
-							$cf[$key]->key = $key;
-							$cf[$key]->save();
-							unset($cf[$key]);
-						}
-					} else {
-						$field = $this->createNewDataItem($key, $value);
-						$field->save();
-					}
-				}
-			}
+                foreach($this->data->getData() as $key => $value) {
 
-			foreach($cf as $field) {
-				$field->delete();
-			}
-		}
-	}
+                    if($value === null) {
+                        continue;
+                    }
 
-	public function save() {
-		parent::save();
-		$this->updateData();
-	}
+                    if(isset($cf[strtolower($key)])) {
+                        if($cf[$key]->value === $value) {
+                            unset($cf[$key]);
+                            continue;
+                        } else {
+                            $cf[$key]->{$this->dataKeyField} = $key;
+                            $cf[$key]->{$this->dataValueField} = $value;
+                            $cf[$key]->save();
+                            unset($cf[$key]);
+                        }
+                    } else {
+                        $field = $this->getDataClass();
+                        $field = new $field();
+                        $field->{$this->dataKeyField} = $key;
+                        $field->{$this->dataValueField} = $value;
 
-	public function onInstanceCreate() {
-		$data = $this->fetchData();
-		if($data->hasRows()) {
-			foreach($data->getRows() as $d) {
-				$this->data->{$d->key} = $d->value;
-			}
-		}
-	}
+                        $this->onNewDataItemCreate($field);
+                    }
+                }
+            }
 
-	public function setData(array $data) {
-		$keys = array_map('strtolower', array_keys($this->getRows()));
-		foreach($data as $key => $d) {
-			if(!in_array(strtolower($key), $keys)) {
-				$this->data->$key = $d;
-			}
-		}
-	}
+            foreach($cf as $field) {
+                $field->delete();
+            }
+        }
+    }
 
-	public function toArray() {
-		$output = parent::toArray();
-		if(is_array($output)) {
-			return array_merge($this->data->getData(), $output);
-		}
-		return $output;
-	}
+    public function save() {
+        parent::save();
+        $this->updateData();
+    }
+
+    public function onInstanceCreate() {
+        $data = $this->fetchData();
+        if(count($data)) {
+            foreach($data as $d) {
+                $this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
+            }
+        }
+    }
+
+    public function setData(array $data) {
+        $keys = array_map('strtolower', array_keys($this->getRows()));
+        foreach($data as $key => $d) {
+            if(!in_array(strtolower($key), $keys)) {
+                $this->data->$key = $d;
+            }
+        }
+    }
+
+    public function toArray() {
+        $output = parent::toArray();
+        if(is_array($output)) {
+            return array_merge($this->data->getData(), $output);
+        }
+        return $output;
+    }
 
 }

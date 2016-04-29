@@ -12,7 +12,7 @@ class ValidateInputSession extends ValidateInput {
 	}
 
 	public function validates() {
-		return ((bool)Session::getInstance()->exists($this->sessionName));
+		return ((bool)Session::exists($this->sessionName));
 	}
 
 	public function getError() {
