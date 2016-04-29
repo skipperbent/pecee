@@ -67,7 +67,7 @@ class ModelFile extends ModelData {
         return FileData::class;
     }
 
-    protected function onNewDataItemCreate(FieldData &$field) {
+    protected function onNewDataItemCreate(Model &$field) {
         $field->file_id = $this->id;
 	    parent::onNewDataItemCreate($field);
     }

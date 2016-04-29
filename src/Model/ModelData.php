@@ -19,7 +19,7 @@ abstract class ModelData extends Model {
 
     abstract protected function fetchData();
 
-    protected function onNewDataItemCreate(Model $field) {
+    protected function onNewDataItemCreate(Model &$field) {
         $field->save();
     }
 

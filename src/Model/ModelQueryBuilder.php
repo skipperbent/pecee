@@ -237,7 +237,7 @@ class ModelQueryBuilder {
         return false;
     }
 
-    public function firstOrCreate(array $data) {
+    public function firstOrCreate(array $data = array()) {
         $item = $this->first();
         if($item === null) {
             $item = $this->createInstance((object)$data);
@@ -247,7 +247,7 @@ class ModelQueryBuilder {
         return $item;
     }
 
-    public function firstOrNew(array $data) {
+    public function firstOrNew(array $data = array()) {
         $item = $this->first();
         if($item === null) {
             return $this->createInstance((object)$data);
