@@ -5,8 +5,11 @@ use Pecee\Mcrypt;
 
 class Session {
 
-	public function __construct() {
-		session_start();
+	public static function start() {
+		if(!static::isActive()) {
+			session_name('pecee_session');
+			session_start();
+		}
 	}
 
 	public static function getSecret() {

@@ -4,6 +4,7 @@ namespace Pecee;
 use Pecee\Exception\RouterException;
 use Pecee\Handler\ExceptionHandler;
 use Pecee\Http\Middleware\IMiddleware;
+use Pecee\Session\Session;
 use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
 use Pecee\UI\Site;
@@ -16,6 +17,8 @@ class Router extends SimpleRouter {
     public static function start($defaultNamespace = null) {
 
         Debug::getInstance()->add('Router initialised.');
+
+        Session::start();
 
         // Load framework specific controllers
         static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
