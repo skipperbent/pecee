@@ -93,7 +93,7 @@ abstract class Model implements \IteratorAggregate {
                 });
         }
 
-        $this->results = array();
+        $this->results = array('rows' => array());
     }
 
     public function newQuery($table = null) {
@@ -132,7 +132,7 @@ abstract class Model implements \IteratorAggregate {
         }
 
         if($this->exists()) {
-            $this->instance()->where($this->primary, '=', $this->{$this->primary})->update($data);
+            $this->update($data);
         } else {
             $this->{$this->primary} = $this->instance()->getQuery()->insert($data);
         }
@@ -153,7 +153,14 @@ abstract class Model implements \IteratorAggregate {
             return false;
         }
 
-        return ($this->instance()->where($this->primary, '=', $this->{$this->primary})->count() > 0);
+        $id = $this->instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
+
+        if($id !== null) {
+            $this->{$this->primary} = $id->{$this->primary};
+            return true;
+        }
+
+        return false;
     }
 
     public function isCollection() {
@@ -181,12 +188,16 @@ abstract class Model implements \IteratorAggregate {
         $this->results['rows'] = $rows;
     }
 
+    public function mergeRows(array $rows) {
+        $this->results['rows'] = array_merge($this->results['rows'], $rows);
+    }
+
     /**
      * Get rows
-     * @return array|null
+     * @return array
      */
     public function getRows() {
-        return ($this->hasRows()) ? $this->results['rows'] : null;
+        return (isset($this->results['rows'])) ? $this->results['rows'] : array();
     }
 
     public function setResults($results) {
@@ -303,7 +314,7 @@ abstract class Model implements \IteratorAggregate {
      * @since 5.0.0
      */
     public function getIterator() {
-        return new \ArrayIterator(($this->hasRows()) ? $this->getRows() : array());
+        return new \ArrayIterator($this->getRows());
     }
 
 }

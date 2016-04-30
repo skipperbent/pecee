@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\Input\Validation;
+namespace Pecee\Http\InputValidation;
 
 class ValidateRegex extends ValidateInput {
 
@@ -11,11 +11,11 @@ class ValidateRegex extends ValidateInput {
         $this->errorMessage = $errorMessage;
     }
 
-    public function validate() {
-        return (preg_match($this->regex, $this->value) !== 0);
+    public function validates() {
+        return (preg_match($this->regex, $this->input->getValue()) !== 0);
     }
 
-    public function getErrorMessage() {
+    public function getError() {
         return $this->errorMessage;
     }
 

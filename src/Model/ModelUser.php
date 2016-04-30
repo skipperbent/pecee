@@ -48,61 +48,18 @@ class ModelUser extends ModelData {
         parent::save();
     }
 
-    public function updateData() {
+    protected function getDataClass() {
+        return static::getUserDataClass();
+    }
 
-        if($this->data !== null) {
-
-            $userDataClass = static::getUserDataClass();
-            $currentFields = $userDataClass::getByIdentifier($this->id);
-
-            $cf = array();
-            foreach($currentFields as $field) {
-                $cf[strtolower($field->key)] = $field;
-            }
-
-            if(count($this->data->getData())) {
-
-                foreach($this->data->getData() as $key => $value) {
-
-                    if($value === null) {
-                        continue;
-                    }
-
-                    if(isset($cf[strtolower($key)])) {
-                        if($cf[$key]->value === $value) {
-                            unset($cf[$key]);
-                            continue;
-                        } else {
-                            $cf[$key]->value = $value;
-                            $cf[$key]->key = $key;
-                            $cf[$key]->save();
-                            unset($cf[$key]);
-                        }
-                    } else {
-                        /* @var $field UserData */
-                        $field = new $userDataClass();
-                        $field->{$userDataClass::USER_IDENTIFIER_KEY} = $this->id;
-                        $field->key = $key;
-                        $field->value = $value;
-                        $field->save();
-                    }
-                }
-            }
-
-            foreach($cf as $field) {
-                $field->delete();
-            }
-        }
+    protected function onNewDataItemCreate(Model &$data) {
+        $data->{$data::USER_IDENTIFIER_KEY} = $this->id;
+        parent::onNewDataItemCreate($data);
     }
 
     protected function fetchData() {
         $class = static::getUserDataClass();
-        $data = $class::getByIdentifier($this->id);
-        if($data->hasRows()) {
-            foreach($data->getRows() as $d) {
-                $this->setDataValue($d->key, $d->value);
-            }
-        }
+        return $class::getByIdentifier($this->id);
     }
 
     public function delete() {
@@ -137,8 +94,8 @@ class ModelUser extends ModelData {
     }
 
     protected function signIn($cookieExp){
-        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSalt());
-        $ticket = Mcrypt::encrypt(join('|',$user), static::getSalt());
+        $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSecret());
+        $ticket = Mcrypt::encrypt(join('|', $user), static::getSecret());
         Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
     }
 
@@ -161,9 +118,9 @@ class ModelUser extends ModelData {
     public static function getFromCookie($setData = false) {
         $ticket = Cookie::get(static::COOKIE_NAME);
         if(trim($ticket) !== ''){
-            $ticket = Mcrypt::decrypt($ticket, static::getSalt());
+            $ticket = Mcrypt::decrypt($ticket, static::getSecret());
             $user = explode('|', $ticket);
-            if (is_array($user) && trim(end($user)) === static::getSalt()) {
+            if (is_array($user) && trim(end($user)) === static::getSecret()) {
                 if ($setData) {
                     static::$instance = static::find($user[0]);
                     return static::$instance;
@@ -198,7 +155,7 @@ class ModelUser extends ModelData {
         return static::$instance;
     }
 
-    public static function getSalt() {
+    public static function getSecret() {
         return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 
@@ -231,14 +188,18 @@ class ModelUser extends ModelData {
         return $this->where('username', '=', $username);
     }
 
-    public function filterKeyValue($key, $value) {
+    public function filterPassword($password) {
+        return $this->where('password', '=', md5($password));
+    }
+
+    public function filterKeyValue($key, $value, $like = false) {
         $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        return $this->join($userDataClass->getTable(), $userDataClassName::USER_IDENTIFIER_KEY, '=', $this->getTable() . '.' . $this->getPrimary())
-            ->where($userDataClass->getTable() . '.' . 'key', $key)
-            ->where($userDataClass->getTable() . '.' . 'value', $value);
+        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', (($like) ? 'LIKE' : '='), (string)$value);
+
+        return $this->where($this->primary, '=', $this->subQuery($subQuery));
     }
 
     public static function getByUsername($username) {
@@ -250,10 +211,10 @@ class ModelUser extends ModelData {
         static::onLoginStart($username, $password, $remember);
 
         /* @var $user ModelUser */
-        $user = static::where('username', '=', $username)->first();
+        $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
 
         if($user === null) {
-            throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
+            throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
         }
 
         // Incorrect user login.

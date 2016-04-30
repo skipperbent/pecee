@@ -31,7 +31,7 @@ abstract class FileAbstract extends Controller {
 
     public function wrap() {
 
-        $this->files = $_GET['files'];
+        $this->files = urldecode(input()->get('files'));
 
         // Set time limit
         set_time_limit(60);

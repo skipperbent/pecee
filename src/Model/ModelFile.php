@@ -63,24 +63,17 @@ class ModelFile extends ModelData {
 		$this->created_date = $datetime;
 	}
 
-	public function updateData() {
-		if($this->data) {
-			/* Remove all fields */
-			FileData::destroyByFileId($this->id);
-			foreach($this->data->getData() as $key => $value) {
-				$data = new FileData($this->id, $key, $value);
-				$data->save();
-			}
-		}
-	}
+    protected function getDataClass() {
+        return FileData::class;
+    }
+
+    protected function onNewDataItemCreate(Model &$field) {
+        $field->file_id = $this->id;
+	    parent::onNewDataItemCreate($field);
+    }
 
 	protected function fetchData() {
-		$data = FileData::getByIdentifier($this->id);
-		if($data->hasRows()) {
-			foreach($data->getRows() as $d) {
-				$this->setDataValue($d->key, $d->value);
-			}
-		}
+		return FileData::getByIdentifier($this->id);
 	}
 
 	public function getFullPath() {

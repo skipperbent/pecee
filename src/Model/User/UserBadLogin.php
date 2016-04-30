@@ -38,7 +38,7 @@ class UserBadLogin extends Model {
 
         $track = static::where('username', '=', trim($username))
             ->where('active', '=', '1')
-            ->select(['*', static::getQuery()->raw('COUNT(ip) as request_count')])
+            ->select([self::instance()->getTable() . '.*', static::getQuery()->raw('COUNT(ip) as request_count')])
             ->groupBy('ip')
             ->orderBy('created_date', 'DESC')
             ->first();

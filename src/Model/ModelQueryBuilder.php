@@ -27,13 +27,10 @@ class ModelQueryBuilder {
 
         $model = get_class($this->model);
 
+        /* @var $model Model */
         $model = new $model();
-
-        foreach($item as $key => $value) {
-            $model->{$key} = $value;
-        }
-
-        $model->onInstanceCreate($item);
+        $model->mergeRows((array)$item);
+        $model->onInstanceCreate();
 
         return $model;
     }
@@ -82,7 +79,7 @@ class ModelQueryBuilder {
     }
 
     public function whereNotNull($key) {
-        $this->query->orWhereNotNull($key);
+        $this->query->whereNotNull($key);
         return $this->model;
     }
 
@@ -134,6 +131,7 @@ class ModelQueryBuilder {
         $collection = (array)$this->query->get();
 
         $class = get_class($this->model);
+        /* @var $model Model */
         $model = new $class();
 
         $models = array();
@@ -157,7 +155,7 @@ class ModelQueryBuilder {
         return null;
     }
 
-    public function findOrfail($id) {
+    public function findOrFail($id) {
         $item = $this->find($id);
         if($item === null) {
             throw new ModelNotFoundException('Item was not found');
@@ -205,7 +203,7 @@ class ModelQueryBuilder {
         return $out;
     }
 
-    public function update(array $data) {
+    public function update(array $data = array()) {
         $data = $this->getValidData($data);
 
         if(count($data) === 0) {
@@ -215,16 +213,13 @@ class ModelQueryBuilder {
         // Remove primary key
         unset($data[$this->model->getPrimary()]);
 
-        $this->query->update($data);
+        $this->model->instance()->getQuery()->where($this->model->getPrimary(), '=', $this->model->{$this->model->getPrimary()})->update($data);
         return $this->model;
     }
 
-    public function create(array $data) {
-        $data = $this->getValidData($data);
+    public function create(array $data = array()) {
 
-        if(!isset($data[$this->model->getPrimary()])) {
-            throw new ModelException('Primary identifier not defined.');
-        }
+        $data = array_merge($this->model->getRows(), $this->getValidData($data));
 
         if(count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
@@ -234,7 +229,7 @@ class ModelQueryBuilder {
 
         if($id) {
 
-            $this->model->setRows($data);
+            $this->model->mergeRows($data);
             $this->model->{$this->model->getPrimary()} = $id;
             return $this->model;
         }
@@ -242,16 +237,17 @@ class ModelQueryBuilder {
         return false;
     }
 
-    public function firstOrCreate(array $data) {
+    public function firstOrCreate(array $data = array()) {
         $item = $this->first();
         if($item === null) {
             $item = $this->createInstance((object)$data);
-            $item->save();
         }
+        $item->mergeRows($data);
+        $item->save();
         return $item;
     }
 
-    public function firstOrNew(array $data) {
+    public function firstOrNew(array $data = array()) {
         $item = $this->first();
         if($item === null) {
             return $this->createInstance((object)$data);
@@ -288,8 +284,8 @@ class ModelQueryBuilder {
         return $this->query->raw($value, $bindings);
     }
 
-    public function subQuery(QueryBuilderHandler $queryBuilder, $alias = null) {
-        $this->query->subQuery($queryBuilder, $alias);
+    public function subQuery(Model $model, $alias = null) {
+        return $this->query->subQuery($model->getQuery(), $alias);
     }
 
     /**

@@ -1,7 +1,10 @@
 <?php
 namespace Pecee;
 
+use Pecee\Exception\RouterException;
 use Pecee\Handler\ExceptionHandler;
+use Pecee\Http\Middleware\IMiddleware;
+use Pecee\Session\Session;
 use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
 use Pecee\UI\Site;
@@ -9,10 +12,13 @@ use Pecee\UI\Site;
 class Router extends SimpleRouter {
 
     protected static $defaultExceptionHandler;
+    protected static $defaultMiddlewares = array();
 
     public static function start($defaultNamespace = null) {
 
         Debug::getInstance()->add('Router initialised.');
+
+        Session::start();
 
         // Load framework specific controllers
         static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
@@ -33,14 +39,26 @@ class Router extends SimpleRouter {
 
         // Handle exceptions
         try {
+
+            if(count(static::$defaultMiddlewares)) {
+                /* @var $middleware \Pecee\Http\Middleware\IMiddleware */
+                foreach(static::$defaultMiddlewares as $middleware) {
+                    $middleware = new $middleware();
+                    if(!($middleware instanceof IMiddleware)) {
+                        throw new RouterException('Middleware must be implement the IMiddleware interface.');
+                    }
+                    $middleware->handle(RouterBase::getInstance()->getRequest());
+                }
+            }
+
             parent::start($defaultNamespace);
         } catch(\Exception $e) {
 
             $route = RouterBase::getInstance()->getLoadedRoute();
 
             // Otherwise use the fallback default exceptions handler
-            if(self::$defaultExceptionHandler !== null) {
-                self::loadExceptionHandler(self::$defaultExceptionHandler, $route, $e);
+            if(static::$defaultExceptionHandler !== null) {
+                static::loadExceptionHandler(static::$defaultExceptionHandler, $route, $e);
             }
 
             throw $e;
@@ -64,6 +82,18 @@ class Router extends SimpleRouter {
 
     public static function defaultExceptionHandler($handler) {
         static::$defaultExceptionHandler = $handler;
+    }
+
+    /**
+     * Add default middleware that will be loaded before any route
+     * @param string|array $middlewares
+     */
+    public static function defaultMiddleware($middlewares) {
+        if(is_array($middlewares)) {
+            static::$defaultMiddlewares = $middlewares;
+        } else {
+            static::$defaultMiddlewares[] = $middlewares;
+        }
     }
 
 }

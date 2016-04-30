@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\Input\Validation;
+namespace Pecee\Http\InputValidation;
 
 use Carbon\Carbon;
 
@@ -11,13 +11,13 @@ class ValidateInputDate extends ValidateInput {
 		$this->format = $format;
 	}
 
-	public function validate() {
+	public function validates() {
 
 		try {
 			if($this->format === null) {
-				Carbon::parse($this->value, 'UTC');
+				Carbon::parse($this->input->getValue(), 'UTC');
 			} else {
-				Carbon::createFromFormat($this->format, $this->value, 'UTC');
+				Carbon::createFromFormat($this->format, $this->input->getValue(), 'UTC');
 			}
 		} catch(\Exception $e) {
 			return false;
@@ -26,8 +26,8 @@ class ValidateInputDate extends ValidateInput {
 		return true;
 	}
 
-	public function getErrorMessage() {
-		return lang('%s is not a valid date', $this->name);
+	public function getError() {
+		return lang('%s is not a valid date', $this->input->getName());
 	}
 
 }

@@ -56,16 +56,16 @@
         },
         {
             "name": "pecee/simple-router",
-            "version": "1.7.2.1",
+            "version": "1.7.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skipperbent/simple-php-router.git",
-                "reference": "11bd5a7d11016e3e9697636915a214ea33c8ae52"
+                "reference": "18a9df56ca59ece21bb6543c721d9705105b9c32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/11bd5a7d11016e3e9697636915a214ea33c8ae52",
-                "reference": "11bd5a7d11016e3e9697636915a214ea33c8ae52",
+                "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/18a9df56ca59ece21bb6543c721d9705105b9c32",
+                "reference": "18a9df56ca59ece21bb6543c721d9705105b9c32",
                 "shasum": ""
             },
             "require": {
@@ -97,7 +97,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2016-04-09 13:39:12"
+            "time": "2016-04-20 06:10:18"
         },
         {
             "name": "robmorgan/phinx",
@@ -500,12 +500,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/usmanhalalit/pixie.git",
-                "reference": "5820ef4f62c7be697767fd84830b7ad6fc057375"
+                "reference": "35378d7acff314bf20fbd3dfa8006b1a036ffc02"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/usmanhalalit/pixie/zipball/5820ef4f62c7be697767fd84830b7ad6fc057375",
-                "reference": "5820ef4f62c7be697767fd84830b7ad6fc057375",
+                "url": "https://api.github.com/repos/usmanhalalit/pixie/zipball/35378d7acff314bf20fbd3dfa8006b1a036ffc02",
+                "reference": "35378d7acff314bf20fbd3dfa8006b1a036ffc02",
                 "shasum": ""
             },
             "require": {
@@ -548,7 +548,7 @@
                 "sql",
                 "sqlite"
             ],
-            "time": "2016-04-08 10:58:01"
+            "time": "2016-04-12 11:50:49"
         },
         {
             "name": "usmanhalalit/viocon",

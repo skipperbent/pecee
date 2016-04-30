@@ -25,11 +25,11 @@ class SessionMessage {
 	}
 
 	protected function parseMessages() {
-		$this->messages= Session::getInstance()->get(self::KEY);
+		$this->messages= Session::get(self::KEY);
 	}
 
 	protected function saveMessages() {
-		Session::getInstance()->set(self::KEY, $this->messages);
+		Session::set(self::KEY, $this->messages);
 	}
 
 	public function set(FormMessage $message, $type = null) {
@@ -75,7 +75,7 @@ class SessionMessage {
 			unset($this->messages[$type]);
 			$this->saveMessages();
 		} else {
-			Session::getInstance()->destroy(self::KEY);
+			Session::destroy(self::KEY);
 		}
 	}
 }
