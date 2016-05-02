@@ -244,15 +244,11 @@ abstract class Model implements \IteratorAggregate {
         if($rows && is_array($rows)) {
             foreach($rows as $key => $row){
                 $key = (isset($this->rename[$key])) ? $this->rename[$key] : $key;
-                if($row instanceof self) {
-                    $rows[$key] = $row->toArray();
-                } else {
-                    if(in_array($key, $this->hidden)) {
-                        unset($rows[$key]);
-                        continue;
-                    }
-                    $rows[$key] = $this->parseArrayData($row);
+                if(in_array($key, $this->hidden)) {
+                    unset($rows[$key]);
+                    continue;
                 }
+                $rows[$key] = $this->parseArrayData($row);
             }
         }
 
@@ -269,8 +265,7 @@ abstract class Model implements \IteratorAggregate {
             return $rows;
         }
 
-        $arr = $rows;
-        return $arr;
+        return $rows;
     }
 
     public function getColumns() {
