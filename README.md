@@ -2,7 +2,7 @@
 
 **Fast, lightweight, open source MVC PHP framework based on Microsoft MVVM.**
 
-***THIS DOCUMENTATION IS UNDER CONSTRUCTION***
+***THIS DOCUMENTATION IS UNDER CONSTRUCTION.***
 
 #### What it is and was its not
 
