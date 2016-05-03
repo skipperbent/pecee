@@ -40,7 +40,7 @@ class Form {
      * @return \Pecee\UI\Html\HtmlInput
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true) {
-        if($saveValue && (is_null($value) && input()->get($name) || request()->getMethod() !== 'get')) {
+        if($saveValue && (is_null($value) && input()->exists($name) || request()->getMethod() !== 'get')) {
             $value = input()->get($name);
         }
         return new HtmlInput($name, $type, $value);
@@ -127,13 +127,13 @@ class Form {
                 if(count($arr)) {
                     foreach($data->getData() as $i) {
                         $val = (!isset($i['value'])) ? $i['name'] : $i['value'];
-                        $selected = ($saveValue && input()->get($name) == $val  || input()->get($name) == $val || !input()->get($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
+                        $selected = (input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                         $element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
                     }
                 }
             } elseif(is_array($data)) {
                 foreach($data as $val => $key) {
-                    $selected = ($saveValue && input()->get($name) == $val  || input()->get($name) == $val || !input()->get($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
+                    $selected = (input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
                     $element->addOption(new HtmlSelectOption($key, $val, $selected));
                 }
             } else {
