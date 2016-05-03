@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Collection;
 
-class Collection implements \IteratorAggregate {
+class Collection implements \IteratorAggregate, \Countable {
 
     protected $rows = array();
 
@@ -29,12 +29,12 @@ class Collection implements \IteratorAggregate {
         return (count($this->rows));
     }
 
-    public function add(CollectionItem $item) {
+    public function add($item) {
         $this->rows[] = $item;
     }
 
-    public function get($index) {
-        return $this->exist($index) ? $this->rows[$index] : null;
+    public function get($index, $defaultValue = null) {
+        return $this->exist($index) ? $this->rows[$index] : $defaultValue;
     }
 
     public function exist($index) {
@@ -60,6 +60,10 @@ class Collection implements \IteratorAggregate {
      */
     public function getIterator() {
         return new \ArrayIterator($this->rows);
+    }
+
+    public function count() {
+        return count($this->getRows());
     }
 
 }
