@@ -35,6 +35,12 @@ class ModelQueryBuilder {
         return $model;
     }
 
+    protected function createCollection(array $items) {
+        $collection = new ModelCollection($items);
+        $collection->setType(static::class);
+        return $collection;
+    }
+
     public function limit($limit) {
         $this->query->limit($limit);
         return $this->model;
@@ -128,23 +134,18 @@ class ModelQueryBuilder {
     }
 
     public function all() {
-        $collection = (array)$this->query->get();
+        $items = (array)$this->query->get();
 
-        $class = get_class($this->model);
         /* @var $model Model */
-        $model = new $class();
-
         $models = array();
 
-        if(count($collection)) {
-            foreach($collection as $item) {
+        if(count($items)) {
+            foreach($items as $item) {
                 $models[] = $this->createInstance($item);
             }
         }
 
-        $model->setResults(array('rows' => $models, 'collection' => true));
-
-        return $model;
+        return $this->createCollection($models);
     }
 
     public function find($id) {
