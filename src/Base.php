@@ -2,12 +2,14 @@
 namespace Pecee;
 
 use Pecee\Http\Input\InputItem;
+use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Site;
 
 abstract class Base {
 
+    protected $_inputSessionKey = 'InputValues';
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_messages;
@@ -20,6 +22,25 @@ abstract class Base {
 
         $this->_site = Site::getInstance();
         $this->_messages = SessionMessage::getInstance();
+
+        $this->setInputValues();
+    }
+
+    protected function setInputValues() {
+        if(Session::exists($this->_inputSessionKey)) {
+            $values = Session::get($this->_inputSessionKey);
+
+            foreach($values as $key => $value) {
+                $item = input()->getObject($key, new InputItem($key))->setValue($value);
+                if(request()->getMethod() === 'post') {
+                    input()->post->$key = $item;
+                } else {
+                    input()->get->$key = $item;
+                }
+            }
+
+            Session::destroy($this->_inputSessionKey);
+        }
     }
 
     public function setInputName(array $names) {
@@ -31,6 +52,22 @@ abstract class Base {
                 $item->setName($name);
             }
         }
+    }
+
+    public function saveInputValues(array $keys = null) {
+
+        if($keys === null) {
+            $keys = array_keys(input()->all());
+        }
+
+        $values = [];
+        foreach($keys as $key) {
+            if(input()->get($key) !== null) {
+                $values[$key] = input()->get($key);
+            }
+        }
+
+        Session::set($this->_inputSessionKey, $values);
     }
 
     protected function validate(array $validation) {
