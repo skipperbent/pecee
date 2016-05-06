@@ -105,12 +105,10 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function onInstanceCreate() {
-        if($this->isCollection() === false) {
-            if (count($this->join)) {
-                foreach ($this->join as $join) {
-                    $method = Str::camelize($join);
-                    $this->{$join} = $this->$method();
-                }
+        if (count($this->join)) {
+            foreach ($this->join as $join) {
+                $method = Str::camelize($join);
+                $this->{$join} = $this->$method();
             }
         }
     }
@@ -163,12 +161,8 @@ abstract class Model implements \IteratorAggregate {
         return false;
     }
 
-    public function isCollection() {
-        return (isset($this->results['collection']) && $this->results['collection'] === true);
-    }
-
     public function hasRows() {
-        return ($this->isCollection() && isset($this->results['rows']) && count($this->results['rows']) > 0);
+        return (isset($this->results['rows']) && count($this->results['rows']) > 0);
     }
 
     /**
