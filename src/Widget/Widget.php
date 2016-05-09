@@ -175,7 +175,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require '../views/snippet/' . $file;
+        require '../views/snippets/' . $file;
     }
 
     /**
