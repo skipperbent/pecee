@@ -143,7 +143,11 @@ abstract class Model implements \IteratorAggregate {
             throw new ModelException('Columns property not defined.');
         }
 
-        $this->queryable->where($this->primary, '=', $this->{$this->primary})->getQuery()->delete();
+        if($this->{$this->primary} != null) {
+            $this->queryable->where($this->primary, '=', $this->{$this->primary});
+        }
+
+        $this->getQuery()->delete();
     }
 
     public function exists() {
