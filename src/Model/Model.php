@@ -299,6 +299,10 @@ abstract class Model implements \IteratorAggregate {
         return null;
     }
 
+    public function __clone() {
+        $this->queryable = clone $this->queryable;
+    }
+
     /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
