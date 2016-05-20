@@ -316,4 +316,8 @@ class ModelQueryBuilder {
         return $this->query;
     }
 
+    public function __clone() {
+        $this->query = clone $this->query;
+    }
+
 }
