@@ -16,7 +16,7 @@ abstract class Widget extends Base  {
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
-    protected $form;
+    protected $_form;
 
     public function __construct() {
 
@@ -27,7 +27,7 @@ abstract class Widget extends Base  {
         $this->setContentTemplate($this->getTemplatePath());
         $this->jsWrapRoute = url('pecee.js.wrap');
         $this->cssWrapRoute = url('pecee.css.wrap');
-        $this->form = new Form();
+        $this->_form = new Form();
     }
 
     /**
@@ -40,13 +40,13 @@ abstract class Widget extends Base  {
         return '../views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
-    public function showMessages($type, $form = null, $placement = null) {
+    public function showMessages($type, $placement = null) {
         $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
-        if($this->hasMessages($type, $form, $placement)) {
+        if($this->hasMessages($type, $placement)) {
             $o = sprintf('<div class="alert alert-%s">', $type);
             $msg = array();
             /* @var $error \Pecee\UI\Form\FormMessage */
-            foreach($this->getMessages($type, $form, $placement) as $error) {
+            foreach($this->getMessages($type, $placement) as $error) {
                 $msg[] = sprintf('%s', $error->getMessage());
             }
 
@@ -165,7 +165,7 @@ abstract class Widget extends Base  {
      * @return Form
      */
     public function form() {
-        return $this->form;
+        return $this->_form;
     }
 
     /**
