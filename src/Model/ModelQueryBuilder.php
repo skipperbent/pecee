@@ -64,7 +64,7 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
-    public function whereIn($key, array $values) {
+    public function whereIn($key, $values) {
         $this->query->whereIn($key, $values);
         return $this->model;
     }
@@ -74,7 +74,7 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
-    public function whereNotIn($key, array $values) {
+    public function whereNotIn($key, $values) {
         $this->query->whereNotIn($key, $values);
         return $this->model;
     }
@@ -99,12 +99,12 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
-    public function orWhereIn($key, array $values) {
+    public function orWhereIn($key, $values) {
         $this->query->orWhereIn($key, $values);
         return $this->model;
     }
 
-    public function orWhereNotIn($key, array $values) {
+    public function orWhereNotIn($key, $values) {
         $this->query->orWhereNotIn($key, $values);
         return $this->model;
     }
@@ -267,7 +267,7 @@ class ModelQueryBuilder {
         return $this->model;
     }
 
-    public function select(array $fields) {
+    public function select($fields) {
         $this->query->select($fields);
         return $this->model;
     }
