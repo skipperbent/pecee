@@ -19,7 +19,7 @@
         "vlucas/phpdotenv": "2.*",
         "robmorgan/phinx": "^0.5.3",
         "nesbot/carbon": "1.*",
-        "usmanhalalit/pixie": "2.*@dev"
+        "usmanhalalit/pixie": "2.x@dev"
     },
     "require-dev": {
 
