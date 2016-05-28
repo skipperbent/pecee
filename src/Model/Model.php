@@ -132,7 +132,11 @@ abstract class Model implements \IteratorAggregate {
         if($this->exists()) {
             $this->update($data);
         } else {
-            $this->{$this->primary} = $this->instance()->getQuery()->insert($data);
+            if($this->{$this->primary} === null) {
+                $this->{$this->primary} = $this->instance()->getQuery()->insert($data);
+            } else {
+                $this->instance()->getQuery()->insert($data);
+            }
         }
 
         return $this;
