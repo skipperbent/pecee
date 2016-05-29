@@ -41,7 +41,7 @@ class ModelUser extends ModelData {
     }
 
     public function save() {
-        $user = $this->filterUsername($this->username)->first();
+        $user = $this->instance()->filterUsername($this->username)->first();
         if($user != null && $user->id != $this->id) {
             throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
         }
