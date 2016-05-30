@@ -88,11 +88,21 @@ abstract class Base {
 
             /* @var $validation \Pecee\Http\InputValidation\ValidateInput */
             foreach($validations as $validation) {
-                $validation->setInput($input);
 
-                if(!$validation->validates()) {
-                    $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
+                if(is_array($input)) {
+                    foreach($input as $i) {
+                        $validation->setInput($i);
+                        if(!$validation->validates()) {
+                            $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $i->getIndex());
+                        }
+                    }
+                } else {
+                    $validation->setInput($input);
+                    if(!$validation->validates()) {
+                        $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
+                    }
                 }
+
             }
 
         }
