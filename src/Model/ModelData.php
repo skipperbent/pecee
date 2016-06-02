@@ -73,8 +73,8 @@ abstract class ModelData extends Model {
         }
     }
 
-    public function save() {
-        parent::save();
+    public function save(array $data = null) {
+        parent::save($data);
         $this->updateData();
     }
 

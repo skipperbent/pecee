@@ -31,9 +31,9 @@ class UserReset extends Model {
         $this->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->delete();
     }
 
-    public function save() {
+    public function save(array $data = null) {
         $this->clean();
-        parent::save();
+        parent::save($data);
     }
 
     public static function getByKey($key) {
