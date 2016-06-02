@@ -36,7 +36,7 @@ class UserBadLogin extends Model {
 
 	public static function checkBadLogin($username) {
 
-        $track = static::where('username', '=', trim($username))
+        $track = static::instance()->where('username', '=', trim($username))
             ->where('active', '=', '1')
             ->select([self::instance()->getTable() . '.*', static::getQuery()->raw('COUNT(ip) as request_count')])
             ->groupBy('ip')
@@ -54,7 +54,7 @@ class UserBadLogin extends Model {
 	}
 
 	public static function reset($username) {
-        static::where('username', '=', $username)->update([
+        static::instance()->where('username', '=', $username)->update([
             'active' => 0
         ]);
 	}

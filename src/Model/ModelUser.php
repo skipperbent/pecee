@@ -40,12 +40,12 @@ class ModelUser extends ModelData {
         $this->created_date = Carbon::now()->toDateTimeString();
     }
 
-    public function save() {
+    public function save(array $data = null) {
         $user = $this->instance()->filterUsername($this->username)->first();
         if($user != null && $user->id != $this->id) {
             throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
         }
-        parent::save();
+        parent::save($data);
     }
 
     protected function getDataClass() {
