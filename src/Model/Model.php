@@ -78,7 +78,7 @@ abstract class Model implements \IteratorAggregate {
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 
-        $this->queryable = $this->newQuery();
+        $this->queryable = new ModelQueryBuilder($this, $this->table);
 
         if(env('DEBUG')) {
 
@@ -97,7 +97,9 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function newQuery($table = null) {
-        return new ModelQueryBuilder($this, (($table === null) ? $this->table : $table));
+        $model = $this->instance();
+        $model->setQuery(new ModelQueryBuilder($this, $table));
+        return $model;
     }
 
     public static function instance() {
@@ -325,6 +327,10 @@ abstract class Model implements \IteratorAggregate {
      */
     public function getIterator() {
         return new \ArrayIterator($this->getRows());
+    }
+
+    public function setQuery(ModelQueryBuilder $query) {
+        $this->queryable = $query;
     }
 
 }
