@@ -116,21 +116,30 @@ abstract class Model implements \IteratorAggregate {
     /**
      * Save item
      * @see Pecee\Model\Model::save()
+     * @param array|null $data
      * @return static
      * @throws ModelException
      */
-    public function save() {
+    public function save(array $data = null) {
         if(!is_array($this->columns)) {
             throw new ModelException('Columns property not defined.');
         }
 
-        $data = array();
-        foreach($this->columns as $key) {
-            $data[$key] = $this->{$key};
+        if($data === null) {
+            $data = array();
+            foreach ($this->columns as $key) {
+                $data[$key] = $this->{$key};
+            }
         }
 
         if($this->exists()) {
-            $this->update($data);
+
+            if(isset($data[$this->getPrimary()])) {
+                // Remove primary key
+                unset($data[$this->getPrimary()]);
+            }
+
+            $this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($data);
         } else {
             if($this->{$this->primary} === null) {
                 $this->{$this->primary} = $this->instance()->getQuery()->insert($data);

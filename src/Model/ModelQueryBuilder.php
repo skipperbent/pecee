@@ -205,22 +205,12 @@ class ModelQueryBuilder {
     }
 
     public function update(array $data = array()) {
-        $data = $this->getValidData($data);
 
         if(count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
         }
 
-        // Only update if not a collection
-        if($this->model->{$this->model->getPrimary()} !== null) {
-
-            // Remove primary key
-            unset($data[$this->model->getPrimary()]);
-
-            $this->model->getQuery()->where($this->model->getPrimary(), '=', $this->model->{$this->model->getPrimary()});
-        }
-
-        $this->model->getQuery()->update($data);
+        $this->query->update($data);
         return $this->model;
     }
 
