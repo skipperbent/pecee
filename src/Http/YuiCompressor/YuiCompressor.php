@@ -114,9 +114,9 @@ class YuiCompressor {
                 $output = array();
                 exec($this->getCmd($item->options, $item->type, $tmpFile), $output);
                 unlink($tmpFile);
-                $item->minified = $output[0];
+                $item->minified = (isset($output[0]) ? $output[0] : '');
                 $item->sizeKB = round(strlen($item->content)/1024, 2);
-                $item->minifiedKB = $item->sizeKB - round(strlen($output[0])/1024, 2);
+                $item->minifiedKB = $item->sizeKB - round(strlen($item->minified)/1024, 2);
                 $item->minifiedRatio = round(($item->minifiedKB / $item->sizeKB) * 100);
             }
         }
