@@ -140,7 +140,7 @@ class Column {
     }
 
     public function increment() {
-        $this->setIncrement(true);
+        $this->primary()->setIncrement(true);
         return $this;
     }
 
