@@ -127,12 +127,12 @@ abstract class Model implements \IteratorAggregate {
             throw new ModelException('Columns property not defined.');
         }
 
-        if($data === null) {
-            $data = array();
-            foreach ($this->columns as $key) {
-                $data[$key] = $this->{$key};
-            }
+        $tmp = array();
+        foreach ($this->columns as $key) {
+            $tmp[$key] = $this->{$key};
         }
+
+        $data = array_merge($tmp, $data);
 
         if($this->exists()) {
 
