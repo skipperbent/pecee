@@ -132,7 +132,11 @@ abstract class Model implements \IteratorAggregate {
             $tmp[$key] = $this->{$key};
         }
 
-        $data = array_merge($tmp, $data);
+        if($data !== null) {
+            $data = array_merge($tmp, $data);
+        } else {
+            $data = $tmp;
+        }
 
         if($this->exists()) {
 
