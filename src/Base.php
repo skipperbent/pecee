@@ -54,17 +54,10 @@ abstract class Base {
         }
     }
 
-    public function saveInputValues(array $keys = null) {
+    public function saveInputValues(array $values = null) {
 
-        if($keys === null) {
-            $keys = array_keys(input()->all());
-        }
-
-        $values = [];
-        foreach($keys as $key) {
-            if(input()->get($key) !== null) {
-                $values[$key] = input()->get($key);
-            }
+        if($values === null) {
+            $values = input()->all();
         }
 
         Session::set($this->_inputSessionKey, $values);
