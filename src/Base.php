@@ -91,12 +91,18 @@ abstract class Base {
 
                 if(is_array($input)) {
                     foreach($input as $i) {
+                        if($validation === '') {
+                            continue;
+                        }
                         $validation->setInput($i);
                         if(!$validation->validates()) {
                             $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $i->getIndex());
                         }
                     }
                 } else {
+                    if($validation === '') {
+                        continue;
+                    }
                     $validation->setInput($input);
                     if(!$validation->validates()) {
                         $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
