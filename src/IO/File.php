@@ -70,7 +70,7 @@ class File {
 		if($ext == '') {
 			$ext = substr($path, strrpos('.', $path));
 		}
-		return $ext;
+		return strtolower($ext);
 	}
 
 	public static function move($source, $destination) {
