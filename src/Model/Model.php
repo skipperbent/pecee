@@ -277,7 +277,7 @@ abstract class Model implements \IteratorAggregate {
                 }
                 $output = call_user_func([$this, $method]);
                 $with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
-                $rows[$with] = ($output instanceof self) ? $output->toArray() : $output;
+                $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
             }
             return $rows;
         }
