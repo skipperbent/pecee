@@ -197,8 +197,9 @@ abstract class Base {
         $this->_messages->set($msg, $type);
     }
 
-    public function hasErrors() {
-        return $this->hasMessages($this->errorType);
+    public function hasErrors($placement = null, $errorType = null) {
+        $errorType = ($errorType === null) ? $this->errorType : $errorType;
+        return $this->hasMessages($errorType, $placement);
     }
 
     /**
@@ -212,10 +213,13 @@ abstract class Base {
 
     /**
      * Get error messages
+     * @param string|null $placement
+     * @param string|null $errorType
      * @return array
      */
-    public function getErrors() {
-        return $this->getMessages($this->errorType);
+    public function getErrors($placement = null, $errorType = null) {
+        $errorType = ($errorType === null) ? $this->errorType : $errorType;
+        return $this->getMessages($errorType, $placement);
     }
 
     public function getErrorsArray($placement = null) {
