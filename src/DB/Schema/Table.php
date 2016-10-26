@@ -129,13 +129,27 @@ class Table {
         if(!$this->exists()) {
             $query = array();
 
-            /* @var $column DBColumn */
+            /* @var $column Column */
             foreach ($this->columns as $column) {
                 $query[] = $column->getQuery();
             }
 
-            $sql = sprintf('CREATE TABLE `' . $this->name . '` (%s) ENGINE = ' . $this->engine . ';', join(', ', $query));
+            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(', ', $query), $this->engine);
             Pdo::getInstance()->nonQuery($sql);
+        }
+    }
+
+    public function alter() {
+        if($this->exists()) {
+
+            /* @var $column Column */
+            foreach ($this->columns as $column) {
+                Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` CHANGE `%s` %s', $this->name, $column->getName(), $column->getQuery(false)));
+
+                if($column->getKeyRelationsQuery() !== '') {
+                    Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` ADD %s', $this->name, $column->getKeyRelationsQuery()));
+                }
+            }
         }
     }
 
