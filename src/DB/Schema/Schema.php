@@ -14,4 +14,10 @@ class Schema {
         $table->drop();
     }
 
+    public function modify($name, $callback) {
+        $table = new Table($name);
+        $callback($table);
+        $table->alter();
+    }
+
 }

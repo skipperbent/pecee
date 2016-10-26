@@ -63,14 +63,16 @@ abstract class Base {
         Session::set($this->_inputSessionKey, $values);
     }
 
-    protected function validate(array $validation) {
-        foreach($validation as $key => $validations) {
+    protected function validate(array $validation = null) {
+        if($validation !== null) {
+            foreach ($validation as $key => $validations) {
 
-            if(!is_array($validations)) {
-                $validations = array($validations);
+                if (!is_array($validations)) {
+                    $validations = array($validations);
+                }
+
+                $this->validations[$key] = $validations;
             }
-
-            $this->validations[$key] = $validations;
         }
     }
 
