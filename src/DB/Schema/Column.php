@@ -260,7 +260,7 @@ class Column {
         Pdo::getInstance()->nonQuery($query);
     }
 
-    public function getQuery() {
+    public function getQuery($includeRelations = true) {
         $length = '';
         if($this->getLength()) {
             $length = '('.$this->getLength().')';
@@ -282,19 +282,39 @@ class Column {
             $query .= ' AUTO_INCREMENT';
         }
 
+        if($includeRelations) {
+
+            if ($this->getIndex()) {
+                $query .= sprintf(', %s (`%s`)', $this->getIndex(), $this->getName());
+            }
+
+            if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
+                $query .= sprintf(', FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
+                    $this->getName(),
+                    $this->getRelationTable(),
+                    $this->getRelationColumn(),
+                    $this->getRelationUpdateType(),
+                    $this->getRelationDeleteType());
+            }
+        }
+
+        return $query;
+    }
+
+    public function getKeyRelationsQuery() {
+        $query = '';
         if ($this->getIndex()) {
-            $query .= sprintf(', %s (`%s`)', $this->getIndex(), $this->getName());
+            $query .= sprintf('%s (`%s`)', $this->getIndex(), $this->getName());
         }
 
         if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
-            $query .= sprintf(', FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
+            $query .= sprintf('CONSTRAINT FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
                 $this->getName(),
                 $this->getRelationTable(),
                 $this->getRelationColumn(),
                 $this->getRelationUpdateType(),
                 $this->getRelationDeleteType());
         }
-
         return $query;
     }
 
