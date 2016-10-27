@@ -21,6 +21,7 @@ class ModelQueryBuilder {
     public function __construct(Model $model, $table) {
         $this->model = $model;
         $this->query = (new QueryBuilderHandler())->table($table);
+        $this->query->addPrefix($table, $table);
     }
 
     protected function createInstance(\stdClass $item) {
@@ -39,6 +40,11 @@ class ModelQueryBuilder {
         $collection = new ModelCollection($items);
         $collection->setType(static::class);
         return $collection;
+    }
+
+    public function prefix($table, $prefix) {
+        $this->query->addPrefix($table, $prefix);
+        return $this->model;
     }
 
     public function limit($limit) {
