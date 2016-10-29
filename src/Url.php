@@ -116,7 +116,7 @@ class Url {
 			$string = str_ireplace($search, $replace, $string);
 		}
 
-		$s = trim(strtolower(preg_replace('/[^A-Za-z0-9 _\-\+\&'.join(' ', $searchMap).']/is','',$string)));
+		$s = trim(strtolower(preg_replace('/[^A-Za-z0-9 _\+\&'.join(' ', $searchMap).']/is','',$string)));
 		$pastChar = '';
 		$newString = '';
 
