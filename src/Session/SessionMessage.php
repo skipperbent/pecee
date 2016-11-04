@@ -49,7 +49,7 @@ class SessionMessage {
 	 * Get messages
 	 * @param string|null $type
 	 * @param string|null $default
-	 * @return \Pecee\UI\Form\FormMessage|null
+	 * @return \Pecee\UI\Form\FormMessage|object
 	 */
 	public function get($type = null, $default = null) {
 		if(!is_null($type)) {

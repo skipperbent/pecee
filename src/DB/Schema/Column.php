@@ -2,6 +2,7 @@
 namespace Pecee\DB\Schema;
 
 use Pecee\DB\Pdo;
+use Pecee\DB\PdoHelper;
 
 class Column {
     protected $table;
