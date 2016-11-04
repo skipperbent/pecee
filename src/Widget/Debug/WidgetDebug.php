@@ -22,6 +22,10 @@ class WidgetDebug extends Widget {
         return $_ENV['framework_path'] . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
+    /**
+     * Render debug
+     * @return string
+     */
     public function render() {
         $this->renderContent();
         $this->renderTemplate();

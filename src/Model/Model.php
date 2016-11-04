@@ -117,7 +117,7 @@ abstract class Model implements \IteratorAggregate {
 
     /**
      * Save item
-     * @see Pecee\Model\Model::save()
+     * @see \Pecee\Model\Model::save()
      * @param array|null $data
      * @return static
      * @throws ModelException
