@@ -21,7 +21,7 @@ class Locale {
 
 	public function __construct() {
 		// Default stuff
-		$this->setTimezone('Europe/Copenhagen');
+		$this->setTimezone('UTC');
 		$this->setLocale('en-gb');
 		$this->setDefaultLocale('en-gb');
 	}
