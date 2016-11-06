@@ -47,7 +47,7 @@ abstract class Model implements IModel, \IteratorAggregate {
 
     /**
      * Save item
-     * @see Pecee\Model\Model::save()
+     * @see \Pecee\Model\Model::save()
      * @return static
      * @throws ModelException
      */
@@ -63,7 +63,14 @@ abstract class Model implements IModel, \IteratorAggregate {
         foreach($this->table->getColumnNames() as $column) {
             if($this->{$column} != null) {
                 $keys[]   = $column;
-                $values[] = $this->{$column};
+
+                $value = $this->{$column};
+
+                if(is_bool($value)) {
+                    $value = ($value) ? 1 : 0;
+                }
+
+                $values[] = $value;
                 $concat[] = '?';
             }
         }
@@ -133,6 +140,10 @@ abstract class Model implements IModel, \IteratorAggregate {
 
                 if(isset($this->results['data']['original'][$name]) && $this->results['data']['original'][$name] == $val) {
                     continue;
+                }
+
+                if(is_bool($val)) {
+                    $val = ($val) ? 1 : 0;
                 }
 
                 $values[] = $val;
