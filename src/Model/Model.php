@@ -48,7 +48,14 @@ abstract class Model implements \IteratorAggregate {
         foreach($this->columns as $column) {
             if($this->{$column} !== null) {
                 $keys[]   = $column;
-                $values[] = $this->{$column};
+
+                $value = $this->{$column};
+
+                if(is_bool($value)) {
+                    $value = ($value) ? 1 : 0;
+                }
+
+                $values[] = $value;
                 $concat[] = '?';
             }
         }
@@ -95,6 +102,12 @@ abstract class Model implements \IteratorAggregate {
 
             if(isset($this->results['data']['original'][$name]) && $this->results['data']['original'][$name] == $value) {
                 continue;
+            }
+
+            $value = $this->{$column};
+
+            if(is_bool($value)) {
+                $value = ($value) ? 1 : 0;
             }
 
             $values[] = $value;
