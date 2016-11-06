@@ -1,20 +1,20 @@
 <?php
-namespace Pecee\Http\Input;
+namespace Pecee\Http\OInput;
 
 class Input {
 
     /**
-     * @var \Pecee\Http\Input\InputCollection
+     * @var \Pecee\Http\OInput\InputCollection
      */
     public $get;
 
     /**
-     * @var \Pecee\Http\Input\InputCollection
+     * @var \Pecee\Http\OInput\InputCollection
      */
     public $post;
 
     /**
-     * @var \Pecee\Http\Input\InputCollection
+     * @var \Pecee\Http\OInput\InputCollection
      */
     public $file;
 

@@ -1,13 +1,13 @@
 <?php
-namespace Pecee\Http\Input\Validation;
+namespace Pecee\Http\OInput\Validation;
 
-use Pecee\Integer;
+use Pecee\FloatUtil;
 
-class ValidateInputInteger extends ValidateInput {
+class ValidateInputFloat extends ValidateInput {
 
 	public function validate() {
 		if($this->value) {
-			return Integer::isNummeric($this->value);
+			return FloatUtil::isFloat(FloatUtil::parse($this->value));
 		}
 		return true;
 	}

@@ -1,8 +1,8 @@
 <?php
-namespace Pecee\Http\Input;
+namespace Pecee\Http\OInput;
 
 use Pecee\Collection\CollectionItem;
-use Pecee\Http\Input\Validation\IValidateFile;
+use Pecee\Http\OInput\Validation\IValidateFile;
 use Pecee\IO\File;
 
 class InputFile extends CollectionItem implements IInputItem {
@@ -12,7 +12,7 @@ class InputFile extends CollectionItem implements IInputItem {
 
     public function validates() {
         if(count($this->validations)) {
-            /* @var $validation \Pecee\Http\Input\Validation\ValidateInput */
+            /* @var $validation \Pecee\Http\OInput\Validation\ValidateInput */
             foreach($this->validations as $validation) {
                 if(!$validation->validate()) {
                     $this->validationErrors[] = $validation;

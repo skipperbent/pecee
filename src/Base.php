@@ -1,8 +1,8 @@
 <?php
 namespace Pecee;
 
-use Pecee\Http\Input\IInputItem;
-use Pecee\Http\Input\Input;
+use Pecee\Http\OInput\IInputItem;
+use Pecee\Http\OInput\Input;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
 use Pecee\UI\Site;
@@ -36,10 +36,10 @@ abstract class Base {
     protected function validateInput() {
         // Validate inputs
 
-        /* @var $item \Pecee\Http\Input\InputItem */
+        /* @var $item \Pecee\Http\OInput\InputItem */
         foreach($this->get as $item) {
             if($item instanceof IInputItem && !$item->validates()) {
-                /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
+                /* @var $error \Pecee\Http\OInput\Validation\ValidateInput */
                 foreach($item->getValidationErrors() as $error) {
                     $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
                     $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
@@ -51,7 +51,7 @@ abstract class Base {
 
             foreach($this->post as $item) {
                 if($item instanceof IInputItem && !$item->validates()) {
-                    /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
+                    /* @var $error \Pecee\Http\OInput\Validation\ValidateInput */
                     foreach ($item->getValidationErrors() as $error) {
                         $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
                         $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
@@ -61,7 +61,7 @@ abstract class Base {
 
             foreach($this->file as $item) {
                 if($item instanceof IInputItem && !$item->validates()) {
-                    /* @var $error \Pecee\Http\Input\Validation\ValidateInput */
+                    /* @var $error \Pecee\Http\OInput\Validation\ValidateInput */
                     foreach($item->getValidationErrors() as $error) {
                         $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
                         $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
@@ -125,7 +125,7 @@ abstract class Base {
     /**
      * Get post input element
      * @param string $index
-     * @return \Pecee\Http\Input\InputFile|null
+     * @return \Pecee\Http\OInput\InputFile|null
      */
     public function file($index) {
         $element = $this->file->findFirst($index);
