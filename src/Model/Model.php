@@ -61,9 +61,11 @@ abstract class Model implements IModel, \IteratorAggregate {
         $concat = array();
 
         foreach($this->table->getColumnNames() as $column) {
-            $keys[] = $column;
-            $values[] = $this->{$column};
-            $concat[] = '?';
+            if($this->{$column} != null) {
+                $keys[]   = $column;
+                $values[] = $this->{$column};
+                $concat[] = '?';
+            }
         }
 
         $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table->getName(), PdoHelper::joinArray($keys, true), join(',', $concat));
