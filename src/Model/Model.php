@@ -104,8 +104,6 @@ abstract class Model implements \IteratorAggregate {
                 continue;
             }
 
-            $value = $this->{$column};
-
             if(is_bool($value)) {
                 $value = ($value) ? 1 : 0;
             }
