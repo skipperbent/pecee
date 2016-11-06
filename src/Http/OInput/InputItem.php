@@ -1,8 +1,8 @@
 <?php
-namespace Pecee\Http\Input;
+namespace Pecee\Http\OInput;
 
-use Pecee\Http\Input\Validation\IValidateInput;
-use Pecee\Http\Input\Validation\ValidateInput;
+use Pecee\Http\OInput\Validation\IValidateInput;
+use Pecee\Http\OInput\Validation\ValidateInput;
 use Pecee\Str;
 
 class InputItem implements IInputItem {

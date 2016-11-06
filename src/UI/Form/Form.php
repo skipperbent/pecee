@@ -3,7 +3,7 @@ namespace Pecee\UI\Form;
 
 use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
-use Pecee\Http\Input\Input;
+use Pecee\Http\OInput\Input;
 use Pecee\Str;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlCheckbox;
