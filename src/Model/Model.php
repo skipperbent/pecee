@@ -13,7 +13,11 @@ abstract class Model implements \IteratorAggregate {
     protected $results;
 
     protected $primary = 'id';
-    protected $hidden, $with, $rename, $join, $columns = [];
+    protected $hidden = [];
+    protected $with = [];
+    protected $rename = [];
+    protected $join = [];
+    protected $columns = [];
 
     public function __construct() {
         // Set table name if its not already defined
@@ -28,7 +32,7 @@ abstract class Model implements \IteratorAggregate {
 
     /**
      * Save item
-     * @see Pecee\Model\Model::save()
+     * @see \Pecee\Model\Model::save()
      * @return static
      * @throws ModelException
      */
@@ -42,9 +46,11 @@ abstract class Model implements \IteratorAggregate {
         $concat = array();
 
         foreach($this->columns as $column) {
-            $keys[] = $column;
-            $values[] = $this->{$column};
-            $concat[] = '?';
+            if($this->{$column} !== null) {
+                $keys[]   = $column;
+                $values[] = $this->{$column};
+                $concat[] = '?';
+            }
         }
 
         $sql = sprintf('INSERT INTO `%s`(%s) VALUES (%s);', $this->table, PdoHelper::joinArray($keys, true), join(',', $concat));
@@ -127,11 +133,11 @@ abstract class Model implements \IteratorAggregate {
         $sql = PdoHelper::formatQuery($query, $args);
         $query =  Pdo::getInstance()->query($sql);
 
-        $results['data']['numFields'] = $query->columnCount();
-        $results['data']['numRows'] = $query->rowCount();
+        $results['data']['max_fields'] = $query->columnCount();
+        $results['data']['max_rows'] = $query->rowCount();
         $results['query'] = array($sql);
         $results['data']['rows'] = array();
-        if($results['data']['numRows'] > 0) {
+        if($results['data']['max_rows'] > 0) {
             foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                 $obj = static::onCreateModel(new CollectionItem($row));
                 $obj->setRows($row);
@@ -144,12 +150,8 @@ abstract class Model implements \IteratorAggregate {
             $results['query'][] = $countSql;
             $maxRows = Pdo::getInstance()->value($countSql);
             $results['data']['page'] = $page;
-            $results['data']['rowsPerPage'] = $rows;
-            $results['data']['maxRows'] = intval($maxRows);
-        } else {
-            $results['data']['page'] = 0;
-            $results['data']['rowsPerPage'] = null;
-            $results['data']['maxRows'] = intval($results['data']['numRows']);
+            $results['data']['rows_per_page'] = $rows;
+            $results['data']['max_rows'] = intval($maxRows);
         }
 
         $model->setResults($results);
@@ -166,11 +168,11 @@ abstract class Model implements \IteratorAggregate {
         $query =  Pdo::getInstance()->query($sql);
 
         if($query !== null) {
-            $results['data']['numFields'] = $query->columnCount();
-            $results['data']['numRows'] = $query->rowCount();
+            $results['data']['max_fields'] = $query->columnCount();
+            $results['data']['max_rows'] = $query->rowCount();
             $results['query'] = $sql;
             $results['data']['rows'] = array();
-            if($results['data']['numRows'] > 0) {
+            if($results['data']['max_rows'] > 0) {
                 foreach($query->fetchAll(\PDO::FETCH_ASSOC) as $row) {
                     $obj = static::onCreateModel(new CollectionItem($row));
                     $obj->setRows($row);
@@ -218,8 +220,8 @@ abstract class Model implements \IteratorAggregate {
         }
         $model = static::queryCollection($query, null, null, $args);
         $results = $model->getResults();
-        $results['data']['rowsPerPage'] = $rows;
-        $results['data']['hasPrevious'] = ($skip > 0);
+        $results['data']['rows_per_page'] = $rows;
+        $results['data']['has_previous'] = ($skip > 0);
         $model->setResults($results);
         return $model;
     }
@@ -272,7 +274,7 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function isCollection() {
-        return (array_key_exists('rowsPerPage', $this->results['data']));
+        return (array_key_exists('max_rows', $this->results['data']));
     }
 
     protected function parseArrayData($data) {
@@ -295,12 +297,15 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function getArray(){
-        if(!$this->hasRows() && !$this->isCollection()) {
-            return null;
+
+        if(!$this->isCollection()) {
+            if(!$this->hasRow()) {
+                return null;
+            }
         }
 
         $arr = array('rows' => null);
-        $arr = array_merge($arr, (array)$this->results['data']);
+        $arr = array_merge($arr, $this->results['data']);
         $rows = $this->results['data']['rows'];
         if($rows && is_array($rows)) {
             foreach($rows as $key=>$row){
@@ -320,8 +325,10 @@ abstract class Model implements \IteratorAggregate {
                 }
             }
 
-            $arr['hasNext'] = $this->hasNext();
-            $arr['hasPrevious'] = $this->hasPrevious();
+            if($this->isCollection()) {
+                $arr['has_next'] = $this->hasNext();
+                $arr['has_previous'] = $this->hasPrevious();
+            }
         }
 
         if(count($this->getResults()) === 1) {
@@ -337,7 +344,7 @@ abstract class Model implements \IteratorAggregate {
 
                 $with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
 
-                if($output instanceof Model) {
+                if($output instanceof static) {
                     $rows[$with] = $output->getArray();
                 } else {
                     $rows[$with] = $output;
@@ -372,8 +379,8 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function setRows(array $rows) {
-        if(!isset($this->results['data']['numRows'])) {
-            $this->results['data']['numRows'] = count($rows);
+        if(!isset($this->results['data']['max_rows'])) {
+            $this->results['data']['max_rows'] = count($rows);
         }
         $this->results['data']['rows'] = $rows;
         $this->results['data']['original'] = $rows;
@@ -395,11 +402,11 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function getMaxRows() {
-        return isset($this->results['data']['maxRows']) ? $this->results['data']['maxRows'] : 0;
+        return isset($this->results['data']['max_rows']) ? $this->results['data']['max_rows'] : 0;
     }
 
     public function setMaxRows($rows) {
-        $this->results['data']['maxRows'] = $rows;
+        $this->results['data']['max_rows'] = $rows;
     }
 
     public function getMaxPages() {
@@ -411,11 +418,11 @@ abstract class Model implements \IteratorAggregate {
     }
 
     public function getRowsPerPage() {
-        return isset($this->results['data']['rowsPerPage']) ? $this->results['data']['rowsPerPage'] : 0;
+        return isset($this->results['data']['rows_per_page']) ? $this->results['data']['rows_per_page'] : 0;
     }
 
     public function setRowsPerPage($rows) {
-        $this->results['data']['rowsPerPage'] = $rows;
+        $this->results['data']['rows_per_page'] = $rows;
     }
 
     public function getPage() {

@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\Input;
+namespace Pecee\Http\OInput;
 
 use Pecee\Collection\CollectionItem;
 
