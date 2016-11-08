@@ -21,14 +21,14 @@ function url($controller = null, array $parameters = null, array $getParams = nu
  * @return \Pecee\Http\Response
  */
 function response() {
-    return new \Pecee\Http\Response();
+    return \Pecee\Router::response();
 }
 
 /**
  * @return \Pecee\Http\Request
  */
 function request() {
-    return \Pecee\Http\Request::getInstance();
+    return \Pecee\Router::request();
 }
 
 function redirect($url, $code = null) {
