@@ -12,14 +12,14 @@ function url($controller = null, $parameters = null, $getParams = null) {
  * @return \Pecee\Http\Response
  */
 function response() {
-    return new \Pecee\Http\Response();
+    return \Pecee\Router::response();
 }
 
 /**
  * @return \Pecee\Http\Request
  */
 function request() {
-    return \Pecee\Http\Request::getInstance();
+    return \Pecee\Router::request();
 }
 
 function redirect($url, $code = null) {
