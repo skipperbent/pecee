@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "pecee/simple-router": "1.*",
+        "pecee/simple-router": "2.*",
         "vlucas/phpdotenv": "2.*",
         "robmorgan/phinx": "^0.5.3",
         "nesbot/carbon": "1.*",
