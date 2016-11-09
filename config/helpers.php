@@ -32,13 +32,12 @@ function request() {
 }
 
 function redirect($url, $code = null) {
-    $response = new \Pecee\Http\Response();
 
     if($code) {
-        $response->httpCode($code);
+        response()->httpCode($code);
     }
 
-    $response->redirect($url);
+    response()->redirect($url);
 }
 
 function lang($key, $args = null) {
