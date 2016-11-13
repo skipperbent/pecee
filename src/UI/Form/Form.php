@@ -57,7 +57,7 @@ class Form {
     public function radio($name, $value, $saveValue = true) {
         $element = new HtmlInput($name, 'radio', $value);
 
-        if($saveValue && input()->get($name, false) === $value) {
+        if($saveValue && input()->get($name, false) == $value) {
             $element->addAttribute('checked', 'checked');
         }
 
