@@ -16,7 +16,7 @@ abstract class Base {
 
     public function __construct() {
         debug('BASE CLASS ' . static::class);
-        $this->_messages = SessionMessage::getInstance();
+        $this->_messages = new SessionMessage();
         $this->setInputValues();
     }
 

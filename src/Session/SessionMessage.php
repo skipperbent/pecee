@@ -5,27 +5,16 @@ use Pecee\UI\Form\FormMessage;
 
 class SessionMessage {
 
-	protected $session;
-	protected $messages;
-	protected static $instance;
-	const KEY = 'MSG';
+    const KEY = 'MSG';
 
-	/**
-	 * @return SessionMessage
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
+	protected $messages;
 
 	public function __construct() {
 		$this->parseMessages();
 	}
 
 	protected function parseMessages() {
-		$this->messages= Session::get(self::KEY);
+		$this->messages = Session::get(self::KEY);
 	}
 
 	protected function saveMessages() {
