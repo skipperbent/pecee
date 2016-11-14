@@ -10,6 +10,7 @@ class CreateUserBadLoginTable extends Migration {
             $table->column('username')->string(300)->index();
             $table->column('ip')->string(50)->index();
             $table->column('active')->bool()->nullable()->index();
+            $table->column('updated_at')->datetime()->nullable()->index();
             $table->column('created_at')->datetime()->index();
         });
     }
