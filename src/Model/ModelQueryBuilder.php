@@ -3,6 +3,7 @@ namespace Pecee\Model;
 
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
+use Pecee\Str;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelQueryBuilder {
@@ -21,10 +22,6 @@ class ModelQueryBuilder {
     public function __construct(Model $model, $table) {
         $this->model = $model;
         $this->query = (new QueryBuilderHandler())->table($table);
-
-        if(is_string($table)) {
-            $this->query->addPrefix($table, $table);
-        }
     }
 
     protected function createInstance(\stdClass $item) {
@@ -45,8 +42,8 @@ class ModelQueryBuilder {
         return $collection;
     }
 
-    public function prefix($table, $prefix) {
-        $this->query->addPrefix($table, $prefix);
+    public function prefix($prefix) {
+        $this->query->addPrefix($this->model->getTable(), $prefix);
         return $this->model;
     }
 
@@ -168,7 +165,7 @@ class ModelQueryBuilder {
     public function findOrFail($id) {
         $item = $this->find($id);
         if($item === null) {
-            throw new ModelNotFoundException('Item was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
         }
         return $item;
     }
@@ -184,7 +181,7 @@ class ModelQueryBuilder {
     public function firstOrFail() {
         $item = $this->first();
         if($item === null) {
-            throw new ModelNotFoundException('Item was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
         }
         return $item;
     }

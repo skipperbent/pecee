@@ -1,14 +1,14 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
-class ValidateInputNotEquals extends ValidateInput {
+class ValidateNotEqual extends ValidateInput {
 
-	protected $notEquals;
+	protected $value;
 	protected $strict;
 	protected $error;
 
-	public function __construct($value, $strict=false) {
-		$this->notEquals = $value;
+	public function __construct($value, $strict = false) {
+		$this->value = $value;
 		$this->strict = $strict;
 	}
 
@@ -17,10 +17,10 @@ class ValidateInputNotEquals extends ValidateInput {
 			$value = $this->input->getValue();
 			if (!$this->strict) {
 				$value = strtolower($value);
-				$this->notEquals = strtolower($this->notEquals);
+				$this->value = strtolower($this->value);
 			}
 
-			if ($value === $this->notEquals) {
+			if ($value === $this->value) {
 				$this->error = lang('%s is required', $this->input->getName());
 				return false;
 			}

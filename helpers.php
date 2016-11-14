@@ -52,7 +52,7 @@ function lang($key, $args = null) {
         $args = func_get_args();
         $args = array_slice($args, 1);
     }
-    return \Pecee\Translation::getInstance()->_($key, $args);
+    return request()->translation->translate($key, $args);
 }
 
 /**

@@ -3,6 +3,7 @@ namespace Pecee\UI\Form;
 
 class FormMessage {
 
+    protected $form;
 	protected $name;
 	protected $index;
 	protected $message;

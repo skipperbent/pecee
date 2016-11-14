@@ -1,7 +1,7 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
-class ValidateInputMaxLength extends ValidateInput {
+class ValidateMaxLength extends ValidateInput {
 
 	protected $maxLength;
 

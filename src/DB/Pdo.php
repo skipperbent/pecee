@@ -2,7 +2,6 @@
 namespace Pecee\DB;
 
 use Pecee\Collection\CollectionItem;
-use Pecee\Debug;
 
 class Pdo {
 
@@ -67,9 +66,9 @@ class Pdo {
         }
 
         $this->query = $query->queryString;
-        Debug::getInstance()->add('START DB QUERY:' . $this->query);
+        request()->debug->add('START DB QUERY:' . $this->query);
         if($query->execute($inputParameters)) {
-            Debug::getInstance()->add('END DB QUERY');
+            request()->debug->add('END DB QUERY');
             return $query;
         }
 
@@ -93,7 +92,7 @@ class Pdo {
     }
 
     public function single($query, array $parameters = null) {
-        $result = $this->fetchAll($query. ' LIMIT 1', $parameters);
+        $result = $this->all($query. ' LIMIT 1', $parameters);
         if($result !== null) {
             return $result[0];
         }

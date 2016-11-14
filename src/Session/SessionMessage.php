@@ -11,7 +11,7 @@ class SessionMessage {
 	const KEY = 'MSG';
 
 	/**
-	 * @return static
+	 * @return SessionMessage
 	 */
 	public static function getInstance() {
 		if(self::$instance === null) {
@@ -48,7 +48,7 @@ class SessionMessage {
 	/**
 	 * Get messages
 	 * @param string|null $type
-	 * @param string|null $default
+	 * @param object|null $default
 	 * @return \Pecee\UI\Form\FormMessage|object
 	 */
 	public function get($type = null, $default = null) {

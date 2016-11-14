@@ -1,18 +1,13 @@
 <?php
 namespace Pecee\UI\Menu;
+
 use Pecee\UI\Html\Html;
 
 class Menu {
 	protected $items;
 	protected $class;
-	protected $attributes;
-	protected $content;
-
-	public function __construct() {
-		$this->attributes=array();
-		$this->content=array();
-		return $this;
-	}
+	protected $attributes = array();
+	protected $content = array();
 
 	public function getItems() {
 		return $this->items;
@@ -85,7 +80,7 @@ class Menu {
 
 	/**
 	 * Get form content, if any
-	 * @return \Pecee\UI\Html\Html|null
+	 * @return array
 	 */
 	public function getContent() {
 		return $this->content;
@@ -96,9 +91,10 @@ class Menu {
 	 *
 	 * @param string $title
 	 * @param string $value
+     * @param string|null $description
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
-	public function addItem($title, $value, $description=null) {
+	public function addItem($title, $value, $description = null) {
 		$item = new MenuItems();
 		$item->addItem($title, $value, $description);
 		$this->items[] = $item;
@@ -178,6 +174,7 @@ class Menu {
 				$o[]=$this->getAttributes($this->attributes);
 			}
 			$o[] = '>';
+            /* @var $item MenuItems */
 			foreach($this->items as $item) {
 				foreach($item->getItems() as $key=>$i) {
 					/* Write html */
@@ -188,12 +185,13 @@ class Menu {
 						htmlspecialchars($i['description']),
 						$this->getAttributes($i['linkAttributes']));
 					if(isset($i['content']) && is_array($i['content'])) {
+                        /* @var $c static */
 						foreach($i['content'] as $c) {
 							$o[]=$c->__toString();
 						}
 					}
 					if(isset($i['menu'])) {
-						$o[]=$i['menu']->__toString();
+						$o[] = $i['menu']->__toString();
 					}
 					if(isset($this->content[$key]) > 0) {
 						$o[]=$this->content[$key]->__toString();

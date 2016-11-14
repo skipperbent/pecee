@@ -2,7 +2,6 @@
 namespace Pecee\Widget;
 
 use Pecee\Base;
-use Pecee\Debug;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
@@ -22,7 +21,7 @@ abstract class Widget extends Base  {
 
         parent::__construct();
 
-        Debug::getInstance()->add('START WIDGET: ' . static::class);
+        request()->debug->add('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
         $this->jsWrapRoute = url('pecee.js.wrap');
@@ -202,30 +201,30 @@ abstract class Widget extends Base  {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        Debug::getInstance()->add('END WIDGET: ' . static::class);
+        request()->debug->add('END WIDGET: ' . static::class);
         return $this->_contentHtml;
     }
 
     protected function renderContent() {
-        Debug::getInstance()->add('START: rendering content-template: ' . $this->_contentTemplate);
+        request()->debug->add('START: rendering content-template: ' . $this->_contentTemplate);
         if($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
-        Debug::getInstance()->add('END: rendering content-template: ' . $this->_contentTemplate);
+        request()->debug->add('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
     protected function renderTemplate() {
-        Debug::getInstance()->add('START: rendering template: ' . $this->_template);
+        request()->debug->add('START: rendering template: ' . $this->_template);
         if($this->_template !== '') {
             ob_start();
             include $this->_template;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
-        Debug::getInstance()->add('END: rendering template ' . $this->_template);
+        request()->debug->add('END: rendering template ' . $this->_template);
     }
 
     protected function setJsWrapRoute($route) {

@@ -1,9 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
 use Pecee\FloatUtil;
 
-class ValidateInputFloat extends ValidateInput {
+class ValidateFloat extends ValidateInput {
 
 	public function validates() {
 		if($this->input->getValue()) {

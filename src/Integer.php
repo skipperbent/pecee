@@ -6,6 +6,7 @@ class Integer {
 	/**
 	 * Check if a given value is a counting type or
 	 * if the value of the string has numbers in it.
+     * @param string $val
 	 * @return bool
 	 */
 	public static function isInteger($val) {

@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Model;
 
-use Carbon\Carbon;
 use Pecee\Guid;
 use Pecee\IO\Directory;
 use Pecee\IO\File;
@@ -15,8 +14,7 @@ class ModelFile extends ModelData {
         'original_filename',
         'path',
         'type',
-        'bytes',
-        'created_date'
+        'bytes'
     ];
 
 	public function __construct($name = null, $path = null) {
@@ -35,8 +33,6 @@ class ModelFile extends ModelData {
             $this->type = File::getMime($fullPath);
             $this->bytes = filesize($fullPath);
         }
-
-        $this->created_date = Carbon::now()->toDateTimeString();
 	}
 
 	public function setFilename($filename) {
@@ -57,10 +53,6 @@ class ModelFile extends ModelData {
 
 	public function setBytes($bytes) {
 		$this->bytes = $bytes;
-	}
-
-	public function setCreatedDate($datetime) {
-		$this->created_date = $datetime;
 	}
 
     protected function getDataClass() {

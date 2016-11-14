@@ -1,7 +1,7 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
-class ValidateInputBoolean extends ValidateInput {
+class ValidateBoolean extends ValidateInput {
 
 	public function validates() {
 		if($this->input->getValue()) {

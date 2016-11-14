@@ -37,7 +37,9 @@
                 </div>
             </td>
             <td style="vertical-align:top; padding:5px;">
-                <?= $log['debug'][count($log['debug'])-1]['class']; ?>
+                <? if(isset($log['debug'][count($log['debug'])-1]['class'])) : ?>
+                    <?= $log['debug'][count($log['debug'])-1]['class']; ?>
+                <? endif; ?>
             </td>
             <td style="vertical-align:top; padding:5px;">
                 <?= $log['debug'][count($log['debug'])-1]['method']; ?>

@@ -2,7 +2,6 @@
 namespace Pecee\Controller\File;
 
 use Pecee\Controller\Controller;
-use Pecee\Module;
 use Pecee\UI\Site;
 use Pecee\Http\YuiCompressor\YuiCompressor;
 
@@ -53,7 +52,7 @@ abstract class FileAbstract extends Controller {
         // Set headers
         response()->headers([
             'Content-type: '.$this->getHeader(),
-            'Charset: ' . Site::getInstance()->getCharset(),
+            'Charset: ' . request()->site->getCharset(),
         ]);
 
         if($this->debugMode() && is_dir($this->tmpDir)) {
@@ -91,9 +90,8 @@ abstract class FileAbstract extends Controller {
                         if(stream_resolve_include_path($filePath) !== false) {
                             $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
                         } else {
-                            $modules = Module::getInstance()->getList();
-                            if($modules) {
-                                foreach($modules as $module) {
+                            if(request()->modules != null) {
+                                foreach(request()->modules->getList() as $module) {
                                     $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
                                     if(file_exists($moduleFilePath)) {
                                         $content = file_get_contents($moduleFilePath);
@@ -169,10 +167,10 @@ abstract class FileAbstract extends Controller {
     protected function getPath() {
         switch($this->type) {
             case self::TYPE_JAVASCRIPT:
-                return Site::getInstance()->getJsPath();
+                return request()->site->getJsPath();
                 break;
             case self::TYPE_CSS:
-                return Site::getInstance()->getCssPath();
+                return request()->site->getCssPath();
                 break;
         }
         return '';

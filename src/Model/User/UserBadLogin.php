@@ -6,6 +6,7 @@ use Pecee\Model\Model;
 
 class UserBadLogin extends Model {
 
+    protected $timestamps = false;
     protected $table = 'user_bad_login';
 
     protected $columns = [
@@ -13,7 +14,7 @@ class UserBadLogin extends Model {
         'username',
         'ip',
         'active',
-        'created_date',
+        'created_at',
     ];
 
     const TIMEOUT_MINUTES = 30;
@@ -25,13 +26,13 @@ class UserBadLogin extends Model {
 
         $this->ip = request()->getIp();
         $this->active = true;
-        $this->created_date = Carbon::now()->toDateTimeString();
+        $this->created_at = Carbon::now()->toDateTimeString();
 	}
 
     public static function track($username) {
-        $login = new static();
-        $login->username = trim($username);
-        $login->save();
+        static::instance()->save([
+            'username' => trim($username),
+        ]);
     }
 
 	public static function checkBadLogin($username) {
@@ -40,11 +41,11 @@ class UserBadLogin extends Model {
             ->where('active', '=', '1')
             ->select([self::instance()->getTable() . '.*', static::getQuery()->raw('COUNT(ip) as request_count')])
             ->groupBy('ip')
-            ->orderBy('created_date', 'DESC')
+            ->orderBy('created_at', 'DESC')
             ->first();
 
         if($track !== null) {
-            $lastLoginTimeStamp = $track->created_date;
+            $lastLoginTimeStamp = $track->created_at;
             $lastLoginMinutesAgo = round((time()-strtotime($lastLoginTimeStamp))/60);
 
             return ((static::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < static::TIMEOUT_MINUTES) &&

@@ -1,9 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
 use Pecee\Integer;
 
-class ValidateInputMaxValue extends ValidateInput {
+class ValidateMaxValue extends ValidateInput {
 
 	protected $maxValue;
 	protected $error;

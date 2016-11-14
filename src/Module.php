@@ -1,22 +1,9 @@
 <?php
 namespace Pecee;
-class Module {
-	protected static $instance;
-	protected $modules;
-	/**
-	 * Get instance
-	 * @return static
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
 
-	public function __construct() {
-		$this->modules = array();
-	}
+class Module {
+
+	protected $modules = array();
 
 	/**
 	 * Add new module
@@ -47,4 +34,5 @@ class Module {
 	public function hasModules() {
 		return (count($this->modules) > 0);
 	}
+
 }

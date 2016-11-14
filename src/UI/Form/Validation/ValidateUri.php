@@ -1,9 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
 use Pecee\Url;
 
-class ValidateInputUri extends ValidateInput {
+class ValidateUri extends ValidateInput {
 
 	protected $error;
 

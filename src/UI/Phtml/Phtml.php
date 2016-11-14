@@ -363,7 +363,7 @@ class Phtml {
      */
     protected function getNode() {
         if (!$this->node) {
-            throw new PhtmlException($this->phtmlRaw,$this->char, $this->lineCount,$this->charCount,$this->debugTrace);
+            throw new PhtmlException($this->phtmlRaw, $this->char, $this->lineCount, $this->charCount, $this->debugTrace);
         }
         return $this->node;
     }

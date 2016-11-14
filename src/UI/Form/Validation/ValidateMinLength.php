@@ -1,7 +1,7 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
-class ValidateInputMinLength extends ValidateInput {
+class ValidateMinLength extends ValidateInput {
 
 	protected $minimumLength;
 

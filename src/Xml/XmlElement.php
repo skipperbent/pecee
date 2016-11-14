@@ -50,7 +50,7 @@ class XmlElement implements IXmlNode {
 		$this->parent = $parent;
 	}
 
-	public function addChild($node) {
+	public function addChild(IXmlNode $node) {
 		$this->children[] = $node;
 		$node->setParent($this);
 	}
@@ -142,9 +142,6 @@ class XmlElement implements IXmlNode {
 		$this->getParent()->removeChild($this);
 	}
 
-	/**
-	 * replace node with other node
-	 */
 	public function replace($otherNode) {
 		$parent = $this->getParent();
 		$i = $parent->getChildIndex($this);

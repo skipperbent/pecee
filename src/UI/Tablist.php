@@ -1,11 +1,12 @@
 <?php
 namespace Pecee\UI;
+
 use Pecee\UI\Html\Html;
 
 class Tablist {
 
 	public function __construct() {
-		Site::getInstance()->addWrappedJs('pecee-tablist.js');
+		request()->site->addWrappedJs('pecee-tablist.js');
 	}
 
 	public function button($id, $value=null) {

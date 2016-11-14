@@ -5,23 +5,10 @@ use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug {
 
-	protected static $instance;
-
 	protected $enabled;
 	protected $lastTime;
 	protected $stack;
 	protected $startTime;
-
-	/**
-	 * Get instance of Debug class
-	 * @return Debug
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
 
 	public function __construct(){
 		$this->enabled = false;
@@ -48,7 +35,7 @@ class Debug {
 
         $debug = array();
 
-        for($i=0; $i < count($backtrace)-2; $i++) {
+        for($i = 0; $i < count($backtrace)-2; $i++) {
             $trace = array_reverse($backtrace);
             $trace = $trace[$i];
             $tmp = array();
@@ -71,7 +58,16 @@ class Debug {
             $debug[] = $tmp;
         }
 
-        $this->stack[]=array('text' => $text, 'time' => $this->getTime(), 'file' => $file, 'line' => $line, 'method' => $method, 'class' => $class, 'debug' => $debug);
+        $this->stack[] = [
+            'text' => $text,
+            'time' => $this->getTime(),
+            'file' => $file,
+            'line' => $line,
+            'method' => $method,
+            'class' => $class,
+            'debug' => $debug
+        ];
+
 		$this->lastTime = microtime(true);
 	}
 

@@ -5,6 +5,7 @@ use Pecee\Collection\CollectionItem;
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
 use Pecee\Integer;
+use Pecee\Model\Exceptions\ModelException;
 use Pecee\Str;
 
 /**
@@ -37,7 +38,7 @@ abstract class LegacyModel implements \IteratorAggregate {
 
     /**
      * Save item
-     * @see Pecee\Model\Model::save()
+     * @see \Pecee\Model\Model::save()
      * @return static
      * @throws ModelException
      */
@@ -112,6 +113,7 @@ abstract class LegacyModel implements \IteratorAggregate {
 
         $sql = sprintf('UPDATE `%s` SET %s WHERE `%s` = ? LIMIT 1;', $this->table, join(', ', $concat), $this->primary);
         Pdo::getInstance()->nonQuery($sql, $values);
+        return $this;
     }
 
     protected function getCountSql($sql) {

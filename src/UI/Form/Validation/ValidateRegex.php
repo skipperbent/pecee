@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
 class ValidateRegex extends ValidateInput {
 

@@ -21,9 +21,10 @@ class MenuItems {
 	 *
 	 * @param string $title
 	 * @param string $value
+     * @param string|null $description
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
-	public function addItem($title, $value, $description=null) {
+	public function addItem($title, $value, $description = null) {
 		$this->moveItem();
 		$this->currentItem['title'] = $title;
 		$this->currentItem['value'] = $value;

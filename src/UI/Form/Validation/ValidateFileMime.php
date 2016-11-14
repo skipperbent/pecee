@@ -1,9 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation\File;
 
 use Pecee\Http\Input\InputFile;
 
-class ValidateFileAllowedMimeType extends ValidateFile {
+class ValidateFileMime extends ValidateFile {
 
 	protected $mimeTypes;
 

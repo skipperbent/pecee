@@ -1,10 +1,10 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation\File;
 
 use Pecee\Http\Input\InputFile;
 use Pecee\IO\File;
 
-class ValidateFileAllowedExtension extends ValidateFile {
+class ValidateFileExtension extends ValidateFile {
 
 	protected $extensions;
 

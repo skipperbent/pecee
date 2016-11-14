@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Debug;
+use Carbon\Carbon;
 use Pecee\Integer;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Str;
@@ -11,6 +11,7 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  *
  * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
  *
+ * @method static Model prefix(string $prefix)
  * @method static Model limit(int $id)
  * @method static Model skip(int $id)
  * @method static Model take(int $id)
@@ -63,6 +64,7 @@ abstract class Model implements \IteratorAggregate {
     protected $rename = [];
     protected $join = [];
     protected $columns = [];
+    protected $timestamps = true;
 
     /**
      * @var ModelQueryBuilder
@@ -84,16 +86,21 @@ abstract class Model implements \IteratorAggregate {
 
             $this->queryable->getQuery()->registerEvent('before-*', $this->table,
                 function (QueryBuilderHandler $qb) {
-                    Debug::getInstance()->add('START QUERY: ' . $qb->getQuery()->getRawSql());
+                    request()->debug->add('START QUERY: ' . $qb->getQuery()->getRawSql());
                 });
 
             $this->queryable->getQuery()->registerEvent('after-*', $this->table,
                 function (QueryBuilderHandler $qb) {
-                    Debug::getInstance()->add('END QUERY: ' . $qb->getQuery()->getRawSql());
+                    request()->debug->add('END QUERY: ' . $qb->getQuery()->getRawSql());
                 });
         }
 
         $this->results = array('rows' => array());
+
+        if($this->timestamps) {
+            $this->columns = array_merge($this->columns, ['created_at', 'updated_at']);
+            $this->created_at = Carbon::now()->toDateTimeString();
+        }
     }
 
     public function newQuery($table = null) {
@@ -127,18 +134,19 @@ abstract class Model implements \IteratorAggregate {
             throw new ModelException('Columns property not defined.');
         }
 
-        $tmp = array();
-        foreach ($this->columns as $key) {
-            $tmp[$key] = $this->{$key};
+        if($data !== null) {
+            $data = array_merge($this->getRows(), $data);
+        } else {
+            $data = $this->getRows();
         }
 
-        if($data !== null) {
-            $data = array_merge($tmp, $data);
-        } else {
-            $data = $tmp;
-        }
+        $this->setRows($data);
 
         if($this->exists()) {
+
+            if($this->timestamps) {
+                $this->updated_at = Carbon::now()->toDateTimeString();
+            }
 
             if(isset($data[$this->getPrimary()])) {
                 // Remove primary key
@@ -242,7 +250,6 @@ abstract class Model implements \IteratorAggregate {
     }
 
     protected function parseArrayData($data) {
-        // If it's an array of Model instances, we get JSON output here
         if(is_array($data)) {
             $out = array();
             foreach($data as $d) {
@@ -252,6 +259,12 @@ abstract class Model implements \IteratorAggregate {
         }
         $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
         return (Integer::isInteger($data)) ? intval($data) : $data;
+    }
+
+    protected function orderArrayRows(array &$rows) {
+        uksort($rows, function($a, $b) {
+            return (array_search($a, $this->columns) > array_search($b, $this->columns));
+        });
     }
 
     public function toArray() {
@@ -267,6 +280,8 @@ abstract class Model implements \IteratorAggregate {
                 }
                 $rows[$key] = $this->parseArrayData($row);
             }
+
+            $this->orderArrayRows($rows);
         }
 
         if(count($this->getResults()) === 1) {

@@ -1,9 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
 use Pecee\Session\Session;
 
-class ValidateInputSession extends ValidateInput {
+class ValidateSession extends ValidateInput {
 
 	protected $sessionName;
 

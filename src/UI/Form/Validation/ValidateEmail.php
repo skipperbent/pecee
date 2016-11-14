@@ -1,8 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
+
 use Pecee\Util;
 
-class ValidateInputEmail extends ValidateInput {
+class ValidateEmail extends ValidateInput {
 
 	public function validates() {
 		if($this->input->getValue()) {

@@ -8,12 +8,13 @@ class UserReset extends Model {
 
     const USER_IDENTIFIER_KEY = 'user_id';
 
+    protected $timestamps = false;
     protected $table = 'user_reset';
 
     protected $columns = [
         'id',
         'key',
-        'created_date'
+        'created_at'
     ];
 
     public function __construct($userId = null) {
@@ -24,7 +25,7 @@ class UserReset extends Model {
 
         $this->{static::USER_IDENTIFIER_KEY} = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Carbon::now()->toDateTimeString();
+        $this->created_at = Carbon::now()->toDateTimeString();
     }
 
     public function clean() {

@@ -5,7 +5,6 @@ use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
-use Pecee\UI\Site;
 
 abstract class Base {
 
@@ -13,14 +12,17 @@ abstract class Base {
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_messages;
+    /**
+     * @var \Pecee\UI\Site
+     */
     protected $_site;
     protected $validations = array();
 
     public function __construct() {
 
-        Debug::getInstance()->add('BASE CLASS ' . static::class);
+        request()->debug->add('BASE CLASS ' . static::class);
 
-        $this->_site = Site::getInstance();
+        $this->_site = request()->site;
         $this->_messages = SessionMessage::getInstance();
 
         $this->setInputValues();
@@ -79,9 +81,10 @@ abstract class Base {
     protected function validateInput() {
         foreach($this->validations as $key => $validations) {
             /* @var $input \Pecee\Http\Input\InputItem */
+            /* @var $i \Pecee\Http\Input\InputItem */
             $input = input()->getObject($key, new InputItem($key, null));
 
-            /* @var $validation \Pecee\Http\InputValidation\ValidateInput */
+            /* @var $validation \Pecee\UI\Form\Validation\ValidateInput */
             foreach($validations as $validation) {
 
                 if(is_array($input)) {

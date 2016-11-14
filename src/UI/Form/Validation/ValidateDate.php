@@ -1,9 +1,9 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
 use Carbon\Carbon;
 
-class ValidateInputDate extends ValidateInput {
+class ValidateDate extends ValidateInput {
 
 	protected $format;
 

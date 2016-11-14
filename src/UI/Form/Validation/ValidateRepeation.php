@@ -1,7 +1,7 @@
 <?php
-namespace Pecee\Http\InputValidation;
+namespace Pecee\UI\Form\Validation;
 
-class ValidateInputRepeation extends ValidateInput {
+class ValidateRepeation extends ValidateInput {
 
 	protected $compareName;
 	protected $compareValue;

@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\UI;
 
-use Pecee\Debug;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlMeta;
 
@@ -17,7 +16,6 @@ class Site {
 
 	// Settings
 	public static $docTypes = array(self::DOCTYPE_XHTML_DEFAULT, self::DOCTYPE_XHTML_STRICT, self::DOCTYPE_HTML_5);
-	private static $instance;
 
 	protected $docType;
 	protected $charset;
@@ -33,17 +31,6 @@ class Site {
 	protected $cssFilesWrapped = array();
 	protected $adminIps;
 
-	/**
-	 * Get new instance
-	 * @return \Pecee\UI\Site
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
-
 	public function __construct() {
 		// Load default settings
 		$this->docType = self::DOCTYPE_HTML_5;
@@ -53,8 +40,6 @@ class Site {
 		$this->keywords = array();
 		$this->cacheEnabled = true;
 		$this->adminIps = array('127.0.0.1', '::1');
-
-		$this->setDebug(env('DEBUG', false));
 	}
 
 	public function getTitle() {
@@ -111,14 +96,6 @@ class Site {
 			$key = array_search(urlencode($filename), $this->cssFilesWrapped);
 			unset($this->cssFilesWrapped[$section][$key]);
 		}
-	}
-
-	public function setDebug($debug) {
-		Debug::getInstance()->setEnabled($debug);
-	}
-
-	public function getDebug() {
-		return Debug::getInstance()->getEnabled();
 	}
 
 	public function addCss($path, $section = self::SECTION_DEFAULT) {

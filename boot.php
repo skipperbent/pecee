@@ -12,3 +12,13 @@ require_once 'helpers.php';
 
 $_ENV['app_name'] = env('APP_NAME');
 $loader->addPsr4($_ENV['app_name'] . '\\', $_ENV['base_path'] . 'app/');
+
+// Locale
+request()->locale = new \Pecee\Locale();
+request()->translation = new \Pecee\Translation\Translation();
+request()->site = new \Pecee\UI\Site();
+
+// Debugger
+request()->debug = new \Pecee\Debug();
+request()->debug->setEnabled(env('DEBUG', false));
+request()->debug->add('Framework loaded');

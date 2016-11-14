@@ -7,11 +7,15 @@ class UserData extends Model {
 
 	const USER_IDENTIFIER_KEY = 'user_id';
 
+    protected $timestamps = false;
+
 	protected $columns = [
 		'id',
 		'key',
 		'value'
 	];
+
+    protected $table = 'user_data';
 
 	public function __construct($userId = null, $key = null, $value = null) {
 
