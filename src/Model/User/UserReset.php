@@ -1,16 +1,17 @@
 <?php
 namespace Pecee\Model\User;
 
-use Pecee\Date;
 use Pecee\Model\Model;
 
 class UserReset extends Model {
+
+    protected $timestamps = true;
+    protected $table = 'user_reset';
 
     protected $columns = [
         'id',
         'user_id',
         'key',
-        'created_date'
     ];
 
     public function __construct($userId = null) {
@@ -19,7 +20,6 @@ class UserReset extends Model {
 
         $this->user_id = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Date::toDateTime();
     }
 
     public function clean() {

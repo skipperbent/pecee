@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 use Pecee\DB\Pdo;
 
 /**
@@ -9,6 +9,10 @@ use Pecee\DB\Pdo;
  * @package Pecee\Model
  */
 class ModelCache extends Model {
+
+    protected $timestamps = true;
+
+    protected $table = 'cache';
 
 	protected $columns = [
 		'key',
@@ -46,7 +50,7 @@ class ModelCache extends Model {
 	}
 
 	public static function set($key, $data, $expireMinutes) {
-		$expireDate = Date::toDateTime(time() + ($expireMinutes*60));
+		$expireDate = Carbon::now()->addMinutes($expireMinutes)->toDateTimeString();
 		self::remove($key);
 		$model = new static($key, $data, $expireDate);
 		return ($model->save());

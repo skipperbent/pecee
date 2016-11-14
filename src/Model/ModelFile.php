@@ -1,17 +1,21 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 use Pecee\Guid;
 use Pecee\IO\Directory;
 use Pecee\IO\File;
 use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData {
-	const ORDER_DATE_ASC = 'f.`created_date` ASC';
-	const ORDER_DATE_DESC = 'f.`created_date` DESC';
+	const ORDER_DATE_ASC = 'f.`created_at` ASC';
+	const ORDER_DATE_DESC = 'f.`created_at` DESC';
 
 	public static $ORDERS = array(self::ORDER_DATE_ASC, self::ORDER_DATE_DESC);
+
+    protected $table = 'file';
+
+    protected $timestamps = true;
 
     protected $columns = [
         'id',
@@ -20,7 +24,6 @@ class ModelFile extends ModelData {
         'path',
         'type',
         'bytes',
-        'created_date'
     ];
 
 	public function __construct($name = null, $path = null) {
@@ -39,8 +42,6 @@ class ModelFile extends ModelData {
             $this->type = File::getMime($fullPath);
             $this->bytes = filesize($fullPath);
         }
-
-        $this->created_date = Date::toDateTime();
 	}
 
 	public function setFilename($filename) {
@@ -63,8 +64,8 @@ class ModelFile extends ModelData {
 		$this->bytes = $bytes;
 	}
 
-	public function setCreatedDate($datetime) {
-		$this->created_date = $datetime;
+	public function setCreatedAt(Carbon $date) {
+		$this->created_at = $date->toDateTimeString();
 	}
 
 	public function updateData() {

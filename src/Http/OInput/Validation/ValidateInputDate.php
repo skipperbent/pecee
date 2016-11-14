@@ -1,25 +1,33 @@
 <?php
 namespace Pecee\Http\OInput\Validation;
-use Pecee\Date;
+
+use Carbon\Carbon;
 
 class ValidateInputDate extends ValidateInput {
 
-	protected $error;
-	protected $format;
+    protected $format;
 
-	public function __construct($format = 'Y-m-d H:i:s') {
-		$this->format = $format;
-	}
+    public function __construct($format = null) {
+        $this->format = $format;
+    }
 
-	public function validate() {
-		if($this->value) {
-			return Date::isValid($this->value, $this->format);
-		}
-		return true;
-	}
+    public function validate() {
 
-	public function getErrorMessage() {
-		return lang('%s is not a valid date', $this->name);
-	}
+        try {
+            if($this->format === null) {
+                Carbon::parse($this->input->getValue(), 'UTC');
+            } else {
+                Carbon::createFromFormat($this->format, $this->input->getValue(), 'UTC');
+            }
+        } catch(\Exception $e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function getErrorMessage() {
+        return lang('%s is not a valid date', $this->input->getName());
+    }
 
 }

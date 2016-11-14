@@ -8,9 +8,10 @@ class CreateUserBadLoginTable extends Migration {
         $this->schema->create('user_bad_login', function(Table $table){
             $table->column('id')->bigint()->primary()->increment();
             $table->column('username')->string(300)->index();
-            $table->column('created_date')->datetime()->index();
             $table->column('ip')->string(50)->index();
             $table->column('active')->bool()->nullable()->index();
+            $table->column('updated_at')->datetime()->nullable()->index();
+            $table->column('created_at')->datetime()->index();
         });
     }
 
