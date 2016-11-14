@@ -96,15 +96,6 @@ class Form {
     }
 
     /**
-     * Make new captcha element
-     * @param string $name
-     * @return \Pecee\UI\Form\FormCaptcha
-     */
-    public function captcha( $name ) {
-        return new FormCaptcha($name);
-    }
-
-    /**
      * Creates new checkbox input element
      * @param string $name
      * @param bool $value
@@ -232,5 +223,5 @@ class Form {
     public function end() {
         return '</form>';
     }
-    
+
 }

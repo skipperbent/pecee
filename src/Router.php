@@ -5,7 +5,6 @@ use Pecee\DB\Pdo;
 use Pecee\Handler\ExceptionHandler;
 use Pecee\SimpleRouter\RouterBase;
 use Pecee\SimpleRouter\SimpleRouter;
-use Pecee\UI\Site;
 
 class Router extends SimpleRouter {
 
@@ -13,21 +12,17 @@ class Router extends SimpleRouter {
 
     public static function start($defaultNamespace = null) {
 
-        Debug::getInstance()->add('Router initialised.');
+        debug('Router initialised.');
 
         // Load framework specific controllers
         static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
         static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
-        static::get('/captcha', 'ControllerCaptcha@show', ['namespace' => '\Pecee\Controller']);
 
         // Load routes.php
         $file = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';
         if(file_exists($file)) {
             require_once $file;
         }
-
-        // Init locale settings
-        Locale::getInstance();
 
         // Set default namespace
         $defaultNamespace = '\\'.$_ENV['app_name'] . '\\Controller';
@@ -59,8 +54,8 @@ class Router extends SimpleRouter {
         }
 
         // Output debug info
-        if(env('DEBUG', false) && Site::getInstance()->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
-            echo Debug::getInstance();
+        if(env('DEBUG', false) && request()->site->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
+            echo request()->debug;
         }
 
         Pdo::getInstance()->close();

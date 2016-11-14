@@ -3,25 +3,13 @@ namespace Pecee;
 
 class Locale {
 
-	protected static $instance;
 	protected $timezone;
 	protected $defaultLocale;
 	protected $locale;
 
-	/**
-	 * Get instance
-	 * @return \Pecee\Locale
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
-
 	public function __construct() {
 		// Default stuff
-		$this->setTimezone('Europe/Copenhagen');
+		$this->setTimezone('UTC');
 		$this->setLocale('en-gb');
 		$this->setDefaultLocale('en-gb');
 	}

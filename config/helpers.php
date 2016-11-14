@@ -6,7 +6,7 @@
 
 /**
  * Get url
- * 
+ *
  * @param string|null $controller
  * @param array|null $parameters
  * @param array|null $getParams
@@ -45,7 +45,26 @@ function lang($key, $args = null) {
         $args = func_get_args();
         $args = array_slice($args, 1);
     }
-    return \Pecee\Translation::getInstance()->_($key, $args);
+    return request()->translation->translate($key, $args);
+}
+
+/**
+ * Add debug message.
+ * Requires DEBUG=1 to be present in your env file.
+ * @param $text
+ */
+function debug($text) {
+    if(env('DEBUG', false)) {
+        request()->debug->add($text);
+    }
+}
+
+function add_module($name, $path) {
+    if(request()->modules === null) {
+        request()->modules = new \Pecee\Modules();
+    }
+
+    request()->modules->add($name, $path);
 }
 
 /**

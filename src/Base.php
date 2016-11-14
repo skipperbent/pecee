@@ -5,14 +5,12 @@ use Pecee\Http\OInput\IInputItem;
 use Pecee\Http\OInput\Input;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
-use Pecee\UI\Site;
 
 abstract class Base {
 
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_messages;
-    protected $_site;
     protected $_input;
     protected $get;
     protected $post;
@@ -20,9 +18,8 @@ abstract class Base {
 
     public function __construct() {
 
-        Debug::getInstance()->add('BASE CLASS ' . static::class);
+        debug('BASE CLASS ' . static::class);
 
-        $this->_site = Site::getInstance();
         $this->_input = new Input();
 
         // Add shortcuts
@@ -77,11 +74,11 @@ abstract class Base {
 
     protected function appendSiteTitle($title, $separator = '-') {
         $separator = ($separator === null) ? '': sprintf(' %s ', $separator);
-        $this->_site->setTitle(($this->_site->getTitle() . $separator . $title));
+        request()->site->setTitle((request()->site->getTitle() . $separator . $title));
     }
 
     protected function prependSiteTitle($title, $separator = ' - ') {
-        $this->_site->setTitle(($title . $separator .$this->_site->getTitle()));
+        request()->site->setTitle(($title . $separator . request()->site->getTitle()));
     }
 
     /**
@@ -142,10 +139,10 @@ abstract class Base {
 
     /**
      * Get site
-     * @return Site
+     * @return \Pecee\UI\Site
      */
     public function getSite() {
-        return $this->_site;
+        return request()->site;
     }
 
     /**

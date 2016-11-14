@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Collection\CollectionItem;
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
@@ -18,6 +19,7 @@ abstract class Model implements \IteratorAggregate {
     protected $rename = [];
     protected $join = [];
     protected $columns = [];
+    protected $timestamps = false;
 
     public function __construct() {
         // Set table name if its not already defined
@@ -28,6 +30,11 @@ abstract class Model implements \IteratorAggregate {
         }
 
         $this->results = array('data' => array());
+
+        if($this->timestamps) {
+            $this->columns = array_merge($this->columns, ['created_at', 'updated_at']);
+            $this->created_at = Carbon::now()->toDateTimeString();
+        }
     }
 
     /**
@@ -92,6 +99,10 @@ abstract class Model implements \IteratorAggregate {
     public function update() {
         if(!is_array($this->columns)) {
             throw new ModelException('Columns property not defined.');
+        }
+
+        if($this->timestamps) {
+            $this->updated_at = Carbon::now()->toDateTimeString();
         }
 
         $concat = array();

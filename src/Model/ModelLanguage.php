@@ -41,7 +41,7 @@ class ModelLanguage extends Model {
     }
 
     public function lookup($text) {
-        if(Locale::getInstance()->getDefaultLocale() != Locale::getInstance()->getLocale() && $this->hasRows()) {
+        if(request()->locale->getDefaultLocale() != request()->locale->getLocale() && $this->hasRows()) {
 
             foreach($this->getRows() as $lang) {
                 if(trim($lang->original) == trim($text)) {
