@@ -8,63 +8,99 @@ use Pecee\UI\Form\FormMessage;
 
 abstract class Base {
 
+    protected $_inputSessionKey = 'InputValues';
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_messages;
-    protected $_input;
-    protected $get;
-    protected $post;
-    protected $file;
+    protected $validations = array();
 
     public function __construct() {
-
         debug('BASE CLASS ' . static::class);
+        $this->_messages = new SessionMessage();
+        $this->setInputValues();
+    }
 
-        $this->_input = new Input();
+    protected function setInputValues() {
+        if(Session::exists($this->_inputSessionKey)) {
+            $values = Session::get($this->_inputSessionKey);
 
-        // Add shortcuts
-        $this->get = $this->_input->get;
-        $this->post = $this->_input->post;
-        $this->file = $this->_input->file;
+            foreach($values as $key => $value) {
+                $item = input()->getObject($key, new InputItem($key))->setValue($value);
+                if(request()->getMethod() === 'post') {
+                    input()->post->$key = $item;
+                } else {
+                    input()->get->$key = $item;
+                }
+            }
 
-        $this->_messages = SessionMessage::getInstance();
+            Session::destroy($this->_inputSessionKey);
+        }
+    }
+
+    public function setInputName(array $names) {
+        foreach($names as $key => $name) {
+            $item = input()->getObject($key);
+
+            /* @var $item InputItem */
+            if($item !== null) {
+                $item->setName($name);
+            }
+        }
+    }
+
+    public function saveInputValues(array $values = null) {
+
+        if($values === null) {
+            $values = input()->all();
+        }
+
+        Session::set($this->_inputSessionKey, $values);
+    }
+
+    protected function validate(array $validation = null) {
+        if($validation !== null) {
+            foreach ($validation as $key => $validations) {
+
+                if (!is_array($validations)) {
+                    $validations = array($validations);
+                }
+
+                $this->validations[$key] = $validations;
+            }
+        }
     }
 
     protected function validateInput() {
-        // Validate inputs
+        foreach($this->validations as $key => $validations) {
+            /* @var $input \Pecee\Http\Input\InputItem */
+            /* @var $i \Pecee\Http\Input\InputItem */
+            $input = input()->getObject($key, new InputItem($key, null));
 
-        /* @var $item \Pecee\Http\OInput\InputItem */
-        foreach($this->get as $item) {
-            if($item instanceof IInputItem && !$item->validates()) {
-                /* @var $error \Pecee\Http\OInput\Validation\ValidateInput */
-                foreach($item->getValidationErrors() as $error) {
-                    $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
-                    $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
-                }
-            }
-        }
+            /* @var $validation \Pecee\UI\Form\Validation\ValidateInput */
+            foreach($validations as $validation) {
 
-        if(request()->getMethod() !== 'get') {
-
-            foreach($this->post as $item) {
-                if($item instanceof IInputItem && !$item->validates()) {
-                    /* @var $error \Pecee\Http\OInput\Validation\ValidateInput */
-                    foreach ($item->getValidationErrors() as $error) {
-                        $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
-                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
+                if(is_array($input)) {
+                    foreach($input as $i) {
+                        if($validation === '') {
+                            continue;
+                        }
+                        $validation->setInput($i);
+                        if(!$validation->validates()) {
+                            $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $i->getIndex());
+                        }
+                    }
+                } else {
+                    if($validation === '') {
+                        continue;
+                    }
+                    $validation->setInput($input);
+                    if(!$validation->validates()) {
+                        $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
                     }
                 }
+
             }
 
-            foreach($this->file as $item) {
-                if($item instanceof IInputItem && !$item->validates()) {
-                    /* @var $error \Pecee\Http\OInput\Validation\ValidateInput */
-                    foreach($item->getValidationErrors() as $error) {
-                        $placement = ($error->getPlacement() === null) ? $this->defaultMessagePlacement : $error->getPlacement();
-                        $this->setMessage($error->getErrorMessage(), $this->errorType, $error->getForm(), $placement, $error->getIndex());
-                    }
-                }
-            }
         }
     }
 
@@ -79,54 +115,6 @@ abstract class Base {
 
     protected function prependSiteTitle($title, $separator = ' - ') {
         request()->site->setTitle(($title . $separator . request()->site->getTitle()));
-    }
-
-    /**
-     * Get input element value matching index
-     * @param string $index
-     * @param string|null $default
-     * @return string|null
-     */
-    public function input($index, $default = null) {
-        $element = $this->get->findFirst($index);
-
-        if($element !== null) {
-
-            if(is_array($element->getValue())) {
-                return $element->getValue();
-            }
-
-            return Str::getFirstOrDefault($element->getValue(), $default);
-        }
-
-        $element = $this->post->findFirst($index);
-
-        if($element !== null) {
-
-            if(is_array($element->getValue())) {
-                return $element->getValue();
-            }
-
-            return Str::getFirstOrDefault($element->getValue(), $default);
-        }
-
-        $element = $this->file->findFirst($index);
-
-        if($element !== null) {
-            return $element;
-        }
-
-        return $default;
-    }
-
-    /**
-     * Get post input element
-     * @param string $index
-     * @return \Pecee\Http\OInput\InputFile|null
-     */
-    public function file($index) {
-        $element = $this->file->findFirst($index);
-        return ($element !== null) ? $element : null;
     }
 
     /**
@@ -148,12 +136,11 @@ abstract class Base {
     /**
      * Get form message
      * @param string $type
-     * @param string|null $form
      * @param string|null $placement
      * @return FormMessage|null
      */
-    public function getMessage($type, $form = null, $placement = null){
-        $messages = $this->getMessages($type, $form, $placement);
+    public function getMessage($type, $placement = null){
+        $messages = $this->getMessages($type, $placement);
         if(count($messages)) {
             return $messages[0];
         }
@@ -163,20 +150,20 @@ abstract class Base {
     /**
      * Get form messages
      * @param string $type
-     * @param string|null $form
      * @param string|null $placement
      * @return array
      */
-    public function getMessages($type, $form = null, $placement = null) {
+    public function getMessages($type, $placement = null) {
         // Trigger validation
         $this->validateInput();
 
         $messages = array();
 
         if($this->_messages->get($type) !== null) {
+            /* @var $message FormMessage */
             foreach ($this->_messages->get($type) as $message) {
 
-                if (($form === null || $message->getForm() === $form) && ($placement === null || $message->getPlacement() === $placement)) {
+                if (($placement === null || $message->getPlacement() === $placement)) {
                     $messages[] = $message;
                 }
             }
@@ -185,56 +172,58 @@ abstract class Base {
         return $messages;
     }
 
-    public function hasMessages($type, $form = null, $placement = null) {
-        return (count($this->getMessages($type, $form, $placement)));
+    public function hasMessages($type, $placement = null) {
+        return (count($this->getMessages($type, $placement)));
     }
 
     /**
      * Set message
      * @param string $message
      * @param string $type
-     * @param string|null $form
      * @param string|null $placement Key to use if you want the message to be displayed an unique place
      * @param string|null $index
      */
-    protected function setMessage($message, $type, $form = null, $placement = null, $index = null) {
+    protected function setMessage($message, $type, $placement = null, $index = null) {
 
         $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
 
         $msg = new FormMessage();
-        $msg->setForm($form);
         $msg->setMessage($message);
         $msg->setPlacement($placement);
         $msg->setIndex($index);
         $this->_messages->set($msg, $type);
     }
 
-    public function hasErrors() {
-        return $this->hasMessages($this->errorType);
+    public function hasErrors($placement = null, $errorType = null) {
+        $errorType = ($errorType === null) ? $this->errorType : $errorType;
+        return $this->hasMessages($errorType, $placement);
     }
 
     /**
      * Set error
      * @param string $message
-     * @param string|null $form
+     * @param string|null $placement
      */
-    protected function setError($message, $form = null) {
-        $this->setMessage($message, $this->errorType, $form, $this->defaultMessagePlacement);
+    protected function setError($message, $placement = null) {
+        $this->setMessage($message, $this->errorType, $placement);
     }
 
     /**
      * Get error messages
+     * @param string|null $placement
+     * @param string|null $errorType
      * @return array
      */
-    public function getErrors() {
-        return $this->getMessages($this->errorType);
+    public function getErrors($placement = null, $errorType = null) {
+        $errorType = ($errorType === null) ? $this->errorType : $errorType;
+        return $this->getMessages($errorType, $placement);
     }
 
-    public function getErrorsArray($form = null, $placement = null) {
+    public function getErrorsArray($placement = null) {
         $output = array();
 
         /* @var $error FormMessage */
-        foreach($this->getMessages($this->errorType, $form, $placement) as $error) {
+        foreach($this->getMessages($this->errorType, $placement) as $error) {
             $output[] = $error->getMessage();
         }
 
@@ -249,12 +238,12 @@ abstract class Base {
 
                 $input = null;
                 if(request()->getMethod() !== 'get') {
-                    $input = $this->post->findFirst($index);
+                    $input = input()->post->findFirst($index);
                     if($input === null) {
-                        $input = $this->file->findFirst($index);
+                        $input = input()->file->findFirst($index);
                     }
                 } else {
-                    $input = $this->get->findFirst($index);
+                    $input = input()->get->findFirst($index);
                 }
 
                 if($input !== null) {
