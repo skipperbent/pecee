@@ -1,7 +1,9 @@
 <?php
-namespace Pecee\Xml\Translate;
+namespace Pecee\Translation\Providers;
 
-class Translate {
+use Pecee\Exceptions\TranslationException;
+
+class XmlTranslateProvider implements ITranslationProvider {
 
 	protected $xml;
 	protected $dir;
@@ -13,7 +15,7 @@ class Translate {
 
 	public function lookup($key) {
 		if(!$this->dir) {
-			throw new TranslateException('XML language directory must be specified.');
+			throw new TranslationException('XML language directory must be specified.');
 		}
 
 		$xml = new \SimpleXmlElement($this->xml);
@@ -36,14 +38,16 @@ class Translate {
 			return $node;
 		}
 
-		throw new TranslateException(sprintf('Key "%s" does not exist for locale "%s"', $key, request()->locale->getLocale()));
+		throw new TranslationException(sprintf('Key "%s" does not exist for locale "%s"', $key, request()->locale->getLocale()));
 	}
 
 	public function setLanguageXml() {
 		$path = sprintf('%s/%s.xml', $this->dir, str_replace('-', '_', strtolower(request()->locale->getLocale())));
+
 		if(!file_exists($path)) {
-			throw new TranslateException(sprintf('Language file %s not found for locale %s', $path, request()->locale->getLocale()));
+			throw new TranslationException(sprintf('Language file %s not found for locale %s', $path, request()->locale->getLocale()));
 		}
+
 		$this->xml = file_get_contents($path, FILE_USE_INCLUDE_PATH);
 	}
 

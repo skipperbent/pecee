@@ -1,9 +1,11 @@
 <?php
 namespace Pecee\Translation;
 
+use Pecee\Translation\Providers\ITranslationProvider;
+
 class Translation {
 
-	protected $translator;
+	protected $provider;
 
 	/**
 	 * Translate message.
@@ -34,18 +36,18 @@ class Translation {
     }
 
 	protected function lookup($key) {
-        if($this->translator instanceof ITranslator) {
-            return $this->translator->lookup($key);
+        if($this->provider instanceof ITranslationProvider) {
+            return $this->provider->lookup($key);
         }
 
         return $key;
 	}
 
-	public function setTranslator(ITranslator $translator) {
-		$this->translator = $translator;
+	public function setProvider(ITranslationProvider $provider) {
+		$this->provider = $provider;
 	}
 
-	public function getTranslator() {
-		return $this->translator;
+	public function getProvider() {
+		return $this->provider;
 	}
 }
