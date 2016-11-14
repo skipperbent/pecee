@@ -56,6 +56,25 @@ function lang($key, $args = null) {
 }
 
 /**
+ * Add debug message.
+ * Requires DEBUG=1 to be present in your env file.
+ * @param $text
+ */
+function debug($text) {
+    if(env('DEBUG', false)) {
+        request()->debug->add($text);
+    }
+}
+
+function add_module($name, $path) {
+    if(request()->modules === null) {
+        request()->modules = new \Pecee\Modules();
+    }
+
+    request()->modules->add($name, $path);
+}
+
+/**
  * Get environment variable
  * @param $key
  * @param null $default

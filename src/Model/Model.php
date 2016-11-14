@@ -86,12 +86,12 @@ abstract class Model implements \IteratorAggregate {
 
             $this->queryable->getQuery()->registerEvent('before-*', $this->table,
                 function (QueryBuilderHandler $qb) {
-                    request()->debug->add('START QUERY: ' . $qb->getQuery()->getRawSql());
+                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
                 });
 
             $this->queryable->getQuery()->registerEvent('after-*', $this->table,
                 function (QueryBuilderHandler $qb) {
-                    request()->debug->add('END QUERY: ' . $qb->getQuery()->getRawSql());
+                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
                 });
         }
 

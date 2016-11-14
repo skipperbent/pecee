@@ -5,13 +5,11 @@ use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug {
 
-	protected $enabled;
 	protected $lastTime;
 	protected $stack;
 	protected $startTime;
 
 	public function __construct(){
-		$this->enabled = false;
 		$this->startTime = microtime(true);
         $this->stack = array();
 		$this->add('Debugger initialized.');
@@ -22,7 +20,7 @@ class Debug {
 	}
 
 	protected function getTime() {
-		return number_format(microtime(true)-$this->startTime, 10);
+		return number_format(microtime(true) - $this->startTime, 10);
 	}
 
 	protected function addObject($text) {
@@ -72,17 +70,7 @@ class Debug {
 	}
 
 	public function add($text) {
-		if($this->enabled) {
-			$this->addObject($text);
-		}
-	}
-
-	public function getEnabled() {
-		return $this->enabled;
-	}
-
-	public function setEnabled($bool) {
-		$this->enabled = $bool;
+        $this->addObject($text);
 	}
 
 	public function __toString() {

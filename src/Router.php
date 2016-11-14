@@ -9,7 +9,7 @@ class Router extends SimpleRouter {
 
     public static function start($defaultNamespace = null) {
 
-        request()->debug->add('Router initialised.');
+        debug('Router initialised.');
 
         Session::start();
 

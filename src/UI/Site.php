@@ -15,7 +15,11 @@ class Site {
 	const CHARSET_UTF8 = 'UTF-8';
 
 	// Settings
-	public static $docTypes = array(self::DOCTYPE_XHTML_DEFAULT, self::DOCTYPE_XHTML_STRICT, self::DOCTYPE_HTML_5);
+    public static $docTypes = [
+        self::DOCTYPE_XHTML_DEFAULT,
+        self::DOCTYPE_XHTML_STRICT,
+        self::DOCTYPE_HTML_5
+    ];
 
 	protected $docType;
 	protected $charset;
@@ -38,7 +42,6 @@ class Site {
 		$this->jsPath = 'public/js/';
 		$this->cssPath = 'public/css/';
 		$this->keywords = array();
-		$this->cacheEnabled = true;
 		$this->adminIps = array('127.0.0.1', '::1');
 	}
 

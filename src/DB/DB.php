@@ -143,7 +143,7 @@ class DB {
 	}
 
 	public function query($query, $pageIndex = null, $pageSize = null, $args = null) {
-        request()->debug->add('START SQL-QUERY:<br/>' . $query);
+        debug('START SQL-QUERY:<br/>' . $query);
 		if(!is_array($args) && !is_null($args)) {
 			$args = func_get_args();
 			$args = array_slice($args, 3);
@@ -158,7 +158,7 @@ class DB {
 			$code = $this->connection->errno;
 			throw new DBException($this->connection->error,$code, $this->sql);
 		}
-        request()->debug->add('<div style="padding-left:20px;color:#999;">END SQL-QUERY</div>');
+        debug('<div style="padding-left:20px;color:#999;">END SQL-QUERY</div>');
 		return $q;
 	}
 

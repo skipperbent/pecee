@@ -21,7 +21,7 @@ abstract class Widget extends Base  {
 
         parent::__construct();
 
-        request()->debug->add('START WIDGET: ' . static::class);
+        debug('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
         $this->jsWrapRoute = url('pecee.js.wrap');
@@ -201,30 +201,30 @@ abstract class Widget extends Base  {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        request()->debug->add('END WIDGET: ' . static::class);
+        debug('END WIDGET: ' . static::class);
         return $this->_contentHtml;
     }
 
     protected function renderContent() {
-        request()->debug->add('START: rendering content-template: ' . $this->_contentTemplate);
+        debug('START: rendering content-template: ' . $this->_contentTemplate);
         if($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
-        request()->debug->add('END: rendering content-template: ' . $this->_contentTemplate);
+        debug('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
     protected function renderTemplate() {
-        request()->debug->add('START: rendering template: ' . $this->_template);
+        debug('START: rendering template: ' . $this->_template);
         if($this->_template !== '') {
             ob_start();
             include $this->_template;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
-        request()->debug->add('END: rendering template ' . $this->_template);
+        debug('END: rendering template ' . $this->_template);
     }
 
     protected function setJsWrapRoute($route) {

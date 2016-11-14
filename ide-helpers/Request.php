@@ -34,4 +34,9 @@ class Request extends \Pecee\Http\Request {
      */
     public $translation;
 
+    /**
+     * @var \Pecee\Modules
+     */
+    public $modules;
+
 }

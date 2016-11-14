@@ -12,19 +12,11 @@ abstract class Base {
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_messages;
-    /**
-     * @var \Pecee\UI\Site
-     */
-    protected $_site;
     protected $validations = array();
 
     public function __construct() {
-
-        request()->debug->add('BASE CLASS ' . static::class);
-
-        $this->_site = request()->site;
+        debug('BASE CLASS ' . static::class);
         $this->_messages = SessionMessage::getInstance();
-
         $this->setInputValues();
     }
 
@@ -118,11 +110,11 @@ abstract class Base {
 
     protected function appendSiteTitle($title, $separator = '-') {
         $separator = ($separator === null) ? '': sprintf(' %s ', $separator);
-        $this->_site->setTitle(($this->_site->getTitle() . $separator . $title));
+        request()->site->setTitle((request()->site->getTitle() . $separator . $title));
     }
 
     protected function prependSiteTitle($title, $separator = ' - ') {
-        $this->_site->setTitle(($title . $separator .$this->_site->getTitle()));
+        request()->site->setTitle(($title . $separator . request()->site->getTitle()));
     }
 
     /**
@@ -135,10 +127,10 @@ abstract class Base {
 
     /**
      * Get site
-     * @return Site
+     * @return \Pecee\UI\Site
      */
     public function getSite() {
-        return $this->_site;
+        return request()->site;
     }
 
     /**

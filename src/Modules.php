@@ -1,7 +1,7 @@
 <?php
 namespace Pecee;
 
-class Module {
+class Modules {
 
 	protected $modules = array();
 

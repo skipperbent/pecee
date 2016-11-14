@@ -20,5 +20,4 @@ request()->site = new \Pecee\UI\Site();
 
 // Debugger
 request()->debug = new \Pecee\Debug();
-request()->debug->setEnabled(env('DEBUG', false));
-request()->debug->add('Framework loaded');
+debug('Framework loaded');
