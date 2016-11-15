@@ -10,8 +10,8 @@ use Pecee\UI\Site;
 
 abstract class Widget extends Base  {
 
-    protected $jsWrapRoute;
-    protected $cssWrapRoute;
+    protected $_jsWrapRoute;
+    protected $_cssWrapRoute;
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
@@ -24,8 +24,8 @@ abstract class Widget extends Base  {
         debug('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->jsWrapRoute = url('pecee.js.wrap');
-        $this->cssWrapRoute = url('pecee.css.wrap');
+        $this->_jsWrapRoute = url('pecee.js.wrap');
+        $this->_cssWrapRoute = url('pecee.css.wrap');
         $this->_form = new Form();
     }
 
@@ -67,15 +67,15 @@ abstract class Widget extends Base  {
 
         $o = $enc;
 
-        if($this->_site->getTitle())  {
-            $o .= '<title>' . $this->_site->getTitle() . '</title>';
+        if($this->getSite()->getTitle())  {
+            $o .= '<title>' . $this->getSite()->getTitle() . '</title>';
         }
 
-        if($this->_site->getDescription()) {
-            $this->_site->addMeta('description', $this->_site->getDescription());
+        if($this->getSite()->getDescription()) {
+            $this->getSite()->addMeta('description', $this->getSite()->getDescription());
         }
-        if(count($this->_site->getKeywords())) {
-            $this->_site->addMeta('keywords', join(', ', $this->_site->getKeywords()));
+        if(count($this->getSite()->getKeywords())) {
+            $this->getSite()->addMeta('keywords', join(', ', $this->getSite()->getKeywords()));
         }
 
         if($includeCss === true) {
@@ -86,8 +86,8 @@ abstract class Widget extends Base  {
             $o .= $this->printJs();
         }
 
-        if(count($this->_site->getHeader())) {
-            $header = $this->_site->getHeader();
+        if(count($this->getSite()->getHeader())) {
+            $header = $this->getSite()->getHeader();
             $o .= join('', $header);
         }
 
@@ -96,7 +96,7 @@ abstract class Widget extends Base  {
 
     public function printCss($section = Site::SECTION_DEFAULT) {
         $o = '';
-        if(count($this->_site->getCssFilesWrapped($section))) {
+        if(count($this->getSite()->getCssFilesWrapped($section))) {
 
             $getParams = array();
 
@@ -104,11 +104,11 @@ abstract class Widget extends Base  {
                 $getParams = ['_' => time()];
             }
 
-            $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped($section), ',')], $getParams));
+            $url = url($this->_cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')], $getParams));
             $o .= new HtmlLink($url);
         }
 
-        foreach($this->_site->getCss($section) as $c) {
+        foreach($this->getSite()->getCss($section) as $c) {
             $type = ($this->getSite()->getDocType() === Site::DOCTYPE_HTML_5) ? null : 'text/css';
             $o .= new HtmlLink($c, 'stylesheet', $type);
         }
@@ -117,7 +117,7 @@ abstract class Widget extends Base  {
 
     public function printJs($section = Site::SECTION_DEFAULT) {
         $o = '';
-        if(count($this->_site->getJsFilesWrapped($section))) {
+        if(count($this->getSite()->getJsFilesWrapped($section))) {
 
             $getParams = array();
 
@@ -125,11 +125,11 @@ abstract class Widget extends Base  {
                 $getParams = ['_' => time()];
             }
 
-            $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped($section), ',')], $getParams));
+            $url = url($this->_jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')], $getParams));
             $o .= new HtmlScript($url);
         }
 
-        foreach($this->_site->getJs($section) as $j) {
+        foreach($this->getSite()->getJs($section) as $j) {
             $o .= new HtmlScript($j);
         }
         return $o;
@@ -228,11 +228,11 @@ abstract class Widget extends Base  {
     }
 
     protected function setJsWrapRoute($route) {
-        $this->jsWrapRoute = $route;
+        $this->_jsWrapRoute = $route;
     }
 
     protected function setCssWrapRoute($route) {
-        $this->cssWrapRoute = $route;
+        $this->_cssWrapRoute = $route;
     }
 
 }

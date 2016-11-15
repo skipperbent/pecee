@@ -14,8 +14,6 @@ use Pecee\UI\Html\HtmlTextarea;
 
 class Form {
 
-    const FORM_ENCTYPE_FORM_DATA = 'multipart/form-data';
-
     protected $name;
 
     /**
@@ -26,7 +24,7 @@ class Form {
      * @param string $enctype
      * @return \Pecee\UI\Html\HtmlForm
      */
-    public function start($name = null, $method = 'post', $action = null, $enctype = 'multipart/form-data') {
+    public function start($name = null, $method = 'post', $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED) {
         $this->name = $name;
         return new HtmlForm($name, $method, $action, $enctype);
     }

@@ -2,7 +2,6 @@
 namespace Pecee\Controller\File;
 
 use Pecee\Controller\Controller;
-use Pecee\UI\Site;
 use Pecee\Http\YuiCompressor\YuiCompressor;
 
 abstract class FileAbstract extends Controller {

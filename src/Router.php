@@ -3,7 +3,6 @@ namespace Pecee;
 
 use Pecee\Session\Session;
 use Pecee\SimpleRouter\SimpleRouter;
-use Pecee\UI\Site;
 
 class Router extends SimpleRouter {
 
@@ -18,7 +17,6 @@ class Router extends SimpleRouter {
         static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
 
         // Load routes.php
-
         require_once $_ENV['base_path'] . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
 
         parent::start('\\'.$_ENV['app_name'] . '\\Controller');

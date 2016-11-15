@@ -79,4 +79,14 @@ class Str {
         $word[0] = strtolower($word[0]);
         return $word;
     }
+
+    /**
+     * Returns weather the $value is a valid email.
+     * @param string $email
+     * @return bool
+     */
+    public static function isEmail($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+
 }

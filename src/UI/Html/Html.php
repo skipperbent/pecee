@@ -6,20 +6,19 @@ use Pecee\Widget\Widget;
 
 class Html {
 
-    protected $type;
-    protected $innerHtml;
-    protected $closingType;
-    protected $attributes;
-
     const CLOSE_TYPE_SELF = 'self';
     const CLOSE_TYPE_TAG = 'tag';
     const CLOSE_TYPE_NONE = 'none';
 
-    public function __construct($type) {
-        $this->type = $type;
-        $this->attributes = array();
-        $this->closingType = static::CLOSE_TYPE_TAG;
-        $this->innerHtml = array();
+    protected $docType;
+    protected $tag;
+    protected $innerHtml = array();
+    protected $closingType = self::CLOSE_TYPE_TAG;
+    protected $attributes = array();
+
+    public function __construct($tag) {
+        $this->tag = $tag;
+        $this->docType = request()->site->getDocType();
     }
 
     /**
@@ -54,7 +53,7 @@ class Html {
      *
      * @param string $name
      * @param string $value
-     * @return static
+     * @return self
      */
     public function replaceAttribute($name, $value = '') {
         $this->attributes[$name] = array($value);
@@ -66,7 +65,7 @@ class Html {
      *
      * @param string $name
      * @param string $value
-     * @return static
+     * @return self
      */
     public function addAttribute($name, $value = '') {
         if(!isset($this->attributes[$name])) {
@@ -83,7 +82,7 @@ class Html {
         return $this;
     }
 
-    public function attr($name, $value = '', $replace = false) {
+    public function attr($name, $value = '', $replace = true) {
         if($replace === true) {
             return $this->replaceAttribute($name, $value);
         }
@@ -91,36 +90,31 @@ class Html {
     }
 
     public function id($id) {
-        $this->attr('id', $id);
-        return $this;
+        return $this->attr('id', $id);
     }
 
     public function style($css) {
-        $this->attr('style', $css);
-        return $this;
+        return $this->attr('style', $css);
     }
 
     protected function writeHtml() {
-        $output = '<'.$this->type;
+        $output = '<'.$this->tag;
         foreach($this->attributes as $key =>  $val) {
             $output .= ' '.$key. (($val[0] !== null || strtolower($key) === 'value') ? '="' . join(' ', $val) . '"' : '');
         }
-        $output .= ($this->closingType === static::CLOSE_TYPE_SELF) ? '/>' : '>';
-        foreach($this->innerHtml as $html) {
-            $output.=$html;
-        }
-        $output .= (($this->closingType === static::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->type) : '');
+        $output .= ($this->closingType === self::CLOSE_TYPE_SELF) ? '/>' : '>';
+        $output .= join('', $this->innerHtml);
+        $output .= (($this->closingType === self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->tag) : '');
         return $output;
     }
 
     /**
      * Add class
      * @param string $class
-     * @return static
+     * @return self
      */
     public function addClass($class) {
-        $this->addAttribute('class', $class);
-        return $this;
+        return $this->attr('class', $class, false);
     }
 
     /**
@@ -128,10 +122,6 @@ class Html {
      */
     public function getClosingType() {
         return $this->closingType;
-    }
-
-    public function getType() {
-        return $this->type;
     }
 
     /**
@@ -155,6 +145,22 @@ class Html {
 
     public function getAttributes() {
         return $this->attributes;
+    }
+
+    public function setTag($tag) {
+        $this->tag = $tag;
+        return $this;
+    }
+
+    public function getTag() {
+        return $this->tag;
+    }
+
+    public function removeAttribute($name) {
+        if(isset($this->attributes[$name])) {
+            unset($this->attributes[$name]);
+        }
+        return $this;
     }
 
 }

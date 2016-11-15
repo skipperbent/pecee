@@ -1,13 +1,13 @@
 <?php
 namespace Pecee\UI\Form\Validation;
 
-use Pecee\Util;
+use Pecee\Str;
 
 class ValidateEmail extends ValidateInput {
 
 	public function validates() {
 		if($this->input->getValue()) {
-			return Util::is_email($this->input->getValue());
+			return Str::isEmail($this->input->getValue());
 		}
 		return true;
 	}
