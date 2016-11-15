@@ -10,12 +10,12 @@ use Pecee\UI\Site;
 
 abstract class Widget extends Base  {
 
-    protected $jsWrapRoute;
-    protected $cssWrapRoute;
+    protected $_jsWrapRoute;
+    protected $_cssWrapRoute;
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
-    protected $form;
+    protected $_form;
 
     public function __construct() {
 
@@ -24,9 +24,9 @@ abstract class Widget extends Base  {
         debug('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->jsWrapRoute = url('pecee.js.wrap');
-        $this->cssWrapRoute = url('pecee.css.wrap');
-        $this->form = new Form($this->_input);
+        $this->_jsWrapRoute = url('pecee.js.wrap');
+        $this->_cssWrapRoute = url('pecee.css.wrap');
+        $this->_form = new Form();
     }
 
     /**
@@ -36,16 +36,16 @@ abstract class Widget extends Base  {
      */
     protected function getTemplatePath() {
         $path = array_slice(explode('\\', static::class), 2);
-        return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return 'Template/Content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
-    public function showMessages($type, $form = null, $placement = null) {
+    public function showMessages($type, $placement = null) {
         $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
-        if($this->hasMessages($type, $form, $placement)) {
+        if($this->hasMessages($type, $placement)) {
             $o = sprintf('<div class="alert alert-%s">', $type);
             $msg = array();
             /* @var $error \Pecee\UI\Form\FormMessage */
-            foreach($this->getMessages($type, $form, $placement) as $error) {
+            foreach($this->getMessages($type, $placement) as $error) {
                 $msg[] = sprintf('%s', $error->getMessage());
             }
 
@@ -104,12 +104,13 @@ abstract class Widget extends Base  {
                 $getParams = ['_' => time()];
             }
 
-            $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')], $getParams));
+            $url = url($this->_cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')], $getParams));
             $o .= new HtmlLink($url);
         }
 
         foreach($this->getSite()->getCss($section) as $c) {
-            $o .= $c;
+            $type = ($this->getSite()->getDocType() === Site::DOCTYPE_HTML_5) ? null : 'text/css';
+            $o .= new HtmlLink($c, 'stylesheet', $type);
         }
         return $o;
     }
@@ -124,12 +125,12 @@ abstract class Widget extends Base  {
                 $getParams = ['_' => time()];
             }
 
-            $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')], $getParams));
+            $url = url($this->_jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')], $getParams));
             $o .= new HtmlScript($url);
         }
 
         foreach($this->getSite()->getJs($section) as $j) {
-            $o .= $j;
+            $o .= new HtmlScript($j);
         }
         return $o;
     }
@@ -138,7 +139,7 @@ abstract class Widget extends Base  {
         return $this->_template;
     }
 
-    protected function setTemplate($path,$relative = true) {
+    protected function setTemplate($path, $relative = true) {
         $this->_template = (($relative === true && trim($path) !== '') ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
@@ -163,7 +164,7 @@ abstract class Widget extends Base  {
      * @return Form
      */
     public function form() {
-        return $this->form;
+        return $this->_form;
     }
 
     /**
@@ -173,7 +174,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require('Template' . DIRECTORY_SEPARATOR . 'Snippet' . DIRECTORY_SEPARATOR . $file);
+        require 'Templates/snippets/' . $file;
     }
 
     /**
@@ -181,7 +182,7 @@ abstract class Widget extends Base  {
      * @param \Pecee\Widget\Widget $widget
      */
     public function widget(Widget $widget) {
-        if($widget->getTemplate() === 'Template'. DIRECTORY_SEPARATOR .'Default.php') {
+        if($widget->getTemplate() === $this->getTemplatePath()) {
             $widget->setTemplate(null);
         }
         echo $widget;
@@ -227,11 +228,11 @@ abstract class Widget extends Base  {
     }
 
     protected function setJsWrapRoute($route) {
-        $this->jsWrapRoute = $route;
+        $this->_jsWrapRoute = $route;
     }
 
     protected function setCssWrapRoute($route) {
-        $this->cssWrapRoute = $route;
+        $this->_cssWrapRoute = $route;
     }
 
 }

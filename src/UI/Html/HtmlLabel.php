@@ -2,12 +2,15 @@
 namespace Pecee\UI\Html;
 
 class HtmlLabel extends Html {
-	public function __construct($name, $for) {
+
+	public function __construct($name, $for = null) {
 		parent::__construct('label');
-		if($for) {
+
+        if($for !== null) {
 			$this->addAttribute('for', $for);
 		}
-		//$this->closingTag = false;
-		$this->setInnerHtml($name);
+
+		$this->addInnerHtml($name);
 	}
+    
 }

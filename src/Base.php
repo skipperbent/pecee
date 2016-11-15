@@ -1,18 +1,18 @@
 <?php
 namespace Pecee;
 
-use Pecee\Http\OInput\IInputItem;
-use Pecee\Http\OInput\Input;
+use Pecee\Http\Input\InputItem;
+use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
 
 abstract class Base {
 
-    protected $_inputSessionKey = 'InputValues';
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
+    protected $_inputSessionKey = 'InputValues';
     protected $_messages;
-    protected $validations = array();
+    protected $_validations = array();
 
     public function __construct() {
         debug('BASE CLASS ' . static::class);
@@ -65,13 +65,13 @@ abstract class Base {
                     $validations = array($validations);
                 }
 
-                $this->validations[$key] = $validations;
+                $this->_validations[$key] = $validations;
             }
         }
     }
 
     protected function validateInput() {
-        foreach($this->validations as $key => $validations) {
+        foreach($this->_validations as $key => $validations) {
             /* @var $input \Pecee\Http\Input\InputItem */
             /* @var $i \Pecee\Http\Input\InputItem */
             $input = input()->getObject($key, new InputItem($key, null));
@@ -162,7 +162,6 @@ abstract class Base {
         if($this->_messages->get($type) !== null) {
             /* @var $message FormMessage */
             foreach ($this->_messages->get($type) as $message) {
-
                 if (($placement === null || $message->getPlacement() === $placement)) {
                     $messages[] = $message;
                 }

@@ -1,11 +1,13 @@
 <?php
 namespace Pecee\UI\Form;
+
 class FormMessage {
+
+    protected $form;
 	protected $name;
 	protected $index;
 	protected $message;
 	protected $placement;
-	protected $form;
 
 	/**
 	 * Get name assosiated with the element (if any)
@@ -54,7 +56,7 @@ class FormMessage {
 	public function setMessage($message) {
 		$this->message = $message;
 	}
-	
+
 	/**
 	 * @return string $placement
 	 */
@@ -67,13 +69,6 @@ class FormMessage {
 	 */
 	public function setPlacement($placement) {
 		$this->placement = $placement;
-	}
-	
-	/**
-	 * @return string $form
-	 */
-	public function getForm() {
-		return $this->form;
 	}
 
 	/**

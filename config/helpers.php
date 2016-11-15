@@ -87,3 +87,11 @@ function csrf_token() {
     $token = new \Pecee\CsrfToken();
     return $token->getToken();
 }
+
+/**
+ * Get input class
+ * @return \Pecee\Http\Input\Input
+ */
+function input() {
+    return request()->getInput();
+}

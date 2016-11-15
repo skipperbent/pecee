@@ -41,7 +41,7 @@ class SessionMessage {
      * @return \Pecee\UI\Form\FormMessage|object
      */
     public function get($type = null, $default = null) {
-        if(!is_null($type)) {
+        if($type !== null) {
             return (isset($this->messages[$type])) ? $this->messages[$type] : $default;
         }
         return $this->messages;
@@ -53,14 +53,14 @@ class SessionMessage {
      * @return boolean
      */
     public function hasMessages($type = null) {
-        if(!is_null($type)) {
+        if($type !== null) {
             return (isset($this->messages[$type]) && count($this->messages[$type]) > 0);
         }
         return (count($this->messages) > 0);
     }
 
     public function clear($type = null) {
-        if(!is_null($type)) {
+        if($type !== null) {
             unset($this->messages[$type]);
             $this->saveMessages();
         } else {
