@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\UI\Form\Validation\File;
+namespace Pecee\UI\Form\Validation;
 
 use Pecee\Http\Input\InputFile;
 
