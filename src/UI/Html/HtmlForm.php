@@ -12,7 +12,7 @@ class HtmlForm extends Html {
     const METHOD_POST = 'post';
     const METHOD_GET = 'get';
 
-	public function __construct($name, $method = self::METHOD_GET, $action = null, $enctype = self::ENCTYPE_APPLICATION_URLENCODED) {
+	public function __construct($name, $method = self::METHOD_POST, $action = null, $enctype = self::ENCTYPE_APPLICATION_URLENCODED) {
 		parent::__construct('form');
 
 		$this->closingType = self::CLOSE_TYPE_NONE;
