@@ -19,7 +19,8 @@ class Router extends SimpleRouter {
         // Load routes.php
         require_once $_ENV['base_path'] . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
 
-        parent::start('\\'.$_ENV['app_name'] . '\\Controller');
+        parent::setDefaultNamespace('\\'. env('APP_NAME') . '\\Controller');
+        parent::start();
 
         // Output debug info
         if(env('DEBUG', false) && request()->site->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {

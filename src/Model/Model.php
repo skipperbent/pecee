@@ -134,13 +134,16 @@ abstract class Model implements \IteratorAggregate {
             throw new ModelException('Columns property not defined.');
         }
 
-        if($data !== null) {
-            $data = array_merge($this->getRows(), $data);
-        } else {
-            $data = $this->getRows();
+        $updateData = array();
+        foreach($this->columns as $column) {
+            $updateData[$column] = $this->{$column};
         }
 
-        $this->setRows($data);
+        if($data !== null) {
+            $updateData = array_merge($updateData, $data);
+        }
+
+        $this->mergeRows($updateData);
 
         if($this->exists()) {
 
@@ -148,17 +151,17 @@ abstract class Model implements \IteratorAggregate {
                 $this->updated_at = Carbon::now()->toDateTimeString();
             }
 
-            if(isset($data[$this->getPrimary()])) {
+            if(isset($updateData[$this->getPrimary()])) {
                 // Remove primary key
-                unset($data[$this->getPrimary()]);
+                unset($updateData[$this->getPrimary()]);
             }
 
-            $this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($data);
+            $this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         } else {
             if($this->{$this->primary} === null) {
-                $this->{$this->primary} = $this->instance()->getQuery()->insert($data);
+                $this->{$this->primary} = $this->instance()->getQuery()->insert($updateData);
             } else {
-                $this->instance()->getQuery()->insert($data);
+                $this->instance()->getQuery()->insert($updateData);
             }
         }
 

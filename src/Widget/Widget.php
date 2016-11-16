@@ -35,7 +35,7 @@ abstract class Widget extends Base  {
      */
     protected function getTemplatePath() {
         $path = array_slice(explode('\\', static::class), 2);
-        return 'Template/Content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return 'views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     public function showMessages($type, $placement = null) {
@@ -123,7 +123,7 @@ abstract class Widget extends Base  {
     }
 
     protected function setTemplate($path, $relative = true) {
-        $this->_template = (($relative === true && trim($path) !== '') ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
+        $this->_template = (($relative === true && trim($path) !== '') ? 'views' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
     protected function setContentTemplate($template) {
@@ -157,7 +157,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require 'Template/Snippets/' . $file;
+        require 'views/snippets/' . $file;
     }
 
     /**

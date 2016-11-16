@@ -24,7 +24,7 @@ class Form {
      * @param string|null $enctype
      * @return \Pecee\UI\Html\HtmlForm
      */
-    public function start($name, $method = HtmlForm::METHOD_GET, $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED) {
+    public function start($name, $method = HtmlForm::METHOD_POST, $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED) {
         $this->name = $name;
         return new HtmlForm($name, $method, $action, $enctype);
     }

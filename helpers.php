@@ -58,7 +58,7 @@ function lang($key, $args = null) {
 /**
  * Add debug message.
  * Requires DEBUG=1 to be present in your env file.
- * @param $text
+ * @param string $text
  */
 function debug($text) {
     if(env('DEBUG', false)) {
@@ -76,14 +76,13 @@ function add_module($name, $path) {
 
 /**
  * Get environment variable
- * @param $key
+ * @param string $key
  * @param null $default
  *
  * @return string|null
  */
 function env($key, $default = null) {
-    $value = getenv($key);
-    return ($value === false) ? $default : $value;
+    return isset($_ENV[$key]) ? $_ENV[$key] : $default;
 }
 
 /**
@@ -91,7 +90,7 @@ function env($key, $default = null) {
  * @return string|null
  */
 function csrf_token() {
-    $baseVerifier = \Pecee\SimpleRouter\RouterBase::getInstance()->getBaseCsrfVerifier();
+    $baseVerifier = \Pecee\SimpleRouter\RouterBase::getInstance()->getCsrfVerifier();
     if($baseVerifier !== null) {
         return $baseVerifier->getToken();
     }
