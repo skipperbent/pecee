@@ -5,7 +5,7 @@ use Pecee\UI\Site;
 
 class HtmlSelectOption extends Html {
 
-	public function __construct($name, $value, $selected = false) {
+	public function __construct($value, $text = null, $selected = false) {
 		parent::__construct('option');
 
         $this->addAttribute('value', $value);
@@ -19,7 +19,9 @@ class HtmlSelectOption extends Html {
             }
 		}
 
-		$this->addInnerHtml($name);
+		if($text !== null) {
+            $this->addInnerHtml($text);
+        }
 	}
 
 }

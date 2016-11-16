@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\UI\Menu\Menu;
+use Pecee\UI\Site;
 use Pecee\Widget\Widget;
 
 class Html {
@@ -40,10 +40,6 @@ class Html {
         return $this->addInnerHtml($widget->__toString());
     }
 
-    public function addMenu(Menu $menu) {
-        return $this->addInnerHtml($menu->__toString());
-    }
-
     public function addItem(Html $htmlItem) {
         return $this->addInnerHtml($htmlItem->__toString());
     }
@@ -53,7 +49,7 @@ class Html {
      *
      * @param string $name
      * @param string $value
-     * @return self
+     * @return static
      */
     public function replaceAttribute($name, $value = '') {
         $this->attributes[$name] = array($value);
@@ -65,7 +61,7 @@ class Html {
      *
      * @param string $name
      * @param string $value
-     * @return self
+     * @return static
      */
     public function addAttribute($name, $value = '') {
         if(!isset($this->attributes[$name])) {
@@ -98,12 +94,20 @@ class Html {
     }
 
     protected function writeHtml() {
-        $output = '<'.$this->tag;
-        foreach($this->attributes as $key =>  $val) {
-            $output .= ' '.$key. (($val[0] !== null || strtolower($key) === 'value') ? '="' . join(' ', $val) . '"' : '');
+        $output = '<' . $this->tag;
+
+        foreach($this->attributes as $key => $val) {
+            $output .= ' ' . $key;
+            if($val[0] !== null || strtolower($key) === 'value') {
+                $val = htmlentities(join(' ', $val), ENT_QUOTES, request()->site->getCharset());
+                $output .= '="' . $val . '"';
+            }
         }
-        $output .= ($this->closingType === self::CLOSE_TYPE_SELF) ? '/>' : '>';
+
+        $output .= ($this->closingType === self::CLOSE_TYPE_SELF && $this->docType !== Site::DOCTYPE_HTML_5) ? '/>' : '>';
+
         $output .= join('', $this->innerHtml);
+
         $output .= (($this->closingType === self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->tag) : '');
         return $output;
     }
@@ -111,7 +115,7 @@ class Html {
     /**
      * Add class
      * @param string $class
-     * @return self
+     * @return static
      */
     public function addClass($class) {
         return $this->attr('class', $class, false);

@@ -1,3 +1,3 @@
 <?php
-namespace Pecee\Http\YuiCompressor;
+namespace Pecee\UI\YuiCompressor;
 class YuiCompressorException extends \ErrorException { }

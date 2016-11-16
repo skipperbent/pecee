@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\Str;
 use Pecee\UI\Site;
 
 class HtmlInput extends Html {
@@ -16,7 +15,7 @@ class HtmlInput extends Html {
 		$this->name($name);
 
 		if($value !== null){
-			$this->value(Str::htmlEntities($value));
+			$this->value($value);
 		}
 
 	}
@@ -75,7 +74,7 @@ class HtmlInput extends Html {
 
     public function checked($checked) {
         if($checked)  {
-            $this->addInputAttribute('checked', $checked);
+            $this->addInputAttribute('checked');
         } else {
             $this->removeAttribute('checked');
         }

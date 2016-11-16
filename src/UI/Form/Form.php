@@ -19,12 +19,12 @@ class Form {
     /**
      * Starts new form
      * @param string $name
-     * @param string $method
-     * @param string $action
-     * @param string $enctype
+     * @param string|null $method
+     * @param string|null $action
+     * @param string|null $enctype
      * @return \Pecee\UI\Html\HtmlForm
      */
-    public function start($name = null, $method = 'post', $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED) {
+    public function start($name, $method = HtmlForm::METHOD_GET, $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED) {
         $this->name = $name;
         return new HtmlForm($name, $method, $action, $enctype);
     }
@@ -38,7 +38,7 @@ class Form {
      * @return \Pecee\UI\Html\HtmlInput
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true) {
-        if($saveValue && (is_null($value) && input()->exists($name) || request()->getMethod() !== 'get')) {
+        if($saveValue && ($value === null && input()->exists($name) || request()->getMethod() !== 'get')) {
             $value = input()->get($name);
         }
         return new HtmlInput($name, $type, $value);
@@ -55,8 +55,8 @@ class Form {
     public function radio($name, $value, $saveValue = true) {
         $element = new HtmlInput($name, 'radio', $value);
 
-        if($saveValue && input()->get($name, false) == $value) {
-            $element->addAttribute('checked', 'checked');
+        if($saveValue && input()->get($name) !== null && input()->get($name) == $value) {
+            $element->checked(true);
         }
 
         return $element;
@@ -80,11 +80,11 @@ class Form {
             }
             $checked = Boolean::parse(input()->get($name, $defaultValue));
             if($checked) {
-                $element->addAttribute('checked', 'checked');
+                $element->checked(true);
             }
         } else {
             if(Boolean::parse($value)) {
-                $element->addAttribute('checked', 'checked');
+                $element->checked(true);
             }
         }
         return $element;
@@ -110,21 +110,22 @@ class Form {
      */
     public function selectStart($name, $data = null, $value = null, $saveValue = true) {
         $element = new HtmlSelect($name);
-        if(!is_null($data)) {
+        if($data !== null) {
             if($data instanceof Dataset) {
-                $arr = $data->getData();
-                if(count($arr)) {
-                    foreach($data->getData() as $i) {
-                        $val = (!isset($i['value'])) ? $i['name'] : $i['value'];
-                        $selected = (input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
-                        $element->addOption(new HtmlSelectOption($i['name'], $val, $selected));
-                    }
+
+                foreach($data->getData() as $item) {
+                    $val = isset($item['value']) ? $item['value'] : $item['name'];
+                    $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($item['selected']) && $item['selected']) || !$saveValue && $value == $val);
+                    $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
                 }
+
             } elseif(is_array($data)) {
+
                 foreach($data as $val => $key) {
-                    $selected = (input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($i['selected']) && $i['selected']) || !$saveValue && $value == $val);
-                    $element->addOption(new HtmlSelectOption($key, $val, $selected));
+                    $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || !$saveValue && $value == $val);
+                    $element->addOption(new HtmlSelectOption($val, $key, $selected));
                 }
+
             } else {
                 throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
             }

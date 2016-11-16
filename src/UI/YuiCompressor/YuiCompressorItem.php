@@ -1,10 +1,10 @@
 <?php
-namespace Pecee\Http\YuiCompressor;
+namespace Pecee\UI\YuiCompressor;
 
 class YuiCompressorItem {
 
 	public $filename;
-	public $filepath;
+	public $filePath;
 	public $type;
 	public $content;
 	public $options;
