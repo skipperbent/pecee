@@ -26,7 +26,6 @@ class HtmlForm extends Html {
 		if(strtolower($method) !== 'get') {
 			$this->addItem(new HtmlInput(BaseCsrfVerifier::POST_KEY, 'hidden', csrf_token()));
 		}
-
 	}
 
 	public function name($name) {
@@ -50,4 +49,5 @@ class HtmlForm extends Html {
     public function action($action) {
         return $this->attr('action', $action);
     }
+
 }

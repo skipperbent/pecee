@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Http\YuiCompressor;
+namespace Pecee\UI\YuiCompressor;
 
 class YuiCompressor {
 
@@ -20,7 +20,11 @@ class YuiCompressor {
     protected $jarFile;
     protected $tempDir;
     protected $javaExecutable = 'java';
-    protected $types = array(self::TYPE_JAVASCRIPT, self::TYPE_CSS);
+    protected $types = [
+        self::TYPE_JAVASCRIPT,
+        self::TYPE_CSS
+    ];
+
     protected $items = array();
 
     public function __construct() {
@@ -41,7 +45,7 @@ class YuiCompressor {
     public function addFile($type, $file, $options=array()) {
         $this->validateType($type);
 
-        if(!file_exists($file)) {
+        if(!is_file($file)) {
             throw new YuiCompressorException('File does not exist: ' . $file);
         }
 
@@ -60,7 +64,7 @@ class YuiCompressor {
      * @return YuiCompressor
      * @throws YuiCompressorException
      */
-    public function addContent($type, $content, $options=array() ) {
+    public function addContent($type, $content, $options = array() ) {
         $this->validateType($type);
 
         $content = preg_replace('!/\*.*?\*/!s', '', $content);
@@ -75,18 +79,18 @@ class YuiCompressor {
      * @param string $type
      * @param string $content
      * @param array $options
-     * @param null|string $filename
-     * @param null|string $filepath
+     * @param string|null $filename
+     * @param string|null $filePath
      *
      * @return self $this
      */
-    protected function addItem($type, $content, $options, $filename = null, $filepath = null) {
+    protected function addItem($type, $content, $options, $filename = null, $filePath = null) {
         $item = new YuiCompressorItem();
         $item->type = $type;
         $item->content = $content;
         $item->options = $options;
         $item->filename = $filename;
-        $item->filepath = $filepath;
+        $item->filePath = $filePath;
         $this->items[] = $item;
         return $this;
     }
@@ -114,9 +118,9 @@ class YuiCompressor {
                 $output = array();
                 exec($this->getCmd($item->options, $item->type, $tmpFile), $output);
                 unlink($tmpFile);
-                $item->minified = $output[0];
+                $item->minified = (isset($output[0]) ? $output[0] : '');
                 $item->sizeKB = round(strlen($item->content)/1024, 2);
-                $item->minifiedKB = $item->sizeKB - round(strlen($output[0])/1024, 2);
+                $item->minifiedKB = $item->sizeKB - round(strlen($item->minified)/1024, 2);
                 $item->minifiedRatio = round(($item->minifiedKB / $item->sizeKB) * 100);
             }
         }
@@ -131,20 +135,21 @@ class YuiCompressor {
     }
 
     protected function getCmd($userOptions, $type, $tmpFile) {
-        $o = array_merge([
+        $options = array_merge([
             'charset' => 'utf-8',
             'type' => $type,
             'nomunge' => true,
             'preserve-semi' => true,
             'disable-optimizations' => true,
-        ],$userOptions
-        );
+        ], $userOptions);
+
         $cmd = $this->javaExecutable . ' -jar ' . escapeshellarg($this->jarFile) . " --type {$type}"
-               . (isset($o['charset']) ? " --charset {$o['charset']}" : '')
-               . (isset($o['line-break']) && $o['line-break'] >= 0 ? ' --line-break ' . (int)$o['line-break'] : '');
-        if ($type === 'js') {
+               . (isset($options['charset']) ? " --charset {$options['charset']}" : '')
+               . (isset($options['line-break']) && $options['line-break'] >= 0 ? ' --line-break ' . (int)$options['line-break'] : '');
+
+        if ($type === static::TYPE_JAVASCRIPT) {
             foreach (array('nomunge', 'preserve-semi', 'disable-optimizations') as $opt) {
-                $cmd .= $o[$opt] ? " --{$opt}" : '';
+                $cmd .= $options[$opt] ? " --{$opt}" : '';
             }
         }
 

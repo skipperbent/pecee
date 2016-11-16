@@ -26,21 +26,18 @@ class ModelFile extends ModelData {
         'bytes',
     ];
 
-	public function __construct($name = null, $path = null) {
-		$fullPath=null;
-		if(!is_null($name) && !is_null($path)) {
-			$fullPath = Directory::normalize($path);
-		}
+	public function __construct($file) {
 
 		parent::__construct();
 
         $this->id = Guid::create();
-        $this->filename = $name;
-        $this->path = $path;
+        $this->filename = basename($file);
+        $this->original_filename = basename($file);
+        $this->path = dirname($file);
 
-        if($fullPath && is_file($fullPath)) {
-            $this->type = File::getMime($fullPath);
-            $this->bytes = filesize($fullPath);
+        if(is_file($file)) {
+            $this->type = mime_content_type($file);
+            $this->bytes = filesize($file);
         }
 	}
 
@@ -53,7 +50,7 @@ class ModelFile extends ModelData {
 	}
 
 	public function setPath($path) {
-		$this->path = $path;
+		$this->path = rtrim($path, DIRECTORY_SEPARATOR);
 	}
 
 	public function setType($type) {
@@ -89,7 +86,7 @@ class ModelFile extends ModelData {
 	}
 
 	public function getFullPath() {
-		return $this->path . Directory::normalize($this->path) . $this->Filename;
+		return $this->path . $this->Filename;
 	}
 
 	/**

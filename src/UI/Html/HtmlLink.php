@@ -23,6 +23,7 @@ class HtmlLink extends Html {
 		parent::__construct('link');
 
 		$this->closingType = self::CLOSE_TYPE_SELF;
+
 		$this->addAttribute('href', $href);
 		$this->addAttribute('rel', $rel);
 

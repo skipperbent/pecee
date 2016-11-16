@@ -1,18 +1,17 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\Str;
-
 class HtmlTextarea extends Html {
 
-	protected $value;
+    protected $value;
 
-    public function __construct($name, $rows = null, $cols = null, $value = '') {
+    public function __construct($name, $rows = null, $cols = null, $value = null) {
 
         parent::__construct('textarea');
 
-		$this->value = Str::htmlEntities($value);
-		$this->addAttribute('name', $name);
+        $this->value = htmlentities($value, ENT_QUOTES, request()->site->getCharset());
+
+        $this->addAttribute('name', $name);
 
         if($rows !== null) {
             $this->rows($rows);
@@ -22,19 +21,21 @@ class HtmlTextarea extends Html {
             $this->cols($cols);
         }
 
-		$this->addInnerHtml($this->value);
-	}
+        if($this->value !== null) {
+            $this->addInnerHtml($this->value);
+        }
+    }
 
-	public function getValue() {
-		return $this->value;
-	}
+    public function getValue() {
+        return html_entity_decode($this->value, ENT_QUOTES, request()->site->getCharset());
+    }
 
-	public function placeholder($text) {
-		$this->addAttribute('placeholder', $text);
-		return $this;
-	}
+    public function placeholder($text) {
+        $this->addAttribute('placeholder', $text);
+        return $this;
+    }
 
-	public function wrap($wrap) {
+    public function wrap($wrap) {
         return $this->attr('wrap', $wrap);
     }
 

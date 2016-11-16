@@ -1,7 +1,7 @@
 <?php
 global $argv, $appPath;
 
-require_once $appPath . '/config/bootstrap.php';
+require_once 'config/init.php';
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
@@ -55,6 +55,14 @@ switch(strtolower($argv[2])) {
     case 'key:generate':
         die('yet not implemented');
         break;
+    case 'assets:generate': {
+        $argv = array_slice($argv, 0, 4);
+
+        die(var_dump($argv));
+
+        require $argv[0];
+
+    }
 }
 
 echo 'No input specified';

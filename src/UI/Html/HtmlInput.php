@@ -1,27 +1,26 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\Str;
 use Pecee\UI\Site;
 
 class HtmlInput extends Html {
 
-	public function __construct($name, $type, $value = null) {
+    public function __construct($name, $type, $value = null) {
 
-		parent::__construct('input');
+        parent::__construct('input');
 
         $this->closingType = self::CLOSE_TYPE_SELF;
 
-		$this->type($type);
-		$this->name($name);
+        $this->type($type);
+        $this->name($name);
 
-		if($value !== null){
-			$this->value(Str::htmlEntities($value));
-		}
+        if($value !== null){
+            $this->value($value);
+        }
 
-	}
+    }
 
-	public function name($name) {
+    public function name($name) {
         return $this->attr('name', $name);
     }
 
@@ -33,11 +32,11 @@ class HtmlInput extends Html {
         return $this->attr('placeholder', $text);
     }
 
-	public function autoComplete($bool = false) {
-		return $this->attr('autocomplete', (($bool === true) ? 'on' : 'off'));
-	}
+    public function autoComplete($bool = false) {
+        return $this->attr('autocomplete', (($bool === true) ? 'on' : 'off'));
+    }
 
-	public function readonly() {
+    public function readonly() {
         return $this->addInputAttribute('readonly');
     }
 
@@ -75,7 +74,7 @@ class HtmlInput extends Html {
 
     public function checked($checked) {
         if($checked)  {
-            $this->addInputAttribute('checked', $checked);
+            $this->addInputAttribute('checked');
         } else {
             $this->removeAttribute('checked');
         }

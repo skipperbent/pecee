@@ -9,7 +9,7 @@ class XmlTranslateProvider implements ITranslationProvider {
 	protected $dir;
 
 	public function __construct() {
-		$this->dir = '../lang';
+		$this->dir = env('XML_TRANSLATION_DIR', '../lang');
 		$this->setLanguageXml();
 	}
 
@@ -23,7 +23,7 @@ class XmlTranslateProvider implements ITranslationProvider {
 
 		if(strpos($key, '.') > -1) {
 			$children = explode('.', $key);
-			foreach($children as $i=>$child) {
+			foreach($children as $i => $child) {
 				if($i === 0) {
 					$node = (isset($xml->$child) ? $xml->$child : null);
 				} else {
@@ -44,7 +44,7 @@ class XmlTranslateProvider implements ITranslationProvider {
 	public function setLanguageXml() {
 		$path = sprintf('%s/%s.xml', $this->dir, str_replace('-', '_', strtolower(request()->locale->getLocale())));
 
-		if(!file_exists($path)) {
+		if(!is_file($path)) {
 			throw new TranslationException(sprintf('Language file %s not found for locale %s', $path, request()->locale->getLocale()));
 		}
 

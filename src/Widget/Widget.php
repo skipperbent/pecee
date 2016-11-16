@@ -41,34 +41,34 @@ abstract class Widget extends Base  {
 
     public function showMessages($type, $placement = null) {
         $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
+
         if($this->hasMessages($type, $placement)) {
             $o = sprintf('<div class="alert alert-%s">', $type);
+
             $msg = array();
             /* @var $error \Pecee\UI\Form\FormMessage */
             foreach($this->getMessages($type, $placement) as $error) {
-                $msg[] = sprintf('%s', $error->getMessage());
+                $msg[] = $error->getMessage();
             }
 
-            $o .= join('<br/>', $msg) . '</div>';
-            return $o;
+            return $o . nl2br(join(chr(10), $msg), ($this->getSite()->getDocType() !== Site::DOCTYPE_HTML_5)) . '</div>';
         }
+
         return '';
     }
 
     /**
-     * @param bool $includeJs
-     * @param bool $includeCss
      * @return string
      */
-    public function printHeader($includeJs = true, $includeCss = true) {
+    public function printHeader() {
 
-        $enc = new HtmlMeta();
-        $enc->addAttribute('charset', $this->getSite()->getCharset());
+        $meta = new HtmlMeta();
+        $meta->addAttribute('charset', $this->getSite()->getCharset());
 
-        $o = $enc;
+        $output = $meta;
 
         if($this->getSite()->getTitle())  {
-            $o .= '<title>' . $this->getSite()->getTitle() . '</title>';
+            $output .= '<title>' . $this->getSite()->getTitle() . '</title>';
         }
 
         if($this->getSite()->getDescription()) {
@@ -78,61 +78,45 @@ abstract class Widget extends Base  {
             $this->getSite()->addMeta('keywords', join(', ', $this->getSite()->getKeywords()));
         }
 
-        if($includeCss === true) {
-            $o .= $this->printCss();
-        }
-
-        if($includeJs === true) {
-            $o .= $this->printJs();
-        }
+        $output .= $this->printCss();
+        $output .= $this->printJs();
 
         if(count($this->getSite()->getHeader())) {
             $header = $this->getSite()->getHeader();
-            $o .= join('', $header);
+            $output .= join('', $header);
         }
 
-        return $o;
+        return $output;
     }
 
     public function printCss($section = Site::SECTION_DEFAULT) {
-        $o = '';
+        $output = '';
+
         if(count($this->getSite()->getCssFilesWrapped($section))) {
-
-            $getParams = array();
-
-            if(env('DEBUG', false)) {
-                $getParams = ['_' => time()];
-            }
-
-            $url = url($this->_cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')], $getParams));
-            $o .= new HtmlLink($url);
+            $url = url($this->_cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]));
+            $output .= new HtmlLink($url);
         }
 
-        foreach($this->getSite()->getCss($section) as $c) {
-            $type = ($this->getSite()->getDocType() === Site::DOCTYPE_HTML_5) ? null : 'text/css';
-            $o .= new HtmlLink($c, 'stylesheet', $type);
+        foreach($this->getSite()->getCss($section) as $css) {
+            $output .= new HtmlLink($css);
         }
-        return $o;
+
+        return $output;
     }
 
     public function printJs($section = Site::SECTION_DEFAULT) {
-        $o = '';
+        $output = '';
+
         if(count($this->getSite()->getJsFilesWrapped($section))) {
-
-            $getParams = array();
-
-            if(env('DEBUG', false)) {
-                $getParams = ['_' => time()];
-            }
-
-            $url = url($this->_jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')], $getParams));
-            $o .= new HtmlScript($url);
+            $url = url($this->_jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]));
+            $output .= new HtmlScript($url);
         }
 
-        foreach($this->getSite()->getJs($section) as $j) {
-            $o .= new HtmlScript($j);
+        foreach($this->getSite()->getJs($section) as $js) {
+            $output .= new HtmlScript($js);
         }
-        return $o;
+
+        return $output;
     }
 
     protected function getTemplate() {
@@ -174,7 +158,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require 'Templates/snippets/' . $file;
+        require 'Template/Snippets/' . $file;
     }
 
     /**
@@ -207,23 +191,27 @@ abstract class Widget extends Base  {
 
     protected function renderContent() {
         debug('START: rendering content-template: ' . $this->_contentTemplate);
+
         if($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
+
         debug('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
     protected function renderTemplate() {
         debug('START: rendering template: ' . $this->_template);
+
         if($this->_template !== '') {
             ob_start();
             include $this->_template;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
+
         debug('END: rendering template ' . $this->_template);
     }
 

@@ -1,44 +1,38 @@
 <?php
 namespace Pecee\Controller\File;
 
-use Pecee\Controller\Controller;
-use Pecee\Module;
-use Pecee\Http\YuiCompressor\YuiCompressor;
-
-abstract class FileAbstract extends Controller {
+abstract class FileAbstract {
 
     protected $files;
-    protected $type;
     protected $tmpDir;
+    protected $cacheFile;
 
-    const TYPE_JAVASCRIPT = 'js';
-    const TYPE_CSS = 'css';
+    public function __construct() {
 
-    public static $types=array(self::TYPE_JAVASCRIPT, self::TYPE_CSS);
+        $this->tmpDir = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'cache';
+        $this->files = (strpos(input()->get('files'), ',')) ? explode(',', input()->get('files')) : array(input()->get('files'));
+        $this->cacheFile = sprintf('%s.%s', md5(urldecode(input()->get('files'))), $this->getExtension());
 
-    public function __construct($type) {
-
-        parent::__construct();
-
-        if(!in_array($type, self::$types)) {
-            throw new \InvalidArgumentException(sprintf('Unknown type, must be one of the following: %s', join(', ', self::$types)));
+        if(!is_dir($this->tmpDir)) {
+            mkdir($this->tmpDir, 0755, true);
         }
 
-        $this->type = $type;
-        $this->tmpDir = $_ENV['base_path'] . DIRECTORY_SEPARATOR . 'cache';
     }
 
     public function wrap() {
 
-        $this->files = $_GET['files'];
-
         // Set time limit
         set_time_limit(60);
 
-        $exists = file_exists($this->getTempFile());
+        // Set headers
+        response()->headers([
+            'Content-type: '. $this->getHeader(),
+            'Charset: ' . request()->site->getCharset(),
+        ]);
+
+        $exists = is_file($this->getTempFile());
 
         if(!$this->debugMode() && $exists) {
-            $lastModified = filemtime($this->getTempFile());
             $md5 = md5_file($this->getTempFile());
 
             if (!in_array('ob_gzhandler', ob_list_handlers())) {
@@ -46,138 +40,97 @@ abstract class FileAbstract extends Controller {
             }
 
             // Set headers
-            response()->cache($md5, $lastModified);
-        }
-
-        // Set headers
-        response()->headers([
-            'Content-type: '.$this->getHeader(),
-            'Charset: ' . request()->site->getCharset(),
-        ]);
-
-        if($this->debugMode() && is_dir($this->tmpDir)) {
+            response()->cache($md5, filemtime($this->getTempFile()));
+        } else {
+            // Clear existing files...
+            $this->cleanup();
             $exists = false;
-            $handle = opendir($this->tmpDir);
-            while (false !== ($file = readdir($handle))) {
-                if($file === (md5($this->files) . '.' . $this->type)) {
-                    unlink($this->tmpDir . DIRECTORY_SEPARATOR . $file);
-                }
-            }
-            closedir($handle);
         }
 
-        if(!$exists) {
+        if($exists === false) {
             $this->saveTempFile();
         }
 
-        echo file_get_contents($this->getTempFile(), FILE_USE_INCLUDE_PATH);
+        echo file_get_contents($this->getTempFile());
     }
 
     protected function saveTempFile() {
-        if($this->files) {
-            $files = (strpos($this->files, ',')) ? explode(',', $this->files) : array($this->files);
-            if(count($files)) {
-                /* Begin wrapping */
-                if(!is_dir($this->tmpDir)) {
-                    mkdir($this->tmpDir, 0777, true);
-                }
-                $handle = fopen($this->getTempFile(), 'w+', FILE_USE_INCLUDE_PATH);
-                if($handle) {
-                    foreach($files as $index => $file) {
-                        $content = null;
-                        $filePath = $this->getPath() . $file;
 
-                        if(stream_resolve_include_path($filePath) !== false) {
-                            $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
-                        } else {
-                            if(request()->modules !== null) {
-                                foreach(request()->modules->getList() as $module) {
-                                    $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
-                                    if(file_exists($moduleFilePath)) {
-                                        $content = file_get_contents($moduleFilePath);
-                                        break;
-                                    }
-                                }
+        if(count($this->files)) {
+            $handle = fopen($this->getTempFile(), 'w+');
+            if($handle !== false) {
+                for($i = 0; $i < count($this->files); $i++) {
+                    $file = $this->files[$i];
+                    $content = false;
+                    $filePath = $this->getPath() . $file;
+
+                    // Try default location
+                    if(stream_resolve_include_path($filePath) !== false) {
+                        $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
+                    }
+
+                    // Try module ressources
+                    if($content === false && request()->modules !== null) {
+                        foreach(request()->modules->getList() as $module) {
+                            $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
+                            if(is_file($moduleFilePath)) {
+                                $content = file_get_contents($moduleFilePath);
+                                break;
                             }
-                        }
-
-                        if(!$content) {
-                            // Try resources folder
-                            $folder = ($this->type === self::TYPE_JAVASCRIPT) ? 'js' : 'css';
-                            $filePath = dirname(dirname(dirname(__DIR__))) . '/resources/' . $folder . '/' . $file;
-                            if(file_exists($filePath)) {
-                                $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
-                            }
-                        }
-
-                        if($content) {
-
-                            if(env('MINIFY_CSS') && $this->type === self::TYPE_CSS) {
-                                $compressor = new YuiCompressor();
-                                $compressor->addContent($this->type, $content);
-                                $output = $compressor->minify(true);
-
-                                if($output->minified && strlen($output->minified)) {
-                                    $content = $output->minified;
-                                }
-                            }
-
-                            if(env('MINIFY_JAVASCRIPT') && $this->type === self::TYPE_JAVASCRIPT) {
-                                $compressor = new YuiCompressor();
-                                $compressor->addContent($this->type, $content);
-                                $output = $compressor->minify(true);
-
-                                if($output->minified && strlen($output->minified)) {
-                                    $content = $output->minified;
-                                }
-                            }
-
-                            $buffer = '/* '.strtoupper($this->type).': ' . $file . ' */' . chr(10);
-                            $buffer.= $content;
-
-                            if( $index < count($files)-1 ) {
-                                $buffer .= str_repeat(chr(10),2);
-                            }
-
-                            fwrite($handle, $buffer);
                         }
                     }
-                    fclose($handle);
-                    chmod($this->getTempFile(), 0777);
+
+                    // Try resources folder
+                    if($content !== false) {
+                        $filePath = $_ENV['base_path'] . '/resources/' . $this->getExtension() . '/' . $file;
+                        if(is_file($filePath)) {
+                            $content = file_get_contents($filePath);
+                        }
+                    }
+
+                    if($content) {
+
+                        $this->processContent($content);
+
+                        $buffer = sprintf('/* %s */', $file) . chr(10) . $content;
+                        fwrite($handle, $buffer);
+
+                        // Unset buffer
+                        $buffer = null;
+                    }
                 }
+
+                fclose($handle);
+                chmod($this->getTempFile(), 0755);
+
             }
         }
     }
+
+    protected function cleanup() {
+        $handle = opendir($this->tmpDir);
+
+        while (false !== ($file = readdir($handle))) {
+            if($file === $this->cacheFile) {
+                unlink($this->tmpDir . DIRECTORY_SEPARATOR . $file);
+                break;
+            }
+        }
+
+        closedir($handle);
+    }
+
     protected function debugMode() {
-        return env('DEBUG', false);
-    }
-
-    protected function getHeader() {
-        switch($this->type) {
-            case self::TYPE_CSS:
-                return 'text/css';
-                break;
-            case self::TYPE_JAVASCRIPT:
-                return 'application/javascript';
-                break;
-        }
-        return '';
-    }
-
-    protected function getPath() {
-        switch($this->type) {
-            case self::TYPE_JAVASCRIPT:
-                return request()->site->getJsPath();
-                break;
-            case self::TYPE_CSS:
-                return request()->site->getCssPath();
-                break;
-        }
-        return '';
+        return env('DEBUG_FILE_WRAPPER', false);
     }
 
     protected function getTempFile() {
-        return $this->tmpDir.DIRECTORY_SEPARATOR.md5($this->files) . '.' . $this->type;
+        return $this->tmpDir . DIRECTORY_SEPARATOR . $this->cacheFile;
     }
+
+    abstract function getExtension();
+    abstract function getHeader();
+    abstract function getPath();
+    abstract function processContent(&$content);
 
 }
