@@ -43,6 +43,7 @@ class PhtmlNode extends HtmlElement {
 	}
 	public function getInnerPHP() {
 		$str = '';
+        /* @var $child \Pecee\UI\Phtml\PhtmlNode */
 		foreach($this->getChildren() as $child) {
 			$str .= $child->toPHP();
 		}

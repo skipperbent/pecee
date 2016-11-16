@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\UI\Form\Validation\File;
+namespace Pecee\UI\Form\Validation;
 
 use Pecee\Http\Input\InputFile;
 
@@ -21,12 +21,12 @@ class ValidateFileSize extends ValidateFile {
 
 		$validates = true;
 
-		if($this->minSize !== null && (($this->size*1024) <= $this->input->getSize())) {
+		if($this->sizeMinKb !== null && (($this->sizeMinKb * 1024) <= $this->input->getSize())) {
             $this->error = lang('%s cannot be less than %sKB', $this->input->getName(), $this->sizeMinKb);
             $validates = false;
         }
 
-        if((($this->size * 1024) >= $this->input->getSize())) {
+        if(($this->sizeMaxKb * 1024) >= $this->input->getSize()) {
             $this->error = lang('%s cannot be greater than %sKB', $this->input->getName(), $this->sizeMaxKb);
             $validates = false;
         }

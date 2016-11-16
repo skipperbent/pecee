@@ -31,7 +31,10 @@ class Site {
 	protected $css = array();
 	protected $jsFilesWrapped = array();
 	protected $cssFilesWrapped = array();
-	protected $adminIps = array('127.0.0.1', '::1');
+	protected $adminIps = [
+	    '127.0.0.1',
+        '::1',
+    ];
 
 	public function getTitle() {
 		return $this->title;

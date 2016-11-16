@@ -345,7 +345,7 @@ class ModelNode extends LegacyModel {
             }
         }
         $this->setRows($out);
-        $this->setNumRow($limit);
+        $this->setRowsPerPage($limit);
         return $this;
     }
 

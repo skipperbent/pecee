@@ -31,7 +31,6 @@ abstract class Widget extends Base  {
 
     /**
      * Calculates template path from given Widget name.
-     *
      * @return string
      */
     protected function getTemplatePath() {

@@ -53,6 +53,12 @@ switch(strtolower($argv[2])) {
     case 'key:generate':
         die('yet not implemented');
         break;
+    case 'assets:generate': {
+        $argv = array_slice($argv, 0, 3);
+
+        require $argv[0];
+
+    }
 }
 
 echo 'No input specified';
