@@ -12,8 +12,8 @@ require_once 'helpers.php';
 $loader->addPsr4(env('APP_NAME') . '\\', $_ENV['base_path'] . 'app/');
 
 // Locale
-request()->locale = new \Pecee\Locale();
 request()->translation = new \Pecee\Translation\Translation();
+request()->locale = new \Pecee\Locale();
 request()->site = new \Pecee\UI\Site();
 request()->debug = new \Pecee\Debug();
 

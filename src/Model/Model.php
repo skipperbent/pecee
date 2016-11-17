@@ -313,9 +313,8 @@ abstract class Model implements \IteratorAggregate {
      * @return static|null
      */
     public function __call($method, $parameters) {
-        $query = $this->queryable;
-        if(method_exists($query, $method)) {
-            return call_user_func_array([$query, $method], $parameters);
+        if(method_exists($this->queryable, $method)) {
+            return call_user_func_array([$this->queryable, $method], $parameters);
         }
 
         return null;
