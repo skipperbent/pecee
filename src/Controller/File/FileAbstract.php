@@ -35,10 +35,6 @@ abstract class FileAbstract {
         if(!$this->debugMode() && $exists) {
             $md5 = md5_file($this->getTempFile());
 
-            if (!in_array('ob_gzhandler', ob_list_handlers())) {
-                ob_start('ob_gzhandler');
-            }
-
             // Set headers
             response()->cache($md5, filemtime($this->getTempFile()));
         } else {
@@ -49,6 +45,10 @@ abstract class FileAbstract {
 
         if($exists === false) {
             $this->saveTempFile();
+        }
+
+        if (!in_array('ob_gzhandler', ob_list_handlers())) {
+            ob_start('ob_gzhandler');
         }
 
         echo file_get_contents($this->getTempFile());
