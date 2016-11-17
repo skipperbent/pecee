@@ -166,7 +166,7 @@ abstract class Widget extends Base  {
      * @param \Pecee\Widget\Widget $widget
      */
     public function widget(Widget $widget) {
-        if($widget->getTemplate() === $this->getTemplatePath()) {
+        if($widget->getTemplate() === $this->getTemplate()) {
             $widget->setTemplate(null);
         }
         echo $widget;
