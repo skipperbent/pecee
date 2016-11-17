@@ -2,7 +2,6 @@
 namespace Pecee\Widget;
 
 use Pecee\Base;
-use Pecee\Debug;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Html\HtmlLink;
 use Pecee\UI\Html\HtmlMeta;
@@ -11,23 +10,23 @@ use Pecee\UI\Site;
 
 abstract class Widget extends Base  {
 
-    protected $jsWrapRoute;
-    protected $cssWrapRoute;
+    protected $_jsWrapRoute;
+    protected $_cssWrapRoute;
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
-    protected $form;
+    protected $_form;
 
     public function __construct() {
 
         parent::__construct();
 
-        Debug::getInstance()->add('START WIDGET: ' . static::class);
+        debug('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->jsWrapRoute = url('pecee.js.wrap');
-        $this->cssWrapRoute = url('pecee.css.wrap');
-        $this->form = new Form($this->_input);
+        $this->_jsWrapRoute = url('pecee.js.wrap');
+        $this->_cssWrapRoute = url('pecee.css.wrap');
+        $this->_form = new Form();
     }
 
     /**
@@ -37,109 +36,94 @@ abstract class Widget extends Base  {
      */
     protected function getTemplatePath() {
         $path = array_slice(explode('\\', static::class), 2);
-        return 'Template' . DIRECTORY_SEPARATOR . 'Content' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return 'Template/Content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
-    public function showMessages($type, $form = null, $placement = null) {
+    public function showMessages($type, $placement = null) {
         $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
-        if($this->hasMessages($type, $form, $placement)) {
+
+        if($this->hasMessages($type, $placement)) {
             $o = sprintf('<div class="alert alert-%s">', $type);
+
             $msg = array();
             /* @var $error \Pecee\UI\Form\FormMessage */
-            foreach($this->getMessages($type, $form, $placement) as $error) {
-                $msg[] = sprintf('%s', $error->getMessage());
+            foreach($this->getMessages($type, $placement) as $error) {
+                $msg[] = $error->getMessage();
             }
 
-            $o .= join('<br/>', $msg) . '</div>';
-            return $o;
+            return $o . nl2br(join(chr(10), $msg), ($this->getSite()->getDocType() !== Site::DOCTYPE_HTML_5)) . '</div>';
         }
+
         return '';
     }
 
     /**
-     * @param bool $includeJs
-     * @param bool $includeCss
      * @return string
      */
-    public function printHeader($includeJs = true, $includeCss = true) {
+    public function printHeader() {
 
-        $enc = new HtmlMeta();
-        $enc->addAttribute('charset', $this->getSite()->getCharset());
+        $meta = new HtmlMeta();
+        $meta->addAttribute('charset', $this->getSite()->getCharset());
 
-        $o = $enc;
+        $output = $meta;
 
-        if($this->_site->getTitle())  {
-            $o .= '<title>' . $this->_site->getTitle() . '</title>';
+        if($this->getSite()->getTitle())  {
+            $output .= '<title>' . $this->getSite()->getTitle() . '</title>';
         }
 
-        if($this->_site->getDescription()) {
-            $this->_site->addMeta('description', $this->_site->getDescription());
+        if($this->getSite()->getDescription()) {
+            $this->getSite()->addMeta('description', $this->getSite()->getDescription());
         }
-        if(count($this->_site->getKeywords())) {
-            $this->_site->addMeta('keywords', join(', ', $this->_site->getKeywords()));
-        }
-
-        if($includeCss === true) {
-            $o .= $this->printCss();
+        if(count($this->getSite()->getKeywords())) {
+            $this->getSite()->addMeta('keywords', join(', ', $this->getSite()->getKeywords()));
         }
 
-        if($includeJs === true) {
-            $o .= $this->printJs();
+        $output .= $this->printCss();
+        $output .= $this->printJs();
+
+        if(count($this->getSite()->getHeader())) {
+            $header = $this->getSite()->getHeader();
+            $output .= join('', $header);
         }
 
-        if(count($this->_site->getHeader())) {
-            $header = $this->_site->getHeader();
-            $o .= join('', $header);
-        }
-
-        return $o;
+        return $output;
     }
 
     public function printCss($section = Site::SECTION_DEFAULT) {
-        $o = '';
-        if(count($this->_site->getCssFilesWrapped($section))) {
+        $output = '';
 
-            $getParams = array();
-
-            if(env('DEBUG', false)) {
-                $getParams = ['_' => time()];
-            }
-
-            $url = url($this->cssWrapRoute, null, array_merge(['files' => join($this->_site->getCssFilesWrapped($section), ',')], $getParams));
-            $o .= new HtmlLink($url);
+        if(count($this->getSite()->getCssFilesWrapped($section))) {
+            $url = url($this->_cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]));
+            $output .= new HtmlLink($url);
         }
 
-        foreach($this->_site->getCss($section) as $c) {
-            $o .= $c;
+        foreach($this->getSite()->getCss($section) as $css) {
+            $output .= new HtmlLink($css);
         }
-        return $o;
+
+        return $output;
     }
 
     public function printJs($section = Site::SECTION_DEFAULT) {
-        $o = '';
-        if(count($this->_site->getJsFilesWrapped($section))) {
+        $output = '';
 
-            $getParams = array();
-
-            if(env('DEBUG', false)) {
-                $getParams = ['_' => time()];
-            }
-
-            $url = url($this->jsWrapRoute, null, array_merge(['files' => join($this->_site->getJsFilesWrapped($section), ',')], $getParams));
-            $o .= new HtmlScript($url);
+        if(count($this->getSite()->getJsFilesWrapped($section))) {
+            $url = url($this->_jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]));
+            $output .= new HtmlScript($url);
         }
 
-        foreach($this->_site->getJs($section) as $j) {
-            $o .= $j;
+        foreach($this->getSite()->getJs($section) as $js) {
+            $output .= new HtmlScript($js);
         }
-        return $o;
+
+        return $output;
     }
 
     protected function getTemplate() {
         return $this->_template;
     }
 
-    protected function setTemplate($path,$relative = true) {
+    protected function setTemplate($path, $relative = true) {
         $this->_template = (($relative === true && trim($path) !== '') ? 'Template' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
@@ -164,7 +148,7 @@ abstract class Widget extends Base  {
      * @return Form
      */
     public function form() {
-        return $this->form;
+        return $this->_form;
     }
 
     /**
@@ -174,7 +158,7 @@ abstract class Widget extends Base  {
      * @param string $file
      */
     public function snippet($file) {
-        require('Template' . DIRECTORY_SEPARATOR . 'Snippet' . DIRECTORY_SEPARATOR . $file);
+        require 'Template/Snippets/' . $file;
     }
 
     /**
@@ -182,7 +166,7 @@ abstract class Widget extends Base  {
      * @param \Pecee\Widget\Widget $widget
      */
     public function widget(Widget $widget) {
-        if($widget->getTemplate() === 'Template'. DIRECTORY_SEPARATOR .'Default.php') {
+        if($widget->getTemplate() === $this->getTemplatePath()) {
             $widget->setTemplate(null);
         }
         echo $widget;
@@ -201,38 +185,42 @@ abstract class Widget extends Base  {
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
-        Debug::getInstance()->add('END WIDGET: ' . static::class);
+        debug('END WIDGET: ' . static::class);
         return $this->_contentHtml;
     }
 
     protected function renderContent() {
-        Debug::getInstance()->add('START: rendering content-template: ' . $this->_contentTemplate);
+        debug('START: rendering content-template: ' . $this->_contentTemplate);
+
         if($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
-        Debug::getInstance()->add('END: rendering content-template: ' . $this->_contentTemplate);
+
+        debug('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
     protected function renderTemplate() {
-        Debug::getInstance()->add('START: rendering template: ' . $this->_template);
+        debug('START: rendering template: ' . $this->_template);
+
         if($this->_template !== '') {
             ob_start();
             include $this->_template;
             $this->_contentHtml = ob_get_contents();
             ob_end_clean();
         }
-        Debug::getInstance()->add('END: rendering template ' . $this->_template);
+
+        debug('END: rendering template ' . $this->_template);
     }
 
     protected function setJsWrapRoute($route) {
-        $this->jsWrapRoute = $route;
+        $this->_jsWrapRoute = $route;
     }
 
     protected function setCssWrapRoute($route) {
-        $this->cssWrapRoute = $route;
+        $this->_cssWrapRoute = $route;
     }
 
 }

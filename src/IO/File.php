@@ -5,87 +5,76 @@ use Pecee\Url;
 
 class File {
 
-	public static function exists($path) {
-		$inc = explode(PATH_SEPARATOR, get_include_path());
-		foreach($inc as $prefix){
-			if(substr($prefix,-1) == DIRECTORY_SEPARATOR)
-				$prefix = substr($prefix,0,-1);
-			$p = sprintf("%s%s%s", $prefix, DIRECTORY_SEPARATOR, $path);
-			if(file_exists($p))
-				return($p);
-		}
-		return false;
-	}
+    public static function remoteSize($url) {
+        $headers = array_change_key_case(get_headers($url, 1), CASE_LOWER);
 
-	public static function remoteFilesize($url) {
-		$headers = get_headers($url, 1);
-		if (isset($headers['Content-Length'])) return $headers['Content-Length'];
-		if (isset($headers['Content-length'])) return $headers['Content-length'];
-		$c = curl_init();
-		curl_setopt_array($c, array(CURLOPT_URL => $url,
-				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_HTTPHEADER => array('User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.5; en-US; rv:1.9.1.3) Gecko/20090824 Firefox/3.5.3'),));
-		curl_exec($c);
-		return curl_getinfo($c, CURLINFO_SIZE_DOWNLOAD);
-	}
+        if (isset($headers['content-length'])) {
+            return $headers['content-length'];
+        }
 
-	public static function remoteExists($url) {
-		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_NOBODY, true);
-		$result = curl_exec($curl);
-		if ($result) {
-			//if request was ok, check response code
-			$statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-			if ($statusCode == 200) {
-				return true;
-			}
-		}
-		curl_close($curl);
-		return false;
-	}
+        $handle = curl_init($url);
 
-	public static function getMime($file) {
-		if(file_exists($file)) {
-			return mime_content_type($file);
-		} elseif(Url::isValid($file)) {
-			$ch = curl_init($file);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-			curl_setopt($ch, CURLOPT_HEADER, true);
-			curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
 
-			curl_exec($ch);
-			return curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-		} else {
-			$handle = finfo_open(FILEINFO_MIME);
-			$mime = finfo_file($handle, $file);
-			finfo_close($handle);
-			return $mime;
-		}
-	}
+        curl_exec($handle);
+        $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-	public static function getExtension($path) {
-		$ext = pathinfo($path, PATHINFO_EXTENSION);
-		if($ext == '') {
-			$ext = substr($path, strrpos('.', $path));
-		}
-		return $ext;
-	}
+        return ($size) ? $size : null;
+    }
 
-	public static function move($source, $destination) {
-		if(is_dir($source)) {
-			if(!is_dir($destination)) {
-				mkdir($destination, 0777, true);
-			}
-			$files = scandir($source);
-			foreach($files as $file) {
-				if($file != "." && $file != "..") {
-					self::move("$source/$file", "$destination/$file");
-				}
-			}
-		} elseif(file_exists($source)) {
-			copy($source, $destination);
-		}
-	}
+    public static function remoteExist($url) {
+        $handle = curl_init($url);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
+
+        $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        if ($statusCode == 200) {
+            return true;
+        }
+
+        curl_close($handle);
+        return false;
+    }
+
+    public static function getRemoteMime($url) {
+        if(Url::isValid($url)) {
+            $handle = curl_init($url);
+            curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($handle, CURLOPT_MAXREDIRS, 5);
+            curl_setopt($handle, CURLOPT_HEADER, true);
+            curl_setopt($handle, CURLOPT_NOBODY, true);
+
+            curl_exec($handle);
+            return curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
+        }
+
+        throw new \ErrorException('Failed to parse mime-type');
+    }
+
+    public static function getExtension($path) {
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        return ($ext !== '') ? $ext : substr($path, strrpos('.', $path));
+    }
+
+    public static function move($source, $destination) {
+        if(is_dir($source)) {
+
+            if(!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
+
+            $files = scandir($source);
+            foreach($files as $file) {
+                if(!in_array($file, ['.', '..'])) {
+                    static::move($source . '/' . $file, $destination . '/' . $file);
+                }
+            }
+        } elseif(is_file($source)) {
+            rename($source, $destination);
+        }
+    }
 }

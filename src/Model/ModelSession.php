@@ -1,14 +1,17 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 
 class ModelSession extends Model {
+
+    protected $timestamps = true;
+
+    protected $table = 'session';
 
     protected $columns = [
         'name',
         'value',
-        'time'
     ];
 
 	public function __construct($name = null, $value = null) {
@@ -17,14 +20,15 @@ class ModelSession extends Model {
 
         $this->name = $name;
         $this->value = $value;
+        $this->updated_at = Carbon::now()->toDateTimeString();
 	}
 
 	public function save() {
-		self::nonQuery('DELETE FROM {table} WHERE `time` <= %s', Date::toDateTime(time()-(60*30)));
+		self::nonQuery('DELETE FROM {table} WHERE `updated_at` <= %s', Carbon::createFromTimestamp(time()-(60*30))->toDateTimeString());
 
 		$session = $this->get($this->name);
 		if($session->hasRows()) {
-			$session->time = Date::toDateTime();
+			$session->time = Carbon::now()->toDateTimeString();
 			$session->update();
 		} else {
 			parent::save();

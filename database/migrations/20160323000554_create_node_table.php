@@ -13,13 +13,13 @@ class CreateNodeTable extends Migration {
             $table->column('type')->string(255)->index();
             $table->column('title')->string(255);
             $table->column('content')->longtext()->nullable();
-            $table->column('created_date')->datetime()->index();
-            $table->column('changed_date')->datetime()->nullable()->index();
             $table->column('active_from')->datetime()->nullable()->index();
             $table->column('active_to')->datetime()->nullable()->index();
             $table->column('level')->integer()->index()->nullable();
             $table->column('order')->integer()->index()->nullable();
             $table->column('active')->bool()->index()->nullable();
+            $table->column('created_date')->datetime()->index();
+            $table->column('changed_date')->datetime()->nullable()->index();
         });
 
     }

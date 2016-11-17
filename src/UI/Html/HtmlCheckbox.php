@@ -8,13 +8,4 @@ class HtmlCheckbox extends HtmlInput {
 		parent::__construct($name, 'checkbox', $value);
 	}
 
-    public function checked($bool) {
-        if($bool)  {
-            $this->attributes['checked'] = 'checked';
-        } else {
-            unset($this->attributes['checked']);
-        }
-        return $this;
-    }
-
 }

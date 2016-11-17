@@ -5,26 +5,11 @@ use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug {
 
-	protected static $instance;
-
-	protected $enabled;
 	protected $lastTime;
 	protected $stack;
 	protected $startTime;
 
-	/**
-	 * Get instance of Debug class
-	 * @return Debug
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
-
 	public function __construct(){
-		$this->enabled = false;
 		$this->startTime = microtime(true);
         $this->stack = array();
 		$this->add('Debugger initialized.');
@@ -76,17 +61,7 @@ class Debug {
 	}
 
 	public function add($text) {
-		if($this->enabled) {
-			$this->addObject($text);
-		}
-	}
-
-	public function getEnabled() {
-		return $this->enabled;
-	}
-
-	public function setEnabled($bool) {
-		$this->enabled = $bool;
+        $this->addObject($text);
 	}
 
 	public function __toString() {

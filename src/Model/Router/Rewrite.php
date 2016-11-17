@@ -6,6 +6,8 @@ use Pecee\Model\Model;
 
 class Rewrite extends Model {
 
+    protected $timestamps = true;
+
     protected $table = 'rewrite';
 
 	protected $columns = [

@@ -1,17 +1,21 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Date;
+use Carbon\Carbon;
 use Pecee\Guid;
 use Pecee\IO\Directory;
 use Pecee\IO\File;
 use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData {
-	const ORDER_DATE_ASC = 'f.`created_date` ASC';
-	const ORDER_DATE_DESC = 'f.`created_date` DESC';
+	const ORDER_DATE_ASC = 'f.`created_at` ASC';
+	const ORDER_DATE_DESC = 'f.`created_at` DESC';
 
 	public static $ORDERS = array(self::ORDER_DATE_ASC, self::ORDER_DATE_DESC);
+
+    protected $table = 'file';
+
+    protected $timestamps = true;
 
     protected $columns = [
         'id',
@@ -20,27 +24,21 @@ class ModelFile extends ModelData {
         'path',
         'type',
         'bytes',
-        'created_date'
     ];
 
-	public function __construct($name = null, $path = null) {
-		$fullPath=null;
-		if(!is_null($name) && !is_null($path)) {
-			$fullPath = Directory::normalize($path);
-		}
+	public function __construct($file) {
 
 		parent::__construct();
 
         $this->id = Guid::create();
-        $this->filename = $name;
-        $this->path = $path;
+        $this->filename = basename($file);
+        $this->original_filename = basename($file);
+        $this->path = dirname($file);
 
-        if($fullPath && is_file($fullPath)) {
-            $this->type = File::getMime($fullPath);
-            $this->bytes = filesize($fullPath);
+        if(is_file($file)) {
+            $this->type = mime_content_type($file);
+            $this->bytes = filesize($file);
         }
-
-        $this->created_date = Date::toDateTime();
 	}
 
 	public function setFilename($filename) {
@@ -52,7 +50,7 @@ class ModelFile extends ModelData {
 	}
 
 	public function setPath($path) {
-		$this->path = $path;
+		$this->path = rtrim($path, DIRECTORY_SEPARATOR);
 	}
 
 	public function setType($type) {
@@ -63,8 +61,8 @@ class ModelFile extends ModelData {
 		$this->bytes = $bytes;
 	}
 
-	public function setCreatedDate($datetime) {
-		$this->created_date = $datetime;
+	public function setCreatedAt(Carbon $date) {
+		$this->created_at = $date->toDateTimeString();
 	}
 
 	public function updateData() {
@@ -88,7 +86,7 @@ class ModelFile extends ModelData {
 	}
 
 	public function getFullPath() {
-		return $this->path . Directory::normalize($this->path) . $this->Filename;
+		return $this->path . $this->Filename;
 	}
 
 	/**
