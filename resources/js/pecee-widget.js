@@ -1,5 +1,5 @@
-if(typeof($p)=='undefined') {
-    var $p={};
+if(typeof($p) == 'undefined') {
+    var $p = {};
 }
 
 $p.utils = {

@@ -5,24 +5,18 @@ use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
-use Pecee\UI\Site;
 
 abstract class Base {
 
-    protected $_inputSessionKey = 'InputValues';
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
+    protected $_inputSessionKey = 'InputValues';
     protected $_messages;
-    protected $_site;
-    protected $validations = array();
+    protected $_validations = array();
 
     public function __construct() {
-
-        Debug::getInstance()->add('BASE CLASS ' . static::class);
-
-        $this->_site = Site::getInstance();
-        $this->_messages = SessionMessage::getInstance();
-
+        debug('BASE CLASS ' . static::class);
+        $this->_messages = new SessionMessage();
         $this->setInputValues();
     }
 
@@ -71,17 +65,18 @@ abstract class Base {
                     $validations = array($validations);
                 }
 
-                $this->validations[$key] = $validations;
+                $this->_validations[$key] = $validations;
             }
         }
     }
 
     protected function validateInput() {
-        foreach($this->validations as $key => $validations) {
+        foreach($this->_validations as $key => $validations) {
             /* @var $input \Pecee\Http\Input\InputItem */
+            /* @var $i \Pecee\Http\Input\InputItem */
             $input = input()->getObject($key, new InputItem($key, null));
 
-            /* @var $validation \Pecee\Http\InputValidation\ValidateInput */
+            /* @var $validation \Pecee\UI\Form\Validation\ValidateInput */
             foreach($validations as $validation) {
 
                 if(is_array($input)) {
@@ -115,11 +110,11 @@ abstract class Base {
 
     protected function appendSiteTitle($title, $separator = '-') {
         $separator = ($separator === null) ? '': sprintf(' %s ', $separator);
-        $this->_site->setTitle(($this->_site->getTitle() . $separator . $title));
+        request()->site->setTitle((request()->site->getTitle() . $separator . $title));
     }
 
     protected function prependSiteTitle($title, $separator = ' - ') {
-        $this->_site->setTitle(($title . $separator .$this->_site->getTitle()));
+        request()->site->setTitle(($title . $separator . request()->site->getTitle()));
     }
 
     /**
@@ -132,10 +127,10 @@ abstract class Base {
 
     /**
      * Get site
-     * @return Site
+     * @return \Pecee\UI\Site
      */
     public function getSite() {
-        return $this->_site;
+        return request()->site;
     }
 
     /**

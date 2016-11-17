@@ -7,6 +7,6 @@ use Pecee\SimpleRouter\RouterEntry;
 
 abstract class BaseExceptionHandler extends Base implements IExceptionHandler {
 
-	abstract public function handleError(Request $request, RouterEntry $router = null, \Exception $error);
+	abstract public function handleError(Request $request, RouterEntry &$route = null, \Exception $error);
 
 }

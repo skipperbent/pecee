@@ -12,7 +12,8 @@ class CreateFileTable extends Migration {
             $table->column('path')->string(355)->index();
             $table->column('type')->string(255)->index();
             $table->column('bytes')->integer()->index();
-            $table->column('created_date')->datetime()->index();
+            $table->column('updated_at')->datetime()->nullable()->index();
+            $table->column('created_at')->datetime()->index();
         });
     }
 

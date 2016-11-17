@@ -3,12 +3,11 @@ namespace Pecee\UI\Html;
 
 class HtmlSelect extends Html {
 
-	protected $options;
+	protected $options = array();
 
 	public function __construct($name = null) {
 		parent::__construct('select');
 
-		$this->options = array();
 		if($name !== null) {
 			$this->addAttribute('name', $name);
 		}

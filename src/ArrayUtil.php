@@ -3,62 +3,18 @@ namespace Pecee;
 
 class ArrayUtil {
 
-	/**
-	 * Remove multiple elements from beginning of array
-	 * @param array $array|null
-	 * @param int $length
-	 * @return array|null
-	 */
-	public static function shift(array &$array, $length) {
-		if(count($array) > $length) {
-			for($i=0;$i<$length;$i++) {
-				array_shift($array);
-			}
-			return $array;
-		}
-		return null;
-	}
-
-	public static function sortByKey(array $array, $keyIndex){
-		$c = array();
-		foreach($array as $k=>$v) {
-			$b[$k] = strtolower($v[$keyIndex]);
-		}
-		arsort($b,true);
-		foreach($b as $key=>$val) {
-			$c[] = $array[$key];
-		}
-		return $c;
-	}
-
-	public static function filter(array $array, $allowEmpty=true){
-		foreach($array as $key=>$arr){
-			if(is_null($arr)) {
-				unset($array[$key]);
-			} elseif(empty($arr) && !$allowEmpty) {
+	public static function filter(array $array, $allowEmpty = true){
+		foreach($array as $key => $value){
+			if($value === null || empty($value) && $allowEmpty === false) {
 				unset($array[$key]);
 			}
 		}
 		return $array;
 	}
 
-	public static function median($arr) {
-		sort($arr);
-		$count = count($arr); //total numbers in array
-		$middleval = floor(($count-1)/2); // find the middle value, or the lowest middle value
-		if($count % 2) { // odd number, middle is the median
-			$median = $arr[$middleval];
-		} else { // even number, calculate avg of 2 medians
-			$low = $arr[$middleval];
-			$high = $arr[$middleval+1];
-			$median = (($low+$high)/2);
-		}
-		return $median;
-	}
-
 	public static function average($arr) {
 		$count = count($arr); //total numbers in array
-		$total=0;
+		$total = 0;
 		foreach ($arr as $value) {
 			$total = ($total + $value); // total value of array numbers
 		}

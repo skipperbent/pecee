@@ -5,6 +5,9 @@ use Pecee\Model\Model;
 
 class FileData extends Model {
 
+    protected $timestamps = false;
+    protected $table = 'file_data';
+
     protected $columns = [
         'id',
         'file_id',

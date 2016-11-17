@@ -1,5 +1,6 @@
 <?php
 namespace Pecee\UI\Phtml;
+
 use Pecee\Guid;
 use Pecee\Registry;
 use Pecee\UI\Html\HtmlElement;
@@ -34,6 +35,7 @@ class PhtmlNode extends HtmlElement {
 
 	public function getInnerString() {
 		$str = '';
+        /* @var $child \Pecee\Xml\IXmlNode */
 		foreach($this->getChildren() as $child) {
 			$str .= $child->__toString();
 		}
@@ -41,6 +43,7 @@ class PhtmlNode extends HtmlElement {
 	}
 	public function getInnerPHP() {
 		$str = '';
+        /* @var $child \Pecee\UI\Phtml\PhtmlNode */
 		foreach($this->getChildren() as $child) {
 			$str .= $child->toPHP();
 		}

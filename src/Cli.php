@@ -42,6 +42,8 @@ class Cli {
 
     /**
      * Returns text formatted with color, background color and/or attributes.
+     * @param array $args
+     * @return string
      */
     protected function createColor(array $args) {
         $options = $this->getOptions();
@@ -52,7 +54,7 @@ class Cli {
                 if(isset($options[$arg])) {
                     $text = sprintf(self::STR_FORMAT, $options[$arg], $text);
                 } else {
-                    $this->writeNewline("Invalid argument: " . $arg);
+                    $this->writeLine("Invalid argument: " . $arg);
                     $this->write(self::STR_SOUND);
                     exit(1);
                 }
@@ -65,15 +67,19 @@ class Cli {
     /**
      * Echos text formatted with color, background color and/or attributes.
      * Adds a new line at the end.
+     * @param string|null $text
+     * @param array|null $args
      */
     public function writeLine($text = null, $args = null) {
         $args = func_get_args();
-        $text = (is_null($text)) ? chr(10) : $text;
-        echo call_user_func_array(array($this, 'createColor'), array($args)) . chr(10);
+        $args[0] = (is_null($text)) ? chr(10) : $text . chr(10);
+        echo call_user_func_array(array($this, 'write'), array($args));
     }
 
     /**
      * Echos text formatted with color, background color and/or attributes.
+     * @param string|null $text
+     * @param array|null $args
      */
     public function write($text, $args = null) {
         $args = func_get_args();

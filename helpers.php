@@ -52,19 +52,37 @@ function lang($key, $args = null) {
         $args = func_get_args();
         $args = array_slice($args, 1);
     }
-    return \Pecee\Translation::getInstance()->_($key, $args);
+    return request()->translation->translate($key, $args);
+}
+
+/**
+ * Add debug message.
+ * Requires DEBUG=1 to be present in your env file.
+ * @param string $text
+ */
+function debug($text) {
+    if(env('DEBUG', false)) {
+        request()->debug->add($text);
+    }
+}
+
+function add_module($name, $path) {
+    if(request()->modules === null) {
+        request()->modules = new \Pecee\Modules();
+    }
+
+    request()->modules->add($name, $path);
 }
 
 /**
  * Get environment variable
- * @param $key
+ * @param string $key
  * @param null $default
  *
  * @return string|null
  */
 function env($key, $default = null) {
-    $value = getenv($key);
-    return ($value === false) ? $default : $value;
+    return isset($_ENV[$key]) ? $_ENV[$key] : $default;
 }
 
 /**
@@ -72,7 +90,7 @@ function env($key, $default = null) {
  * @return string|null
  */
 function csrf_token() {
-    $baseVerifier = \Pecee\SimpleRouter\RouterBase::getInstance()->getBaseCsrfVerifier();
+    $baseVerifier = \Pecee\SimpleRouter\RouterBase::getInstance()->getCsrfVerifier();
     if($baseVerifier !== null) {
         return $baseVerifier->getToken();
     }

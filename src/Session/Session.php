@@ -29,7 +29,7 @@ class Session {
 	}
 
 	public static function exists($id) {
-		return (isset($_SESSION[$id]));
+		return isset($_SESSION[$id]);
 	}
 
 	public static function set($id, $value) {

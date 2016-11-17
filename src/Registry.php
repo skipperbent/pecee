@@ -4,7 +4,8 @@ namespace Pecee;
 class Registry {
 
 	protected static $instance;
-	protected static $registry;
+
+	protected $registry = array();
 
 	/**
 	 * Get instance
@@ -14,6 +15,7 @@ class Registry {
 		if(self::$instance === null) {
 			self::$instance = new static();
 		}
+
 		return self::$instance;
 	}
 
@@ -24,16 +26,18 @@ class Registry {
 	 * @return string|null
 	 */
 	public function get($key, $default=null) {
-		return (isset(self::$registry[$key]) ? self::$registry[$key] : $default);
+		return (isset($this->registry[$key]) ? $this->registry[$key] : $default);
 	}
 
 	/**
 	 * Set registry key
 	 * @param string $key
 	 * @param string $value
+     * @return static
 	 */
 	public function set($key, $value) {
-		self::$registry[$key] = $value;
+		$this->registry[$key] = $value;
+        return $this;
 	}
 
 }
