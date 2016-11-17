@@ -16,7 +16,10 @@ class ModelUser extends ModelData {
     const ERROR_TYPE_BANNED = 0x1;
     const ERROR_TYPE_INVALID_LOGIN = 0x2;
     const ERROR_TYPE_EXISTS = 0x3;
+
     protected static $instance;
+
+    protected $table = 'user';
 
     protected $columns = [
         'id',
@@ -24,7 +27,6 @@ class ModelUser extends ModelData {
         'password',
         'admin_level',
         'deleted',
-        'created_date',
         'last_activity'
     ];
 
@@ -37,7 +39,6 @@ class ModelUser extends ModelData {
         $this->admin_level = 0;
         $this->deleted = false;
         $this->last_activity = Carbon::now()->toDateTimeString();
-        $this->created_date = Carbon::now()->toDateTimeString();
     }
 
     public function save(array $data = null) {

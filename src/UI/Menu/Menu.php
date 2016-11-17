@@ -1,18 +1,14 @@
 <?php
 namespace Pecee\UI\Menu;
+
 use Pecee\UI\Html\Html;
 
 class Menu {
-	protected $items;
-	protected $class;
-	protected $attributes;
-	protected $content;
 
-	public function __construct() {
-		$this->attributes=array();
-		$this->content=array();
-		return $this;
-	}
+	protected $items = array();
+	protected $attributes = array();
+	protected $content = array();
+    protected $class;
 
 	public function getItems() {
 		return $this->items;
@@ -24,10 +20,7 @@ class Menu {
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
 	public function getItem($index) {
-		if($this->hasItem($index)) {
-			return $this->items[$index];
-		}
-		return null;
+        return ($this->hasItem($index)) ? $this->items[$index] : null;
 	}
 
 	/**
@@ -35,11 +28,10 @@ class Menu {
 	 * @return \Pecee\UI\Menu\MenuItems|null
 	 */
 	public function getFirst() {
-		if(count($this->items) > 0) {
-			foreach($this->items as $item) {
-				return $item;
-			}
+		if(count($this->items)) {
+            return $this->items[0];
 		}
+
 		return null;
 	}
 
@@ -48,10 +40,7 @@ class Menu {
 	 * @return \Pecee\UI\Menu\MenuItems|null
 	 */
 	public function getLast() {
-		if(count($this->items) > 0) {
-			return $this->items[count($this->items)-1];
-		}
-		return null;
+        return end($this->items);
 	}
 
 	/**
@@ -64,7 +53,7 @@ class Menu {
 	}
 
 	public function hasItems() {
-		return (count($this->items) > 0);
+		return (count($this->items));
 	}
 
 	/**
@@ -85,7 +74,7 @@ class Menu {
 
 	/**
 	 * Get form content, if any
-	 * @return \Pecee\UI\Html\Html|null
+	 * @return array
 	 */
 	public function getContent() {
 		return $this->content;
@@ -96,9 +85,10 @@ class Menu {
 	 *
 	 * @param string $title
 	 * @param string $value
+     * @param string|null $description
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
-	public function addItem($title, $value, $description=null) {
+	public function addItem($title, $value, $description = null) {
 		$item = new MenuItems();
 		$item->addItem($title, $value, $description);
 		$this->items[] = $item;
@@ -125,9 +115,9 @@ class Menu {
 	 * @param string|null $description
 	 * @return \Pecee\UI\Menu\MenuItems
 	 */
-	public function addItemToIndex($index, $title, $value, $description=null) {
+	public function addItemToIndex($index, $title, $value, $description = null) {
 		$item = new MenuItems();
-		$item->addItem( $title, $value, $description );
+		$item->addItem($title, $value, $description);
 		$this->items[$index] = $item;
 		return $item;
 	}
@@ -137,16 +127,17 @@ class Menu {
 	 * @param string $name
 	 * @return \Pecee\UI\Menu\Menu
 	 */
-	public function setClass( $name ) {
+	public function setClass($name) {
 		$this->class = $name;
 		return $this;
 	}
 	public function addAttribute($name, $value) {
 		$this->attributes[$name] = $value;
+        return $this;
 	}
 
 	public function addClass($class) {
-		$this->addAttribute('class', $class);
+		return $this->addAttribute('class', $class);
 	}
 
 	public function removeClass() {
@@ -155,13 +146,13 @@ class Menu {
 	}
 
 	protected function getAttributes($attributes) {
-		if(is_array($attributes) && count($attributes) > 0) {
+		if(is_array($attributes) && count($attributes)) {
 			$out = array();
 			/* Run through each attribute */
-			foreach($attributes as $attr=>$v) {
+			foreach($attributes as $attr => $v) {
 				$out[] = ' ' . $attr . '="'.$v.'"';
 			}
-			return join($out, null);
+			return join('', $out);
 		}
 		return '';
 	}
@@ -172,12 +163,17 @@ class Menu {
 	 */
 	public function __toString() {
 		$o = array();
-		if(count($this->items) > 0) {
-			$o[] = '<ul'.(($this->class) ? ' class="'.$this->class.'"' : '');
-			if(count($this->attributes) > 0) {
-				$o[]=$this->getAttributes($this->attributes);
+		if(count($this->items)) {
+
+            $o[] = '<ul'.(($this->class) ? ' class="'.$this->class.'"' : '');
+
+            if(count($this->attributes)) {
+				$o[] = $this->getAttributes($this->attributes);
 			}
+
 			$o[] = '>';
+
+            /* @var $item MenuItems */
 			foreach($this->items as $item) {
 				foreach($item->getItems() as $key=>$i) {
 					/* Write html */
@@ -187,24 +183,30 @@ class Menu {
 						$i['title'],
 						htmlspecialchars($i['description']),
 						$this->getAttributes($i['linkAttributes']));
+
 					if(isset($i['content']) && is_array($i['content'])) {
+                        /* @var $c static */
 						foreach($i['content'] as $c) {
-							$o[]=$c->__toString();
+							$o[] = $c->__toString();
 						}
 					}
+
 					if(isset($i['menu'])) {
-						$o[]=$i['menu']->__toString();
+						$o[] = $i['menu']->__toString();
 					}
+
 					if(isset($this->content[$key]) > 0) {
-						$o[]=$this->content[$key]->__toString();
+						$o[] = $this->content[$key]->__toString();
 					}
-					$o[]='</li>';
+
+					$o[] = '</li>';
 				}
 			}
 
 			$o[] = '</ul>';
-			return join($o, '');
+			return join('', $o);
 		}
+
 		return '';
 	}
 }

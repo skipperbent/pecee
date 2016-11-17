@@ -5,12 +5,17 @@ abstract class Dataset implements \IteratorAggregate {
 
 	protected $data = array();
 
-	/**
-	 * @return array
-	 */
-	public function getData() {
-		return $this->data;
-	}
+	public function toArray() {
+        $output = array();
+
+        if(count($this->data)) {
+            foreach ($this->data as $data) {
+                $output[$data['name']] = $data['value'];
+            }
+        }
+
+        return $output;
+    }
 
 	public function get($index) {
 		foreach($this->data as $data) {
@@ -22,22 +27,32 @@ abstract class Dataset implements \IteratorAggregate {
 		return null;
 	}
 
-	/**
-	 * @param mixed $data
-	 */
-	public function setData($data) {
-		$this->data = $data;
-	}
-
 	protected function add($value = null, $name) {
 		$arr = array();
+
 		if($value !== null) {
 			$arr['value'] = htmlspecialchars($value);
 		}
+
 		$arr['name'] = $name;
 		$this->data[] = $arr;
+
 		return $this;
 	}
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data) {
+        $this->data = $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData() {
+        return $this->data;
+    }
 
 	/**
 	 * Retrieve an external iterator
@@ -47,16 +62,7 @@ abstract class Dataset implements \IteratorAggregate {
 	 * @since 5.0.0
 	 */
 	public function getIterator() {
-
-        $tmp = array();
-
-        if(count($this->data)) {
-            foreach ($this->data as $value) {
-                $tmp[$value['name']] = $value['value'];
-            }
-        }
-
-		return new \ArrayIterator($tmp);
+		return new \ArrayIterator($this->toArray());
 	}
 
 }

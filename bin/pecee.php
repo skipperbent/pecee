@@ -1,10 +1,11 @@
 <?php
 global $argv, $appPath;
 
-require_once $appPath . '/bootstrap.php';
+require_once $appPath . '/config/bootstrap.php';
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
+// TODO: use migration
 
 function getClassInfo($file) {
     $contents = file_get_contents($file);
@@ -24,7 +25,7 @@ function changeNamespace($newNamespace, $file) {
     file_put_contents($file, $contents);
 }
 
-switch(strtolower($argv[1])) {
+switch(strtolower($argv[2])) {
     case 'copy-migrations':
 
         \Pecee\IO\Directory::copy(dirname(__DIR__) . '/database/migrations', $appPath . '/database/migrations');
@@ -36,18 +37,12 @@ switch(strtolower($argv[1])) {
         $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
         $config = $appPath . '/config/phinx-config.php';
 
-        array_shift($argv);
-        array_shift($argv);
+        $template = dirname(__DIR__) . '/database/stubs/migration.php';
 
-        $cmd = join(' ', $argv) . ' -c ' . $config;
-
-        if(isset($argv[0]) && strtolower($argv[0]) === 'create') {
-            $template = dirname(__DIR__) . '/database/stubs/migration.php';
-            $cmd .= ' --template="'. $template . '"';
-        }
+        $argv = array_slice($argv, 0, 3);
 
         // Run Phinx
-        exec($phinx . ' ' . $cmd, $output);
+        exec($phinx . ' ' . join(' ', $argv) . ' -c ' . $config . ' --template="'. $template .'"', $output);
         echo join(chr(10), $output);
 
         exit(0);
@@ -56,10 +51,14 @@ switch(strtolower($argv[1])) {
         die('yet not implemented');
         break;
     case 'key:generate':
-        $token = new \Pecee\CsrfToken();
-        echo 'New key: ' . md5($token->generateToken()) . chr(10);
-        exit(0);
+        die('yet not implemented');
         break;
+    case 'assets:generate': {
+        $argv = array_slice($argv, 0, 3);
+
+        require $argv[0];
+
+    }
 }
 
 echo 'No input specified';

@@ -15,11 +15,12 @@
     ],
     "require": {
         "php": ">=5.4.0",
+        "josegonzalez/dotenv": "2.*",
         "pecee/simple-router": "2.*",
-        "vlucas/phpdotenv": "2.*",
         "robmorgan/phinx": "^0.5.3",
         "nesbot/carbon": "1.*",
-        "pecee/pixie": "2.*"
+        "pecee/pixie": "2.*",
+        "filp/whoops": "^2.1"
     },
     "require-dev": {
 

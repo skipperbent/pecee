@@ -1,12 +1,9 @@
 <?php
 namespace Pecee\Model;
 
-use Pecee\Locale;
 use Pecee\SimpleRouter\RouterBase;
 
 class ModelLanguage extends Model {
-
-    protected static $instance;
 
     protected $columns = [
         'id',
@@ -15,16 +12,6 @@ class ModelLanguage extends Model {
         'locale',
         'context'
     ];
-
-    /**
-     * @return static
-     */
-    public static function getInstance() {
-        if(static::$instance === null) {
-            static::$instance = new static();
-        }
-        return static::$instance;
-    }
 
     protected static function getContext() {
         $route = RouterBase::getInstance()->getLoadedRoute();
@@ -40,7 +27,7 @@ class ModelLanguage extends Model {
     }
 
     public function lookup($text) {
-        if(Locale::getInstance()->getDefaultLocale() !== Locale::getInstance()->getLocale() && $this->hasRows()) {
+        if(request()->locale->getDefaultLocale() !== request()->locale->getLocale() && $this->hasRows()) {
 
             foreach($this->getRows() as $lang) {
                 if(trim($lang->original) == trim($text)) {

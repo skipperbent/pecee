@@ -26,28 +26,6 @@ class Str {
         return join(' ', array_splice($words, 0, $limit));
     }
 
-    public static function htmlEntities($value) {
-        if(is_array($value)) {
-            $newArr = array();
-            foreach($value as $key => $v) {
-                $newArr[$key] = htmlentities($v, null, 'UTF-8');
-            }
-            return $newArr;
-        }
-        return htmlentities($value, ENT_QUOTES, 'UTF-8');
-    }
-
-    public static function htmlEntitiesDecode($value) {
-        if(is_array($value)) {
-            $newArr = array();
-            foreach($value as $key => $v) {
-                $newArr[$key] = html_entity_decode($v, null, 'UTF-8');
-            }
-            return $newArr;
-        }
-        return html_entity_decode($value, ENT_QUOTES, 'UTF-8');
-    }
-
     public static function base64Encode($obj) {
         return base64_encode(serialize($obj));
     }
@@ -79,4 +57,14 @@ class Str {
         $word[0] = strtolower($word[0]);
         return $word;
     }
+
+    /**
+     * Returns weather the $value is a valid email.
+     * @param string $email
+     * @return bool
+     */
+    public static function isEmail($email) {
+        return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+
 }

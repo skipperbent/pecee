@@ -5,14 +5,13 @@ use Pecee\UI\Phtml\Phtml;
 
 abstract class WidgetTaglib extends Widget {
 
-    protected $cacheDir;
+    protected $_pHtmlCacheDir;
 
     public function __construct() {
         parent::__construct();
 
         $this->getSite()->addWrappedJs('pecee-widget.js');
-
-        $this->cacheDir = $_ENV['base_path'] . 'cache';
+        $this->_pHtmlCacheDir = $_ENV['base_path'] . 'cache/phtml';
     }
 
     public function render()  {
@@ -30,38 +29,36 @@ abstract class WidgetTaglib extends Widget {
     }
 
     public function renderContent() {
-        $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . 'phtml';
-        $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . str_replace(DIRECTORY_SEPARATOR, '_', $this->_contentTemplate);
+        $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace(DIRECTORY_SEPARATOR, '_', $this->_contentTemplate);
 
-        $cacheExists = file_exists($cacheFile);
-
-        if($cacheExists && !$this->getSite()->getDebug()) {
-            $this->renderPhp(file_get_contents($cacheFile));
-        } else {
-
-            if($cacheExists && $this->getSite()->getDebug()) {
+        if(is_file($cacheFile)) {
+            if(!env('DEBUG', false)) {
+                $this->renderPhp(file_get_contents($cacheFile));
+                return;
+            } else {
                 unlink($cacheFile);
             }
-
-            $phtml = new Phtml();
-            $error = false;
-            try {
-                $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
-                $this->_contentHtml = $phtml->read($this->_contentHtml)->toPHP();
-            } catch(\Exception $e) {
-                $this->_contentHtml = $e->getMessage();
-                $error = true;
-            }
-
-            if(!$error) {
-                if(!is_dir($cacheDir)) {
-                    mkdir($cacheDir, 0777, true);
-                }
-
-                $handle = fopen($cacheFile, 'w+');
-                fwrite($handle, $this->_contentHtml);
-                fclose($handle);
-            }
         }
+
+        try {
+
+            if(!is_dir($this->_pHtmlCacheDir)) {
+                mkdir($this->_pHtmlCacheDir, 0755, true);
+            }
+
+            $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
+            $pHtml = new Phtml();
+            $output = $pHtml->read($this->_contentHtml)->toPHP();
+
+            $this->_contentHtml = $output;
+
+            $handle = fopen($cacheFile, 'w+');
+            fwrite($handle, $this->_contentHtml);
+            fclose($handle);
+
+        } catch(\Exception $e) {
+            $this->_contentHtml = $e->getMessage();
+        }
+
     }
 }

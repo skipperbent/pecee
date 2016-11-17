@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Model\User;
 
-use Carbon\Carbon;
 use Pecee\Model\Model;
 
 class UserReset extends Model {
@@ -13,7 +12,6 @@ class UserReset extends Model {
     protected $columns = [
         'id',
         'key',
-        'created_date'
     ];
 
     public function __construct($userId = null) {
@@ -24,7 +22,6 @@ class UserReset extends Model {
 
         $this->{static::USER_IDENTIFIER_KEY} = $userId;
         $this->key = md5(uniqid());
-        $this->created_date = Carbon::now()->toDateTimeString();
     }
 
     public function clean() {

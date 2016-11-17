@@ -5,77 +5,66 @@ use Pecee\UI\Form\FormMessage;
 
 class SessionMessage {
 
-	protected $session;
-	protected $messages;
-	protected static $instance;
-	const KEY = 'MSG';
+    const KEY = 'MSG';
 
-	/**
-	 * @return static
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
+    protected $messages;
 
-	public function __construct() {
-		$this->parseMessages();
-	}
+    public function __construct() {
+        $this->parseMessages();
+    }
 
-	protected function parseMessages() {
-		$this->messages= Session::get(self::KEY);
-	}
+    protected function parseMessages() {
+        $this->messages = Session::get(self::KEY);
+    }
 
-	protected function saveMessages() {
-		Session::set(self::KEY, $this->messages);
-	}
+    protected function saveMessages() {
+        Session::set(self::KEY, $this->messages);
+    }
 
-	public function set(FormMessage $message, $type = null) {
-		// Ensure no double posting
-		if(isset($this->messages[$type]) && is_array($this->messages[$type])) {
-			if(!in_array($message, $this->messages[$type])) {
-				$this->messages[$type][] = $message;
-				$this->saveMessages();
-			}
-		} else {
-			$this->messages[$type][] = $message;
-			$this->saveMessages();
-		}
-	}
+    public function set(FormMessage $message, $type = null) {
+        // Ensure no double posting
+        if(isset($this->messages[$type]) && is_array($this->messages[$type])) {
+            if(!in_array($message, $this->messages[$type])) {
+                $this->messages[$type][] = $message;
+                $this->saveMessages();
+            }
+        } else {
+            $this->messages[$type][] = $message;
+            $this->saveMessages();
+        }
+    }
 
-	/**
-	 * Get messages
-	 * @param string|null $type
-	 * @param string|null $default
-	 * @return \Pecee\UI\Form\FormMessage|object
-	 */
-	public function get($type = null, $default = null) {
-		if(!is_null($type)) {
-			return (isset($this->messages[$type])) ? $this->messages[$type] : $default;
-		}
-		return $this->messages;
-	}
+    /**
+     * Get messages
+     * @param string|null $type
+     * @param object|null $default
+     * @return \Pecee\UI\Form\FormMessage|object
+     */
+    public function get($type = null, $default = null) {
+        if($type !== null) {
+            return (isset($this->messages[$type])) ? $this->messages[$type] : $default;
+        }
+        return $this->messages;
+    }
 
-	/**
-	 * Checks if there's any messages
-	 * @param string|null $type
-	 * @return boolean
-	 */
-	public function hasMessages($type = null) {
-		if(!is_null($type)) {
-			return (isset($this->messages[$type]) && count($this->messages[$type]) > 0);
-		}
-		return (count($this->messages) > 0);
-	}
+    /**
+     * Checks if there's any messages
+     * @param string|null $type
+     * @return boolean
+     */
+    public function hasMessages($type = null) {
+        if($type !== null) {
+            return (isset($this->messages[$type]) && count($this->messages[$type]) > 0);
+        }
+        return (count($this->messages) > 0);
+    }
 
-	public function clear($type = null) {
-		if(!is_null($type)) {
-			unset($this->messages[$type]);
-			$this->saveMessages();
-		} else {
-			Session::destroy(self::KEY);
-		}
-	}
+    public function clear($type = null) {
+        if($type !== null) {
+            unset($this->messages[$type]);
+            $this->saveMessages();
+        } else {
+            Session::destroy(self::KEY);
+        }
+    }
 }

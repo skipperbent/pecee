@@ -1,10 +1,7 @@
 <?php
 namespace Pecee\Model;
 
-use Carbon\Carbon;
 use Pecee\Guid;
-use Pecee\IO\Directory;
-use Pecee\IO\File;
 use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData {
@@ -15,28 +12,20 @@ class ModelFile extends ModelData {
         'original_filename',
         'path',
         'type',
-        'bytes',
-        'created_date'
+        'bytes'
     ];
 
-	public function __construct($name = null, $path = null) {
-		$fullPath=null;
-		if(!is_null($name) && !is_null($path)) {
-			$fullPath = Directory::normalize($path);
-		}
-
+	public function __construct($file) {
 		parent::__construct();
 
         $this->id = Guid::create();
-        $this->filename = $name;
-        $this->path = $path;
+        $this->filename = basename($file);
+        $this->path = dirname($file);
 
-        if($fullPath && is_file($fullPath)) {
-            $this->type = File::getMime($fullPath);
-            $this->bytes = filesize($fullPath);
+        if(is_file($file)) {
+            $this->type = mime_content_type($file);
+            $this->bytes = filesize($file);
         }
-
-        $this->created_date = Carbon::now()->toDateTimeString();
 	}
 
 	public function setFilename($filename) {
@@ -59,10 +48,6 @@ class ModelFile extends ModelData {
 		$this->bytes = $bytes;
 	}
 
-	public function setCreatedDate($datetime) {
-		$this->created_date = $datetime;
-	}
-
     protected function getDataClass() {
         return FileData::class;
     }
@@ -77,7 +62,7 @@ class ModelFile extends ModelData {
 	}
 
 	public function getFullPath() {
-		return $this->path . Directory::normalize($this->path) . $this->Filename;
+		return $this->path . $this->Filename;
 	}
 
 }

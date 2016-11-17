@@ -3,21 +3,9 @@ namespace Pecee;
 
 class Locale {
 
-	protected static $instance;
 	protected $timezone;
 	protected $defaultLocale;
 	protected $locale;
-
-	/**
-	 * Get instance
-	 * @return \Pecee\Locale
-	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
-			self::$instance = new static();
-		}
-		return self::$instance;
-	}
 
 	public function __construct() {
 		// Default stuff

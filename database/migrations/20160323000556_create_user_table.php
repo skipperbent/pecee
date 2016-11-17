@@ -11,8 +11,9 @@ class CreateUserTable extends Migration {
             $table->column('password')->string(32)->index();
             $table->column('admin_level')->integer(1)->nullable()->index();
             $table->column('deleted')->bool()->index();
-            $table->column('created_date')->datetime()->index();
             $table->column('last_activity')->datetime()->nullable()->index();
+            $table->column('updated_at')->datetime()->nullable()->index();
+            $table->column('created_at')->datetime()->index();
         });
     }
 

@@ -12,12 +12,11 @@ class WidgetDebug extends Widget {
         parent::__construct();
 
         $this->setTemplate(null);
-
         $this->stack = $stack;
     }
 
     protected function getTemplatePath() {
-        $path=explode('\\', get_class($this));
+        $path = explode('\\', get_class($this));
         $path = array_slice($path, 2);
         return $_ENV['framework_path'] . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
@@ -31,6 +30,5 @@ class WidgetDebug extends Widget {
         $this->renderTemplate();
         return $this->_contentHtml;
     }
-
 
 }
