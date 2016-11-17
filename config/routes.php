@@ -13,12 +13,11 @@ $dotenv->load();
 require_once 'helpers.php';
 
 // Locale
-request()->locale = new \Pecee\Locale();
 request()->translation = new \Pecee\Translation\Translation();
+request()->locale = new \Pecee\Locale();
 request()->site = new \Pecee\UI\Site();
-
-// Debugger
 request()->debug = new \Pecee\Debug();
+
 debug('Framework loaded');
 
 function modules_autoloader($class) {
