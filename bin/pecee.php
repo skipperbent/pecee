@@ -1,7 +1,7 @@
 <?php
 global $argv, $appPath;
 
-require_once $appPath . '/config/bootstrap.php';
+require_once $appPath . '/bootstrap.php';
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
