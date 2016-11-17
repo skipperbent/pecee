@@ -56,16 +56,16 @@
         },
         {
             "name": "pecee/simple-router",
-            "version": "2.1.3",
+            "version": "2.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skipperbent/simple-php-router.git",
-                "reference": "b5eef6f3ee34f01baf433a2dd4ca6968068abf49"
+                "reference": "c6e85676da5ded9674b94086e515bf9552b04967"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/b5eef6f3ee34f01baf433a2dd4ca6968068abf49",
-                "reference": "b5eef6f3ee34f01baf433a2dd4ca6968068abf49",
+                "url": "https://api.github.com/repos/skipperbent/simple-php-router/zipball/c6e85676da5ded9674b94086e515bf9552b04967",
+                "reference": "c6e85676da5ded9674b94086e515bf9552b04967",
                 "shasum": ""
             },
             "require": {
@@ -97,7 +97,7 @@
                 "router",
                 "routing"
             ],
-            "time": "2016-11-16 14:16:22"
+            "time": "2016-11-17 04:37:03"
         },
         {
             "name": "psr/log",
