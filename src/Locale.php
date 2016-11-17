@@ -10,8 +10,8 @@ class Locale {
 	public function __construct() {
 		// Default stuff
 		$this->setTimezone('UTC');
-		$this->setLocale('en-gb');
 		$this->setDefaultLocale('en-gb');
+        $this->setLocale('en-gb');
 	}
 
 	/**
@@ -30,9 +30,12 @@ class Locale {
 	}
 
 	public function setLocale($locale) {
-		/* Set PHP language */
 		setlocale(LC_ALL, strtolower(str_replace('-', '_', $locale)));
-		$this->locale=$locale;
+		$this->locale = $locale;
+
+        if(request()->translation->getProvider() !== null) {
+            request()->translation->getProvider()->load($locale, $this->defaultLocale);
+        }
 	}
 
 	public function getLocale() {

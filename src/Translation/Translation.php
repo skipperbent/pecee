@@ -47,6 +47,9 @@ class Translation {
 		$this->provider = $provider;
 	}
 
+    /**
+     * @return ITranslationProvider
+     */
 	public function getProvider() {
 		return $this->provider;
 	}
