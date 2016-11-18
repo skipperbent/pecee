@@ -8,7 +8,7 @@ class FloatUtil {
 	}
 
 	public static function parse($val) {
-		return (self::isFloat($val)) ? $val : floatval(str_replace(array('.', ','), array('', '.'), $val));
+		return static::isFloat($val) ? $val : floatval(str_replace(['.', ','], ['', '.'], $val));
 	}
 
 }

@@ -33,7 +33,7 @@ class Debug {
 
         $debug = array();
 
-        for($i=0; $i < count($backtrace)-2; $i++) {
+        for($i = 0; $i < count($backtrace) - 2; $i++) {
             $trace = array_reverse($backtrace);
             $trace = $trace[$i];
             $tmp = array();
