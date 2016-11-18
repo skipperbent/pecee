@@ -3,8 +3,6 @@ namespace Pecee\Model;
 
 use Carbon\Carbon;
 use Pecee\Guid;
-use Pecee\IO\Directory;
-use Pecee\IO\File;
 use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData {
