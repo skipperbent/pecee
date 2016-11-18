@@ -41,7 +41,7 @@ class Str {
         return $defaultValue;
     }
 
-    public static function decamelize($word) {
+    public static function deCamelize($word) {
         return preg_replace_callback('/(^|[a-z])([A-Z])/',
             function($matches) {
                 return strtolower(strlen($matches[1]) ? $matches[1] . '_' . $matches[2] : $matches[2]);

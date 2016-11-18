@@ -17,7 +17,7 @@ class Session {
 	}
 
  	public static function isActive() {
-		return (session_id());
+		return (session_id() === '');
 	}
 
 	public static function destroy($id) {
@@ -25,6 +25,7 @@ class Session {
 			unset($_SESSION[$id]);
 			return true;
 		}
+		
 		return false;
 	}
 

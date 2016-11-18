@@ -20,7 +20,7 @@ class Modules {
 	 * @return string
 	 */
 	public function get($name) {
-		return (isset($this->modules[$name]) ? $this->modules[$name] : null);
+		return isset($this->modules[$name]) ? $this->modules[$name] : null;
 	}
 
 	/**
