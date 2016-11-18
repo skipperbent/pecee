@@ -105,7 +105,7 @@ abstract class Base {
     }
 
     public function isAjaxRequest() {
-        return (request()->getHeader('http_x_requested_with') !== null && request()->getHeader('http_x_requested_with') === 'xmlhttprequest');
+        return (request()->getHeader('http_x_requested_with') !== null && strtolower(request()->getHeader('http_x_requested_with')) === 'xmlhttprequest');
     }
 
     protected function appendSiteTitle($title, $separator = '-') {
