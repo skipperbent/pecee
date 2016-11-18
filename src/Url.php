@@ -3,37 +3,18 @@ namespace Pecee;
 
 class Url {
 
-	public static function getHost($url) {
-		return str_ireplace('www.', '', parse_url($url, PHP_URL_HOST));
-	}
-
 	public static function hasParams($url) {
 		return (strpos($url, '?') > -1);
 	}
 
-	public static function paramsToArray($query) {
-		$output = array();
-		if($query[0] === '?') {
-			$query = substr($query, 1);
-		}
-		parse_str($query, $output);
-		return $output;
-	}
+    public static function paramsToArray($query) {
+        $output = array();
+        parse_str(trim($query, '?'), $output);
+        return $output;
+    }
 
 	public static function getParamsSeparator($url) {
 		return (strpos($url, '?') > -1) ? '&' : '?';
-	}
-
-	public static function arrayToParams(array $getParams = null, $includeEmpty = true) {
-		if(is_array($getParams) && count($getParams) > 0) {
-			foreach($getParams as $key=>$val) {
-				if(!empty($val) || empty($val) && $includeEmpty) {
-					$getParams[$key] = $key . '=' . $val;
-				}
-			}
-			return join('&', $getParams);
-		}
-		return '';
 	}
 
 	public static function isValid($url) {

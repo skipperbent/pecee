@@ -6,7 +6,7 @@ use Pecee\Http\Request;
 use Pecee\SimpleRouter\RouterEntry;
 
 abstract class Middleware implements IMiddleware {
-3
+
     abstract public function handle(Request $request, RouterEntry &$route);
 
 }
