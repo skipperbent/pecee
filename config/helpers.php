@@ -24,9 +24,9 @@
  * @param array|null $getParams
  * @return string
  */
-function url($name = null, $parameters = null, $getParams = null)
+function url($name = null, $parameters = null, array $getParams = null)
 {
-	return \Pecee\Router::getRoute($name, $parameters, $getParams);
+	return \Pecee\Router::getUrl($name, $parameters, $getParams);
 }
 
 /**
