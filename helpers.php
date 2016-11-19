@@ -14,7 +14,7 @@
  * @return string
  */
 function url($controller = null, array $parameters = null, array $getParams = null) {
-    return \Pecee\Router::getRoute($controller, $parameters, $getParams);
+    return \Pecee\Router::getUrl($controller, $parameters, $getParams);
 }
 
 /**
@@ -90,7 +90,7 @@ function env($key, $default = null) {
  * @return string|null
  */
 function csrf_token() {
-    $baseVerifier = \Pecee\SimpleRouter\RouterBase::getInstance()->getCsrfVerifier();
+    $baseVerifier = S \Pecee\SimpleRouter\RouterBase::getInstance()->getCsrfVerifier();
     if($baseVerifier !== null) {
         return $baseVerifier->getToken();
     }
