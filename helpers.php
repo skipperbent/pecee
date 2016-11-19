@@ -14,7 +14,7 @@
  * @return string
  */
 function url($controller = null, array $parameters = null, array $getParams = null) {
-    return \Pecee\Router::getRoute($controller, $parameters, $getParams);
+    return \Pecee\Router::getUrl($controller, $parameters, $getParams);
 }
 
 /**

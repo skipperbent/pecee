@@ -2,6 +2,7 @@
 namespace Pecee\Handler;
 
 use Pecee\Base;
+use Pecee\Handlers\IExceptionHandler;
 use Pecee\Http\Request;
 use Pecee\SimpleRouter\RouterEntry;
 
