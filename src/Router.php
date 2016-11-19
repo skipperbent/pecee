@@ -6,7 +6,7 @@ use Pecee\SimpleRouter\SimpleRouter;
 
 class Router extends SimpleRouter {
 
-    public static function start($defaultNamespace = null) {
+    public static function start() {
 
         debug('Router initialised.');
 
@@ -19,7 +19,7 @@ class Router extends SimpleRouter {
         // Load routes.php
         require_once $_ENV['base_path'] . 'lib' . DIRECTORY_SEPARATOR . 'routes.php';
 
-        parent::setDefaultNamespace($_ENV['app_name'] . '\Controller');
+        parent::setDefaultNamespace('\\' . $_ENV['app_name']);
         parent::start();
 
         // Output debug info

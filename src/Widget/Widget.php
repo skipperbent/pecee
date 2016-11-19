@@ -93,7 +93,7 @@ abstract class Widget extends Base  {
         $output = '';
 
         if(count($this->getSite()->getCssFilesWrapped($section))) {
-            $url = url($this->_cssWrapRoute, null, array_merge(['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]));
+            $url = url($this->_cssWrapRoute, null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
             $output .= new HtmlLink($url);
         }
 
@@ -108,7 +108,7 @@ abstract class Widget extends Base  {
         $output = '';
 
         if(count($this->getSite()->getJsFilesWrapped($section))) {
-            $url = url($this->_jsWrapRoute, null, array_merge(['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]));
+            $url = url($this->_jsWrapRoute, null, ['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]);
             $output .= new HtmlScript($url);
         }
 
