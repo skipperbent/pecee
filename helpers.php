@@ -5,16 +5,24 @@
  */
 
 /**
- * Get url
+ * Get url for a route by using either name/alias, class or method name.
  *
- * @param string|null $controller
- * @param array|null $parameters
+ * The name parameter supports the following values:
+ * - Route name
+ * - Controller/resource name (with or without method)
+ * - Controller class name
+ *
+ * When searching for controller/resource by name, you can use this syntax "route.name@method".
+ * You can also use the same syntax when searching for a specific controller-class "MyController@home".
+ * If no arguments is specified, it will return the url for the current loaded route.
+ *
+ * @param string|null $name
+ * @param string|array|null $parameters
  * @param array|null $getParams
- *
  * @return string
  */
-function url($controller = null, array $parameters = null, array $getParams = null) {
-    return \Pecee\Router::getUrl($controller, $parameters, $getParams);
+function url($name = null, $parameters = null, array $getParams = null) {
+    return \Pecee\Router::getUrl($name, $parameters, $getParams);
 }
 
 /**
