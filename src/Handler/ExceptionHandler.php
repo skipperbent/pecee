@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Handler;
 
+use Pecee\Handlers\IExceptionHandler;
 use Pecee\Http\Request;
 use Pecee\SimpleRouter\RouterEntry;
 
