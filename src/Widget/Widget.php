@@ -24,8 +24,8 @@ abstract class Widget extends Base  {
         debug('START WIDGET: ' . static::class);
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->_jsWrapRoute = url('pecee.js.wrap');
-        $this->_cssWrapRoute = url('pecee.css.wrap');
+        $this->_jsWrapRoute = 'pecee.js.wrap';
+        $this->_cssWrapRoute = 'pecee.css.wrap';
         $this->_form = new Form();
     }
 
