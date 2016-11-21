@@ -20,7 +20,7 @@ class HtmlForm extends Html {
         $this->name($name);
         $this->enctype($enctype);
         $this->method($method);
-        $this->action((($action === null) ? url(null, null, null) : $action));
+        $this->action((($action === null) ? url() : $action));
 
         // Add csrf token
         if(strtolower($method) !== 'get') {
