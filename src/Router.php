@@ -13,8 +13,8 @@ class Router extends SimpleRouter {
         Session::start();
 
         // Load framework specific controllers
-        static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.js.wrap');
-        static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setAlias('pecee.css.wrap');
+        static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setName('pecee.js.wrap');
+        static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setName('pecee.css.wrap');
 
         // Load routes.php
         require_once $_ENV['base_path'] . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
