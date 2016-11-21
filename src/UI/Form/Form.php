@@ -66,11 +66,11 @@ class Form {
      * Creates new checkbox input element
      * @param string $name
      * @param bool $value
-     * @param bool $saveValue
      * @param bool $defaultValue
+     * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = true, $saveValue = true, $defaultValue = null) {
+    public function bool($name, $value = true, $defaultValue = null, $saveValue = true) {
         $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
         if($saveValue !== false) {
             if($defaultValue === null) {
