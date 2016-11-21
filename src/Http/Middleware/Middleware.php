@@ -1,11 +1,10 @@
 <?php
-
 namespace Pecee\Http\Middleware;
 
 use Pecee\Http\Request;
-use Pecee\SimpleRouter\RouterEntry;
+use Pecee\SimpleRouter\Route\ILoadableRoute;
 
 abstract class Middleware implements IMiddleware
 {
-    abstract public function handle(Request $request, RouterEntry &$route);
+    abstract public function handle(Request $request, ILoadableRoute &$route);
 }

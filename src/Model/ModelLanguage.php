@@ -2,7 +2,6 @@
 namespace Pecee\Model;
 
 use Pecee\DB\PdoHelper;
-use Pecee\SimpleRouter\RouterBase;
 
 class ModelLanguage extends Model {
 
