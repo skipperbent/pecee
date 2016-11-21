@@ -3,7 +3,7 @@ namespace Pecee\Translation\Providers;
 
 use Pecee\Model\ModelCollection;
 use Pecee\Model\ModelLanguage;
-use Pecee\SimpleRouter\RouterBase;
+use Pecee\SimpleRouter\Router;
 
 class DbTranslateProvider implements ITranslationProvider {
 
@@ -21,7 +21,7 @@ class DbTranslateProvider implements ITranslationProvider {
     }
 
     public function getContext() {
-        $route = RouterBase::getInstance()->getLoadedRoute();
+        $route = Router::getInstance()->getLoadedRoute();
 
         if($route && $route->getIdentifier()) {
             return $route->getIdentifier();
