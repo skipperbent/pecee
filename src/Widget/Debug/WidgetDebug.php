@@ -1,34 +1,41 @@
 <?php
-
 namespace Pecee\Widget\Debug;
 
 use Pecee\Widget\Widget;
 
-class WidgetDebug extends Widget {
+class WidgetDebug extends Widget
+{
+	protected $stack;
 
-    protected $stack;
+	public function __construct(array $stack)
+	{
+		parent::__construct();
 
-    public function __construct(array $stack) {
-        parent::__construct();
+		$this->getSite()->addCss('css/pecee-debug.css');
+		$this->getSite()->addWrappedJs('js/pecee-debug.js');
 
-        $this->setTemplate(null);
-        $this->stack = $stack;
-    }
+		$this->setTemplate(null);
+		$this->stack = $stack;
+	}
 
-    protected function getTemplatePath() {
-        $path = explode('\\', get_class($this));
-        $path = array_slice($path, 2);
-        return $_ENV['framework_path'] . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
-    }
+	protected function getTemplatePath()
+	{
+		$path = explode('\\', get_class($this));
+		$path = array_slice($path, 2);
 
-    /**
-     * Render debug
-     * @return string
-     */
-    public function render() {
-        $this->renderContent();
-        $this->renderTemplate();
-        return $this->_contentHtml;
-    }
+		return $_ENV['framework_path'] . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
+	}
+
+	/**
+	 * Render debug
+	 * @return string
+	 */
+	public function render()
+	{
+		$this->renderContent();
+		$this->renderTemplate();
+
+		return $this->_contentHtml;
+	}
 
 }

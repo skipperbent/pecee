@@ -2,27 +2,11 @@
 namespace Pecee\UI;
 
 use Pecee\UI\Html\Html;
-use Pecee\UI\Html\HtmlMeta;
 
 class Site {
 
 	const SECTION_DEFAULT = 'default';
 
-	const DOCTYPE_HTML_5 = '<!DOCTYPE html>';
-	const DOCTYPE_XHTML_DEFAULT = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">';
-	const DOCTYPE_XHTML_STRICT = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">';
-
-	const CHARSET_UTF8 = 'UTF-8';
-
-	// Settings
-    public static $docTypes = [
-        self::DOCTYPE_HTML_5,
-        self::DOCTYPE_XHTML_STRICT,
-        self::DOCTYPE_XHTML_DEFAULT,
-    ];
-
-	protected $docType = self::DOCTYPE_HTML_5;
-	protected $charset = self::CHARSET_UTF8;
 	protected $title;
 	protected $description;
 	protected $keywords = array();
@@ -31,10 +15,6 @@ class Site {
 	protected $css = array();
 	protected $jsFilesWrapped = array();
 	protected $cssFilesWrapped = array();
-	protected $adminIps = [
-	    '127.0.0.1',
-        '::1',
-    ];
 
 	public function getTitle() {
 		return $this->title;
@@ -52,22 +32,6 @@ class Site {
 	public function setDescription($description) {
 		$this->description = $description;
         return $this;
-	}
-
-	public function setDocType($docType) {
-		if(!in_array($docType, static::$docTypes)) {
-            throw new \InvalidArgumentException('Invalid or unsupported docType.');
-        }
-		$this->docType = $docType;
-        return $this;
-	}
-
-	public function getDocType() {
-		return $this->docType;
-	}
-
-	public function getCharset() {
-		return $this->charset;
 	}
 
 	public function addWrappedJs($filename, $section = self::SECTION_DEFAULT) {
@@ -133,13 +97,20 @@ class Site {
 		return $this->keywords;
 	}
 
-	public function addMeta($name, $content) {
-		return $this->addHeader((new HtmlMeta($content))->attr('name', $name));
+	public function addMeta(array $attributes) {
+		return $this
+			->addHeader((new Html('meta'))
+			->setClosingType(Html::CLOSE_TYPE_SELF)
+			->setAttributes($attributes));
 	}
 
 	public function addHeader(Html $el) {
 		$this->header[] = $el;
-		return $this;
+		return $el;
+	}
+
+	public function getHeader() {
+		return $this->header;
 	}
 
 	public function getJsFilesWrapped($section) {
@@ -156,41 +127,6 @@ class Site {
 
 	public function getCss($section = self::SECTION_DEFAULT) {
 		return (isset($this->css[$section]) ? $this->css[$section] : array());
-	}
-
-	public function getHeader() {
-		return $this->header;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getAdminIps() {
-		return $this->adminIps;
-	}
-
-	/**
-	 * @param array $ips
-     * @return static
-	 */
-	public function setAdminIps(array $ips) {
-		$this->adminIps = $ips;
-        return $this;
-	}
-
-	public function addAdminIp($ip) {
-		$this->adminIps[] = $ip;
-        return $this;
-	}
-
-	public function hasAdminIp($ip = null) {
-		$ip = ($ip === null) ? request()->getIp() : $ip;
-
-        if(is_array($this->adminIps)) {
-			return (in_array($ip, $this->adminIps));
-		}
-
-		return false;
 	}
 
 }

@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\Xml\XmlText;
+use Pecee\UI\Xml\XmlText;
 
 class HtmlText extends XmlText implements IHtmlNode {
 

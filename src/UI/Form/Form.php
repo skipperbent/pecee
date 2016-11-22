@@ -7,7 +7,6 @@ use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
 use Pecee\UI\Html\HtmlInput;
-use Pecee\UI\Html\HtmlLabel;
 use Pecee\UI\Html\HtmlSelect;
 use Pecee\UI\Html\HtmlSelectOption;
 use Pecee\UI\Html\HtmlTextarea;
@@ -92,12 +91,22 @@ class Form {
 
     /**
      * Creates new label
-     * @param string $value
-     * @param string $for
-     * @return \Pecee\UI\Html\HtmlLabel
+     * @param string|null $inner
+     * @param string|null $for
+     * @return \Pecee\UI\Html\Html
      */
-    public function label($value, $for=null) {
-        return new HtmlLabel($value, $for);
+    public function label($inner, $for=null) {
+        $label = (new Html('label'));
+
+        if($inner !== null) {
+        	$label->addItem($inner);
+        }
+
+        if($for !== null) {
+        	$label->attr('for', $for);
+        }
+
+        return $label;
     }
 
     /**

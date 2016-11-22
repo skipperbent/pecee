@@ -1,5 +1,5 @@
 <?php
 namespace Pecee\UI\Html;
-use Pecee\Xml\IXmlNode;
+use Pecee\UI\Xml\IXmlNode;
 
 interface IHtmlNode extends IXmlNode { }

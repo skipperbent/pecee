@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Xml;
+namespace Pecee\UI\Xml;
 class Xml {
 	public static function toXml($data,$parent = 'root') {
 
