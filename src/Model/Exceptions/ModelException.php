@@ -1,3 +1,6 @@
 <?php
 namespace Pecee\Model\Exceptions;
-class ModelException extends \Exception { }
+
+class ModelException extends \Exception
+{
+}

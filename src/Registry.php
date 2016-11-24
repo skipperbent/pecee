@@ -1,18 +1,20 @@
 <?php
 namespace Pecee;
 
-class Registry {
+class Registry
+{
 
 	protected static $instance;
 
-	protected $registry = array();
+	protected $registry = [];
 
 	/**
 	 * Get instance
 	 * @return static
 	 */
-	public static function getInstance() {
-		if(self::$instance === null) {
+	public static function getInstance()
+	{
+		if (self::$instance === null) {
 			self::$instance = new static();
 		}
 
@@ -22,10 +24,11 @@ class Registry {
 	/**
 	 * Get key from registry
 	 * @param string $key
-     * @param string|null $default;
+	 * @param string|null $default ;
 	 * @return string|null
 	 */
-	public function get($key, $default=null) {
+	public function get($key, $default = null)
+	{
 		return (isset($this->registry[$key]) ? $this->registry[$key] : $default);
 	}
 
@@ -33,11 +36,13 @@ class Registry {
 	 * Set registry key
 	 * @param string $key
 	 * @param string $value
-     * @return static
+	 * @return static
 	 */
-	public function set($key, $value) {
+	public function set($key, $value)
+	{
 		$this->registry[$key] = $value;
-        return $this;
+
+		return $this;
 	}
 
 }

@@ -1,106 +1,117 @@
 <?php
 namespace Pecee\UI\AssetManager;
 
-abstract class Asset implements IAsset {
+abstract class Asset implements IAsset
+{
 
-    protected $files = array();
-    protected $filename;
-    protected $destinationPath;
+	protected $files = [];
+	protected $filename;
+	protected $destinationPath;
 
-    public function __construct($filename) {
-        $this->filename = $filename;
-    }
+	public function __construct($filename)
+	{
+		$this->filename = $filename;
+	}
 
-    /**
-     * Add another file
-     * @param string $sourceFile
-     * @return static $this
-     */
-    public function mix($sourceFile) {
-        $this->files[] = $sourceFile;
-        return $this;
-    }
+	/**
+	 * Add another file
+	 * @param string $sourceFile
+	 * @return static $this
+	 */
+	public function mix($sourceFile)
+	{
+		$this->files[] = $sourceFile;
 
-    /**
-     * Find local resource from relative, absolute or from within modules
-     * and retrieve the contents of the file.
-     *
-     * @param string $filePath
-     * @return bool|string
-     */
-    protected function getResourceContent($filePath) {
-        $content = false;
+		return $this;
+	}
 
-        if(is_file($filePath)) {
-            $content = file_get_contents($filePath);
-        }
+	/**
+	 * Find local resource from relative, absolute or from within modules
+	 * and retrieve the contents of the file.
+	 *
+	 * @param string $filePath
+	 * @return bool|string
+	 */
+	protected function getResourceContent($filePath)
+	{
+		$content = false;
 
-        // Try default location
-        if(stream_resolve_include_path($filePath) !== false) {
-            $content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
-        }
+		if (is_file($filePath)) {
+			$content = file_get_contents($filePath);
+		}
 
-        // Try module resources
-        if($content === false && app()->hasModules() !== null) {
-            foreach(app()->getModules() as $module) {
-                $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
-                if(is_file($moduleFilePath)) {
-                    $content = file_get_contents($moduleFilePath);
-                    break;
-                }
-            }
-        }
+		// Try default location
+		if (stream_resolve_include_path($filePath) !== false) {
+			$content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
+		}
 
-        return $content;
-    }
+		// Try module resources
+		if ($content === false && app()->hasModules() !== null) {
+			foreach (app()->getModules() as $module) {
+				$moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
+				if (is_file($moduleFilePath)) {
+					$content = file_get_contents($moduleFilePath);
+					break;
+				}
+			}
+		}
 
-    public function build() {
+		return $content;
+	}
 
-        if(!is_dir($this->destinationPath)) {
-            mkdir($this->destinationPath, 0755);
-        }
+	public function build()
+	{
 
-        $handle = fopen($this->destinationPath . '/' . $this->filename, 'w+');
+		if (!is_dir($this->destinationPath)) {
+			mkdir($this->destinationPath, 0755);
+		}
 
-        foreach($this->files as $file) {
+		$handle = fopen($this->destinationPath . '/' . $this->filename, 'w+');
 
-            $contents = $this->getResourceContent($file);
+		foreach ($this->files as $file) {
 
-            if($contents === false) {
-                continue;
-            }
+			$contents = $this->getResourceContent($file);
 
-            $this->processFile($file, $contents);
+			if ($contents === false) {
+				continue;
+			}
 
-            $buffer = sprintf('/* %s */', $file) . chr(10) . $contents;
-            fwrite($handle, $buffer);
+			$this->processFile($file, $contents);
 
-            $buffer = null;
+			$buffer = sprintf('/* %s */', $file) . chr(10) . $contents;
+			fwrite($handle, $buffer);
 
-        }
+			$buffer = null;
 
-        fclose($handle);
+		}
 
-    }
+		fclose($handle);
 
-    /**
-     * @param string $path
-     * @return static $this
-     */
-    public function setDestinationPath($path) {
-        $this->destinationPath = rtrim($path, '/');
-        return $this;
-    }
+	}
 
-    public function setFilename($filename) {
-        $this->filename = $filename;
-        return $this;
-    }
+	/**
+	 * @param string $path
+	 * @return static $this
+	 */
+	public function setDestinationPath($path)
+	{
+		$this->destinationPath = rtrim($path, '/');
 
-    public function getFilename() {
-        return $this->filename;
-    }
+		return $this;
+	}
 
-    abstract protected function processFile($file, &$contents);
+	public function setFilename($filename)
+	{
+		$this->filename = $filename;
+
+		return $this;
+	}
+
+	public function getFilename()
+	{
+		return $this->filename;
+	}
+
+	abstract protected function processFile($file, &$contents);
 
 }

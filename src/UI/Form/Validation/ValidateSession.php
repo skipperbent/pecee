@@ -3,19 +3,23 @@ namespace Pecee\UI\Form\Validation;
 
 use Pecee\Session\Session;
 
-class ValidateSession extends ValidateInput {
+class ValidateSession extends ValidateInput
+{
 
 	protected $sessionName;
 
-	public function __construct( $sessionName ) {
+	public function __construct($sessionName)
+	{
 		$this->sessionName = $sessionName;
 	}
 
-	public function validates() {
+	public function validates()
+	{
 		return ((bool)Session::exists($this->sessionName));
 	}
 
-	public function getError() {
+	public function getError()
+	{
 		return lang('%s does not exist', $this->input->getName());
 	}
 
