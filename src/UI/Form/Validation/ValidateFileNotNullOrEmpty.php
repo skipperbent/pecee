@@ -10,7 +10,7 @@ class ValidateFileNotNullOrEmpty extends ValidateFile {
 			return false;
 		}
 
-		return (!empty($this->input->getName()) && $this->input->getSize() > 0 && $this->input->getError() == 0);
+		return ($this->input->hasError() === false && !empty($this->input->getName()) && $this->input->getSize() > 0 && $this->input->getError() == 0);
 	}
 
 	public function getError() {

@@ -3,8 +3,8 @@ namespace Pecee\Translation;
 
 use Pecee\Translation\Providers\ITranslationProvider;
 
-class Translation {
-
+class Translation
+{
 	protected $provider;
 
 	/**
@@ -13,44 +13,51 @@ class Translation {
 	 * @param array $args
 	 * @return string
 	 */
-	public function _($key, $args = null) {
+	public function _($key, $args = null)
+	{
 		if (!is_array($args)) {
 			$args = func_get_args();
 			$args = array_slice($args, 1);
 		}
+
 		return vsprintf($this->lookup($key), $args);
 	}
 
-    /**
-     * Translate message.
-     * @param string $key
-     * @param array $args
-     * @return string
-     */
-    public function translate($key, $args = null) {
-        if (!is_array($args)) {
-            $args = func_get_args();
-            $args = array_slice($args, 1);
-        }
-        return vsprintf($this->lookup($key), $args);
-    }
+	/**
+	 * Translate message.
+	 * @param string $key
+	 * @param array $args
+	 * @return string
+	 */
+	public function translate($key, $args = null)
+	{
+		if (!is_array($args)) {
+			$args = func_get_args();
+			$args = array_slice($args, 1);
+		}
 
-	protected function lookup($key) {
-        if($this->provider instanceof ITranslationProvider) {
-            return $this->provider->lookup($key);
-        }
-
-        return $key;
+		return vsprintf($this->lookup($key), $args);
 	}
 
-	public function setProvider(ITranslationProvider $provider) {
+	protected function lookup($key)
+	{
+		if ($this->provider instanceof ITranslationProvider) {
+			return $this->provider->lookup($key);
+		}
+
+		return $key;
+	}
+
+	public function setProvider(ITranslationProvider $provider)
+	{
 		$this->provider = $provider;
 	}
 
-    /**
-     * @return ITranslationProvider
-     */
-	public function getProvider() {
+	/**
+	 * @return ITranslationProvider
+	 */
+	public function getProvider()
+	{
 		return $this->provider;
 	}
 }

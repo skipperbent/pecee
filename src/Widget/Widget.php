@@ -3,15 +3,11 @@ namespace Pecee\Widget;
 
 use Pecee\Base;
 use Pecee\UI\Form\Form;
-use Pecee\UI\Html\HtmlLink;
-use Pecee\UI\Html\HtmlMeta;
-use Pecee\UI\Html\HtmlScript;
+use Pecee\UI\Html\Html;
 use Pecee\UI\Site;
 
 abstract class Widget extends Base  {
 
-    protected $_jsWrapRoute;
-    protected $_cssWrapRoute;
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
@@ -22,10 +18,9 @@ abstract class Widget extends Base  {
         parent::__construct();
 
         debug('START WIDGET: ' . static::class);
+
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->_jsWrapRoute = 'pecee.js.wrap';
-        $this->_cssWrapRoute = 'pecee.css.wrap';
         $this->_form = new Form();
     }
 
@@ -50,7 +45,7 @@ abstract class Widget extends Base  {
                 $msg[] = $error->getMessage();
             }
 
-            return $o . nl2br(join(chr(10), $msg), ($this->getSite()->getDocType() !== Site::DOCTYPE_HTML_5)) . '</div>';
+            return $o . join('<br>', $msg) . '</div>';
         }
 
         return '';
@@ -59,26 +54,17 @@ abstract class Widget extends Base  {
     /**
      * @return string
      */
-    public function printHeader() {
+    public function printMeta() {
 
-        $meta = new HtmlMeta();
-        $meta->addAttribute('charset', $this->getSite()->getCharset());
+	    $output = '';
 
-        $output = $meta;
+	    if($this->getSite()->getDescription()) {
+		    $this->getSite()->addMeta(['content' => $this->getSite()->getDescription(), 'name' => 'description']);
+	    }
 
-        if($this->getSite()->getTitle())  {
-            $output .= '<title>' . $this->getSite()->getTitle() . '</title>';
-        }
-
-        if($this->getSite()->getDescription()) {
-            $this->getSite()->addMeta('description', $this->getSite()->getDescription());
-        }
-        if(count($this->getSite()->getKeywords())) {
-            $this->getSite()->addMeta('keywords', join(', ', $this->getSite()->getKeywords()));
-        }
-
-        $output .= $this->printCss();
-        $output .= $this->printJs();
+	    if(count($this->getSite()->getKeywords()) > 0) {
+		    $this->getSite()->addMeta(['content' => join(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
+	    }
 
         if(count($this->getSite()->getHeader())) {
             $header = $this->getSite()->getHeader();
@@ -92,12 +78,15 @@ abstract class Widget extends Base  {
         $output = '';
 
         if(count($this->getSite()->getCssFilesWrapped($section))) {
-            $url = url($this->_cssWrapRoute, null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
-            $output .= new HtmlLink($url);
+	        $css = url(app()->getCssWrapRouteName(), null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
+            $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_SELF)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
         foreach($this->getSite()->getCss($section) as $css) {
-            $output .= new HtmlLink($css);
+            $output .= (new Html('link'))
+	            ->setClosingType(Html::CLOSE_TYPE_SELF)
+	            ->attr('href', $css)
+	            ->attr('rel', 'stylesheet');
         }
 
         return $output;
@@ -107,12 +96,12 @@ abstract class Widget extends Base  {
         $output = '';
 
         if(count($this->getSite()->getJsFilesWrapped($section))) {
-            $url = url($this->_jsWrapRoute, null, ['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]);
-            $output .= new HtmlScript($url);
+	        $js = url(app()->getJsWrapRouteName(), null, ['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]);
+            $output .= (new Html('script'))->attr('src', $js);
         }
 
         foreach($this->getSite()->getJs($section) as $js) {
-            $output .= new HtmlScript($js);
+            $output .= (new Html('script'))->attr('src', $js);
         }
 
         return $output;
@@ -212,14 +201,6 @@ abstract class Widget extends Base  {
         }
 
         debug('END: rendering template ' . $this->_template);
-    }
-
-    protected function setJsWrapRoute($route) {
-        $this->_jsWrapRoute = $route;
-    }
-
-    protected function setCssWrapRoute($route) {
-        $this->_cssWrapRoute = $route;
     }
 
 }

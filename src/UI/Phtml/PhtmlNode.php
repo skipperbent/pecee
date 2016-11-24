@@ -6,6 +6,7 @@ use Pecee\Registry;
 use Pecee\UI\Html\HtmlElement;
 
 class PhtmlNode extends HtmlElement {
+
 	private static $closureCount = 0;
 	private static $append = '';
 	private static $prepend = '';
@@ -35,7 +36,7 @@ class PhtmlNode extends HtmlElement {
 
 	public function getInnerString() {
 		$str = '';
-        /* @var $child \Pecee\Xml\IXmlNode */
+        /* @var $child \Pecee\UI\Xml\IXmlNode */
 		foreach($this->getChildren() as $child) {
 			$str .= $child->__toString();
 		}

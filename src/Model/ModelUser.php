@@ -3,7 +3,7 @@ namespace Pecee\Model;
 
 use Carbon\Carbon;
 use Pecee\Cookie;
-use Pecee\Mcrypt;
+use Pecee\Guid;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
 use Pecee\Model\User\UserException;
@@ -98,7 +98,7 @@ class ModelUser extends ModelData {
 
     protected function signIn($cookieExp){
         $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSecret());
-        $ticket = Mcrypt::encrypt(join('|', $user), static::getSecret());
+        $ticket = Guid::encrypt(join('|', $user), static::getSecret());
         Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
     }
 
@@ -121,7 +121,7 @@ class ModelUser extends ModelData {
     public static function getFromCookie($setData = false) {
         $ticket = Cookie::get(static::COOKIE_NAME);
         if(trim($ticket) !== ''){
-            $ticket = Mcrypt::decrypt($ticket, static::getSecret());
+            $ticket = Guid::decrypt($ticket, static::getSecret());
             $user = explode('|', $ticket);
             if (is_array($user) && trim(end($user)) === static::getSecret()) {
                 if ($setData) {
@@ -137,6 +137,7 @@ class ModelUser extends ModelData {
                 }
             }
         }
+
         return null;
     }
 

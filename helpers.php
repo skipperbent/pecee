@@ -4,6 +4,8 @@
  * Contain helper functions which provides shortcuts for various classes.
  */
 
+use \Pecee\Application\Router as Router;
+
 /**
  * Get url for a route by using either name/alias, class or method name.
  *
@@ -21,65 +23,81 @@
  * @param array|null $getParams
  * @return string
  */
-function url($name = null, $parameters = null, $getParams = []) {
-    return \Pecee\Router::getUrl($name, $parameters, $getParams);
+function url($name = null, $parameters = null, $getParams = null)
+{
+	return Router::getUrl($name, $parameters, $getParams);
 }
 
 /**
  * @return \Pecee\Http\Response
  */
-function response() {
-    return \Pecee\Router::response();
+function response()
+{
+	return Router::response();
 }
 
 /**
  * @return \Pecee\Http\Request
  */
-function request() {
-    return \Pecee\Router::request();
+function request()
+{
+	return Router::request();
 }
 
 /**
  * Get input class
  * @return \Pecee\Http\Input\Input
  */
-function input() {
-    return request()->getInput();
+function input()
+{
+	return request()->getInput();
 }
 
-function redirect($url, $code = null) {
-    if($code) {
-        response()->httpCode($code);
-    }
+function redirect($url, $code = null)
+{
+	if ($code) {
+		response()->httpCode($code);
+	}
 
-    response()->redirect($url);
+	response()->redirect($url);
 }
 
-function lang($key, $args = null) {
-    if (!is_array($args)) {
-        $args = func_get_args();
-        $args = array_slice($args, 1);
-    }
-    return request()->translation->translate($key, $args);
+/**
+ * Get main application class
+ *
+ * @return \Pecee\Application\Application
+ */
+function app()
+{
+	return request()->app;
+}
+
+function lang($key, $args = null)
+{
+	if (!is_array($args)) {
+		$args = func_get_args();
+		$args = array_slice($args, 1);
+	}
+
+	return app()->translation->translate($key, $args);
 }
 
 /**
  * Add debug message.
  * Requires DEBUG=1 to be present in your env file.
+ *
  * @param string $text
  */
-function debug($text) {
-    if(env('DEBUG', false)) {
-        request()->debug->add($text);
-    }
+function debug($text)
+{
+	if (env('DEBUG', false)) {
+		app()->debug->add($text);
+	}
 }
 
-function add_module($name, $path) {
-    if(request()->modules === null) {
-        request()->modules = new \Pecee\Modules();
-    }
-
-    request()->modules->add($name, $path);
+function add_module($name, $path)
+{
+	app()->addModule($name, $path);
 }
 
 /**
@@ -89,18 +107,21 @@ function add_module($name, $path) {
  *
  * @return string|null
  */
-function env($key, $default = null) {
-    return isset($_ENV[$key]) ? $_ENV[$key] : $default;
+function env($key, $default = null)
+{
+	return isset($_ENV[$key]) ? $_ENV[$key] : $default;
 }
 
 /**
  * Get current csrf-token
  * @return string|null
  */
-function csrf_token() {
-    $baseVerifier = \Pecee\SimpleRouter\Router::getInstance()->getCsrfVerifier();
-    if($baseVerifier !== null) {
-        return $baseVerifier->getToken();
-    }
-    return null;
+function csrf_token()
+{
+	$baseVerifier = Router::router()->getInstance()->getCsrfVerifier();
+	if ($baseVerifier !== null) {
+		return $baseVerifier->getToken();
+	}
+
+	return null;
 }

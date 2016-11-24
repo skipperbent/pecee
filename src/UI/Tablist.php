@@ -6,7 +6,7 @@ use Pecee\UI\Html\Html;
 class Tablist {
 
 	public function __construct() {
-		request()->site->addWrappedJs('pecee-tablist.js');
+		app()->site->addWrappedJs('pecee-tablist.js');
 	}
 
 	public function button($id, $value=null) {

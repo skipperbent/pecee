@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\Xml\XmlElement;
+use Pecee\UI\Xml\XmlElement;
 
 class HtmlElement extends XmlElement implements IHtmlNode {
 
