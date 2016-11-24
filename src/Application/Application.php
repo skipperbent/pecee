@@ -33,11 +33,12 @@ class Application
 	protected $timezone;
 	protected $defaultLocale;
 	protected $locale;
-	protected $modules = array();
+	protected $modules = [];
 	protected $cssWrapRouteName = 'pecee.css.wrap';
 	protected $jsWrapRouteName = 'pecee.js.wrap';
 	protected $cssWrapRouteUrl = '/css-wrap';
 	protected $jsWrapRouteUrl = '/js-wrap';
+	protected $disableFrameworkRoutes = false;
 
 	public function __construct()
 	{
@@ -93,46 +94,64 @@ class Application
 	/**
 	 * @return string $timezone
 	 */
-	public function getTimezone() {
+	public function getTimezone()
+	{
 		return $this->timezone;
 	}
 
 	/**
 	 * @param string $timezone
 	 */
-	public function setTimezone($timezone) {
+	public function setTimezone($timezone)
+	{
 		$this->timezone = $timezone;
 		date_default_timezone_set($timezone);
 	}
 
-	public function setLocale($locale) {
+	public function setLocale($locale)
+	{
 		setlocale(LC_ALL, strtolower(str_replace('-', '_', $locale)));
 		$this->locale = $locale;
 
-		if($this->translation->getProvider() !== null) {
+		if ($this->translation->getProvider() !== null) {
 			$this->translation->getProvider()->load($locale, $this->defaultLocale);
 		}
 	}
 
-	public function getLocale() {
+	public function getLocale()
+	{
 		return $this->locale;
 	}
 
-	public function getDefaultLocale() {
+	public function getDefaultLocale()
+	{
 		return $this->defaultLocale;
 	}
 
-	public function setDefaultLocale($defaultLocale) {
+	/**
+	 * Set site locale
+	 *
+	 * @param string $defaultLocale
+	 * @return static $this
+	 */
+	public function setDefaultLocale($defaultLocale)
+	{
 		$this->defaultLocale = $defaultLocale;
+
+		return $this;
 	}
 
 	/**
 	 * Add new module
 	 * @param string $name
 	 * @param string $path
+	 * @return static $this
 	 */
-	public function addModule($name, $path) {
+	public function addModule($name, $path)
+	{
 		$this->modules[$name] = $path;
+
+		return $this;
 	}
 
 	/**
@@ -140,7 +159,8 @@ class Application
 	 * @param string $name
 	 * @return string
 	 */
-	public function getModule($name) {
+	public function getModule($name)
+	{
 		return isset($this->modules[$name]) ? $this->modules[$name] : null;
 	}
 
@@ -148,15 +168,18 @@ class Application
 	 * Get modules
 	 * @return array
 	 */
-	public function getModules() {
+	public function getModules()
+	{
 		return $this->modules;
 	}
 
-	public function hasModules() {
+	public function hasModules()
+	{
 		return (count($this->modules) > 0);
 	}
 
-	public function getCharset() {
+	public function getCharset()
+	{
 		return $this->charset;
 	}
 
@@ -166,8 +189,10 @@ class Application
 	 * @param string $url
 	 * @return static $this
 	 */
-	public function setJsWrapRouteUrl($url) {
+	public function setJsWrapRouteUrl($url)
+	{
 		$this->jsWrapRouteUrl = $url;
+
 		return $this;
 	}
 
@@ -177,16 +202,20 @@ class Application
 	 * @param string $url
 	 * @return static $this
 	 */
-	public function setCssWrapRouteUrl($url) {
+	public function setCssWrapRouteUrl($url)
+	{
 		$this->cssWrapRouteUrl = $url;
+
 		return $this;
 	}
 
-	public function getJsWrapRouteUrl() {
+	public function getJsWrapRouteUrl()
+	{
 		return $this->jsWrapRouteUrl;
 	}
 
-	public function getCssWrapRouteUrl() {
+	public function getCssWrapRouteUrl()
+	{
 		return $this->cssWrapRouteUrl;
 	}
 
@@ -195,7 +224,8 @@ class Application
 	 *
 	 * @return string
 	 */
-	public function getCssWrapRouteName() {
+	public function getCssWrapRouteName()
+	{
 		return $this->cssWrapRouteName;
 	}
 
@@ -204,11 +234,32 @@ class Application
 	 *
 	 * @return string
 	 */
-	public function getJsWrapRouteName() {
+	public function getJsWrapRouteName()
+	{
 		return $this->jsWrapRouteName;
 	}
 
-	public function __set($name, $value)  {
+	/**
+	 * Disables all routes added by the framework.
+	 * Useful if running in cli or using a scraped site.
+	 *
+	 * @param bool $bool
+	 * @return static $this
+	 */
+	public function disableFrameworkRoutes($bool)
+	{
+		$this->disableFrameworkRoutes = $bool;
+
+		return $this;
+	}
+
+	public function getDisableFrameworkRoutes()
+	{
+		return $this->disableFrameworkRoutes;
+	}
+
+	public function __set($name, $value)
+	{
 		$this->parameters[$name] = $value;
 	}
 

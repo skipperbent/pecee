@@ -12,9 +12,13 @@ class Router extends SimpleRouter {
 
         Session::start();
 
-        // Load framework specific controllers
-	    static::get(app()->getCssWrapRouteUrl(), 'ControllerWrap@css', ['namespace' => '\Pecee\Controller'])->setName(app()->getCssWrapRouteName());
-        static::get(app()->getJsWrapRouteUrl(), 'ControllerWrap@js', ['namespace' => '\Pecee\Controller'])->setName(app()->getJsWrapRouteName());
+        if(app()->getDisableFrameworkRoutes() === true) {
+
+	        // Load framework specific controllers
+	        static::get(app()->getCssWrapRouteUrl(), 'ControllerWrap@css', ['namespace' => '\Pecee\Controller'])->setName(app()->getCssWrapRouteName());
+	        static::get(app()->getJsWrapRouteUrl(), 'ControllerWrap@js', ['namespace' => '\Pecee\Controller'])->setName(app()->getJsWrapRouteName());
+
+        }
 
         // Load routes.php
         require_once $_ENV['base_path'] . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
