@@ -1,5 +1,5 @@
 <?php
-namespace Pecee;
+namespace Pecee\Application;
 
 use Pecee\Session\Session;
 use Pecee\SimpleRouter\SimpleRouter;
@@ -13,8 +13,8 @@ class Router extends SimpleRouter {
         Session::start();
 
         // Load framework specific controllers
-        static::get('/js-wrap', 'ControllerJs@wrap', ['namespace' => '\Pecee\Controller'])->setName('pecee.js.wrap');
-        static::get('/css-wrap', 'ControllerCss@wrap', ['namespace' => '\Pecee\Controller'])->setName('pecee.css.wrap');
+	    static::get(app()->getCssWrapRouteUrl(), 'ControllerWrap@css', ['namespace' => '\Pecee\Controller'])->setName(app()->getCssWrapRouteName());
+        static::get(app()->getJsWrapRouteUrl(), 'ControllerWrap@js', ['namespace' => '\Pecee\Controller'])->setName(app()->getJsWrapRouteName());
 
         // Load routes.php
         require_once $_ENV['base_path'] . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
@@ -23,8 +23,8 @@ class Router extends SimpleRouter {
         parent::start();
 
         // Output debug info
-        if(env('DEBUG', false) && request()->site->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
-            echo request()->debug;
+        if(env('DEBUG', false) && app()->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
+            echo app()->debug;
         }
     }
 

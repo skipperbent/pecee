@@ -41,8 +41,8 @@ abstract class Asset implements IAsset {
         }
 
         // Try module resources
-        if($content === false && request()->modules !== null) {
-            foreach(request()->modules->getList() as $module) {
+        if($content === false && app()->hasModules() !== null) {
+            foreach(app()->getModules() as $module) {
                 $moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
                 if(is_file($moduleFilePath)) {
                     $content = file_get_contents($moduleFilePath);

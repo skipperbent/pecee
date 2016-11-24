@@ -9,7 +9,7 @@ class HtmlTextarea extends Html {
 
         parent::__construct('textarea');
 
-		$this->value = htmlentities($value, ENT_QUOTES, request()->site->getCharset());
+		$this->value = htmlentities($value, ENT_QUOTES, app()->getCharset());
 
 		$this->addAttribute('name', $name);
 
@@ -27,7 +27,7 @@ class HtmlTextarea extends Html {
 	}
 
 	public function getValue() {
-		return html_entity_decode($this->value, ENT_QUOTES, request()->site->getCharset());
+		return html_entity_decode($this->value, ENT_QUOTES, app()->getCharset());
 	}
 
 	public function placeholder($text) {

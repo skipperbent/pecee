@@ -11,43 +11,43 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  *
  * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
  *
- * @method static Model prefix(string $prefix)
- * @method static Model limit(int $id)
- * @method static Model skip(int $id)
- * @method static Model take(int $id)
- * @method static Model offset(int $id)
- * @method static Model where(string $key, string $operator = null, string $value = null)
- * @method static Model whereIn(string $key, array|object $values)
- * @method static Model whereNot(string $key, string $operator = null, string $value = null)
- * @method static Model whereNotIn(string $key, array|object $values)
- * @method static Model whereNull(string $key)
- * @method static Model whereNotNull(string $key)
- * @method static Model whereBetween(string $key, string $valueFrom, string $valueTo)
- * @method static Model orWhere(string $key, string $operator = null, string $value = null)
- * @method static Model orWhereIn(string $key, array|object $values)
- * @method static Model orWhereNotIn(string $key, array|object $values)
- * @method static Model orWhereNot(string $key, string $operator = null, string $value = null)
- * @method static Model orWhereNull(string $key)
- * @method static Model orWhereNotNull(string $key)
- * @method static Model orWhereBetween(string $key, string $valueFrom, string $valueTo)
+ * @method static $this prefix(string $prefix)
+ * @method static $this limit(int $id)
+ * @method static $this skip(int $id)
+ * @method static $this take(int $id)
+ * @method static $this offset(int $id)
+ * @method static $this where(string $key, string $operator = null, string $value = null)
+ * @method static $this whereIn(string $key, array|object $values)
+ * @method static $this whereNot(string $key, string $operator = null, string $value = null)
+ * @method static $this whereNotIn(string $key, array|object $values)
+ * @method static $this whereNull(string $key)
+ * @method static $this whereNotNull(string $key)
+ * @method static $this whereBetween(string $key, string $valueFrom, string $valueTo)
+ * @method static $this orWhere(string $key, string $operator = null, string $value = null)
+ * @method static $this orWhereIn(string $key, array|object $values)
+ * @method static $this orWhereNotIn(string $key, array|object $values)
+ * @method static $this orWhereNot(string $key, string $operator = null, string $value = null)
+ * @method static $this orWhereNull(string $key)
+ * @method static $this orWhereNotNull(string $key)
+ * @method static $this orWhereBetween(string $key, string $valueFrom, string $valueTo)
  * @method static ModelCollection get()
  * @method static ModelCollection all()
- * @method static Model find(string $id)
- * @method static Model findOrfail(string $id)
- * @method static Model first()
- * @method static Model firstOrFail()
- * @method static Model count()
- * @method static Model max(string $field)
- * @method static Model sum(string $field)
- * @method static Model update(array $data)
- * @method static Model create(array $data)
- * @method static Model firstOrCreate(array $data)
- * @method static Model firstOrNew(array $data)
- * @method static Model destroy(array|object $ids)
- * @method static Model select(array|object $fields)
- * @method static Model groupBy(string $field)
- * @method static Model orderBy(string $field, string $defaultDirection = 'ASC')
- * @method static Model join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
+ * @method static $this find(string $id)
+ * @method static $this findOrfail(string $id)
+ * @method static $this first()
+ * @method static $this firstOrFail()
+ * @method static $this count()
+ * @method static $this max(string $field)
+ * @method static $this sum(string $field)
+ * @method static $this update(array $data)
+ * @method static $this create(array $data)
+ * @method static $this firstOrCreate(array $data)
+ * @method static $this firstOrNew(array $data)
+ * @method static $this destroy(array|object $ids)
+ * @method static $this select(array|object $fields)
+ * @method static $this groupBy(string $field)
+ * @method static $this orderBy(string $field, string $defaultDirection = 'ASC')
+ * @method static $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
  * @method static QueryBuilderHandler getQuery()
  * @method static string raw(string $value, array $bindings = array())
  * @method static string subQuery(QueryBuilderHandler $queryBuilder, string $alias = null)
@@ -109,8 +109,23 @@ abstract class Model implements \IteratorAggregate {
         return $model;
     }
 
+	/**
+	 * Create new instance
+	 * @return static
+	 */
+    public static function new() {
+		return new static();
+    }
+
+	/**
+	 * Create new instance.
+	 * Alias for static::new();
+	 *
+	 * @see static::new()
+	 * @return static
+	 */
     public static function instance() {
-        return new static();
+        return static::new();
     }
 
     public function onInstanceCreate() {
@@ -323,7 +338,7 @@ abstract class Model implements \IteratorAggregate {
     /**
      * @param $method
      * @param $parameters
-     * @return static|null
+     * @return static
      */
     public static function __callStatic($method, $parameters) {
         $instance = new static;
@@ -339,19 +354,19 @@ abstract class Model implements \IteratorAggregate {
         $this->queryable = clone $this->queryable;
     }
 
-    /**
-     * Retrieve an external iterator
-     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return \Traversable An instance of an object implementing <b>Iterator</b> or
-     * <b>Traversable</b>
-     * @since 5.0.0
-     */
-    public function getIterator() {
-        return new \ArrayIterator($this->getRows());
-    }
-
     public function setQuery(ModelQueryBuilder $query) {
         $this->queryable = $query;
     }
+
+	/**
+	 * Retrieve an external iterator
+	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+	 * @return \Traversable An instance of an object implementing <b>Iterator</b> or
+	 * <b>Traversable</b>
+	 * @since 5.0.0
+	 */
+	public function getIterator() {
+		return new \ArrayIterator($this->getRows());
+	}
 
 }

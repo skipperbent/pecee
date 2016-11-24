@@ -1,5 +1,5 @@
 <?php
-namespace Pecee\Xml;
+namespace Pecee\UI\Xml;
 
 use Pecee\ArrayUtil;
 

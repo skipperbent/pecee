@@ -6,314 +6,395 @@ use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pecee\Str;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
-class ModelQueryBuilder {
+class ModelQueryBuilder
+{
+	protected static $instance;
 
-    protected static $instance;
+	/**
+	 * @var Model
+	 */
+	protected $model;
+	/**
+	 * @var QueryBuilderHandler
+	 */
+	protected $query;
 
-    /**
-     * @var Model
-     */
-    protected $model;
-    /**
-     * @var QueryBuilderHandler
-     */
-    protected $query;
+	public function __construct(Model $model, $table)
+	{
+		$this->model = $model;
+		$this->query = (new QueryBuilderHandler())->table($table);
+	}
 
-    public function __construct(Model $model, $table) {
-        $this->model = $model;
-        $this->query = (new QueryBuilderHandler())->table($table);
-    }
+	protected function createInstance(\stdClass $item)
+	{
+		$model = get_class($this->model);
 
-    protected function createInstance(\stdClass $item) {
+		/* @var $model Model */
+		$model = new $model();
+		$model->mergeRows((array)$item);
+		$model->onInstanceCreate();
 
-        $model = get_class($this->model);
+		return $model;
+	}
 
-        /* @var $model Model */
-        $model = new $model();
-        $model->mergeRows((array)$item);
-        $model->onInstanceCreate();
+	protected function createCollection(array $items)
+	{
+		$collection = new ModelCollection($items);
+		$collection->setType(static::class);
 
-        return $model;
-    }
+		return $collection;
+	}
 
-    protected function createCollection(array $items) {
-        $collection = new ModelCollection($items);
-        $collection->setType(static::class);
-        return $collection;
-    }
+	public function prefix($prefix)
+	{
+		$this->query->addPrefix($this->model->getTable(), $prefix);
 
-    public function prefix($prefix) {
-        $this->query->addPrefix($this->model->getTable(), $prefix);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function limit($limit) {
-        $this->query->limit($limit);
-        return $this->model;
-    }
+	public function limit($limit)
+	{
+		$this->query->limit($limit);
 
-    public function skip($skip) {
-        $this->query->offset($skip);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function take($amount) {
-        return $this->limit($amount);
-    }
+	public function skip($skip)
+	{
+		$this->query->offset($skip);
 
-    public function offset($offset) {
-        return $this->skip($offset);
-    }
+		return $this->model;
+	}
 
-    public function where($key, $operator = null, $value = null) {
-        $this->query->where($key, $operator, $value);
-        return $this->model;
-    }
+	public function take($amount)
+	{
+		return $this->limit($amount);
+	}
 
-    public function whereIn($key, $values) {
-        $this->query->whereIn($key, $values);
-        return $this->model;
-    }
+	public function offset($offset)
+	{
+		return $this->skip($offset);
+	}
 
-    public function whereNot($key, $operator = null, $value = null) {
-        $this->query->whereNot($key, $operator, $value);
-        return $this->model;
-    }
+	public function where($key, $operator = null, $value = null)
+	{
+		$this->query->where($key, $operator, $value);
 
-    public function whereNotIn($key, $values) {
-        $this->query->whereNotIn($key, $values);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function whereNull($key) {
-        $this->query->whereNull($key);
-        return $this->model;
-    }
+	public function whereIn($key, $values)
+	{
+		$this->query->whereIn($key, $values);
 
-    public function whereNotNull($key) {
-        $this->query->whereNotNull($key);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function whereBetween($key, $valueFrom, $valueTo) {
-        $this->query->whereBetween($key, $valueFrom, $valueTo);
-        return $this->model;
-    }
+	public function whereNot($key, $operator = null, $value = null)
+	{
+		$this->query->whereNot($key, $operator, $value);
 
-    public function orWhere($key, $operator = null, $value = null) {
-        $this->query->orWhere($key, $operator, $value);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function orWhereIn($key, $values) {
-        $this->query->orWhereIn($key, $values);
-        return $this->model;
-    }
+	public function whereNotIn($key, $values)
+	{
+		$this->query->whereNotIn($key, $values);
 
-    public function orWhereNotIn($key, $values) {
-        $this->query->orWhereNotIn($key, $values);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function orWhereNot($key, $operator = null, $value = null) {
-        $this->query->orWhereNot($key, $operator, $value);
-        return $this->model;
-    }
+	public function whereNull($key)
+	{
+		$this->query->whereNull($key);
 
-    public function orWhereNull($key) {
-        $this->query->orWhereNull($key);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function orWhereNotNull($key) {
-        $this->query->orWhereNotNull($key);
-        return $this->model;
-    }
+	public function whereNotNull($key)
+	{
+		$this->query->whereNotNull($key);
 
-    public function orWhereBetween($key, $valueFrom, $valueTo) {
-        $this->query->orWhereBetween($key, $valueFrom, $valueTo);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function get() {
-        return $this->all();
-    }
+	public function whereBetween($key, $valueFrom, $valueTo)
+	{
+		$this->query->whereBetween($key, $valueFrom, $valueTo);
 
-    public function all() {
-        $items = (array)$this->query->get();
+		return $this->model;
+	}
 
-        /* @var $model Model */
-        $models = array();
+	public function orWhere($key, $operator = null, $value = null)
+	{
+		$this->query->orWhere($key, $operator, $value);
 
-        if(count($items)) {
-            foreach($items as $item) {
-                $models[] = $this->createInstance($item);
-            }
-        }
+		return $this->model;
+	}
 
-        return $this->createCollection($models);
-    }
+	public function orWhereIn($key, $values)
+	{
+		$this->query->orWhereIn($key, $values);
 
-    public function find($id) {
-        $item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
-        if($item !== null) {
-            return $this->createInstance($item);
-        }
-        return null;
-    }
+		return $this->model;
+	}
 
-    public function findOrFail($id) {
-        $item = $this->find($id);
-        if($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
-        }
-        return $item;
-    }
+	public function orWhereNotIn($key, $values)
+	{
+		$this->query->orWhereNotIn($key, $values);
 
-    public function first() {
-        $item = $this->query->first();
-        if($item !== null) {
-            return $this->createInstance($item);
-        }
-        return null;
-    }
+		return $this->model;
+	}
 
-    public function firstOrFail() {
-        $item = $this->first();
-        if($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
-        }
-        return $item;
-    }
+	public function orWhereNot($key, $operator = null, $value = null)
+	{
+		$this->query->orWhereNot($key, $operator, $value);
 
-    public function count() {
-        return $this->query->count();
-    }
+		return $this->model;
+	}
 
-    public function max($field) {
-        $result = $this->query->select($this->query->raw('MAX('. $field .') AS max'))->get();
-        return (int)$result[0]->max;
-    }
+	public function orWhereNull($key)
+	{
+		$this->query->orWhereNull($key);
 
-    public function sum($field) {
-        $result = $this->query->select($this->query->raw('SUM('. $field .') AS sum'))->get();
-        return (int)$result[0]->sum;
-    }
+		return $this->model;
+	}
 
-    protected function getValidData($data) {
-        $out = array();
-        foreach($data as $key => $value) {
-            if(in_array($key, $this->model->getColumns())) {
-                $out[$key] = $value;
-            }
-        }
-        return $out;
-    }
+	public function orWhereNotNull($key)
+	{
+		$this->query->orWhereNotNull($key);
 
-    public function update(array $data = array()) {
+		return $this->model;
+	}
 
-        if(count($data) === 0) {
-            throw new ModelException('Not valid columns found to update.');
-        }
+	public function orWhereBetween($key, $valueFrom, $valueTo)
+	{
+		$this->query->orWhereBetween($key, $valueFrom, $valueTo);
 
-        $this->query->update($data);
-        return $this->model;
-    }
+		return $this->model;
+	}
 
-    public function create(array $data = array()) {
+	public function get()
+	{
+		return $this->all();
+	}
 
-        $data = array_merge($this->model->getRows(), $this->getValidData($data));
+	public function all()
+	{
+		$items = (array)$this->query->get();
 
-        if(count($data) === 0) {
-            throw new ModelException('Not valid columns found to update.');
-        }
+		/* @var $model Model */
+		$models = [];
 
-        $id = $this->query->insert($data);
+		if (count($items)) {
+			foreach ($items as $item) {
+				$models[] = $this->createInstance($item);
+			}
+		}
 
-        if($id) {
+		return $this->createCollection($models);
+	}
 
-            $this->model->mergeRows($data);
-            $this->model->{$this->model->getPrimary()} = $id;
-            return $this->model;
-        }
+	public function find($id)
+	{
+		$item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
+		if ($item !== null) {
+			return $this->createInstance($item);
+		}
 
-        return false;
-    }
+		return null;
+	}
 
-    public function firstOrCreate(array $data = array()) {
-        $item = $this->first();
-        if($item === null) {
-            $item = $this->createInstance((object)$data);
-        }
-        $item->mergeRows($data);
-        $item->save();
-        return $item;
-    }
+	public function findOrFail($id)
+	{
+		$item = $this->find($id);
+		if ($item === null) {
+			throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
+		}
 
-    public function firstOrNew(array $data = array()) {
-        $item = $this->first();
-        if($item === null) {
-            return $this->createInstance((object)$data);
-        }
-        return $item;
-    }
+		return $item;
+	}
 
-    public function destroy($ids) {
-        $this->query->whereIn('id', $ids)->delete();
-        return $this->model;
-    }
+	public function first()
+	{
+		$item = $this->query->first();
+		if ($item !== null) {
+			return $this->createInstance($item);
+		}
 
-    public function select($fields) {
-        $this->query->select($fields);
-        return $this->model;
-    }
+		return null;
+	}
 
-    public function groupBy($field) {
-        $this->query->groupBy($field);
-        return $this->model;
-    }
+	public function firstOrFail()
+	{
+		$item = $this->first();
+		if ($item === null) {
+			throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
+		}
 
-    public function orderBy($fields, $defaultDirection = 'ASC') {
-        $this->query->orderBy($fields, $defaultDirection);
-        return $this->model;
-    }
+		return $item;
+	}
 
-    public function join($table, $key, $operator = null, $value = null, $type = 'inner') {
-        $this->query->join($table, $key, $operator, $value, $type);
-        return $this->model;
-    }
+	public function count()
+	{
+		return $this->query->count();
+	}
 
-    public function raw($value, array $bindings = array()) {
-        return $this->query->raw($value, $bindings);
-    }
+	public function max($field)
+	{
+		$result = $this->query->select($this->query->raw('MAX(' . $field . ') AS max'))->get();
 
-    public function subQuery(Model $model, $alias = null) {
-        return $this->query->subQuery($model->getQuery(), $alias);
-    }
+		return (int)$result[0]->max;
+	}
 
-    /**
-     * @return Model
-     */
-    public function getModel() {
-        return $this->model;
-    }
+	public function sum($field)
+	{
+		$result = $this->query->select($this->query->raw('SUM(' . $field . ') AS sum'))->get();
 
-    /**
-     * @param mixed $model
-     */
-    public function setModel(Model $model) {
-        $this->model = $model;
-    }
+		return (int)$result[0]->sum;
+	}
 
-    /**
-     * @return QueryBuilderHandler
-     */
-    public function getQuery() {
-        return $this->query;
-    }
+	protected function getValidData($data)
+	{
+		$out = [];
+		foreach ($data as $key => $value) {
+			if (in_array($key, $this->model->getColumns())) {
+				$out[$key] = $value;
+			}
+		}
 
-    public function __clone() {
-        $this->query = clone $this->query;
-    }
+		return $out;
+	}
+
+	public function update(array $data = [])
+	{
+		if (count($data) === 0) {
+			throw new ModelException('Not valid columns found to update.');
+		}
+
+		$this->query->update($data);
+
+		return $this->model;
+	}
+
+	public function create(array $data = [])
+	{
+		$data = array_merge($this->model->getRows(), $this->getValidData($data));
+
+		if (count($data) === 0) {
+			throw new ModelException('Not valid columns found to update.');
+		}
+
+		$id = $this->query->insert($data);
+
+		if ($id) {
+
+			$this->model->mergeRows($data);
+			$this->model->{$this->model->getPrimary()} = $id;
+
+			return $this->model;
+		}
+
+		return false;
+	}
+
+	public function firstOrCreate(array $data = [])
+	{
+		$item = $this->first();
+
+		if ($item === null) {
+			$item = $this->createInstance((object)$data);
+		}
+
+		$item->mergeRows($data);
+		$item->save();
+
+		return $item;
+	}
+
+	public function firstOrNew(array $data = [])
+	{
+		$item = $this->first();
+
+		if ($item === null) {
+			return $this->createInstance((object)$data);
+		}
+
+		return $item;
+	}
+
+	public function destroy($ids)
+	{
+		$this->query->whereIn('id', $ids)->delete();
+
+		return $this->model;
+	}
+
+	public function select($fields)
+	{
+		$this->query->select($fields);
+
+		return $this->model;
+	}
+
+	public function groupBy($field)
+	{
+		$this->query->groupBy($field);
+
+		return $this->model;
+	}
+
+	public function orderBy($fields, $defaultDirection = 'ASC')
+	{
+		$this->query->orderBy($fields, $defaultDirection);
+
+		return $this->model;
+	}
+
+	public function join($table, $key, $operator = null, $value = null, $type = 'inner')
+	{
+		$this->query->join($table, $key, $operator, $value, $type);
+
+		return $this->model;
+	}
+
+	public function raw($value, array $bindings = [])
+	{
+		return $this->query->raw($value, $bindings);
+	}
+
+	public function subQuery(Model $model, $alias = null)
+	{
+		return $this->query->subQuery($model->getQuery(), $alias);
+	}
+
+	/**
+	 * @return Model
+	 */
+	public function getModel()
+	{
+		return $this->model;
+	}
+
+	/**
+	 * @param mixed $model
+	 */
+	public function setModel(Model $model)
+	{
+		$this->model = $model;
+	}
+
+	/**
+	 * @return QueryBuilderHandler
+	 */
+	public function getQuery()
+	{
+		return $this->query;
+	}
+
+	public function __clone()
+	{
+		$this->query = clone $this->query;
+	}
 
 }
