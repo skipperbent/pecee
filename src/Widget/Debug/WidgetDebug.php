@@ -11,9 +11,6 @@ class WidgetDebug extends Widget
 	{
 		parent::__construct();
 
-		$this->getSite()->addCss('css/pecee-debug.css');
-		$this->getSite()->addWrappedJs('js/pecee-debug.js');
-
 		$this->setTemplate(null);
 		$this->stack = $stack;
 	}
