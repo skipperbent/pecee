@@ -1,0 +1,51 @@
+.pecee-debug h1
+{
+    font-family:Arial;
+    font-size:18px;
+    margin:10px 0;
+    border-bottom:1px solid #CCC;
+    padding-bottom:5px;
+}
+
+.pecee-debug table
+{
+    width:100%;
+    font-size:12px;
+    font-family:Arial;
+}
+
+.pecee-debug table thead
+{
+    background-color:#EEE;
+}
+
+.pecee-debug table th
+{
+    padding:5px;
+}
+
+.pecee-debug table tbody
+{
+    background-color:#FFF;
+}
+
+.pecee-debug table tr
+{
+    border-bottom:1px solid #CCC;
+    cursor:pointer;
+    height:10px;
+}
+
+.pecee-debug table td
+{
+    vertical-align: top;
+    padding:5px;
+}
+
+.pecee-debug table td .debug-info
+{
+    display: none;
+    background-color:#EEE;
+    padding:10px;
+    margin-top:10px;
+}
