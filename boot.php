@@ -11,4 +11,6 @@ require_once 'helpers.php';
 
 $loader->addPsr4(env('APP_NAME') . '\\', $_ENV['base_path'] . 'app/');
 
+set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__ . '/resources');
+
 request()->app = new Pecee\Application\Application();

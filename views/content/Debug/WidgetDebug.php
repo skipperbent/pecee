@@ -1,62 +1,61 @@
 <? /* @var $this \Pecee\Widget\Debug\WidgetDebug */ ?>
 
-<h1 style="font-family:Arial;font-size:18px;margin:10px 0;border-bottom:1px solid #CCC;padding-bottom:5px;">Debug information</h1>
-<table cellspacing="0" cellpadding="0" style="width:100%;font-size:12px;font-family:Arial;">
-    <thead style="background-color:#EEE;">
-    <tr>
-        <th align="left" style="padding:5px;">
-            Execution time
-        </th>
-        <th align="left" style="padding:5px;">
-            Message
-        </th>
-        <th align="left" style="padding:5px;">
-            Class
-        </th>
-        <th align="left" style="padding:5px;">
-            Method
-        </th>
-        <th align="left" style="padding:5px;">
-            File
-        </th>
-        <th align="center" style="padding:5px;">
-            Line
-        </th>
-    </tr>
-    </thead>
-    <tbody style="background-color:#FFF;">
-    <? foreach($this->stack as $i => $log) : ?>
-        <tr style="border-bottom:1px solid #CCC;cursor:pointer;height:10px;" onclick="show_debug('debug_<?= $i; ?>')">
-            <td style="vertical-align: top;padding:5px;">
-                <?= $log['time']; ?>
-            </td>
-            <td style="vertical-align: top;padding:5px;">
-                <?= $log['text']; ?>
-                <div id="debug_<?= $i; ?>" style="display: none;background-color:#EEE;padding:10px;margin-top:10px;">
-                    <pre><?= print_r($log['debug'],true); ?></pre>
-                </div>
-            </td>
-            <td style="vertical-align:top; padding:5px;">
-                <? if(isset($log['debug'][count($log['debug'])-1]['class'])) : ?>
-                    <?= $log['debug'][count($log['debug'])-1]['class']; ?>
-                <? endif; ?>
-            </td>
-            <td style="vertical-align:top; padding:5px;">
-                <?= $log['debug'][count($log['debug'])-1]['method']; ?>
-            </td>
-            <td style="vertical-align:top; padding:5px;">
-                <?= $log['file']; ?>
-            </td>
-            <td style="vertical-align:top; padding:5px;" align="center">
-                <?= !isset($log['debug'][count($log['debug'])-1]['line']) ? '-' : $log['debug'][count($log['debug'])-1]['line']; ?>
-            </td>
+<?= $this->printJs('debug'); ?>
+<?= $this->printCss('debug'); ?>
+
+<div class="pecee-debug">
+    <h1>Debug information</h1>
+    <table cellspacing="0" cellpadding="0">
+        <thead>
+        <tr>
+            <th align="left">
+                Execution time
+            </th>
+            <th align="left">
+                Message
+            </th>
+            <th align="left">
+                Class
+            </th>
+            <th align="left">
+                Method
+            </th>
+            <th align="left">
+                File
+            </th>
+            <th align="center">
+                Line
+            </th>
         </tr>
-    <? endforeach; ?>
-    </tbody>
-</table>
-<script>
-    function show_debug(id) {
-        var el = document.getElementById(id);
-        document.getElementById(id).style.display = (el.style.display == 'block') ? 'none' : 'block';
-    }
-</script>
+        </thead>
+        <tbody>
+        <? foreach($this->stack as $i => $log) : ?>
+            <tr onclick="pecee_show_debug('debug_<?= $i; ?>')">
+                <td>
+                    <?= $log['time']; ?>
+                </td>
+                <td>
+                    <?= $log['text']; ?>
+                    <div id="debug_<?= $i; ?>" class="debug-info" style="">
+                        <pre><?= print_r($log['debug'],true); ?></pre>
+                    </div>
+                </td>
+                <td>
+                    <? if(isset($log['debug'][count($log['debug'])-1]['class'])) : ?>
+                        <?= $log['debug'][count($log['debug'])-1]['class']; ?>
+                    <? endif; ?>
+                </td>
+                <td>
+                    <?= $log['debug'][count($log['debug'])-1]['method']; ?>
+                </td>
+                <td>
+                    <?= $log['file']; ?>
+                </td>
+                <td align="center">
+                    <?= !isset($log['debug'][count($log['debug'])-1]['line']) ? '-' : $log['debug'][count($log['debug'])-1]['line']; ?>
+                </td>
+            </tr>
+        <? endforeach; ?>
+        </tbody>
+    </table>
+</div>
