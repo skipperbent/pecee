@@ -23,4 +23,9 @@ abstract class ControllerBase extends Base {
         }
     }
 
+    public function __destruct()
+    {
+	    $this->_messages->clear();
+    }
+
 }
