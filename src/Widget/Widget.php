@@ -54,24 +54,17 @@ abstract class Widget extends Base  {
     /**
      * @return string
      */
-    public function printHeader() {
+    public function printMeta() {
 
 	    $output = (new Html('meta'))->setClosingType(Html::CLOSE_TYPE_SELF)->attr('charset', app()->getCharset());
 
-        if($this->getSite()->getTitle())  {
-            $output .= '<title>' . $this->getSite()->getTitle() . '</title>';
-        }
+	    if($this->getSite()->getDescription()) {
+		    $this->getSite()->addMeta(['content' => $this->getSite()->getDescription(), 'name' => 'description']);
+	    }
 
-        if($this->getSite()->getDescription()) {
-            $this->getSite()->addMeta(['content' => $this->getSite()->getDescription(), 'name' => 'description']);
-        }
-
-        if(count($this->getSite()->getKeywords()) > 0) {
-            $this->getSite()->addMeta(['content' => join(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
-        }
-
-        $output .= $this->printCss();
-        $output .= $this->printJs();
+	    if(count($this->getSite()->getKeywords()) > 0) {
+		    $this->getSite()->addMeta(['content' => join(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
+	    }
 
         if(count($this->getSite()->getHeader())) {
             $header = $this->getSite()->getHeader();
