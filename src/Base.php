@@ -279,4 +279,9 @@ abstract class Base
 		return null;
 	}
 
+	public function __destruct()
+	{
+		$this->_messages->clear();
+	}
+
 }
