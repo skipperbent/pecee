@@ -6,13 +6,14 @@ use Pecee\Widget\Widget;
 class WidgetDebug extends Widget
 {
 	protected $stack;
+	protected $group = null;
 
 	public function __construct(array $stack)
 	{
 		parent::__construct();
 
-		$this->getSite()->addCss('css/pecee-debug.css');
-		$this->getSite()->addWrappedJs('js/pecee-debug.js');
+		$this->getSite()->addWrappedCss('css/pecee-debug.css', 'debug');
+		$this->getSite()->addWrappedJs('js/pecee-debug.js', 'debug');
 
 		$this->setTemplate(null);
 		$this->stack = $stack;

@@ -18,7 +18,8 @@ class ControllerWrap
 		set_time_limit(60);
 
 		$this->tmpDir = $_ENV['base_path'] . 'cache';
-		$this->files = (strpos(input()->get('files'), ',')) ? explode(',', input()->get('files')) : [ input()->get('files') ];
+		$this->files = (strpos(input()->get('files'), ',')) ? explode(',', input()->get('files')) : [input()->get('files')];
+
 		$this->cacheFile = md5(urldecode(input()->get('files'))) . '.' . $this->getExtension();
 
 		if (!is_dir($this->tmpDir)) {
@@ -104,35 +105,24 @@ class ControllerWrap
 
 					$file = $this->files[$i];
 
-					$content = false;
+					$content = null;
 
-					$filePath = $this->path . $file;
+					$content = $this->loadFile($file);
 
-					// Try default location
-					if (stream_resolve_include_path($filePath) !== false) {
-						$content = file_get_contents($filePath, FILE_USE_INCLUDE_PATH);
-					}
-
-					// Try module ressources
-					if ($content === false && app()->hasModules() !== null) {
-						foreach (app()->getModules() as $module) {
-							$moduleFilePath = $module . DIRECTORY_SEPARATOR . $filePath;
-							if (is_file($moduleFilePath)) {
-								$content = file_get_contents($moduleFilePath);
-								break;
-							}
-						}
+					/* Load content from framework */
+					if ($content === null) {
+						$content = $this->loadFile($this->path . $file);
 					}
 
 					// Try resources folder
-					if ($content !== false) {
+					if ($content !== null) {
 						$filePath = $_ENV['base_path'] . '/resources/' . $this->getExtension() . '/' . $file;
 						if (is_file($filePath)) {
 							$content = file_get_contents($filePath);
 						}
 					}
 
-					if ($content !== false) {
+					if ($content !== null) {
 
 						if (env('MINIFY_JS', false)) {
 							$compressor = new YuiCompressor();
@@ -144,7 +134,7 @@ class ControllerWrap
 							}
 						}
 
-						$buffer = '/* '. $file .' */' . chr(10) . $content;
+						$buffer = '/* ' . $file . ' */' . chr(10) . $content;
 						fwrite($handle, $buffer);
 
 						// Unset buffer
@@ -157,6 +147,29 @@ class ControllerWrap
 
 			}
 		}
+	}
+
+	protected function loadFile($file)
+	{
+		$content = null;
+
+		// Try default location
+		if (stream_resolve_include_path($file) !== false) {
+			$content = file_get_contents($file, FILE_USE_INCLUDE_PATH);
+		}
+
+		// Try module ressources
+		if ($content === null && app()->hasModules() !== null) {
+			foreach (app()->getModules() as $module) {
+				$moduleFilePath = $module . DIRECTORY_SEPARATOR . $file;
+				if (is_file($moduleFilePath)) {
+					$content = file_get_contents($moduleFilePath);
+					break;
+				}
+			}
+		}
+
+		return $content;
 	}
 
 	protected function cleanup()
