@@ -246,7 +246,7 @@ class Application
 	 * @param bool $bool
 	 * @return static $this
 	 */
-	public function disableFrameworkRoutes($bool)
+	public function setDisableFrameworkRoutes($bool)
 	{
 		$this->disableFrameworkRoutes = $bool;
 

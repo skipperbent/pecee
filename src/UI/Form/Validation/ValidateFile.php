@@ -1,7 +1,8 @@
 <?php
 namespace Pecee\UI\Form\Validation;
 
-abstract class ValidateFile extends ValidateInput {
+abstract class ValidateFile extends ValidateInput
+{
 
 	/**
 	 * @var \Pecee\Http\Input\InputFile

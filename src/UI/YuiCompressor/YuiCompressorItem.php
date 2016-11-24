@@ -1,7 +1,8 @@
 <?php
 namespace Pecee\UI\YuiCompressor;
 
-class YuiCompressorItem {
+class YuiCompressorItem
+{
 
 	public $filename;
 	public $filePath;

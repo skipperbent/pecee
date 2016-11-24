@@ -1,4 +1,6 @@
 <?php
 namespace Pecee\Model\Exceptions;
 
-class ModelNotFoundException extends \Exception {}
+class ModelNotFoundException extends \Exception
+{
+}

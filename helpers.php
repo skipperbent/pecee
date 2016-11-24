@@ -4,7 +4,7 @@
  * Contain helper functions which provides shortcuts for various classes.
  */
 
-use \Pecee\Application\Router as Router;
+use Pecee\Application\Router as Router;
 
 /**
  * Get url for a route by using either name/alias, class or method name.

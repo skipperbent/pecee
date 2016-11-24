@@ -1,185 +1,209 @@
 <?php
 namespace Pecee\UI\Taglib;
 
-class TaglibJs extends Taglib {
+class TaglibJs extends Taglib
+{
 
-    protected $containers = array();
+	protected $containers = [];
 
-    protected static $JS_WRAPPER_TAG = '';
-    protected static $JS_EXPRESSION_START = '/js{/';
-    protected static $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
+	protected static $JS_WRAPPER_TAG = '';
+	protected static $JS_EXPRESSION_START = '/js{/';
+	protected static $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
 
-    //private static $JS_EXPRESSION = '/js{(.*?)}/';
-    //private static $JS_WIDGET_EXPRESSION_OUTER = '/js{_w(.*?)}/';
-    //private static $JS_WIDGET_EXPRESSION_REPLACEMENT = '';
+	//private static $JS_EXPRESSION = '/js{(.*?)}/';
+	//private static $JS_WIDGET_EXPRESSION_OUTER = '/js{_w(.*?)}/';
+	//private static $JS_WIDGET_EXPRESSION_REPLACEMENT = '';
 
-    public function __construct() {
-        parent::__construct();
-    }
+	public function __construct()
+	{
+		parent::__construct();
+	}
 
-    protected function makeJsString($string) {
-        return preg_replace('/[\n\r\t]*|\s\s/', '', trim($string));
-    }
+	protected function makeJsString($string)
+	{
+		return preg_replace('/[\n\r\t]*|\s\s/', '', trim($string));
+	}
 
-    protected function handleInline($string) {
-        $string = str_replace('\\"', '"', str_replace("\\'", "'", $string));
-        $parts = preg_split('/[;\n]{1,2}/s',$string);
-        if (count($parts) <= 1)
-            return "($string)";
-        $result = "";
-        for($i = 0; $i < count($parts);$i++) {
-            $result .= ($i ==  (count($parts)-1)) ? 'return '.$parts[$i].";" : $parts[$i].";";
-        }
-        return sprintf('(function(){%s})()',$result);
-    }
+	protected function handleInline($string)
+	{
+		$string = str_replace('\\"', '"', str_replace("\\'", "'", $string));
+		$parts = preg_split('/[;\n]{1,2}/s', $string);
+		if (count($parts) <= 1) {
+			return "($string)";
+		}
+		$result = "";
+		for ($i = 0; $i < count($parts); $i++) {
+			$result .= ($i == (count($parts) - 1)) ? 'return ' . $parts[$i] . ";" : $parts[$i] . ";";
+		}
 
-    protected function replaceJsExpressions($string) {
-        $fixedExpressions = array();
-        $expressionMatches = array();
-        /* Change all widget expressions */
-        $string = preg_replace(self::$JS_WIDGET_EXPRESSION, '$p.getWidget(\'"+g+"\')$1', $string);
-        //$string = preg_replace(self::$JS_WIDGET_EXPRESSION_OUTER, '"+($p.getWidget(g)$1)+"', $string);
-        preg_match_all(self::$JS_EXPRESSION_START, $string, $expressionMatches,PREG_OFFSET_CAPTURE);
+		return sprintf('(function(){%s})()', $result);
+	}
 
-        $expressions = array();
-        $mOffset = 0;
+	protected function replaceJsExpressions($string)
+	{
+		$fixedExpressions = [];
+		$expressionMatches = [];
+		/* Change all widget expressions */
+		$string = preg_replace(self::$JS_WIDGET_EXPRESSION, '$p.getWidget(\'"+g+"\')$1', $string);
+		//$string = preg_replace(self::$JS_WIDGET_EXPRESSION_OUTER, '"+($p.getWidget(g)$1)+"', $string);
+		preg_match_all(self::$JS_EXPRESSION_START, $string, $expressionMatches, PREG_OFFSET_CAPTURE);
 
-        foreach($expressionMatches[0] as $match) {
+		$expressions = [];
+		$mOffset = 0;
 
-            $mText = $match[0];
-            $offset = $match[1];
-            $searchOffset = $offset+strlen($mText);
-            $curlies = 1;
-            $end = 0;
-            for($i = $searchOffset;$i < strlen($string);$i++) {
-                switch($string[$i]) {
-                    case '{':
-                        $curlies++;
-                        break;
-                    case '}':
-                        $curlies--;
-                        break;
-                }
-                if ($curlies == 0) {
-                    $end = $i;
-                    break;
-                }
-            }
-            if ($end >= $mOffset) {
-                $expressions[] = array(
-                    'raw'=>substr($string,$offset,$end-$offset+1),
-                    'js'=>substr($string,$searchOffset,$end-$searchOffset)
-                );
-            }
+		foreach ($expressionMatches[0] as $match) {
 
-        }
+			$mText = $match[0];
+			$offset = $match[1];
+			$searchOffset = $offset + strlen($mText);
+			$curlies = 1;
+			$end = 0;
+			for ($i = $searchOffset; $i < strlen($string); $i++) {
+				switch ($string[$i]) {
+					case '{':
+						$curlies++;
+						break;
+					case '}':
+						$curlies--;
+						break;
+				}
+				if ($curlies == 0) {
+					$end = $i;
+					break;
+				}
+			}
+			if ($end >= $mOffset) {
+				$expressions[] = [
+					'raw' => substr($string, $offset, $end - $offset + 1),
+					'js'  => substr($string, $searchOffset, $end - $searchOffset),
+				];
+			}
 
-        if(count($expressions) > 0) {
-            /* Let's ensure that our js-expression don't get addslashed */
-            foreach($expressions as $expr) {
-                $fixedExpressions[] = '"+'.$this->handleInline($expr['js']).'+"';
-            }
+		}
 
-            /* Now we replace the expression tags, with the fixed js expression */
-            for($i=0;$i<count($expressions);$i++) {
-                $string = str_replace($expressions[$i]['raw'],$fixedExpressions[$i], $string);
-            }
-        }
-        return $string;
-    }
+		if (count($expressions) > 0) {
+			/* Let's ensure that our js-expression don't get addslashed */
+			foreach ($expressions as $expr) {
+				$fixedExpressions[] = '"+' . $this->handleInline($expr['js']) . '+"';
+			}
 
-    protected function tagContainer($attrs) {
-        $this->requireAttributes($attrs, array('id'));
+			/* Now we replace the expression tags, with the fixed js expression */
+			for ($i = 0; $i < count($expressions); $i++) {
+				$string = str_replace($expressions[$i]['raw'], $fixedExpressions[$i], $string);
+			}
+		}
 
-        $output = sprintf('$.%1$s = new $p.template(); $.%1$s.view = function(d,g){var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};', $attrs->id, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
-        $matches = array();
+		return $string;
+	}
 
-        preg_match_all('%<'.self::$JS_WRAPPER_TAG.'>(.*?)</'.self::$JS_WRAPPER_TAG.'>%', $output, $matches);
-        if(isset($matches[1])) {
-            foreach($matches[1] as $m) {
-                $output = str_replace('<'.self::$JS_WRAPPER_TAG.'>'.$m.'</'.self::$JS_WRAPPER_TAG.'>', addslashes($m), $output);
-            }
-        }
+	protected function tagContainer($attrs)
+	{
+		$this->requireAttributes($attrs, ['id']);
 
-        $this->containers[$attrs->id] = $this->replaceJsExpressions($output);
+		$output = sprintf('$.%1$s = new $p.template(); $.%1$s.view = function(d,g){var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};', $attrs->id, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
+		$matches = [];
 
-        if(env('DEBUG')) {
-            $this->containers[$attrs->id] = str_replace('o+=', "\no+=", $this->containers[$attrs->id]);
-            $this->containers[$attrs->id] = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $this->containers[$attrs->id]);
-        }
-    }
+		preg_match_all('%<' . self::$JS_WRAPPER_TAG . '>(.*?)</' . self::$JS_WRAPPER_TAG . '>%', $output, $matches);
+		if (isset($matches[1])) {
+			foreach ($matches[1] as $m) {
+				$output = str_replace('<' . self::$JS_WRAPPER_TAG . '>' . $m . '</' . self::$JS_WRAPPER_TAG . '>', addslashes($m), $output);
+			}
+		}
 
-    protected function tagIf($attrs) {
-        $this->requireAttributes($attrs, array('test'));
-        return sprintf('</%3$s>";if(%1$s){o+="<%3$s>%2$s</%3$s>"; } o+="<%3$s>', $this->makeJsString($attrs->test), $this->getBody(), self::$JS_WRAPPER_TAG);
-    }
+		$this->containers[$attrs->id] = $this->replaceJsExpressions($output);
 
-    protected function tagElse() {
-        return sprintf('</%2$s>";}else{o+="<%2$s>%s', $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
-    }
+		if (env('DEBUG')) {
+			$this->containers[$attrs->id] = str_replace('o+=', "\no+=", $this->containers[$attrs->id]);
+			$this->containers[$attrs->id] = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $this->containers[$attrs->id]);
+		}
+	}
 
-    protected function tagElseIf($attrs) {
-        $this->requireAttributes($attrs, array('test'));
-        return sprintf('</%3$s>";}else if(%1$s){o+="<%3$s>%2$s', $attrs->test, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
-    }
+	protected function tagIf($attrs)
+	{
+		$this->requireAttributes($attrs, ['test']);
 
-    protected function tagWhile($attrs) {
-        $this->requireAttributes($attrs, array('test'));
-        return sprintf('</%3$s>";while(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>', $attrs->test, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
-    }
+		return sprintf('</%3$s>";if(%1$s){o+="<%3$s>%2$s</%3$s>"; } o+="<%3$s>', $this->makeJsString($attrs->test), $this->getBody(), self::$JS_WRAPPER_TAG);
+	}
 
-    protected function tagBind($attrs) {
-        $this->requireAttributes($attrs, array('name'));
+	protected function tagElse()
+	{
+		return sprintf('</%2$s>";}else{o+="<%2$s>%s', $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
+	}
 
-        $output = sprintf('<%1$s>'.$this->makeJsString($this->getBody()).'</%1$s>', self::$JS_WRAPPER_TAG);
+	protected function tagElseIf($attrs)
+	{
+		$this->requireAttributes($attrs, ['test']);
 
-        preg_match_all('%<'.self::$JS_WRAPPER_TAG.'>(.*?)</'.self::$JS_WRAPPER_TAG.'>%', $output, $matches);
-        if(isset($matches[1])) {
-            foreach($matches[1] as $m) {
-                $output = str_replace('<'.self::$JS_WRAPPER_TAG.'>'.$m.'</'.self::$JS_WRAPPER_TAG.'>', addslashes($m), $output);
-            }
-        }
+		return sprintf('</%3$s>";}else if(%1$s){o+="<%3$s>%2$s', $attrs->test, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
+	}
 
-        $output = $this->replaceJsExpressions($output);
+	protected function tagWhile($attrs)
+	{
+		$this->requireAttributes($attrs, ['test']);
 
-        if(env('DEBUG')) {
-            $output = str_replace('o+=', "\no+=", $output);
-            $output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
-        }
+		return sprintf('</%3$s>";while(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>', $attrs->test, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
+	}
 
-        $data = (isset($attrs->data)) ? $attrs->data : 'null';
-        $el = (isset($attrs->el)) ? $attrs->el : 'div';
+	protected function tagBind($attrs)
+	{
+		$this->requireAttributes($attrs, ['name']);
 
-        return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>', $attrs->name, $el, $data, $output, self::$JS_WRAPPER_TAG);
-    }
+		$output = sprintf('<%1$s>' . $this->makeJsString($this->getBody()) . '</%1$s>', self::$JS_WRAPPER_TAG);
 
-    protected function tagEach($attrs) {
-        $this->requireAttributes($attrs, array('in'));
-        $row = (!isset($attrs->as)) ? 'row' : $attrs->as;
-        $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
-        return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>', $attrs->in, $row, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG, $index);
-    }
+		preg_match_all('%<' . self::$JS_WRAPPER_TAG . '>(.*?)</' . self::$JS_WRAPPER_TAG . '>%', $output, $matches);
+		if (isset($matches[1])) {
+			foreach ($matches[1] as $m) {
+				$output = str_replace('<' . self::$JS_WRAPPER_TAG . '>' . $m . '</' . self::$JS_WRAPPER_TAG . '>', addslashes($m), $output);
+			}
+		}
 
-    protected function tagFor($attrs) {
-        $this->requireAttributes($attrs, array('limit', 'start', 'it'));
-        return sprintf('</%5$s>";for(var %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>', $attrs->it, $attrs->start, $attrs->limit, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
-    }
+		$output = $this->replaceJsExpressions($output);
 
-    protected function tagBreak() {
-        return sprintf('</%1$s>"; break; o+="<%1$s>', self::$JS_WRAPPER_TAG);
-    }
+		if (env('DEBUG')) {
+			$output = str_replace('o+=', "\no+=", $output);
+			$output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
+		}
 
-    protected function tagCollect() {
-        $output = array('<script>');
+		$data = (isset($attrs->data)) ? $attrs->data : 'null';
+		$el = (isset($attrs->el)) ? $attrs->el : 'div';
 
-        if($this->containers) {
-            foreach($this->containers as $c) {
-                $output[] = $c;
-            }
-        }
+		return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>', $attrs->name, $el, $data, $output, self::$JS_WRAPPER_TAG);
+	}
 
-        $output[] = '</script>';
-        return join((env('DEBUG') ? chr(10) : ''), $output);
-    }
+	protected function tagEach($attrs)
+	{
+		$this->requireAttributes($attrs, ['in']);
+		$row = (!isset($attrs->as)) ? 'row' : $attrs->as;
+		$index = (!isset($attrs->index)) ? 'i' : $attrs->index;
+
+		return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>', $attrs->in, $row, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG, $index);
+	}
+
+	protected function tagFor($attrs)
+	{
+		$this->requireAttributes($attrs, ['limit', 'start', 'it']);
+
+		return sprintf('</%5$s>";for(var %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>', $attrs->it, $attrs->start, $attrs->limit, $this->makeJsString($this->getBody()), self::$JS_WRAPPER_TAG);
+	}
+
+	protected function tagBreak()
+	{
+		return sprintf('</%1$s>"; break; o+="<%1$s>', self::$JS_WRAPPER_TAG);
+	}
+
+	protected function tagCollect()
+	{
+		$output = ['<script>'];
+
+		if ($this->containers) {
+			foreach ($this->containers as $c) {
+				$output[] = $c;
+			}
+		}
+
+		$output[] = '</script>';
+
+		return join((env('DEBUG') ? chr(10) : ''), $output);
+	}
 
 }
