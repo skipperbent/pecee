@@ -56,7 +56,7 @@ abstract class Widget extends Base  {
      */
     public function printMeta() {
 
-	    $output = (new Html('meta'))->setClosingType(Html::CLOSE_TYPE_SELF)->attr('charset', app()->getCharset());
+	    $output = '';
 
 	    if($this->getSite()->getDescription()) {
 		    $this->getSite()->addMeta(['content' => $this->getSite()->getDescription(), 'name' => 'description']);
