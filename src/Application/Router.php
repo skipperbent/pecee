@@ -19,7 +19,7 @@ class Router extends SimpleRouter {
         // Load routes.php
         require_once $_ENV['base_path'] . 'app' . DIRECTORY_SEPARATOR . 'routes.php';
 
-        parent::setDefaultNamespace('\\'. env('APP_NAME'));
+        parent::setDefaultNamespace('\\'. env('APP_NAME') . '\\Controller');
         parent::start();
 
         // Output debug info
