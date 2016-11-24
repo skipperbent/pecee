@@ -93,8 +93,9 @@ class Html
 	 * @param array $attributes
 	 * @return static $this
 	 */
-	public function setAttributes(array $attributes) {
-		foreach($attributes as $name => $value) {
+	public function setAttributes(array $attributes)
+	{
+		foreach ($attributes as $name => $value) {
 			$this->addAttribute($name, $value);
 		}
 
@@ -134,7 +135,7 @@ class Html
 
 		$output .= '>' . join('', $this->innerHtml);
 
-		$output .= (($this->closingType == self::CLOSE_TYPE_TAG) ? sprintf('</%s>',$this->tag) : '');
+		$output .= (($this->closingType == self::CLOSE_TYPE_TAG) ? sprintf('</%s>', $this->tag) : '');
 
 		return $output;
 	}
@@ -164,6 +165,7 @@ class Html
 	public function setClosingType($closingType)
 	{
 		$this->closingType = $closingType;
+
 		return $this;
 	}
 

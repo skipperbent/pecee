@@ -1,8 +1,9 @@
 <?php
 namespace Pecee\UI\AssetManager;
 
-interface IAsset {
+interface IAsset
+{
 
-    function getContentType();
+	function getContentType();
 
 }

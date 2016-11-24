@@ -3,9 +3,11 @@ namespace Pecee\UI\Html;
 
 use Pecee\UI\Xml\XmlElement;
 
-class HtmlElement extends XmlElement implements IHtmlNode {
+class HtmlElement extends XmlElement implements IHtmlNode
+{
 
-	public function isContainer() {
+	public function isContainer()
+	{
 		switch (strtolower($this->getTag())) {
 			case 'div':
 			case 'span':
@@ -44,6 +46,7 @@ class HtmlElement extends XmlElement implements IHtmlNode {
 			case 'script':
 				return true;
 		}
+
 		return false;
 	}
 

@@ -1,9 +1,10 @@
 <?php
 namespace Pecee\UI\Form;
 
-class FormMessage {
+class FormMessage
+{
 
-    protected $form;
+	protected $form;
 	protected $name;
 	protected $index;
 	protected $message;
@@ -13,7 +14,8 @@ class FormMessage {
 	 * Get name assosiated with the element (if any)
 	 * @return string $name
 	 */
-	public function getName() {
+	public function getName()
+	{
 		return $this->name;
 	}
 
@@ -21,7 +23,8 @@ class FormMessage {
 	 * Get the index (if any)
 	 * @return string $index
 	 */
-	public function getIndex() {
+	public function getIndex()
+	{
 		return $this->index;
 	}
 
@@ -29,7 +32,8 @@ class FormMessage {
 	 * Get message
 	 * @return string $message
 	 */
-	public function getMessage() {
+	public function getMessage()
+	{
 		return $this->message;
 	}
 
@@ -37,7 +41,8 @@ class FormMessage {
 	 * Get name (if any)
 	 * @param string $name
 	 */
-	public function setName($name) {
+	public function setName($name)
+	{
 		$this->name = $name;
 	}
 
@@ -45,7 +50,8 @@ class FormMessage {
 	 * Set index
 	 * @param string $index
 	 */
-	public function setIndex($index) {
+	public function setIndex($index)
+	{
 		$this->index = $index;
 	}
 
@@ -53,28 +59,32 @@ class FormMessage {
 	 * Set message
 	 * @param string $message
 	 */
-	public function setMessage($message) {
+	public function setMessage($message)
+	{
 		$this->message = $message;
 	}
 
 	/**
 	 * @return string $placement
 	 */
-	public function getPlacement() {
+	public function getPlacement()
+	{
 		return $this->placement;
 	}
 
 	/**
 	 * @param string $placement
 	 */
-	public function setPlacement($placement) {
+	public function setPlacement($placement)
+	{
 		$this->placement = $placement;
 	}
 
 	/**
 	 * @param string $form
 	 */
-	public function setForm($form) {
+	public function setForm($form)
+	{
 		$this->form = $form;
 	}
 }

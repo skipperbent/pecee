@@ -49,73 +49,77 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static $this orderBy(string $field, string $defaultDirection = 'ASC')
  * @method static $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
  * @method static QueryBuilderHandler getQuery()
- * @method static string raw(string $value, array $bindings = array())
+ * @method static string raw(string $value, array $bindings = [])
  * @method static string subQuery(QueryBuilderHandler $queryBuilder, string $alias = null)
  */
+abstract class Model implements \IteratorAggregate
+{
 
-abstract class Model implements \IteratorAggregate {
+	protected $table;
+	protected $results;
 
-    protected $table;
-    protected $results;
+	protected $primary = 'id';
+	protected $hidden = [];
+	protected $with = [];
+	protected $rename = [];
+	protected $join = [];
+	protected $columns = [];
+	protected $timestamps = true;
 
-    protected $primary = 'id';
-    protected $hidden = [];
-    protected $with = [];
-    protected $rename = [];
-    protected $join = [];
-    protected $columns = [];
-    protected $timestamps = true;
+	/**
+	 * @var ModelQueryBuilder
+	 */
+	protected $queryable;
 
-    /**
-     * @var ModelQueryBuilder
-     */
-    protected $queryable;
+	public function __construct()
+	{
 
-    public function __construct() {
+		// Set table name if its not already defined
+		if ($this->table === null) {
+			$name = explode('\\', get_called_class());
+			$name = str_ireplace('model', '', end($name));
+			$this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
+		}
 
-        // Set table name if its not already defined
-        if($this->table === null) {
-            $name = explode('\\', get_called_class());
-            $name = str_ireplace('model', '', end($name));
-            $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
-        }
+		$this->queryable = new ModelQueryBuilder($this, $this->table);
 
-        $this->queryable = new ModelQueryBuilder($this, $this->table);
+		if (env('DEBUG')) {
 
-        if(env('DEBUG')) {
+			$this->queryable->getQuery()->registerEvent('before-*', $this->table,
+				function (QueryBuilderHandler $qb) {
+					debug('START QUERY: ' . $qb->getQuery()->getRawSql());
+				});
 
-            $this->queryable->getQuery()->registerEvent('before-*', $this->table,
-                function (QueryBuilderHandler $qb) {
-                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
-                });
+			$this->queryable->getQuery()->registerEvent('after-*', $this->table,
+				function (QueryBuilderHandler $qb) {
+					debug('END QUERY: ' . $qb->getQuery()->getRawSql());
+				});
+		}
 
-            $this->queryable->getQuery()->registerEvent('after-*', $this->table,
-                function (QueryBuilderHandler $qb) {
-                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
-                });
-        }
+		$this->results = ['rows' => []];
 
-        $this->results = array('rows' => array());
+		if ($this->timestamps) {
+			$this->columns = array_merge($this->columns, ['created_at', 'updated_at']);
+			$this->created_at = Carbon::now()->toDateTimeString();
+		}
+	}
 
-        if($this->timestamps) {
-            $this->columns = array_merge($this->columns, ['created_at', 'updated_at']);
-            $this->created_at = Carbon::now()->toDateTimeString();
-        }
-    }
+	public function newQuery($table = null)
+	{
+		$model = $this->instance();
+		$model->setQuery(new ModelQueryBuilder($this, $table));
 
-    public function newQuery($table = null) {
-        $model = $this->instance();
-        $model->setQuery(new ModelQueryBuilder($this, $table));
-        return $model;
-    }
+		return $model;
+	}
 
 	/**
 	 * Create new instance
 	 * @return static
 	 */
-    public static function new() {
+	public static function new()
+	{
 		return new static();
-    }
+	}
 
 	/**
 	 * Create new instance.
@@ -124,239 +128,268 @@ abstract class Model implements \IteratorAggregate {
 	 * @see static::new()
 	 * @return static
 	 */
-    public static function instance() {
-        return static::new();
-    }
+	public static function instance()
+	{
+		return static::new();
+	}
 
-    public function onInstanceCreate() {
-        if (count($this->join)) {
-            foreach ($this->join as $join) {
-                $method = Str::camelize($join);
-                $this->{$join} = $this->$method();
-            }
-        }
-    }
+	public function onInstanceCreate()
+	{
+		if (count($this->join)) {
+			foreach ($this->join as $join) {
+				$method = Str::camelize($join);
+				$this->{$join} = $this->$method();
+			}
+		}
+	}
 
-    /**
-     * Save item
-     * @see \Pecee\Model\Model::save()
-     * @param array|null $data
-     * @return static
-     * @throws ModelException
-     */
-    public function save(array $data = null) {
-        if(!is_array($this->columns)) {
-            throw new ModelException('Columns property not defined.');
-        }
+	/**
+	 * Save item
+	 * @see \Pecee\Model\Model::save()
+	 * @param array|null $data
+	 * @return static
+	 * @throws ModelException
+	 */
+	public function save(array $data = null)
+	{
+		if (!is_array($this->columns)) {
+			throw new ModelException('Columns property not defined.');
+		}
 
-        $updateData = array();
-        foreach($this->columns as $column) {
-            $updateData[$column] = $this->{$column};
-        }
+		$updateData = [];
+		foreach ($this->columns as $column) {
+			$updateData[$column] = $this->{$column};
+		}
 
-        if($data !== null) {
-            $updateData = array_merge($updateData, $data);
-        }
+		if ($data !== null) {
+			$updateData = array_merge($updateData, $data);
+		}
 
-        $this->mergeRows($updateData);
+		$this->mergeRows($updateData);
 
-        if($this->exists()) {
+		if ($this->exists()) {
 
-            if($this->timestamps) {
-                $this->updated_at = Carbon::now()->toDateTimeString();
-            }
+			if ($this->timestamps) {
+				$this->updated_at = Carbon::now()->toDateTimeString();
+			}
 
-            if(isset($updateData[$this->getPrimary()])) {
-                // Remove primary key
-                unset($updateData[$this->getPrimary()]);
-            }
+			if (isset($updateData[$this->getPrimary()])) {
+				// Remove primary key
+				unset($updateData[$this->getPrimary()]);
+			}
 
-            $this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
-        } else {
-            if($this->{$this->primary} === null) {
-                $this->{$this->primary} = $this->instance()->getQuery()->insert($updateData);
-            } else {
-                $this->instance()->getQuery()->insert($updateData);
-            }
-        }
+			$this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
+		} else {
+			if ($this->{$this->primary} === null) {
+				$this->{$this->primary} = $this->instance()->getQuery()->insert($updateData);
+			} else {
+				$this->instance()->getQuery()->insert($updateData);
+			}
+		}
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function delete() {
-        if(!is_array($this->columns)) {
-            throw new ModelException('Columns property not defined.');
-        }
+	public function delete()
+	{
+		if (!is_array($this->columns)) {
+			throw new ModelException('Columns property not defined.');
+		}
 
-        if($this->{$this->primary} != null) {
-            $this->queryable->where($this->primary, '=', $this->{$this->primary});
-        }
+		if ($this->{$this->primary} != null) {
+			$this->queryable->where($this->primary, '=', $this->{$this->primary});
+		}
 
-        $this->getQuery()->delete();
-    }
+		$this->getQuery()->delete();
+	}
 
-    public function exists() {
-        if($this->{$this->primary} === null) {
-            return false;
-        }
+	public function exists()
+	{
+		if ($this->{$this->primary} === null) {
+			return false;
+		}
 
-        $id = $this->instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
+		$id = $this->instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
 
-        if($id !== null) {
-            $this->{$this->primary} = $id->{$this->primary};
-            return true;
-        }
+		if ($id !== null) {
+			$this->{$this->primary} = $id->{$this->primary};
 
-        return false;
-    }
+			return true;
+		}
 
-    public function hasRows() {
-        return (isset($this->results['rows']) && count($this->results['rows']) > 0);
-    }
+		return false;
+	}
 
-    /**
-     * Get row
-     * @param int $key
-     * @return static
-     */
-    public function getRow($key) {
-        return ($this->hasRows() && isset($this->results['rows'][$key])) ? $this->results['rows'][$key] : null;
-    }
+	public function hasRows()
+	{
+		return (isset($this->results['rows']) && count($this->results['rows']) > 0);
+	}
 
-    public function setRow($key, $value) {
-        $this->results['rows'][$key] = $value;
-    }
+	/**
+	 * Get row
+	 * @param int $key
+	 * @return static
+	 */
+	public function getRow($key)
+	{
+		return ($this->hasRows() && isset($this->results['rows'][$key])) ? $this->results['rows'][$key] : null;
+	}
 
-    public function setRows(array $rows) {
-        $this->results['rows'] = $rows;
-    }
+	public function setRow($key, $value)
+	{
+		$this->results['rows'][$key] = $value;
+	}
 
-    public function mergeRows(array $rows) {
-        $this->results['rows'] = array_merge($this->results['rows'], $rows);
-    }
+	public function setRows(array $rows)
+	{
+		$this->results['rows'] = $rows;
+	}
 
-    /**
-     * Get rows
-     * @return array
-     */
-    public function getRows() {
-        return (isset($this->results['rows'])) ? $this->results['rows'] : array();
-    }
+	public function mergeRows(array $rows)
+	{
+		$this->results['rows'] = array_merge($this->results['rows'], $rows);
+	}
 
-    public function setResults($results) {
-        $this->results = $results;
-    }
+	/**
+	 * Get rows
+	 * @return array
+	 */
+	public function getRows()
+	{
+		return (isset($this->results['rows'])) ? $this->results['rows'] : [];
+	}
 
-    public function getResults() {
-        return $this->results;
-    }
+	public function setResults($results)
+	{
+		$this->results = $results;
+	}
 
-    public function getTable() {
-        return $this->table;
-    }
+	public function getResults()
+	{
+		return $this->results;
+	}
 
-    public function __get($name) {
-        return (isset($this->results['rows'][$name])) ? $this->results['rows'][$name] : null;
-    }
+	public function getTable()
+	{
+		return $this->table;
+	}
 
-    public function __set($name, $value) {
-        $this->results['rows'][strtolower($name)] = $value;
-    }
+	public function __get($name)
+	{
+		return (isset($this->results['rows'][$name])) ? $this->results['rows'][$name] : null;
+	}
 
-    public function getPrimary() {
-        return $this->primary;
-    }
+	public function __set($name, $value)
+	{
+		$this->results['rows'][strtolower($name)] = $value;
+	}
 
-    protected function parseArrayData($data) {
-        if(is_array($data)) {
-            $out = array();
-            foreach($data as $d) {
-                $out[] = $this->parseArrayData($d);
-            }
-            return $out;
-        }
-        $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
-        return (Integer::isInteger($data)) ? intval($data) : $data;
-    }
+	public function getPrimary()
+	{
+		return $this->primary;
+	}
 
-    protected function orderArrayRows(array &$rows) {
-        uksort($rows, function($a, $b) {
-            return (array_search($a, $this->columns) > array_search($b, $this->columns));
-        });
-    }
+	protected function parseArrayData($data)
+	{
+		if (is_array($data)) {
+			$out = [];
+			foreach ($data as $d) {
+				$out[] = $this->parseArrayData($d);
+			}
 
-    public function toArray() {
+			return $out;
+		}
+		$data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
 
-        $rows = $this->results['rows'];
+		return (Integer::isInteger($data)) ? intval($data) : $data;
+	}
 
-        if($rows && is_array($rows)) {
-            foreach($rows as $key => $row){
-                $key = (isset($this->rename[$key])) ? $this->rename[$key] : $key;
-                if(in_array($key, $this->hidden)) {
-                    unset($rows[$key]);
-                    continue;
-                }
-                $rows[$key] = $this->parseArrayData($row);
-            }
+	protected function orderArrayRows(array &$rows)
+	{
+		uksort($rows, function ($a, $b) {
+			return (array_search($a, $this->columns) > array_search($b, $this->columns));
+		});
+	}
 
-            $this->orderArrayRows($rows);
-        }
+	public function toArray()
+	{
 
-        if(count($this->getResults()) === 1) {
-            foreach($this->with as $with) {
-                $method = Str::camelize($with);
-                if(!method_exists($this, $method)) {
-                    throw new ModelException('Missing required method ' . $method);
-                }
-                $output = call_user_func([$this, $method]);
-                $with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
-                $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
-            }
-            return $rows;
-        }
+		$rows = $this->results['rows'];
 
-        return $rows;
-    }
+		if ($rows && is_array($rows)) {
+			foreach ($rows as $key => $row) {
+				$key = (isset($this->rename[$key])) ? $this->rename[$key] : $key;
+				if (in_array($key, $this->hidden)) {
+					unset($rows[$key]);
+					continue;
+				}
+				$rows[$key] = $this->parseArrayData($row);
+			}
 
-    public function getColumns() {
-        return $this->columns;
-    }
+			$this->orderArrayRows($rows);
+		}
 
-    /**
-     * @param $method
-     * @param $parameters
-     * @return static|null
-     */
-    public function __call($method, $parameters) {
-        if(method_exists($this->queryable, $method)) {
-            return call_user_func_array([$this->queryable, $method], $parameters);
-        }
+		if (count($this->getResults()) === 1) {
+			foreach ($this->with as $with) {
+				$method = Str::camelize($with);
+				if (!method_exists($this, $method)) {
+					throw new ModelException('Missing required method ' . $method);
+				}
+				$output = call_user_func([$this, $method]);
+				$with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
+				$rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
+			}
 
-        return null;
-    }
+			return $rows;
+		}
 
-    /**
-     * @param $method
-     * @param $parameters
-     * @return static
-     */
-    public static function __callStatic($method, $parameters) {
-        $instance = new static;
+		return $rows;
+	}
 
-        if(method_exists($instance->queryable, $method)) {
-            return call_user_func_array([$instance, $method], $parameters);
-        }
+	public function getColumns()
+	{
+		return $this->columns;
+	}
 
-        return null;
-    }
+	/**
+	 * @param $method
+	 * @param $parameters
+	 * @return static|null
+	 */
+	public function __call($method, $parameters)
+	{
+		if (method_exists($this->queryable, $method)) {
+			return call_user_func_array([$this->queryable, $method], $parameters);
+		}
 
-    public function __clone() {
-        $this->queryable = clone $this->queryable;
-    }
+		return null;
+	}
 
-    public function setQuery(ModelQueryBuilder $query) {
-        $this->queryable = $query;
-    }
+	/**
+	 * @param $method
+	 * @param $parameters
+	 * @return static
+	 */
+	public static function __callStatic($method, $parameters)
+	{
+		$instance = new static;
+
+		if (method_exists($instance->queryable, $method)) {
+			return call_user_func_array([$instance, $method], $parameters);
+		}
+
+		return null;
+	}
+
+	public function __clone()
+	{
+		$this->queryable = clone $this->queryable;
+	}
+
+	public function setQuery(ModelQueryBuilder $query)
+	{
+		$this->queryable = $query;
+	}
 
 	/**
 	 * Retrieve an external iterator
@@ -365,7 +398,8 @@ abstract class Model implements \IteratorAggregate {
 	 * <b>Traversable</b>
 	 * @since 5.0.0
 	 */
-	public function getIterator() {
+	public function getIterator()
+	{
 		return new \ArrayIterator($this->getRows());
 	}
 
