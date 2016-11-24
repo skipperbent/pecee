@@ -14,9 +14,12 @@ class ControllerWrap
 
 	public function __construct()
 	{
-		$this->tmpDir = $_ENV['base_path'] . '/cache';
-		$this->files = (strpos(input()->get('files'), ',')) ? explode(',', input()->get('files')) : [input()->get('files')];
-		$this->cacheFile = md5(urldecode(input()->get('files'))) . ' ' . $this->getExtension();
+		// Set time limit
+		set_time_limit(60);
+
+		$this->tmpDir = $_ENV['base_path'] . 'cache';
+		$this->files = (strpos(input()->get('files'), ',')) ? explode(',', input()->get('files')) : [ input()->get('files') ];
+		$this->cacheFile = md5(urldecode(input()->get('files'))) . '.' . $this->getExtension();
 
 		if (!is_dir($this->tmpDir)) {
 			mkdir($this->tmpDir, 0755, true);
@@ -58,9 +61,6 @@ class ControllerWrap
 
 	public function wrap()
 	{
-		// Set time limit
-		set_time_limit(60);
-
 		// Set headers
 		response()->headers([
 			'Content-type: ' . $this->contentType,
@@ -144,7 +144,7 @@ class ControllerWrap
 							}
 						}
 
-						$buffer = sprintf('/* %s */', $file) . chr(10) . $content;
+						$buffer = '/* '. $file .' */' . chr(10) . $content;
 						fwrite($handle, $buffer);
 
 						// Unset buffer

@@ -28,12 +28,4 @@ class Router extends SimpleRouter {
         }
     }
 
-    public static function getCssWrapRoute() {
-    	return parent::router()->findRoute(static::$cssWrapName);
-    }
-
-	public static function getJsWrapRoute() {
-		return parent::router()->findRoute(static::$jsWrapRoute);
-	}
-
 }

@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Widget;
 
-use Pecee\Application\Router;
 use Pecee\Base;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Html\Html;

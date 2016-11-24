@@ -10,15 +10,15 @@ class SessionMessage {
     protected $messages;
 
     public function __construct() {
-        $this->parseMessages();
+        $this->parse();
     }
 
-    protected function parseMessages() {
+    protected function parse() {
         $this->messages = Session::get(self::KEY);
     }
 
-    protected function saveMessages() {
-        Session::set(self::KEY, $this->messages);
+    public function save() {
+	    Session::set(self::KEY, $this->messages);
     }
 
     public function set(FormMessage $message, $type = null) {
@@ -26,11 +26,11 @@ class SessionMessage {
         if(isset($this->messages[$type]) && is_array($this->messages[$type])) {
             if(!in_array($message, $this->messages[$type])) {
                 $this->messages[$type][] = $message;
-                $this->saveMessages();
+                $this->save();
             }
         } else {
             $this->messages[$type][] = $message;
-            $this->saveMessages();
+            $this->save();
         }
     }
 
@@ -52,7 +52,7 @@ class SessionMessage {
      * @param string|null $type
      * @return boolean
      */
-    public function hasMessages($type = null) {
+    public function has($type = null) {
         if($type !== null) {
             return (isset($this->messages[$type]) && count($this->messages[$type]) > 0);
         }
@@ -62,9 +62,9 @@ class SessionMessage {
     public function clear($type = null) {
         if($type !== null) {
             unset($this->messages[$type]);
-            $this->saveMessages();
+            $this->save();
         } else {
-            Session::destroy(self::KEY);
+	        Session::destroy(self::KEY);
         }
     }
 }

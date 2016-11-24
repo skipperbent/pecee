@@ -62,16 +62,6 @@ function redirect($url, $code = null)
 	response()->redirect($url);
 }
 
-function lang($key, $args = null)
-{
-	if (!is_array($args)) {
-		$args = func_get_args();
-		$args = array_slice($args, 1);
-	}
-
-	return app()->translation->translate($key, $args);
-}
-
 /**
  * Get main application class
  *
@@ -80,6 +70,16 @@ function lang($key, $args = null)
 function app()
 {
 	return request()->app;
+}
+
+function lang($key, $args = null)
+{
+	if (!is_array($args)) {
+		$args = func_get_args();
+		$args = array_slice($args, 1);
+	}
+
+	return app()->translation->translate($key, $args);
 }
 
 /**
