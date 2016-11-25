@@ -41,7 +41,7 @@ abstract class Base {
         foreach($names as $key => $name) {
             $item = input()->getObject($key);
 
-            /* @var $item InputItem */
+            /* @var $item \Pecee\Http\Input\IInputItem */
             if($item !== null) {
                 $item->setName($name);
             }
@@ -72,8 +72,8 @@ abstract class Base {
 
     protected function validateInput() {
         foreach($this->_validations as $key => $validations) {
-            /* @var $input \Pecee\Http\Input\InputItem */
-            /* @var $i \Pecee\Http\Input\InputItem */
+            /* @var $input \Pecee\Http\Input\IInputItem */
+            /* @var $i \Pecee\Http\Input\IInputItem */
             $input = input()->getObject($key, new InputItem($key, null));
 
             /* @var $validation \Pecee\UI\Form\Validation\ValidateInput */

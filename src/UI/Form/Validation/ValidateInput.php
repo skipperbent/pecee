@@ -1,12 +1,12 @@
 <?php
 namespace Pecee\UI\Form\Validation;
 
-use Pecee\Http\Input\InputItem;
+use Pecee\Http\Input\IInputItem;
 
 abstract class ValidateInput {
 
     /**
-     * @var InputItem
+     * @var IInputItem
      */
 	protected $input;
 	protected $placement;
@@ -29,14 +29,14 @@ abstract class ValidateInput {
     }
 
 	/**
-	 * @param InputItem $input
+	 * @param IInputItem $input
 	 */
-	public function setInput(InputItem $input) {
+	public function setInput(IInputItem $input) {
 		$this->input = $input;
 	}
 
 	/**
-	 * @return InputItem
+	 * @return IInputItem
 	 */
 	public function getInput() {
 		return $this->input;
