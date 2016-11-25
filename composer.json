@@ -1,36 +1,40 @@
 {
-    "name": "pecee/framework",
-    "description": "Simple, lightweight PHP framework based on Microsoft MVVM.",
-    "keywords": [ "fast", "speed", "framework", "pecee" ],
-    "license": "MIT",
-    "homepage": "http://www.pecee.dk",
-    "support": {
-        "source": "https://bitbucket.org/sessingo/pecee-framework"
-    },
-    "authors": [
-        {
-            "name": "Simon Sessingø",
-            "email": "simon.sessingoe@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.4.0",
-        "josegonzalez/dotenv": "2.*",
-        "pecee/simple-router": "2.*",
-        "robmorgan/phinx": "^0.5.3",
-        "nesbot/carbon": "1.*",
-        "pecee/pixie": "2.*",
-        "filp/whoops": "^2.1"
-    },
-    "require-dev": {
-
-    },
-    "autoload": {
-        "psr-4": {
-            "Pecee\\": "src/"
-        }
-    },
-    "config": {
-        "preferred-install": "dist"
+  "name": "pecee/framework",
+  "description": "Simple, lightweight PHP framework based on Microsoft MVVM.",
+  "keywords": [
+    "fast",
+    "speed",
+    "framework",
+    "pecee"
+  ],
+  "license": "MIT",
+  "homepage": "http://www.pecee.dk",
+  "support": {
+    "source": "https://bitbucket.org/sessingo/pecee-framework"
+  },
+  "authors": [
+    {
+      "name": "Simon Sessingø",
+      "email": "simon.sessingoe@gmail.com"
     }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "josegonzalez/dotenv": "2.*",
+    "pecee/simple-router": "2.*",
+    "robmorgan/phinx": "^0.5.3",
+    "nesbot/carbon": "1.*",
+    "pecee/pixie": "2.*",
+    "filp/whoops": "^2.1"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Pecee\\": "src/"
+    }
+  },
+  "config": {
+    "preferred-install": "dist"
+  }
 }

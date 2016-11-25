@@ -9,6 +9,6 @@ use Pecee\SimpleRouter\Route\ILoadableRoute;
 abstract class BaseExceptionHandler extends Base implements IExceptionHandler
 {
 
-	abstract public function handleError(Request $request, ILoadableRoute &$route = null, \Exception $error);
+    abstract public function handleError(Request $request, ILoadableRoute &$route = null, \Exception $error);
 
 }

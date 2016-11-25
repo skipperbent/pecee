@@ -6,21 +6,21 @@ use Pecee\Session\Session;
 class ValidateSession extends ValidateInput
 {
 
-	protected $sessionName;
+    protected $sessionName;
 
-	public function __construct($sessionName)
-	{
-		$this->sessionName = $sessionName;
-	}
+    public function __construct($sessionName)
+    {
+        $this->sessionName = $sessionName;
+    }
 
-	public function validates()
-	{
-		return ((bool)Session::exists($this->sessionName));
-	}
+    public function validates()
+    {
+        return ((bool)Session::exists($this->sessionName));
+    }
 
-	public function getError()
-	{
-		return lang('%s does not exist', $this->input->getName());
-	}
+    public function getError()
+    {
+        return lang('%s does not exist', $this->input->getName());
+    }
 
 }
