@@ -27,9 +27,9 @@ abstract class Base {
             foreach($values as $key => $value) {
                 $item = input()->getObject($key, new InputItem($key))->setValue($value);
                 if(request()->getMethod() === 'post') {
-                    input()->post->$key = $item;
+                    input()->post[$key] = $item;
                 } else {
-                    input()->get->$key = $item;
+                    input()->get[$key] = $item;
                 }
             }
 
@@ -229,30 +229,32 @@ abstract class Base {
         return $output;
     }
 
-    public function validationFor($index) {
-        $messages = $this->_messages->get($this->errorType);
-        if($messages && is_array($messages)) {
-            /* @var $message \Pecee\UI\Form\FormMessage */
-            foreach($messages as $message) {
+	public function validationFor($index)
+	{
+		$messages = $this->_messages->get($this->errorType);
+		if ($messages && is_array($messages)) {
+			/* @var $message \Pecee\UI\Form\FormMessage */
+			foreach ($messages as $message) {
 
-                $input = null;
-                if(request()->getMethod() !== 'get') {
-                    $input = input()->post->findFirst($index);
-                    if($input === null) {
-                        $input = input()->file->findFirst($index);
-                    }
-                } else {
-                    $input = input()->get->findFirst($index);
-                }
+				$input = null;
+				if (request()->getMethod() !== 'get') {
+					$input = input()->findPost($index);
+					if ($input === null) {
+						$input = input()->findFile($index);
+					}
+				} else {
+					$input = input()->findGet($index);
+				}
 
-                if($input !== null) {
-                    if ($message->getIndex() === $input->getIndex()) {
-                        return $message->getMessage();
-                    }
-                }
-            }
-        }
-        return null;
-    }
+				if ($input !== null) {
+					if ($message->getIndex() === $input->getIndex()) {
+						return $message->getMessage();
+					}
+				}
+			}
+		}
+
+		return null;
+	}
 
 }
