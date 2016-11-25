@@ -1,51 +1,51 @@
 <?php
 namespace Pecee\UI\Form\Validation;
 
-use Pecee\Http\Input\InputItem;
+use Pecee\Http\Input\IInputItem;
 
 abstract class ValidateInput
 {
 
-	/**
-	 * @var InputItem
-	 */
-	protected $input;
-	protected $placement;
+    /**
+     * @var IInputItem
+     */
+    protected $input;
+    protected $placement;
 
-	abstract public function validates();
+    abstract public function validates();
 
-	abstract public function getError();
+    abstract public function getError();
 
-	/**
-	 * @return string|null
-	 */
-	public function getPlacement()
-	{
-		return $this->placement;
-	}
+    /**
+     * @return string|null
+     */
+    public function getPlacement()
+    {
+        return $this->placement;
+    }
 
-	/**
-	 * @param string|null $placement
-	 */
-	public function setPlacement($placement)
-	{
-		$this->placement = $placement;
-	}
+    /**
+     * @param string|null $placement
+     */
+    public function setPlacement($placement)
+    {
+        $this->placement = $placement;
+    }
 
-	/**
-	 * @param InputItem $input
-	 */
-	public function setInput(InputItem $input)
-	{
-		$this->input = $input;
-	}
+    /**
+     * @param IInputItem $input
+     */
+    public function setInput(IInputItem $input)
+    {
+        $this->input = $input;
+    }
 
-	/**
-	 * @return InputItem
-	 */
-	public function getInput()
-	{
-		return $this->input;
-	}
+    /**
+     * @return IInputItem
+     */
+    public function getInput()
+    {
+        return $this->input;
+    }
 
 }

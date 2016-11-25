@@ -5,84 +5,84 @@ use Pecee\Url;
 
 class File
 {
-	public static function remoteSize($url)
-	{
-		$headers = array_change_key_case(get_headers($url, 1), CASE_LOWER);
+    public static function remoteSize($url)
+    {
+        $headers = array_change_key_case(get_headers($url, 1), CASE_LOWER);
 
-		if (isset($headers['content-length'])) {
-			return $headers['content-length'];
-		}
+        if (isset($headers['content-length'])) {
+            return $headers['content-length'];
+        }
 
-		$handle = curl_init($url);
+        $handle = curl_init($url);
 
-		curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($handle, CURLOPT_HEADER, true);
-		curl_setopt($handle, CURLOPT_NOBODY, true);
-		curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HEADER, true);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
 
-		curl_exec($handle);
-		$size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+        curl_exec($handle);
+        $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-		return ($size) ? $size : null;
-	}
+        return ($size) ? $size : null;
+    }
 
-	public static function remoteExist($url)
-	{
-		$handle = curl_init($url);
-		curl_setopt($handle, CURLOPT_NOBODY, true);
-		curl_exec($handle);
+    public static function remoteExist($url)
+    {
+        $handle = curl_init($url);
+        curl_setopt($handle, CURLOPT_NOBODY, true);
+        curl_exec($handle);
 
-		$statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-		if ($statusCode == 200) {
-			return true;
-		}
+        $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        if ($statusCode == 200) {
+            return true;
+        }
 
-		curl_close($handle);
+        curl_close($handle);
 
-		return false;
-	}
+        return false;
+    }
 
-	public static function getRemoteMime($url)
-	{
-		if (Url::isValid($url)) {
-			$handle = curl_init($url);
-			curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($handle, CURLOPT_MAXREDIRS, 5);
-			curl_setopt($handle, CURLOPT_HEADER, true);
-			curl_setopt($handle, CURLOPT_NOBODY, true);
+    public static function getRemoteMime($url)
+    {
+        if (Url::isValid($url)) {
+            $handle = curl_init($url);
+            curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($handle, CURLOPT_MAXREDIRS, 5);
+            curl_setopt($handle, CURLOPT_HEADER, true);
+            curl_setopt($handle, CURLOPT_NOBODY, true);
 
-			curl_exec($handle);
+            curl_exec($handle);
 
-			return curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
-		}
+            return curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
+        }
 
-		throw new \ErrorException('Failed to parse mime-type');
-	}
+        throw new \ErrorException('Failed to parse mime-type');
+    }
 
-	public static function getExtension($path)
-	{
-		$ext = pathinfo($path, PATHINFO_EXTENSION);
+    public static function getExtension($path)
+    {
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
 
-		return ($ext !== '') ? $ext : substr($path, strrpos('.', $path));
-	}
+        return ($ext !== '') ? $ext : substr($path, strrpos('.', $path));
+    }
 
-	public static function move($source, $destination)
-	{
-		if (is_dir($source)) {
+    public static function move($source, $destination)
+    {
+        if (is_dir($source)) {
 
-			if (!is_dir($destination)) {
-				mkdir($destination, 0755, true);
-			}
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
 
-			$files = scandir($source);
-			foreach ($files as $file) {
-				if (!in_array($file, ['.', '..'])) {
-					static::move($source . '/' . $file, $destination . '/' . $file);
-				}
-			}
-		} elseif (is_file($source)) {
-			rename($source, $destination);
-		}
-	}
+            $files = scandir($source);
+            foreach ($files as $file) {
+                if (!in_array($file, ['.', '..'])) {
+                    static::move($source . '/' . $file, $destination . '/' . $file);
+                }
+            }
+        } elseif (is_file($source)) {
+            rename($source, $destination);
+        }
+    }
 }

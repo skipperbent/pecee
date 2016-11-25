@@ -4,67 +4,67 @@ namespace Pecee\UI\AssetManager;
 class AssetManager
 {
 
-	protected $scripts = [];
-	protected $styles = [];
-	protected $scriptsDestination;
-	protected $stylesDestination;
+    protected $scripts = [];
+    protected $styles = [];
+    protected $scriptsDestination;
+    protected $stylesDestination;
 
-	public function __construct()
-	{
-		$this->scriptsDestination = env('JS_PATH');
-		$this->stylesDestination = env('CSS_PATH');
-	}
+    public function __construct()
+    {
+        $this->scriptsDestination = env('JS_PATH');
+        $this->stylesDestination = env('CSS_PATH');
+    }
 
-	public function createScript($filename)
-	{
-		$asset = new ScriptAsset($filename);
-		$asset->setDestinationPath($this->scriptsDestination);
-		$this->scripts[] = $asset;
+    public function createScript($filename)
+    {
+        $asset = new ScriptAsset($filename);
+        $asset->setDestinationPath($this->scriptsDestination);
+        $this->scripts[] = $asset;
 
-		return $asset;
-	}
+        return $asset;
+    }
 
-	public function createStyle($filename)
-	{
-		$asset = new StyleAsset($filename);
-		$asset->setDestinationPath($this->stylesDestination);
-		$this->styles[] = $asset;
+    public function createStyle($filename)
+    {
+        $asset = new StyleAsset($filename);
+        $asset->setDestinationPath($this->stylesDestination);
+        $this->styles[] = $asset;
 
-		return $asset;
-	}
+        return $asset;
+    }
 
-	public function getScripts()
-	{
-		return $this->scripts;
-	}
+    public function getScripts()
+    {
+        return $this->scripts;
+    }
 
-	public function getStyles()
-	{
-		return $this->styles;
-	}
+    public function getStyles()
+    {
+        return $this->styles;
+    }
 
-	public function setScriptsDestination($path)
-	{
-		$this->scriptsDestination = $path;
+    public function setScriptsDestination($path)
+    {
+        $this->scriptsDestination = $path;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function setStylesDestination($path)
-	{
-		$this->stylesDestination = $path;
+    public function setStylesDestination($path)
+    {
+        $this->stylesDestination = $path;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	public function getScriptsDestination()
-	{
-		return $this->scriptsDestination;
-	}
+    public function getScriptsDestination()
+    {
+        return $this->scriptsDestination;
+    }
 
-	public function getStylesDestination()
-	{
-		return $this->stylesDestination;
-	}
+    public function getStylesDestination()
+    {
+        return $this->stylesDestination;
+    }
 
 }

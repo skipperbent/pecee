@@ -6,22 +6,22 @@ use Pecee\Url;
 class ValidateUri extends ValidateInput
 {
 
-	protected $error;
+    protected $error;
 
-	public function validates()
-	{
-		if ($this->input->getValue() && !Url::isValid($this->input->getValue())) {
-			$this->error = lang('%s is not a valid link', $this->input->getName());
+    public function validates()
+    {
+        if ($this->input->getValue() && !Url::isValid($this->input->getValue())) {
+            $this->error = lang('%s is not a valid link', $this->input->getName());
 
-			return false;
-		}
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public function getError()
-	{
-		return $this->error;
-	}
+    public function getError()
+    {
+        return $this->error;
+    }
 
 }
