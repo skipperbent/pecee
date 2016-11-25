@@ -29,9 +29,9 @@ abstract class Base
 			foreach ($values as $key => $value) {
 				$item = input()->getObject($key, new InputItem($key))->setValue($value);
 				if (request()->getMethod() === 'post') {
-					input()->post->$key = $item;
+					input()->post[$key] = $item;
 				} else {
-					input()->get->$key = $item;
+					input()->get[$key] = $item;
 				}
 			}
 
@@ -260,12 +260,12 @@ abstract class Base
 
 				$input = null;
 				if (request()->getMethod() !== 'get') {
-					$input = input()->post->findFirst($index);
+					$input = input()->findPost($index);
 					if ($input === null) {
-						$input = input()->file->findFirst($index);
+						$input = input()->findFile($index);
 					}
 				} else {
-					$input = input()->get->findFirst($index);
+					$input = input()->findGet($index);
 				}
 
 				if ($input !== null) {
