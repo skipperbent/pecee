@@ -4,101 +4,101 @@ namespace Pecee\UI\Html;
 class HtmlInput extends Html
 {
 
-	public function __construct($name, $type, $value = null)
-	{
+    public function __construct($name, $type, $value = null)
+    {
 
-		parent::__construct('input');
+        parent::__construct('input');
 
-		$this->closingType = self::CLOSE_TYPE_SELF;
+        $this->closingType = self::CLOSE_TYPE_SELF;
 
-		$this->type($type);
-		$this->name($name);
+        $this->type($type);
+        $this->name($name);
 
-		if ($value !== null) {
-			$this->value($value);
-		}
+        if ($value !== null) {
+            $this->value($value);
+        }
 
-	}
+    }
 
-	public function name($name)
-	{
-		return $this->attr('name', $name);
-	}
+    public function name($name)
+    {
+        return $this->attr('name', $name);
+    }
 
-	public function value($value)
-	{
-		return $this->attr('value', $value);
-	}
+    public function value($value)
+    {
+        return $this->attr('value', $value);
+    }
 
-	public function placeholder($text)
-	{
-		return $this->attr('placeholder', $text);
-	}
+    public function placeholder($text)
+    {
+        return $this->attr('placeholder', $text);
+    }
 
-	public function autoComplete($bool = false)
-	{
-		return $this->attr('autocomplete', (($bool === true) ? 'on' : 'off'));
-	}
+    public function autoComplete($bool = false)
+    {
+        return $this->attr('autocomplete', (($bool === true) ? 'on' : 'off'));
+    }
 
-	public function readonly()
-	{
-		return $this->addInputAttribute('readonly');
-	}
+    public function readonly()
+    {
+        return $this->addInputAttribute('readonly');
+    }
 
-	public function disabled()
-	{
-		return $this->addInputAttribute('disabled');
-	}
+    public function disabled()
+    {
+        return $this->addInputAttribute('disabled');
+    }
 
-	public function autofocus()
-	{
-		return $this->addInputAttribute('autofocus');
-	}
+    public function autofocus()
+    {
+        return $this->addInputAttribute('autofocus');
+    }
 
-	public function required()
-	{
-		return $this->addInputAttribute('required');
-	}
+    public function required()
+    {
+        return $this->addInputAttribute('required');
+    }
 
-	public function multiple()
-	{
-		return $this->addInputAttribute('required');
-	}
+    public function multiple()
+    {
+        return $this->addInputAttribute('required');
+    }
 
-	public function maxLength($maxLength)
-	{
-		return $this->attr('maxlength', $maxLength);
-	}
+    public function maxLength($maxLength)
+    {
+        return $this->attr('maxlength', $maxLength);
+    }
 
-	public function size($size)
-	{
-		return $this->attr('size', $size);
-	}
+    public function size($size)
+    {
+        return $this->attr('size', $size);
+    }
 
-	public function type($type)
-	{
-		return $this->attr('type', $type);
-	}
+    public function type($type)
+    {
+        return $this->attr('type', $type);
+    }
 
-	public function pattern($pattern)
-	{
-		return $this->attr('pattern', $pattern);
-	}
+    public function pattern($pattern)
+    {
+        return $this->attr('pattern', $pattern);
+    }
 
-	public function checked($checked)
-	{
-		if ($checked) {
-			$this->addInputAttribute('checked');
-		} else {
-			$this->removeAttribute('checked');
-		}
-	}
+    public function checked($checked)
+    {
+        if ($checked) {
+            $this->addInputAttribute('checked');
+        } else {
+            $this->removeAttribute('checked');
+        }
+    }
 
-	public function addInputAttribute($name)
-	{
-		$this->attr($name, null);
+    public function addInputAttribute($name)
+    {
+        $this->attr($name, null);
 
-		return $this;
-	}
+        return $this;
+    }
 
 }

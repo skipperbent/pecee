@@ -25,7 +25,7 @@ use Pecee\Application\Router as Router;
  */
 function url($name = null, $parameters = null, $getParams = null)
 {
-	return Router::getUrl($name, $parameters, $getParams);
+    return Router::getUrl($name, $parameters, $getParams);
 }
 
 /**
@@ -33,7 +33,7 @@ function url($name = null, $parameters = null, $getParams = null)
  */
 function response()
 {
-	return Router::response();
+    return Router::response();
 }
 
 /**
@@ -41,7 +41,7 @@ function response()
  */
 function request()
 {
-	return Router::request();
+    return Router::request();
 }
 
 /**
@@ -50,16 +50,16 @@ function request()
  */
 function input()
 {
-	return request()->getInput();
+    return request()->getInput();
 }
 
 function redirect($url, $code = null)
 {
-	if ($code) {
-		response()->httpCode($code);
-	}
+    if ($code) {
+        response()->httpCode($code);
+    }
 
-	response()->redirect($url);
+    response()->redirect($url);
 }
 
 /**
@@ -69,17 +69,17 @@ function redirect($url, $code = null)
  */
 function app()
 {
-	return request()->app;
+    return request()->app;
 }
 
 function lang($key, $args = null)
 {
-	if (!is_array($args)) {
-		$args = func_get_args();
-		$args = array_slice($args, 1);
-	}
+    if (!is_array($args)) {
+        $args = func_get_args();
+        $args = array_slice($args, 1);
+    }
 
-	return app()->translation->translate($key, $args);
+    return app()->translation->translate($key, $args);
 }
 
 /**
@@ -90,14 +90,14 @@ function lang($key, $args = null)
  */
 function debug($text)
 {
-	if (env('DEBUG', false)) {
-		app()->debug->add($text);
-	}
+    if (env('DEBUG', false)) {
+        app()->debug->add($text);
+    }
 }
 
 function add_module($name, $path)
 {
-	app()->addModule($name, $path);
+    app()->addModule($name, $path);
 }
 
 /**
@@ -109,7 +109,7 @@ function add_module($name, $path)
  */
 function env($key, $default = null)
 {
-	return isset($_ENV[$key]) ? $_ENV[$key] : $default;
+    return isset($_ENV[$key]) ? $_ENV[$key] : $default;
 }
 
 /**
@@ -118,10 +118,10 @@ function env($key, $default = null)
  */
 function csrf_token()
 {
-	$baseVerifier = Router::router()->getInstance()->getCsrfVerifier();
-	if ($baseVerifier !== null) {
-		return $baseVerifier->getToken();
-	}
+    $baseVerifier = Router::router()->getInstance()->getCsrfVerifier();
+    if ($baseVerifier !== null) {
+        return $baseVerifier->getToken();
+    }
 
-	return null;
+    return null;
 }

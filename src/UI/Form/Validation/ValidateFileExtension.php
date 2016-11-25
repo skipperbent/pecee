@@ -7,26 +7,26 @@ use Pecee\IO\File;
 class ValidateFileExtension extends ValidateFile
 {
 
-	protected $extensions;
+    protected $extensions;
 
-	public function __construct(array $extensions)
-	{
-		$this->extensions = $extensions;
-	}
+    public function __construct(array $extensions)
+    {
+        $this->extensions = $extensions;
+    }
 
-	public function validates()
-	{
+    public function validates()
+    {
 
-		if (!($this->input instanceof InputFile)) {
-			return true;
-		}
+        if (!($this->input instanceof InputFile)) {
+            return true;
+        }
 
-		return (in_array(File::getExtension($this->input->getName()), $this->extensions));
-	}
+        return (in_array(File::getExtension($this->input->getName()), $this->extensions));
+    }
 
-	public function getError()
-	{
-		return lang('%s is not a valid format', $this->input->getName());
-	}
+    public function getError()
+    {
+        return lang('%s is not a valid format', $this->input->getName());
+    }
 
 }

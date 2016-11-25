@@ -4,16 +4,16 @@ namespace Pecee\UI\Xml;
 interface IXmlNode
 {
 
-	public function __toString();
+    public function __toString();
 
-	/**
-	 * @param XmlElement $parent
-	 */
-	public function setParent($parent);
+    /**
+     * @param XmlElement $parent
+     */
+    public function setParent($parent);
 
-	/**
-	 * @return XmlElement
-	 */
-	public function getParent();
+    /**
+     * @return XmlElement
+     */
+    public function getParent();
 
 }

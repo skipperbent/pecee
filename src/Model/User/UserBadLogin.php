@@ -6,59 +6,59 @@ use Pecee\Model\Model;
 class UserBadLogin extends Model
 {
 
-	const TIMEOUT_MINUTES = 30;
-	const MAX_REQUEST_PER_IP = 10;
+    const TIMEOUT_MINUTES = 30;
+    const MAX_REQUEST_PER_IP = 10;
 
-	protected $table = 'user_bad_login';
+    protected $table = 'user_bad_login';
 
-	protected $columns = [
-		'id',
-		'username',
-		'ip',
-		'active',
-	];
+    protected $columns = [
+        'id',
+        'username',
+        'ip',
+        'active',
+    ];
 
-	public function __construct()
-	{
+    public function __construct()
+    {
 
-		parent::__construct();
+        parent::__construct();
 
-		$this->ip = request()->getIp();
-		$this->active = true;
-	}
+        $this->ip = request()->getIp();
+        $this->active = true;
+    }
 
-	public static function track($username)
-	{
-		static::instance()->save([
-			'username' => trim($username),
-		]);
-	}
+    public static function track($username)
+    {
+        static::instance()->save([
+            'username' => trim($username),
+        ]);
+    }
 
-	public static function checkBadLogin($username)
-	{
+    public static function checkBadLogin($username)
+    {
 
-		$track = static::instance()->where('username', '=', trim($username))
-			->where('active', '=', '1')
-			->select([self::instance()->getTable() . '.*', static::getQuery()->raw('COUNT(ip) as request_count')])
-			->groupBy('ip')
-			->orderBy('created_at', 'DESC')
-			->first();
+        $track = static::instance()->where('username', '=', trim($username))
+            ->where('active', '=', '1')
+            ->select([self::instance()->getTable() . '.*', static::getQuery()->raw('COUNT(ip) as request_count')])
+            ->groupBy('ip')
+            ->orderBy('created_at', 'DESC')
+            ->first();
 
-		if ($track !== null) {
-			$lastLoginTimeStamp = $track->created_at;
-			$lastLoginMinutesAgo = round((time() - strtotime($lastLoginTimeStamp)) / 60);
+        if ($track !== null) {
+            $lastLoginTimeStamp = $track->created_at;
+            $lastLoginMinutesAgo = round((time() - strtotime($lastLoginTimeStamp)) / 60);
 
-			return ((static::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < static::TIMEOUT_MINUTES) &&
-				(static::MAX_REQUEST_PER_IP === null || $track->request_count > static::MAX_REQUEST_PER_IP));
-		}
+            return ((static::TIMEOUT_MINUTES === null || $lastLoginMinutesAgo < static::TIMEOUT_MINUTES) &&
+                (static::MAX_REQUEST_PER_IP === null || $track->request_count > static::MAX_REQUEST_PER_IP));
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	public static function reset($username)
-	{
-		static::instance()->where('username', '=', $username)->update([
-			'active' => 0,
-		]);
-	}
+    public static function reset($username)
+    {
+        static::instance()->where('username', '=', $username)->update([
+            'active' => 0,
+        ]);
+    }
 }

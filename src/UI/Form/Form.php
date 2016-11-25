@@ -14,212 +14,212 @@ use Pecee\UI\Html\HtmlTextarea;
 class Form
 {
 
-	protected $name;
+    protected $name;
 
-	/**
-	 * Starts new form
-	 * @param string $name
-	 * @param string|null $method
-	 * @param string|null $action
-	 * @param string|null $enctype
-	 * @return \Pecee\UI\Html\HtmlForm
-	 */
-	public function start($name, $method = HtmlForm::METHOD_POST, $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED)
-	{
-		$this->name = $name;
+    /**
+     * Starts new form
+     * @param string $name
+     * @param string|null $method
+     * @param string|null $action
+     * @param string|null $enctype
+     * @return \Pecee\UI\Html\HtmlForm
+     */
+    public function start($name, $method = HtmlForm::METHOD_POST, $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED)
+    {
+        $this->name = $name;
 
-		return new HtmlForm($name, $method, $action, $enctype);
-	}
+        return new HtmlForm($name, $method, $action, $enctype);
+    }
 
-	/**
-	 * Creates new HTML input element
-	 * @param string $name
-	 * @param string $type
-	 * @param string $value
-	 * @param bool $saveValue
-	 * @return \Pecee\UI\Html\HtmlInput
-	 */
-	public function input($name, $type = 'text', $value = null, $saveValue = true)
-	{
-		if ($saveValue && ($value === null && input()->exists($name) || request()->getMethod() !== 'get')) {
-			$value = input()->get($name);
-		}
+    /**
+     * Creates new HTML input element
+     * @param string $name
+     * @param string $type
+     * @param string $value
+     * @param bool $saveValue
+     * @return \Pecee\UI\Html\HtmlInput
+     */
+    public function input($name, $type = 'text', $value = null, $saveValue = true)
+    {
+        if ($saveValue && ($value === null && input()->exists($name) || request()->getMethod() !== 'get')) {
+            $value = input()->get($name);
+        }
 
-		return new HtmlInput($name, $type, $value);
-	}
+        return new HtmlInput($name, $type, $value);
+    }
 
-	/**
-	 * Create radio element
-	 *
-	 * @param string $name
-	 * @param string $value
-	 * @param bool $saveValue
-	 * @return HtmlInput
-	 */
-	public function radio($name, $value, $saveValue = true)
-	{
-		$element = new HtmlInput($name, 'radio', $value);
+    /**
+     * Create radio element
+     *
+     * @param string $name
+     * @param string $value
+     * @param bool $saveValue
+     * @return HtmlInput
+     */
+    public function radio($name, $value, $saveValue = true)
+    {
+        $element = new HtmlInput($name, 'radio', $value);
 
-		if ($saveValue && input()->get($name) !== null && input()->get($name) == $value) {
-			$element->checked(true);
-		}
+        if ($saveValue && input()->get($name) !== null && input()->get($name) == $value) {
+            $element->checked(true);
+        }
 
-		return $element;
-	}
+        return $element;
+    }
 
-	/**
-	 * Creates new checkbox input element
-	 * @param string $name
-	 * @param bool $value
-	 * @param bool $defaultValue
-	 * @param bool $saveValue
-	 * @return \Pecee\UI\Html\HtmlCheckbox
-	 */
-	public function bool($name, $value = true, $defaultValue = null, $saveValue = true)
-	{
-		$element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
-		if ($saveValue !== false) {
-			if ($defaultValue === null) {
-				$defaultValue = $value;
-			} else {
-				$defaultValue = (count($_GET)) ? null : $defaultValue;
-			}
-			$checked = Boolean::parse(input()->get($name, $defaultValue));
-			if ($checked) {
-				$element->checked(true);
-			}
-		} else {
-			if (Boolean::parse($value)) {
-				$element->checked(true);
-			}
-		}
+    /**
+     * Creates new checkbox input element
+     * @param string $name
+     * @param bool $value
+     * @param bool $defaultValue
+     * @param bool $saveValue
+     * @return \Pecee\UI\Html\HtmlCheckbox
+     */
+    public function bool($name, $value = true, $defaultValue = null, $saveValue = true)
+    {
+        $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
+        if ($saveValue !== false) {
+            if ($defaultValue === null) {
+                $defaultValue = $value;
+            } else {
+                $defaultValue = (count($_GET)) ? null : $defaultValue;
+            }
+            $checked = Boolean::parse(input()->get($name, $defaultValue));
+            if ($checked) {
+                $element->checked(true);
+            }
+        } else {
+            if (Boolean::parse($value)) {
+                $element->checked(true);
+            }
+        }
 
-		return $element;
-	}
+        return $element;
+    }
 
-	/**
-	 * Creates new label
-	 * @param string|null $inner
-	 * @param string|null $for
-	 * @return \Pecee\UI\Html\Html
-	 */
-	public function label($inner, $for = null)
-	{
-		$label = (new Html('label'));
+    /**
+     * Creates new label
+     * @param string|null $inner
+     * @param string|null $for
+     * @return \Pecee\UI\Html\Html
+     */
+    public function label($inner, $for = null)
+    {
+        $label = (new Html('label'));
 
-		if ($inner !== null) {
-			$label->addItem($inner);
-		}
+        if ($inner !== null) {
+            $label->addItem($inner);
+        }
 
-		if ($for !== null) {
-			$label->attr('for', $for);
-		}
+        if ($for !== null) {
+            $label->attr('for', $for);
+        }
 
-		return $label;
-	}
+        return $label;
+    }
 
-	/**
-	 * Creates new HTML Select element
-	 * @param string $name
-	 * @param Dataset $data
-	 * @param string|null $value
-	 * @param bool $saveValue
-	 * @return \Pecee\UI\Html\HtmlSelect
-	 */
-	public function selectStart($name, $data = null, $value = null, $saveValue = true)
-	{
-		$element = new HtmlSelect($name);
-		if ($data !== null) {
-			if ($data instanceof Dataset) {
+    /**
+     * Creates new HTML Select element
+     * @param string $name
+     * @param Dataset $data
+     * @param string|null $value
+     * @param bool $saveValue
+     * @return \Pecee\UI\Html\HtmlSelect
+     */
+    public function selectStart($name, $data = null, $value = null, $saveValue = true)
+    {
+        $element = new HtmlSelect($name);
+        if ($data !== null) {
+            if ($data instanceof Dataset) {
 
-				foreach ($data->getData() as $item) {
-					$val = isset($item['value']) ? $item['value'] : $item['name'];
-					$selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($item['selected']) && $item['selected']) || !$saveValue && $value == $val);
-					$element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
-				}
+                foreach ($data->getData() as $item) {
+                    $val = isset($item['value']) ? $item['value'] : $item['name'];
+                    $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($item['selected']) && $item['selected']) || !$saveValue && $value == $val);
+                    $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
+                }
 
-			} elseif (is_array($data)) {
+            } elseif (is_array($data)) {
 
-				foreach ($data as $val => $key) {
-					$selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || !$saveValue && $value == $val);
-					$element->addOption(new HtmlSelectOption($val, $key, $selected));
-				}
+                foreach ($data as $val => $key) {
+                    $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || !$saveValue && $value == $val);
+                    $element->addOption(new HtmlSelectOption($val, $key, $selected));
+                }
 
-			} else {
-				throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
-			}
-		}
+            } else {
+                throw new \InvalidArgumentException('Data must be either instance of Dataset or array.');
+            }
+        }
 
-		return $element;
-	}
+        return $element;
+    }
 
-	/**
-	 * Creates new textarea
-	 * @param string $name
-	 * @param int $rows
-	 * @param int $cols
-	 * @param string $value
-	 * @param bool $saveValue
-	 * @return \Pecee\UI\Html\HtmlTextarea
-	 */
-	public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
-	{
-		if ($saveValue && (!$value && input()->get($name) || request()->getMethod() !== 'get')) {
-			$value = input()->get($name);
-		}
+    /**
+     * Creates new textarea
+     * @param string $name
+     * @param int $rows
+     * @param int $cols
+     * @param string $value
+     * @param bool $saveValue
+     * @return \Pecee\UI\Html\HtmlTextarea
+     */
+    public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
+    {
+        if ($saveValue && (!$value && input()->get($name) || request()->getMethod() !== 'get')) {
+            $value = input()->get($name);
+        }
 
-		return new HtmlTextarea($name, $rows, $cols, $value);
-	}
+        return new HtmlTextarea($name, $rows, $cols, $value);
+    }
 
-	/**
-	 * Creates submit element
-	 * @param string $name
-	 * @param string $value
-	 * @return \Pecee\UI\Html\HtmlInput
-	 */
-	public function submit($name, $value)
-	{
-		return $this->input($name, 'submit', $value);
-	}
+    /**
+     * Creates submit element
+     * @param string $name
+     * @param string $value
+     * @return \Pecee\UI\Html\HtmlInput
+     */
+    public function submit($name, $value)
+    {
+        return $this->input($name, 'submit', $value);
+    }
 
-	/**
-	 * Create button element
-	 * @param string $text
-	 * @param string|null $type
-	 * @param string|null $name
-	 * @param string|null $value
-	 * @return Html
-	 */
-	public function button($text, $type = null, $name = null, $value = null)
-	{
-		$el = new Html('button');
+    /**
+     * Create button element
+     * @param string $text
+     * @param string|null $type
+     * @param string|null $name
+     * @param string|null $value
+     * @return Html
+     */
+    public function button($text, $type = null, $name = null, $value = null)
+    {
+        $el = new Html('button');
 
-		$el->addInnerHtml($text);
+        $el->addInnerHtml($text);
 
-		if ($type !== null) {
-			$el->addAttribute('type', $type);
-		}
+        if ($type !== null) {
+            $el->addAttribute('type', $type);
+        }
 
-		if ($name !== null) {
-			$el->addAttribute('name', $name);
-		}
+        if ($name !== null) {
+            $el->addAttribute('name', $name);
+        }
 
-		if ($value !== null) {
-			$el->addAttribute('value', $value);
-		}
+        if ($value !== null) {
+            $el->addAttribute('value', $value);
+        }
 
-		$el->setClosingType(Html::CLOSE_TYPE_TAG);
+        $el->setClosingType(Html::CLOSE_TYPE_TAG);
 
-		return $el;
-	}
+        return $el;
+    }
 
-	/**
-	 * Ends open form
-	 * @return string
-	 */
-	public function end()
-	{
-		return '</form>';
-	}
+    /**
+     * Ends open form
+     * @return string
+     */
+    public function end()
+    {
+        return '</form>';
+    }
 
 }

@@ -4,8 +4,8 @@ namespace Pecee\Translation\Providers;
 interface ITranslationProvider
 {
 
-	public function lookup($key);
+    public function lookup($key);
 
-	public function load($locale, $defaultLocale);
+    public function load($locale, $defaultLocale);
 
 }

@@ -4,6 +4,6 @@ namespace Pecee\UI\AssetManager;
 interface IAsset
 {
 
-	function getContentType();
+    function getContentType();
 
 }

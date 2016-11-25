@@ -10,287 +10,307 @@ use Pecee\Model\User\UserException;
 
 class ModelUser extends ModelData
 {
+    const COOKIE_NAME = 'ticket';
 
-	const COOKIE_NAME = 'ticket';
+    /* Errors */
+    const ERROR_TYPE_BANNED = 0x1;
+    const ERROR_TYPE_INVALID_LOGIN = 0x2;
+    const ERROR_TYPE_EXISTS = 0x3;
 
-	// Errors
-	const ERROR_TYPE_BANNED = 0x1;
-	const ERROR_TYPE_INVALID_LOGIN = 0x2;
-	const ERROR_TYPE_EXISTS = 0x3;
+    protected static $instance;
+    protected static $ticketExpireMinutes = 60 * 1;
 
-	protected static $instance;
+    protected $table = 'user';
 
-	protected $table = 'user';
+    protected $columns = [
+        'id',
+        'username',
+        'password',
+        'admin_level',
+        'deleted',
+        'last_activity',
+    ];
 
-	protected $columns = [
-		'id',
-		'username',
-		'password',
-		'admin_level',
-		'deleted',
-		'last_activity',
-	];
+    public function __construct($username = null, $password = null)
+    {
+        parent::__construct();
 
-	public function __construct($username = null, $password = null)
-	{
+        $this->username = $username;
 
-		parent::__construct();
+        if ($password !== null) {
+            $this->password = $this->setPassword($password);
+        }
 
-		$this->username = $username;
-		$this->password = md5($password);
-		$this->admin_level = 0;
-		$this->deleted = false;
-		$this->last_activity = Carbon::now()->toDateTimeString();
-	}
+        $this->admin_level = 0;
+        $this->deleted = false;
+        $this->last_activity = Carbon::now();
+    }
 
-	public function save(array $data = null)
-	{
-		if ($this->{$this->primary} === null) {
-			$user = $this->instance()->filterUsername($this->username)->first();
-			if ($user != null && $user->id != $this->id) {
-				throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
-			}
-		}
-		parent::save($data);
-	}
+    public function save(array $data = null)
+    {
+        if ($this->{$this->primary} === null) {
+            $user = $this->instance()->filterUsername($this->username)->first();
+            if ($user != null && $user->id != $this->id) {
+                throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
+            }
+        }
+        parent::save($data);
+    }
 
-	protected function getDataClass()
-	{
-		return static::getUserDataClass();
-	}
+    protected function getDataClass()
+    {
+        return static::getUserDataClass();
+    }
 
-	protected function onNewDataItemCreate(Model &$data)
-	{
-		$data->{$data::USER_IDENTIFIER_KEY} = $this->id;
-		parent::onNewDataItemCreate($data);
-	}
+    protected function onNewDataItemCreate(Model &$data)
+    {
+        $data->{$data::USER_IDENTIFIER_KEY} = $this->id;
+        parent::onNewDataItemCreate($data);
+    }
 
-	protected function fetchData()
-	{
-		$class = static::getUserDataClass();
+    protected function fetchData()
+    {
+        $class = static::getUserDataClass();
 
-		return $class::getByIdentifier($this->id);
-	}
+        return $class::getByIdentifier($this->id);
+    }
 
-	public function delete()
-	{
-		$this->deleted = true;
-		$this->save();
-	}
+    public function delete()
+    {
+        $this->deleted = true;
+        $this->save();
+    }
 
-	public static function isLoggedIn($force = false)
-	{
-		if ($force === true) {
-			$user = static::getFromCookie(true);
+    /**
+     * Validates cookie-ticket and returns bool if the ticket is valid.
+     *
+     * @return self|bool
+     */
+    public static function isLoggedIn()
+    {
+        $ticket = static::getTicket();
 
-			return ($user !== null);
-		}
+        try {
 
-		return (Cookie::exists(static::COOKIE_NAME) && static::getFromCookie() !== null);
-	}
+            if ($ticket === null || Carbon::parse($ticket[1])->diffInMinutes(Carbon::now()) > static::$ticketExpireMinutes) {
+                Cookie::delete(static::COOKIE_NAME);
 
-	public function signOut()
-	{
-		if (Cookie::exists(static::COOKIE_NAME)) {
-			Cookie::delete(static::COOKIE_NAME);
-		}
-	}
+                return false;
+            }
 
-	public function exist()
-	{
-		return $this->filterUsername($this->username)->filterDeleted(false)->first();
-	}
+            return true;
 
-	public function registerActivity()
-	{
-		if ($this->isLoggedIn()) {
-			$this->last_activity = Carbon::now()->toDateTimeString();
-			$this->save();
-		}
-	}
+        } catch (\Exception $e) {
+            Cookie::delete(static::COOKIE_NAME);
 
-	protected function signIn($cookieExp)
-	{
-		$user = [$this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSecret()];
-		$ticket = Guid::encrypt(join('|', $user), static::getSecret());
-		Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
-	}
+            return false;
+        }
+    }
 
-	/**
-	 * Set timeout on user session
-	 * @param int $minutes
-	 */
-	public function setTimeout($minutes)
-	{
-		$this->signIn(time() + 60 * $minutes);
-	}
+    public static function createTicket($userId)
+    {
+        /* Remove existing ticket */
+        Cookie::delete(static::COOKIE_NAME);
 
-	/**
-	 * Sets users password and encrypts it.
-	 * @param string $string
-	 */
-	public function setPassword($string)
-	{
-		$this->password = md5($string);
-	}
+        $ticket = Guid::encrypt(static::getSalt(), join('|', [
+            $userId,
+            Carbon::now()->addMinutes(static::$ticketExpireMinutes)->toW3cString(),
+        ]));
 
-	public static function getFromCookie($setData = false)
-	{
-		$ticket = Cookie::get(static::COOKIE_NAME);
-		if (trim($ticket) !== '') {
-			$ticket = Guid::decrypt($ticket, static::getSecret());
-			$user = explode('|', $ticket);
-			if (is_array($user) && trim(end($user)) === static::getSecret()) {
-				if ($setData) {
-					static::$instance = static::find($user[0]);
+        Cookie::create(static::COOKIE_NAME, $ticket);
+    }
 
-					return static::$instance;
-				} else {
-					$obj = new static();
-					$obj->setRow('id', $user[0]);
-					$obj->setRow('password', $user[1]);
-					$obj->setRow('username', $user[3]);
-					$obj->setRow('admin_level', $user[4]);
+    public static function getTicket()
+    {
+        if (Cookie::exists(static::COOKIE_NAME) === false) {
+            return null;
+        }
 
-					return $obj;
-				}
-			}
-		}
+        $ticket = Guid::decrypt(static::getSalt(), Cookie::get(static::COOKIE_NAME));
 
-		return null;
-	}
+        if ($ticket !== false) {
+            $ticket = explode('|', $ticket);
 
-	/**
-	 * Get current user
-	 * @param bool $setData
-	 * @return static
-	 */
-	public static function current($setData = false)
-	{
-		if (!is_null(static::$instance)) {
-			return static::$instance;
-		}
-		if (static::isLoggedIn()) {
-			$user = static::getFromCookie($setData);
-			if ($user !== null) {
-				return $user;
-			}
-		}
+            return (count($ticket) > 0) ? $ticket : null;
+        }
 
-		return static::$instance;
-	}
+        return null;
+    }
 
-	public static function getSecret()
-	{
-		return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
-	}
+    protected function signIn()
+    {
+        static::createTicket($this->id);
+    }
 
-	public function filterQuery($query)
-	{
+    public function signOut()
+    {
+        Cookie::delete(static::COOKIE_NAME);
+    }
 
-		$userDataClassName = $this->getUserDataClass();
-		/* @var $userDataClass UserData */
-		$userDataClass = new $userDataClassName();
+    public function exist()
+    {
+        return $this->filterUsername($this->username)->filterDeleted(false)->first();
+    }
 
-		$userDataQuery = $this->newQuery($userDataClass->getTable())
-			->getQuery()
-			->select($userDataClassName::USER_IDENTIFIER_KEY)
-			->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
-			->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
-			->limit(1);
+    public function registerActivity()
+    {
+        if ($this->isLoggedIn() === true) {
+            $this->last_activity = Carbon::now()->toDateTimeString();
+            $this->save();
+        }
+    }
 
-		return $this->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
-			->orWhere($this->getPrimary(), '=', $this->raw($userDataQuery));
-	}
+    /**
+     * Sets users password and encrypts it.
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = password_hash($password, PASSWORD_DEFAULT);
+    }
 
-	public function filterDeleted($deleted)
-	{
-		return $this->where('deleted', '=', $deleted);
-	}
+    public static function getSalt()
+    {
+        return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
+    }
 
-	public function filterAdminLevel($level)
-	{
-		return $this->where('admin_level', '=', $level);
-	}
+    /**
+     * Get current user
+     *
+     * @return static
+     */
+    public static function current()
+    {
+        if (static::$instance !== null) {
+            return static::$instance;
+        }
 
-	public function filterUsername($username)
-	{
-		return $this->where('username', '=', $username);
-	}
+        if (static::isLoggedIn() === true) {
 
-	public function filterPassword($password)
-	{
-		return $this->where('password', '=', md5($password));
-	}
+            $ticket = static::getTicket();
 
-	public function filterKeyValue($key, $value, $like = false)
-	{
-		$userDataClassName = static::getUserDataClass();
-		/* @var $userDataClass UserData */
-		$userDataClass = new $userDataClassName();
+            /* @var $user static */
+            static::$instance = static::new()->filterDeleted()->find($ticket[0]);
 
-		$subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', (($like) ? 'LIKE' : '='), (string)$value);
+            if (static::$instance !== null) {
+                /* Refresh ticket */
+                static::createTicket($ticket[0]);
+            }
 
-		return $this->where($this->primary, '=', $this->subQuery($subQuery));
-	}
+        }
 
-	public static function getByUsername($username)
-	{
-		return static::instance()->filterDeleted(false)->filterUsername($username);
-	}
+        return static::$instance;
+    }
 
-	public static function authenticate($username, $password, $remember = false)
-	{
+    public static function getSecret()
+    {
+        return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
+    }
 
-		static::onLoginStart($username, $password, $remember);
+    public function filterQuery($query)
+    {
+        $userDataClassName = $this->getUserDataClass();
+        /* @var $userDataClass UserData */
+        $userDataClass = new $userDataClassName();
 
-		/* @var $user ModelUser */
-		$user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
+        $userDataQuery = $this->newQuery($userDataClass->getTable())
+            ->getQuery()
+            ->select($userDataClassName::USER_IDENTIFIER_KEY)
+            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
+            ->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
+            ->limit(1);
 
-		if ($user === null) {
-			throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
-		}
+        return $this->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
+            ->orWhere($this->getPrimary(), '=', $this->raw($userDataQuery));
+    }
 
-		// Incorrect user login.
-		if (strtolower($user->username) != strtolower($username) || $user->password != md5($password) && $user->password != $password) {
-			static::onLoginFailed($user);
-			throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
-		}
+    public function filterDeleted($deleted = false)
+    {
+        return $this->where('deleted', '=', $deleted);
+    }
 
-		static::onLoginSuccess($user);
-		$user->signIn(($remember) ? null : 0);
+    public function filterAdminLevel($level)
+    {
+        return $this->where('admin_level', '=', $level);
+    }
 
-		return $user;
-	}
+    public function filterUsername($username)
+    {
+        return $this->where('username', '=', $username);
+    }
 
-	public function auth()
-	{
-		return static::authenticate($this->username, $this->password, false);
-	}
+    public function filterPassword($password)
+    {
+        return $this->where('password', '=', md5($password));
+    }
 
-	/**
-	 * @return UserData
-	 */
-	public static function getUserDataClass()
-	{
-		return UserData::class;
-	}
+    public function filterKeyValue($key, $value, $like = false)
+    {
+        $userDataClassName = static::getUserDataClass();
+        /* @var $userDataClass UserData */
+        $userDataClass = new $userDataClassName();
 
-	// Events
-	protected static function onLoginFailed(ModelUser $user)
-	{
-		UserBadLogin::track($user->username);
-	}
+        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', (($like) ? 'LIKE' : '='), (string)$value);
 
-	protected static function onLoginSuccess(ModelUser $user)
-	{
-		UserBadLogin::reset($user->username);
-	}
+        return $this->where($this->primary, '=', $this->subQuery($subQuery));
+    }
 
-	protected static function onLoginStart($username, $password, $remember)
-	{
-		if (UserBadLogin::checkBadLogin($username)) {
-			throw new UserException('User has been banned', static::ERROR_TYPE_BANNED);
-		}
-	}
+    public static function getByUsername($username)
+    {
+        return static::instance()->filterDeleted(false)->filterUsername($username);
+    }
+
+    public static function authenticate($username, $password)
+    {
+        static::onLoginStart($username, $password);
+
+        /* @var $user ModelUser */
+        $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
+
+        if ($user === null) {
+            throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
+        }
+
+        // Incorrect user login.
+        if (strtolower($user->username) != strtolower($username) || password_verify($password, $user->password) === false) {
+            static::onLoginFailed($user);
+            throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
+        }
+
+        static::onLoginSuccess($user);
+        $user->signIn();
+
+        return $user;
+    }
+
+    public function auth()
+    {
+        return static::authenticate($this->username, $this->password, false);
+    }
+
+    /**
+     * @return UserData
+     */
+    public static function getUserDataClass()
+    {
+        return UserData::class;
+    }
+
+    // Events
+    protected static function onLoginFailed(ModelUser $user)
+    {
+        UserBadLogin::track($user->username);
+    }
+
+    protected static function onLoginSuccess(ModelUser $user)
+    {
+        UserBadLogin::reset($user->username);
+    }
+
+    protected static function onLoginStart($username, $password)
+    {
+        if (UserBadLogin::checkBadLogin($username)) {
+            throw new UserException('User has been banned', static::ERROR_TYPE_BANNED);
+        }
+    }
 }
