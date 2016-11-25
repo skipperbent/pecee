@@ -14,7 +14,7 @@ class Router extends SimpleRouter
 
 		Session::start();
 
-		if (app()->getDisableFrameworkRoutes() === true) {
+		if (app()->getDisableFrameworkRoutes() === false) {
 
 			// Load framework specific controllers
 			static::get(app()->getCssWrapRouteUrl(), 'ControllerWrap@css', ['namespace' => '\Pecee\Controller'])->setName(app()->getCssWrapRouteName());
