@@ -27,7 +27,7 @@ abstract class Base
             $values = Session::get($this->_inputSessionKey);
 
             foreach ($values as $key => $value) {
-                $item = input()->getObject($key, new InputItem($key))->setValue($value);
+                $item = input()->getObject($key, new InputItem($key), ['get', 'post'])->setValue($value);
                 if (request()->getMethod() === 'post') {
                     input()->post[$key] = $item;
                 } else {
