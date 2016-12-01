@@ -15,7 +15,7 @@ class Html
     protected $closingType = self::CLOSE_TYPE_TAG;
     protected $attributes = [];
 
-    public function __construct($tag)
+    public function __construct($tag = null)
     {
         $this->tag = $tag;
     }
