@@ -190,7 +190,7 @@ class ModelUser extends ModelData
             $ticket = static::getTicket();
 
             /* @var $user static */
-            static::$instance = static::new()->filterDeleted()->find($ticket[0]);
+            static::$instance = static::instance()->filterDeleted()->find($ticket[0]);
 
             if (static::$instance !== null) {
                 /* Refresh ticket */

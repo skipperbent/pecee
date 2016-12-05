@@ -113,24 +113,13 @@ abstract class Model implements \IteratorAggregate
     }
 
     /**
-     * Create new instance
-     * @return static
-     */
-    public static function new()
-    {
-        return new static();
-    }
-
-    /**
      * Create new instance.
-     * Alias for static::new();
      *
-     * @see static::new()
      * @return static
      */
     public static function instance()
     {
-        return static::new();
+        return new static();
     }
 
     public function onInstanceCreate()
