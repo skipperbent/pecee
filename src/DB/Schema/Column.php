@@ -353,7 +353,7 @@ class Column
         }
 
         if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
-            $query .= sprintf('CONSTRAINT FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
+            $query .= sprintf('CONSTRAINT FOREIGN KEY(`%s`) REFERENCES `%s`(`%s`) ON UPDATE %s ON DELETE %s',
                 $this->getName(),
                 $this->getRelationTable(),
                 $this->getRelationColumn(),
@@ -463,6 +463,8 @@ class Column
     public function setIncrement($increment)
     {
         $this->increment = $increment;
+
+        $this->primary();
 
         return $this;
     }
