@@ -55,6 +55,38 @@ switch (strtolower($argv[1])) {
 
         exit(0);
         break;
+    case 'seed:create':
+
+        $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
+        $config = $appPath . '/config/phinx-config.php';
+
+        $argv = array_slice($argv, 2);
+
+        $cmd = 'seed:create ' . join(' ', $argv) . ' -c ' . $config;
+
+        // Run Phinx
+        exec($phinx . ' ' . $cmd, $output);
+        echo join(chr(10), $output);
+
+        exit(0);
+
+        break;
+    case 'seed:run':
+
+        $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
+        $config = $appPath . '/config/phinx-config.php';
+
+        $argv = array_slice($argv, 2);
+
+        $cmd = 'seed:run ' . join(' ', $argv) . ' -c ' . $config;
+
+        // Run Phinx
+        exec($phinx . ' ' . $cmd, $output);
+        echo join(chr(10), $output);
+
+        exit(0);
+
+        break;
     case 'change-namespace':
         die('yet not implemented');
         break;

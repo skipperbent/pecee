@@ -14,8 +14,7 @@ class CreateRewriteTable extends Migration
 			$table->column('host')->string(255)->index()->nullable();
 			$table->column('regex')->string(255)->index()->nullable();
 			$table->column('order')->integer()->index()->nullable();
-			$table->column('updated_at')->datetime()->nullable()->index();
-			$table->column('created_at')->datetime()->index();
+            $table->timestamps();
 		});
 	}
 
