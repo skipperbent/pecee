@@ -45,6 +45,17 @@ class Table
     }
 
     /**
+     * Create timestamp columns
+     * @return static $this
+     */
+    public function timestamps()
+    {
+        $this->column('updated_at')->datetime()->nullable()->index();
+        $this->column('created_at')->datetime()->index();
+        return $this;
+    }
+
+    /**
      * @param $name
      * @return Column
      */
@@ -99,7 +110,7 @@ class Table
     {
         /* @var $column Column */
         foreach ($this->columns as $column) {
-            if (!$strict && strtolower($column->getName()) == strtolower($name) || $strict && $column->getName() == $name) {
+            if (($strict === true && $column->getName() === $name) || ($strict === false && strtolower($column->getName()) === strtolower($name))) {
                 return $column;
             }
         }
@@ -124,7 +135,7 @@ class Table
 
     public function setEngine($engine)
     {
-        if (!in_array($engine, self::$ENGINES)) {
+        if (in_array($engine, self::$ENGINES) === false) {
             throw new \InvalidArgumentException('Invalid or unsupported engine');
         }
         $this->engine = $engine;
@@ -207,6 +218,11 @@ class Table
         if ($this->exists()) {
             $this->drop();
         }
+    }
+
+    public function truncate()
+    {
+        Pdo::getInstance()->nonQuery('TRUNCATE TABLE `'. $this->name .'`;');
     }
 
     public function drop()
