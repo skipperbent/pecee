@@ -333,7 +333,7 @@ class Column
             }
 
             if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
-                $query .= sprintf(', FOREIGN KEY(%s) REFERENCES %s(`%s`) ON UPDATE %s ON DELETE %s',
+                $query .= sprintf(', FOREIGN KEY(`%s`) REFERENCES `%s`(`%s`) ON UPDATE %s ON DELETE %s',
                     $this->getName(),
                     $this->getRelationTable(),
                     $this->getRelationColumn(),
