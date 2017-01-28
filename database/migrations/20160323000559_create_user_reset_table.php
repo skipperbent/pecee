@@ -11,8 +11,7 @@ class CreateUserResetTable extends Migration
 			$table->column('id')->bigint()->primary()->increment();
 			$table->column('user_id')->bigint()->index()->relation('user', 'id');
 			$table->column('key')->string(32)->index();
-			$table->column('updated_at')->datetime()->nullable()->index();
-			$table->column('created_at')->datetime()->index();
+            $table->timestamps();
 		});
 	}
 
