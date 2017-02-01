@@ -196,7 +196,6 @@ class ModelUser extends ModelData
                 /* Refresh ticket */
                 static::createTicket($ticket[0]);
             }
-
         }
 
         return static::$instance;
@@ -265,7 +264,7 @@ class ModelUser extends ModelData
         static::onLoginStart($username, $password);
 
         /* @var $user ModelUser */
-        $user = static::instance()->select(['username', 'password'])->filterDeleted(false)->filterUsername($username)->first();
+        $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
 
         if ($user === null) {
             throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
