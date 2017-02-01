@@ -6,11 +6,7 @@ class ValidateBoolean extends ValidateInput
 
     public function validates()
     {
-        if ($this->input->getValue()) {
-            return ($this->input->getValue() == true || $this->input->getValue() == false);
-        }
-
-        return true;
+        return ($this->input->getValue() == true || $this->input->getValue() == false);
     }
 
     public function getError()

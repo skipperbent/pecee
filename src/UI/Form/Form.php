@@ -60,7 +60,9 @@ class Form
     {
         $element = new HtmlInput($name, 'radio', $value);
 
-        if ($saveValue && input()->get($name) !== null && input()->get($name) == $value) {
+        $inputValue = input()->get($name);
+
+        if ($saveValue === true && $inputValue !== null && $inputValue == $value) {
             $element->checked(true);
         }
 
@@ -82,7 +84,7 @@ class Form
             if ($defaultValue === null) {
                 $defaultValue = $value;
             } else {
-                $defaultValue = (count($_GET)) ? null : $defaultValue;
+                $defaultValue = count($_GET) ? null : $defaultValue;
             }
             $checked = Boolean::parse(input()->get($name, $defaultValue));
             if ($checked) {
@@ -105,7 +107,7 @@ class Form
      */
     public function label($inner, $for = null)
     {
-        $label = (new Html('label'));
+        $label = new Html('label');
 
         if ($inner !== null) {
             $label->addItem($inner);
@@ -121,9 +123,10 @@ class Form
     /**
      * Creates new HTML Select element
      * @param string $name
-     * @param Dataset $data
+     * @param array|Dataset|null $data
      * @param string|null $value
      * @param bool $saveValue
+     * @throws \InvalidArgumentException
      * @return \Pecee\UI\Html\HtmlSelect
      */
     public function selectStart($name, $data = null, $value = null, $saveValue = true)
@@ -138,7 +141,7 @@ class Form
                     $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
                 }
 
-            } elseif (is_array($data)) {
+            } elseif (is_array($data) === true) {
 
                 foreach ($data as $val => $key) {
                     $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || !$saveValue && $value == $val);

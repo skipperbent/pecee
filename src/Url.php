@@ -24,7 +24,17 @@ class Url
 
     public static function isValid($url)
     {
-        return (preg_match('/^(http|https):\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url) === 1);
+        return (preg_match('/^\w+:\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url) === 1);
+    }
+
+    /**
+     * Check if string is valid relative url
+     * @param string $url
+     * @return bool
+     */
+    public static function isValidRelative($url)
+    {
+        return !preg_match('/[^\w.-]/', $url);
     }
 
     public static function isValidHostname($hostname)

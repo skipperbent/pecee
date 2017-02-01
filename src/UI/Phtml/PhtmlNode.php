@@ -18,7 +18,7 @@ class PhtmlNode extends HtmlElement
         self::$closureCount++;
         $basis = self::$closureCount . Guid::create();
 
-        return "closure" . md5($basis);
+        return 'closure' . md5($basis);
     }
 
     public function isContainer()
@@ -125,7 +125,7 @@ class PhtmlNode extends HtmlElement
                     $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), $body);
                 }
             } else {
-                $str .= sprintf("</%s>", $this->getTag());
+                $str .= sprintf('</%s>', $this->getTag());
             }
         } else {
             if ($method) {
@@ -154,18 +154,18 @@ class PhtmlNode extends HtmlElement
 
     private function processEvals($phtml)
     {
-        return preg_replace('/%\{([^\}]*)\}/i', '<?=$1?>', $phtml);
+        return preg_replace('/%\{([^\}]*)\}/', '<?=$1?>', $phtml);
     }
 
     private function processAttrValue($val)
     {
-        if (preg_match('/<\?\=(.*)\?>/i', $val)) {
+        if (preg_match('/<\?\=(.*)\?>/', $val)) {
             //Remove php start/end tags that might have gotten here from %{} evaluations
-            $val = preg_replace('/<\?\=(.*)\?>/i', '$1', $val);
+            $val = preg_replace('/<\?\=(.*)\?>/', '$1', $val);
         } else {
             //Replace %{} with ".." - and trim if "".$expr."" exists
-            $val = preg_replace('/%\{([^\}]*)\}/i', '".$1."', '"' . $val . '"');
-            $val = preg_replace('/(""\.|\."")/i', '', $val);
+            $val = preg_replace('/%\{([^\}]*)\}/', '".$1."', '"' . $val . '"');
+            $val = preg_replace('/(""\.|\."")/', '', $val);
         }
 
         return str_replace('&quot;', '\\"', $val);

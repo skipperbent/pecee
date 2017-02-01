@@ -8,11 +8,7 @@ class ValidateEmail extends ValidateInput
 
     public function validates()
     {
-        if ($this->input->getValue()) {
-            return Str::isEmail($this->input->getValue());
-        }
-
-        return true;
+        return Str::isEmail($this->input->getValue());
     }
 
     public function getError()

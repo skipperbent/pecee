@@ -272,6 +272,11 @@ class Application
         return isset($this->parameters[$name]) ? $this->parameters[$name] : null;
     }
 
+    public function __isset($name)
+    {
+        return array_key_exists($name, $this->parameters);
+    }
+
     public function setEncryptionMethod($method)
     {
         $this->encryptionMethod = $method;

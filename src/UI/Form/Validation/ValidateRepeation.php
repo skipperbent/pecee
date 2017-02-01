@@ -3,7 +3,6 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateRepeation extends ValidateInput
 {
-
     protected $compareName;
     protected $compareValue;
     protected $caseSensitive;
@@ -17,15 +16,11 @@ class ValidateRepeation extends ValidateInput
 
     public function validates()
     {
-        if ($this->input->getValue()) {
-            if (!$this->caseSensitive) {
-                return (strtolower($this->compareValue) === strtolower($this->input->getValue()));
-            }
-
-            return ($this->compareValue === $this->input->getValue());
+        if ($this->caseSensitive === false) {
+            return (strtolower($this->compareValue) === strtolower($this->input->getValue()));
         }
 
-        return true;
+        return ($this->compareValue === $this->input->getValue());
     }
 
     public function getError()

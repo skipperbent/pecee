@@ -5,7 +5,6 @@ use Carbon\Carbon;
 
 class ValidateDate extends ValidateInput
 {
-
     protected $format;
 
     public function __construct($format = null)
@@ -15,7 +14,6 @@ class ValidateDate extends ValidateInput
 
     public function validates()
     {
-
         try {
             if ($this->format === null) {
                 Carbon::parse($this->input->getValue(), 'UTC');

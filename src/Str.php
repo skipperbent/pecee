@@ -17,12 +17,7 @@ class Str
     public static function substr($text, $maxLength, $end = '...', $encoding = 'UTF-8')
     {
         if (strlen($text) > $maxLength) {
-            $output = mb_substr($text, 0, $maxLength, $encoding);
-            if (strlen($text) > $maxLength) {
-                $output .= $end;
-            }
-
-            return $output;
+            return mb_substr($text, 0, $maxLength, $encoding) . $end;
         }
 
         return $text;
@@ -45,7 +40,7 @@ class Str
         $req = base64_decode($str);
         if ($req !== false) {
             $req = unserialize($req);
-            if ($req) {
+            if ($req !== false) {
                 return $req;
             }
         }

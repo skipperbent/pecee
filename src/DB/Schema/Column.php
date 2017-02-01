@@ -143,7 +143,7 @@ class Column
 
         return $this;
     }
-
+    
     public function increment()
     {
         $this->primary()->setIncrement(true);
@@ -315,7 +315,7 @@ class Column
         $query .= (!$this->getNullable()) ? 'NOT null' : 'null';
 
         if ($this->getDefaultValue()) {
-            $query .= PdoHelper::formatQuery(' DEFAULT %s', [$this->getDefaultValue()]);;
+            $query .= PdoHelper::formatQuery(' DEFAULT %s', [$this->getDefaultValue()]);
         }
 
         if ($this->getComment()) {

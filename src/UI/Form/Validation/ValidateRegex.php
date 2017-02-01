@@ -3,7 +3,7 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateRegex extends ValidateInput
 {
-
+    protected $allowEmpty = true;
     protected $regex;
     protected $errorMessage;
 

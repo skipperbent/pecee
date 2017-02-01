@@ -18,12 +18,14 @@ class ControllerWrap
         set_time_limit(60);
 
         $this->tmpDir = $_ENV['base_path'] . 'cache';
-        $this->files = (strpos(input()->get('files'), ',')) ? explode(',', input()->get('files')) : [input()->get('files')];
+        $this->files = strpos(input()->get('files'), ',') ? explode(',', input()->get('files')) : [input()->get('files')];
 
         $this->cacheFile = md5(urldecode(input()->get('files'))) . '.' . $this->getExtension();
 
-        if (!is_dir($this->tmpDir)) {
-            mkdir($this->tmpDir, 0755, true);
+        if (is_dir($this->tmpDir) === false) {
+            if(mkdir($this->tmpDir, 0755, true) === false) {
+                throw new \ErrorException('Failed to create temp-directory');
+            }
         }
     }
 
@@ -70,7 +72,7 @@ class ControllerWrap
 
         $exists = is_file($this->getTempFile());
 
-        if (!$this->debugMode() && $exists) {
+        if ($exists === true && $this->debugMode() === false) {
             $md5 = md5_file($this->getTempFile());
 
             // Set headers
@@ -97,11 +99,11 @@ class ControllerWrap
 
         if (count($this->files)) {
 
-            $handle = fopen($this->getTempFile(), 'w+');
+            $handle = fopen($this->getTempFile(), 'w+b+');
 
             if ($handle !== false) {
 
-                for ($i = 0; $i < count($this->files); $i++) {
+                for ($i = 0, $maxFiles = count($this->files); $i < $maxFiles; $i++) {
 
                     $file = $this->files[$i];
 
@@ -129,7 +131,7 @@ class ControllerWrap
                             $compressor->addContent($this->extension, $content);
                             $output = $compressor->minify(true);
 
-                            if ($output->minified && strlen($output->minified)) {
+                            if ($output->minified && $output->minified !== '') {
                                 $content = $output->minified;
                             }
                         }
