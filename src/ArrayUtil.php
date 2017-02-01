@@ -7,7 +7,7 @@ class ArrayUtil
     public static function filter(array $array, $allowEmpty = true)
     {
         foreach ($array as $key => $value) {
-            if ($value === null || empty($value) && $allowEmpty === false) {
+            if ($value === null || (empty($value) && $allowEmpty === false)) {
                 unset($array[$key]);
             }
         }
@@ -20,10 +20,9 @@ class ArrayUtil
         $count = count($arr); //total numbers in array
         $total = 0;
         foreach ($arr as $value) {
-            $total = ($total + $value); // total value of array numbers
+            $total += $value; // total value of array numbers
         }
-        $average = ($total / $count); // get average value
-        return $average;
+        return ($total / $count); // get average value
     }
 
     public static function toStdClass($array)
@@ -44,8 +43,8 @@ class ArrayUtil
     {
         $val = [];
         array_walk_recursive($arr, function ($v, $k) use ($key, &$val) {
-            if (is_null($key) || $k == $key) {
-                array_push($val, $v);
+            if ($k == $key || $key === null) {
+                $val[] = $v;
             }
         });
 
@@ -55,7 +54,7 @@ class ArrayUtil
     public static function append(&$array1, $array2)
     {
         foreach ($array2 as $key => $value) {
-            array_push($array1, $value);
+            $array1[] = $value;
         }
 
         return $array1;

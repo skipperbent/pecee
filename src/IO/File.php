@@ -72,12 +72,14 @@ class File
         if (is_dir($source)) {
 
             if (!is_dir($destination)) {
-                mkdir($destination, 0755, true);
+                if(mkdir($destination, 0755, true) === false) {
+                    throw new \ErrorException('Failed to create directory: ' . $destination);
+                }
             }
 
             $files = scandir($source);
             foreach ($files as $file) {
-                if (!in_array($file, ['.', '..'])) {
+                if (in_array($file, ['.', '..'], true) === false) {
                     static::move($source . '/' . $file, $destination . '/' . $file);
                 }
             }

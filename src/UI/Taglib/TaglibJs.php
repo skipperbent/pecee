@@ -26,14 +26,14 @@ class TaglibJs extends Taglib
 
     protected function handleInline($string)
     {
-        $string = str_replace('\\"', '"', str_replace("\\'", "'", $string));
-        $parts = preg_split('/[;\n]{1,2}/s', $string);
+        $string = str_replace('\\"', '"', str_replace("\\'", '\'', $string));
+        $parts = preg_split('/[;\n]{1,2}/', $string);
         if (count($parts) <= 1) {
             return "($string)";
         }
         $result = "";
-        for ($i = 0; $i < count($parts); $i++) {
-            $result .= ($i == (count($parts) - 1)) ? 'return ' . $parts[$i] . ";" : $parts[$i] . ";";
+        for ($i = 0, $max = count($parts); $i < $max; $i++) {
+            $result .= ($i == (count($parts) - 1)) ? 'return ' . $parts[$i] . ';' : $parts[$i] . ';';
         }
 
         return sprintf('(function(){%s})()', $result);
@@ -58,7 +58,7 @@ class TaglibJs extends Taglib
             $searchOffset = $offset + strlen($mText);
             $curlies = 1;
             $end = 0;
-            for ($i = $searchOffset; $i < strlen($string); $i++) {
+            for ($i = $searchOffset, $max = strlen($string); $i < $max; $i++) {
                 switch ($string[$i]) {
                     case '{':
                         $curlies++;
@@ -88,7 +88,7 @@ class TaglibJs extends Taglib
             }
 
             /* Now we replace the expression tags, with the fixed js expression */
-            for ($i = 0; $i < count($expressions); $i++) {
+            for ($i = 0, $max = count($expressions); $i < $max; $i++) {
                 $string = str_replace($expressions[$i]['raw'], $fixedExpressions[$i], $string);
             }
         }

@@ -29,7 +29,7 @@ class Router extends SimpleRouter
         parent::start();
 
         // Output debug info
-        if (env('DEBUG', false) && app()->hasAdminIp() && isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'true') {
+        if (isset($_GET['__debug']) && env('DEBUG', false) === true && strtolower($_GET['__debug']) === 'true' && app()->hasAdminIp()) {
             echo app()->debug;
         }
     }

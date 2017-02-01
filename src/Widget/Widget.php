@@ -188,6 +188,9 @@ abstract class Widget extends Base
         return '';
     }
 
+    /**
+     * @return string
+     */
     public function render()
     {
         $this->renderContent();

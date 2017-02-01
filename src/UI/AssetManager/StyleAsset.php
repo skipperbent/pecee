@@ -18,7 +18,7 @@ class StyleAsset extends Asset
         $compressor->addContent(YuiCompressor::TYPE_CSS, $contents);
         $output = $compressor->minify(true);
 
-        if ($output->minified && strlen($output->minified)) {
+        if ($output->minified && $output->minified !== '') {
             $contents = $output->minified;
         }
 

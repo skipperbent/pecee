@@ -6,7 +6,7 @@ use Pecee\Widget\Widget;
 class WidgetDebug extends Widget
 {
     protected $stack;
-    protected $group = null;
+    protected $group;
 
     public function __construct(array $stack)
     {

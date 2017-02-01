@@ -17,7 +17,7 @@ class CollectionItem implements \IteratorAggregate
     {
         $this->data = [];
         foreach ($arr as $key => $value) {
-            $this->__set($key, $value);
+            $this->$key = $value;
         }
     }
 
@@ -28,7 +28,7 @@ class CollectionItem implements \IteratorAggregate
 
     public function set($name, $value)
     {
-        $this->__set($name, $value);
+        $this->$name = $value;
     }
 
     public function __get($key)
@@ -41,6 +41,11 @@ class CollectionItem implements \IteratorAggregate
         $this->data[strtolower($key)] = $value;
     }
 
+    public function __isset($key)
+    {
+        return array_key_exists(strtolower($key), $this->data);
+    }
+
     public function getData()
     {
         return $this->data;
@@ -48,7 +53,7 @@ class CollectionItem implements \IteratorAggregate
 
     public function add($key, $value)
     {
-        $this->__set($key, $value);
+        $this->$key = $value;
     }
 
     public function remove($key)

@@ -5,14 +5,13 @@ use Pecee\Integer;
 
 class ValidateInteger extends ValidateInput
 {
-
-    public function validates()
+    public function validates($strict = true)
     {
-        if ($this->input->getValue()) {
+        if($strict === false) {
             return Integer::isNummeric($this->input->getValue());
         }
-
-        return true;
+        
+        return Integer::isInteger($this->input->getValue());
     }
 
     public function getError()

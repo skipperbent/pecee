@@ -5,7 +5,7 @@ use Pecee\Session\Session;
 
 class ValidateSession extends ValidateInput
 {
-
+    protected $allowEmpty = false;
     protected $sessionName;
 
     public function __construct($sessionName)
