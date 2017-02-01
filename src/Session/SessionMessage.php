@@ -41,13 +41,13 @@ class SessionMessage
     /**
      * Get messages
      * @param string|null $type
-     * @param object|null $default
-     * @return \Pecee\UI\Form\FormMessage|object
+     * @param mixed|null $defaultValue
+     * @return \Pecee\UI\Form\FormMessage|mixed
      */
-    public function get($type = null, $default = null)
+    public function get($type = null, $defaultValue = null)
     {
         if ($type !== null) {
-            return (isset($this->messages[$type])) ? $this->messages[$type] : $default;
+            return isset($this->messages[$type]) ? $this->messages[$type] : $defaultValue;
         }
 
         return $this->messages;

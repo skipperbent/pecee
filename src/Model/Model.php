@@ -33,7 +33,7 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static ModelCollection get()
  * @method static ModelCollection all()
  * @method static $this find(string $id)
- * @method static $this findOrfail(string $id)
+ * @method static $this findOrFail(string $id)
  * @method static $this first()
  * @method static $this firstOrFail()
  * @method static $this count()
@@ -141,7 +141,7 @@ abstract class Model implements \IteratorAggregate
      */
     public function save(array $data = null)
     {
-        if (!is_array($this->columns)) {
+        if (is_array($this->columns) === false) {
             throw new ModelException('Columns property not defined.');
         }
 
@@ -151,6 +151,12 @@ abstract class Model implements \IteratorAggregate
         }
 
         if ($data !== null) {
+
+            /* Only save valid columns */
+            $data = array_filter($data, function($key) {
+                return (in_array($key, $this->columns, true) === true);
+            }, ARRAY_FILTER_USE_KEY);
+
             $updateData = array_merge($updateData, $data);
         }
 
@@ -181,11 +187,11 @@ abstract class Model implements \IteratorAggregate
 
     public function delete()
     {
-        if (!is_array($this->columns)) {
+        if (is_array($this->columns) === false) {
             throw new ModelException('Columns property not defined.');
         }
 
-        if ($this->{$this->primary} != null) {
+        if ($this->{$this->primary} !== null) {
             $this->queryable->where($this->primary, '=', $this->{$this->primary});
         }
 
@@ -198,7 +204,7 @@ abstract class Model implements \IteratorAggregate
             return false;
         }
 
-        $id = $this->instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
+        $id = static::instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
 
         if ($id !== null) {
             $this->{$this->primary} = $id->{$this->primary};
@@ -245,7 +251,7 @@ abstract class Model implements \IteratorAggregate
      */
     public function getRows()
     {
-        return (isset($this->results['rows'])) ? $this->results['rows'] : [];
+        return isset($this->results['rows']) ? $this->results['rows'] : [];
     }
 
     public function setResults($results)
@@ -265,12 +271,17 @@ abstract class Model implements \IteratorAggregate
 
     public function __get($name)
     {
-        return (isset($this->results['rows'][$name])) ? $this->results['rows'][$name] : null;
+        return isset($this->results['rows'][$name]) ? $this->results['rows'][$name] : null;
     }
 
     public function __set($name, $value)
     {
         $this->results['rows'][strtolower($name)] = $value;
+    }
+
+    public function __isset($name)
+    {
+        return array_key_exists(strtolower($name), $this->results['rows']);
     }
 
     public function getPrimary()
@@ -288,9 +299,9 @@ abstract class Model implements \IteratorAggregate
 
             return $out;
         }
-        $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
 
-        return (Integer::isInteger($data)) ? intval($data) : $data;
+        $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
+        return Integer::isInteger($data) ? (int)$data : $data;
     }
 
     protected function orderArrayRows(array &$rows)
@@ -321,11 +332,11 @@ abstract class Model implements \IteratorAggregate
         if (count($this->getResults()) === 1) {
             foreach ($this->with as $with) {
                 $method = Str::camelize($with);
-                if (!method_exists($this, $method)) {
+                if (method_exists($this, $method) === false) {
                     throw new ModelException('Missing required method ' . $method);
                 }
-                $output = call_user_func([$this, $method]);
-                $with = (isset($this->rename[$with])) ? $this->rename[$with] : $with;
+                $output = $this->$method();
+                $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
                 $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
             }
 

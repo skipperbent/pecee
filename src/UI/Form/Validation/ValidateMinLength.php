@@ -3,7 +3,6 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateMinLength extends ValidateInput
 {
-
     protected $minimumLength;
 
     public function __construct($minimumLength = 5)
@@ -13,11 +12,7 @@ class ValidateMinLength extends ValidateInput
 
     public function validates()
     {
-        if ($this->input->getValue()) {
-            return ((strlen($this->input->getValue()) > $this->minimumLength));
-        }
-
-        return true;
+        return (strlen($this->input->getValue()) > $this->minimumLength);
     }
 
     public function getError()

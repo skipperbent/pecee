@@ -14,7 +14,7 @@ abstract class Queue
 
     abstract public function process($job, $data);
 
-    abstract function send(array $data = []);
+    abstract public function send(array $data = []);
 
     /**
      * @return string

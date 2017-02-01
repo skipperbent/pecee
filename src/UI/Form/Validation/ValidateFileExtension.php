@@ -1,12 +1,8 @@
 <?php
 namespace Pecee\UI\Form\Validation;
 
-use Pecee\Http\Input\InputFile;
-use Pecee\IO\File;
-
 class ValidateFileExtension extends ValidateFile
 {
-
     protected $extensions;
 
     public function __construct(array $extensions)
@@ -16,12 +12,7 @@ class ValidateFileExtension extends ValidateFile
 
     public function validates()
     {
-
-        if (!($this->input instanceof InputFile)) {
-            return true;
-        }
-
-        return (in_array(File::getExtension($this->input->getName()), $this->extensions));
+        return in_array($this->input->getExtension(), array_map('strtolower', $this->extensions), false);
     }
 
     public function getError()

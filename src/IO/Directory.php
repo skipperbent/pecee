@@ -10,15 +10,17 @@ class Directory
         $dir = opendir($source);
 
         if (!is_dir($destination)) {
-            mkdir($destination, 0755, true);
+            if(mkdir($destination, 0755, true) === false) {
+                throw new \ErrorException('Failed to create directory: ' . $destination);
+            }
         }
 
         while (($file = readdir($dir)) !== false) {
-            if (!in_array($file, ['.', '..'])) {
+            if (in_array($file, ['.', '..'], true) === false) {
                 if (is_dir($source . '/' . $file)) {
                     static::copy($source . '/' . $file, $destination . '/' . $file);
                 } else {
-                    if ($overwrite === true || $overwrite === false && is_file($destination . '/' . $file) === false) {
+                    if ($overwrite === true || ($overwrite === false && is_file($destination . '/' . $file) === false)) {
                         copy($source . '/' . $file, $destination . '/' . $file);
                     }
                 }

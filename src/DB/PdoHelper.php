@@ -29,12 +29,12 @@ class PdoHelper
                 if (is_null($arg)) {
                     $a[] = 'null';
                 } elseif (Integer::isInteger($arg)) {
-                    $a[] = sprintf("%s", self::escape($arg));
+                    $a[] = sprintf('%s', self::escape($arg));
                 } else {
-                    $a[] = sprintf("'%s'", self::escape($arg));
+                    $a[] = sprintf('\'%s\'', self::escape($arg));
                 }
             }
-            if (count($a) > 0 && $query) {
+            if ($query && count($a) > 0) {
                 return vsprintf($query, $a);
             }
         }

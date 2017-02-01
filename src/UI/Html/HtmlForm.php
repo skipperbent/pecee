@@ -53,6 +53,11 @@ class HtmlForm extends Html
         return $this;
     }
 
+    public function fileUpload()
+    {
+        return $this->enctype(static::ENCTYPE_FORM_DATA);
+    }
+
     public function action($action)
     {
         return $this->attr('action', $action);

@@ -50,7 +50,9 @@ abstract class WidgetTaglib extends Widget
         try {
 
             if (!is_dir($this->_pHtmlCacheDir)) {
-                mkdir($this->_pHtmlCacheDir, 0755, true);
+                if(mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
+                    throw new \ErrorException('Failed to create temp-cache directory');
+                }
             }
 
             $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
@@ -59,7 +61,7 @@ abstract class WidgetTaglib extends Widget
 
             $this->_contentHtml = $output;
 
-            $handle = fopen($cacheFile, 'w+');
+            $handle = fopen($cacheFile, 'w+b+');
             fwrite($handle, $this->_contentHtml);
             fclose($handle);
 

@@ -3,7 +3,6 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateNotEqual extends ValidateInput
 {
-
     protected $value;
     protected $strict;
     protected $error;
@@ -16,26 +15,18 @@ class ValidateNotEqual extends ValidateInput
 
     public function validates()
     {
-        if ($this->input->getValue()) {
-            $value = $this->input->getValue();
-            if (!$this->strict) {
-                $value = strtolower($value);
-                $this->value = strtolower($this->value);
-            }
-
-            if ($value === $this->value) {
-                $this->error = lang('%s is required', $this->input->getName());
-
-                return false;
-            }
+        $value = $this->input->getValue();
+        if ($this->strict === false) {
+            $value = strtolower($value);
+            $this->value = strtolower($this->value);
         }
 
-        return true;
+        return $value !== $this->value;
     }
 
     public function getError()
     {
-        return $this->error;
+        return lang('%s is required', $this->input->getName());
     }
 
 }

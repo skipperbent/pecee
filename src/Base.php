@@ -64,8 +64,7 @@ abstract class Base
     {
         if ($validation !== null) {
             foreach ($validation as $key => $validations) {
-
-                if (!is_array($validations)) {
+                if (is_array($validations) === false) {
                     $validations = [$validations];
                 }
 
@@ -86,11 +85,11 @@ abstract class Base
 
                 if (is_array($input)) {
                     foreach ($input as $i) {
-                        if ($validation === '') {
+                        if ($validation === null || $validation === '') {
                             continue;
                         }
                         $validation->setInput($i);
-                        if (!$validation->validates()) {
+                        if ($validation->runValidation() === false) {
                             $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $i->getIndex());
                         }
                     }
@@ -99,7 +98,7 @@ abstract class Base
                         continue;
                     }
                     $validation->setInput($input);
-                    if (!$validation->validates()) {
+                    if ($validation->runValidation() === false) {
                         $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
                     }
                 }
@@ -267,10 +266,8 @@ abstract class Base
                     $input = input()->findGet($index);
                 }
 
-                if ($input !== null) {
-                    if ($message->getIndex() === $input->getIndex()) {
-                        return $message->getMessage();
-                    }
+                if ($input !== null && $message->getIndex() === $input->getIndex()) {
+                    return $message->getMessage();
                 }
             }
         }

@@ -5,7 +5,6 @@ use Pecee\Integer;
 
 class ValidateMaxValue extends ValidateInput
 {
-
     protected $maxValue;
     protected $error;
 
@@ -16,18 +15,16 @@ class ValidateMaxValue extends ValidateInput
 
     public function validates()
     {
-        if ($this->input->getValue()) {
-            if (!Integer::isInteger($this->input->getValue())) {
-                $this->error = lang('%s is not a valid number', $this->input->getName());
-            }
-            if ($this->input->getValue() > $this->maxValue) {
-                $this->error = lang('%s cannot be greater than %s', $this->input->getName(), $this->maxValue);
-            }
-
-            return !($this->error);
+        if (Integer::isInteger($this->input->getValue()) === false) {
+            $this->error = lang('%s is not a valid number', $this->input->getName());
         }
 
-        return true;
+        if ($this->input->getValue() > $this->maxValue) {
+            $this->error = lang('%s cannot be greater than %s', $this->input->getName(), $this->maxValue);
+        }
+
+        return ($this->error !== null);
+
     }
 
     public function getError()

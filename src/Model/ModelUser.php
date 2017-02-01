@@ -50,7 +50,7 @@ class ModelUser extends ModelData
     {
         if ($this->{$this->primary} === null) {
             $user = $this->instance()->filterUsername($this->username)->first();
-            if ($user != null && $user->id != $this->id) {
+            if ($user !== null && $user->id !== $this->id) {
                 throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
             }
         }
@@ -265,14 +265,14 @@ class ModelUser extends ModelData
         static::onLoginStart($username, $password);
 
         /* @var $user ModelUser */
-        $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
+        $user = static::instance()->select(['username', 'password'])->filterDeleted(false)->filterUsername($username)->first();
 
         if ($user === null) {
             throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
         }
 
         // Incorrect user login.
-        if (strtolower($user->username) != strtolower($username) || password_verify($password, $user->password) === false) {
+        if (password_verify($password, $user->password) === false || strtolower($user->username) !== strtolower($username)) {
             static::onLoginFailed($user);
             throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
         }
@@ -285,7 +285,7 @@ class ModelUser extends ModelData
 
     public function auth()
     {
-        return static::authenticate($this->username, $this->password, false);
+        return static::authenticate($this->username, $this->password);
     }
 
     /**

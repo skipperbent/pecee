@@ -55,7 +55,7 @@ class Phtml
         $this->phtmlRaw = $string;
         $this->lineCount = 1;
         $ignoredAscii = [10, 13, ord("\t"), ord(" ")];
-        for ($i = 0; $i < mb_strlen($string); $i++) {
+        for ($i = 0, $max = mb_strlen($string); $i < $max; $i++) {
             $chr = mb_substr($string, $i, 1);
             $this->charCount++;
             $this->prevChar = null;
@@ -77,7 +77,7 @@ class Phtml
                         $this->pushWithin(self::PHP);
                         break;
                     }
-                    if (!$this->ignoreAll() && $this->nextChar == '/') {
+                    if ($this->nextChar == '/' && !$this->ignoreAll()) {
                         $this->ignoreChars = true;
                         $this->pushWithin(self::TAGEND);
                         $this->getNode()->setContainer(true);
@@ -133,7 +133,7 @@ class Phtml
                         break;
                     }
                 case '}':
-                    if ($this->isWithin(self::P_EVAL) && $this->lastChar != '\\') {
+                    if ($this->lastChar != '\\' && $this->isWithin(self::P_EVAL)) {
                         $this->popWithin();
                         break;
                     }
@@ -342,7 +342,7 @@ class Phtml
 
     protected function pushWithin($within)
     {
-        array_push($this->withinStack, $within);
+        $this->withinStack[] = $within;
     }
 
     protected function pushBefore($within)
@@ -412,7 +412,7 @@ class Phtml
                 $tag = $endTag;
             } else {
                 list($ns, $tag) = explode(':', $endTag);
-            };
+            }
 
             if (strtolower($this->getNode()->getTag()) != strtolower($tag) ||
                 strtolower($this->getNode()->getNs()) != strtolower($ns)

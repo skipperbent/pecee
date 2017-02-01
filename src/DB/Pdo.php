@@ -30,7 +30,7 @@ class Pdo
         return self::$instance;
     }
 
-    public function __construct($connectionString, $username, $password)
+    protected function __construct($connectionString, $username, $password)
     {
         $this->connection = new \PDO($connectionString, $username, $password);
         $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -50,12 +50,11 @@ class Pdo
      *
      * @param string $query
      * @param array|null $parameters
-     * @return \PDOStatement
+     * @return \PDOStatement|null
      * @throws \PdoException
      */
     public function query($query, array $parameters = null)
     {
-
         $query = $this->connection->prepare($query);
         $inputParameters = null;
 
