@@ -5,8 +5,7 @@ use Pecee\Model\Model;
 
 class UserData extends Model
 {
-
-    const USER_IDENTIFIER_KEY = 'user_id';
+    const IDENTIFIER_KEY = 'user_id';
 
     protected $timestamps = false;
 
@@ -24,7 +23,7 @@ class UserData extends Model
         parent::__construct();
 
         $this->columns = array_merge($this->columns, [
-            static::USER_IDENTIFIER_KEY,
+            static::IDENTIFIER_KEY,
         ]);
 
         $this->user_id = $userId;
@@ -38,16 +37,16 @@ class UserData extends Model
             return false;
         }
 
-        return ($this->where('key', '=', $this->key)->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->first() !== null);
+        return ($this->where('key', '=', $this->key)->where(static::IDENTIFIER_KEY, '=', $this->{static::IDENTIFIER_KEY})->first() !== null);
     }
 
     public static function destroyByIdentifier($identifierId)
     {
-        static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->delete();
+        static::where(static::IDENTIFIER_KEY, '=', $identifierId)->delete();
     }
 
     public static function getByIdentifier($identifierId)
     {
-        return static::where(static::USER_IDENTIFIER_KEY, '=', $identifierId)->all();
+        return static::where(static::IDENTIFIER_KEY, '=', $identifierId)->all();
     }
 }

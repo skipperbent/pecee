@@ -6,7 +6,6 @@ use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData
 {
-
     protected $table = 'file';
 
     protected $columns = [
@@ -60,12 +59,6 @@ class ModelFile extends ModelData
     protected function getDataClass()
     {
         return FileData::class;
-    }
-
-    protected function onNewDataItemCreate(Model &$field)
-    {
-        $field->file_id = $this->id;
-        parent::onNewDataItemCreate($field);
     }
 
     protected function fetchData()

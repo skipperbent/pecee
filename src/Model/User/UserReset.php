@@ -5,8 +5,7 @@ use Pecee\Model\Model;
 
 class UserReset extends Model
 {
-
-    const USER_IDENTIFIER_KEY = 'user_id';
+    const IDENTIFIER_KEY = 'user_id';
 
     protected $table = 'user_reset';
 
@@ -20,15 +19,15 @@ class UserReset extends Model
 
         parent::__construct();
 
-        $this->columns = array_merge($this->columns, [static::USER_IDENTIFIER_KEY]);
+        $this->columns = array_merge($this->columns, [static::IDENTIFIER_KEY]);
 
-        $this->{static::USER_IDENTIFIER_KEY} = $userId;
+        $this->{static::IDENTIFIER_KEY} = $userId;
         $this->key = md5(uniqid());
     }
 
     public function clean()
     {
-        $this->where(static::USER_IDENTIFIER_KEY, '=', $this->{static::USER_IDENTIFIER_KEY})->delete();
+        $this->where(static::IDENTIFIER_KEY, '=', $this->{static::IDENTIFIER_KEY})->delete();
     }
 
     public function save(array $data = null)
@@ -53,7 +52,7 @@ class UserReset extends Model
             $reset->clean();
             $reset->delete();
 
-            return $reset->{static::USER_IDENTIFIER_KEY};
+            return $reset->{static::IDENTIFIER_KEY};
         }
 
         return false;
@@ -61,7 +60,7 @@ class UserReset extends Model
 
     public function getIdentifier()
     {
-        return $this->{static::USER_IDENTIFIER_KEY};
+        return $this->{static::IDENTIFIER_KEY};
     }
 
     public function getKey()

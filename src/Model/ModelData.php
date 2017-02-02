@@ -5,7 +5,6 @@ use Pecee\Collection\CollectionItem;
 
 abstract class ModelData extends Model
 {
-
     public $data;
 
     protected $dataKeyField = 'key';
@@ -21,8 +20,9 @@ abstract class ModelData extends Model
 
     abstract protected function fetchData();
 
-    protected function onNewDataItemCreate(Model &$field)
+    protected function onNewDataItemCreate(Model $field)
     {
+        $field->{$field::IDENTIFIER_KEY} = $this->{$this->primary};
         $field->save();
     }
 

@@ -5,11 +5,11 @@ use Pecee\UI\Html\Html;
 
 class Menu
 {
-
     protected $items = [];
     protected $attributes = [];
     protected $content = [];
     protected $class;
+    protected $parent;
 
     public function getItems()
     {
@@ -19,16 +19,16 @@ class Menu
     /**
      * Get active tab by index.
      * @param int $index
-     * @return \Pecee\UI\Menu\MenuItems
+     * @return \Pecee\UI\Menu\MenuItem
      */
     public function getItem($index)
     {
-        return ($this->hasItem($index)) ? $this->items[$index] : null;
+        return $this->hasItem($index) ? $this->items[$index] : null;
     }
 
     /**
      * Returns first item.
-     * @return \Pecee\UI\Menu\MenuItems|null
+     * @return \Pecee\UI\Menu\MenuItem|null
      */
     public function getFirst()
     {
@@ -41,7 +41,7 @@ class Menu
 
     /**
      * Returns last item.
-     * @return \Pecee\UI\Menu\MenuItems|null
+     * @return \Pecee\UI\Menu\MenuItem|null
      */
     public function getLast()
     {
@@ -60,7 +60,7 @@ class Menu
 
     public function hasItems()
     {
-        return (count($this->items));
+        return count($this->items);
     }
 
     /**
@@ -93,15 +93,14 @@ class Menu
     /**
      * Add new item
      *
-     * @param string $title
-     * @param string $value
-     * @param string|null $description
-     * @return \Pecee\UI\Menu\MenuItems
+     * @param string $name
+     * @param string $url
+     * @return \Pecee\UI\Menu\MenuItem
      */
-    public function addItem($title, $value, $description = null)
+    public function addItem($name, $url)
     {
-        $item = new MenuItems();
-        $item->addItem($title, $value, $description);
+        $item = new MenuItem($name, $url);
+        $item->setParent($this);
         $this->items[] = $item;
 
         return $item;
@@ -110,37 +109,20 @@ class Menu
     /**
      * Add new item
      *
-     * @param \Pecee\UI\Menu\MenuItems $item
-     * @return \Pecee\UI\Menu\MenuItems
+     * @param \Pecee\UI\Menu\MenuItem $item
+     * @return static
      */
-    public function addItemObject(MenuItems $item)
+    public function addMenuItem(MenuItem $item)
     {
         $this->items[] = $item;
 
-        return $item;
-    }
-
-    /**
-     * Add new item to given index
-     * @param int $index
-     * @param string $title
-     * @param string $value
-     * @param string|null $description
-     * @return \Pecee\UI\Menu\MenuItems
-     */
-    public function addItemToIndex($index, $title, $value, $description = null)
-    {
-        $item = new MenuItems();
-        $item->addItem($title, $value, $description);
-        $this->items[$index] = $item;
-
-        return $item;
+        return $this;
     }
 
     /**
      * Set item-class
      * @param string $name
-     * @return \Pecee\UI\Menu\Menu
+     * @return static
      */
     public function setClass($name)
     {
@@ -151,7 +133,11 @@ class Menu
 
     public function addAttribute($name, $value)
     {
-        $this->attributes[$name] = $value;
+        if (isset($this->attributes[$name])) {
+            $this->attributes[$name][] = $value;
+        } else {
+            $this->attributes[$name] = [$value];
+        }
 
         return $this;
     }
@@ -168,16 +154,110 @@ class Menu
         return $this;
     }
 
-    protected function getAttributes($attributes)
+    public function getAttributes()
     {
-        if (is_array($attributes) && count($attributes)) {
-            $out = [];
-            /* Run through each attribute */
-            foreach ($attributes as $attr => $v) {
-                $out[] = ' ' . $attr . '="' . $v . '"';
+        return $this->attributes;
+    }
+
+    /**
+     * Set parent menu-item
+     *
+     * @param MenuItem $parent
+     * @return static
+     */
+    public function setParent(MenuItem $parent)
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * Get parent menu-item
+     * @return MenuItem|null
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    public function findItemByUrl($url, $strict = false, $recursive = true)
+    {
+        /* @var $item MenuItem */
+        foreach ($this->items as $item) {
+
+            if ($recursive === true) {
+                $subMenu = $item->getMenu();
+
+                if ($subMenu !== null) {
+                    $subItem = $subMenu->findItemByUrl($url, $strict, $recursive);
+                    if ($subItem !== null) {
+                        return $subItem;
+                    }
+                }
             }
 
-            return join('', $out);
+            if ($strict === true) {
+                if (rtrim($item->getUrl(), '/') === rtrim($url, '/')) {
+                    return $item;
+                }
+            } else {
+                if (false !== strstr(rtrim($url, '/'), rtrim($item->getUrl(), '/'))) {
+                    return $item;
+                }
+            }
+
+        }
+
+        return null;
+    }
+
+    public function findItemByAttribute($name, $value, $strict = false, $recursive = true)
+    {
+        /* @var $item MenuItem */
+        foreach ($this->items as $item) {
+
+            if ($recursive === true) {
+                $subMenu = $item->getMenu();
+
+                if ($subMenu !== null) {
+                    $subItem = $subMenu->findItemByAttribute($name, $value, $strict, $recursive);
+                    if ($subItem !== null) {
+                        return $subItem;
+                    }
+                }
+            }
+
+            $attributes = $item->getAttributes();
+
+            if ($attributes !== null && isset($attributes[$name])) {
+
+                if ($strict === true) {
+                    if (in_array($value, $attributes[$name], true) === true) {
+                        return $item;
+                    }
+                } else {
+                    if (stripos($attributes[$name], $value) !== false) {
+                        return $item;
+                    }
+                }
+
+            }
+        }
+
+        return null;
+    }
+
+    protected function formatAttributes(array $attributes)
+    {
+        if (count($attributes)) {
+            $output = ' ';
+            /* Run through each attribute */
+            foreach ($attributes as $name => $value) {
+                $output .= $name . '="' . join(' ', $value) . '"';
+            }
+
+            return $output;
         }
 
         return '';
@@ -189,50 +269,47 @@ class Menu
      */
     public function __toString()
     {
-        $o = [];
+        $o = '';
         if (count($this->items)) {
 
-            $o[] = '<ul' . (($this->class) ? ' class="' . $this->class . '"' : '');
+            $o .= '<ul' . ($this->class ? ' class="' . $this->class . '"' : '');
 
             if (count($this->attributes)) {
-                $o[] = $this->getAttributes($this->attributes);
+                $o .= $this->formatAttributes($this->attributes);
             }
 
-            $o[] = '>';
+            $o .= '>';
 
-            /* @var $item MenuItems */
-            foreach ($this->items as $item) {
-                foreach ($item->getItems() as $key => $i) {
-                    /* Write html */
-                    $o[] = sprintf('<li%1$s><a href="%2$s" title="%4$s"%5$s>%3$s</a>',
-                        $this->getAttributes($i['attributes']),
-                        $i['value'],
-                        $i['title'],
-                        htmlspecialchars($i['description']),
-                        $this->getAttributes($i['linkAttributes']));
+            /* @var $menuItem MenuItem */
+            foreach ($this->items as $key => $menuItem) {
+                /* Write html */
 
-                    if (isset($i['content']) && is_array($i['content'])) {
-                        /* @var $c static */
-                        foreach ($i['content'] as $c) {
-                            $o[] = $c->__toString();
-                        }
-                    }
+                $o .= '<li' . $this->formatAttributes($menuItem->getAttributes()) . '><a href="' . $menuItem->getUrl() . '"' .
+                    $this->formatAttributes($menuItem->getLinkAttributes()) . '>' .
+                    htmlspecialchars($menuItem->getName()) . '</a>';
 
-                    if (isset($i['menu'])) {
-                        $o[] = $i['menu']->__toString();
-                    }
+                $inner = $menuItem->getInnerContent();
 
-                    if (isset($this->content[$key]) > 0) {
-                        $o[] = $this->content[$key]->__toString();
-                    }
-
-                    $o[] = '</li>';
+                if ($inner !== null) {
+                    $o .= $inner;
                 }
+
+                $menu = $menuItem->getMenu();
+
+                if ($menu !== null) {
+                    $o .= $menu->__toString();
+                }
+
+                if (isset($this->content[$key])) {
+                    $o .= $this->content[$key]->__toString();
+                }
+
+                $o .= '</li>';
             }
 
-            $o[] = '</ul>';
+            $o .= '</ul>';
 
-            return join('', $o);
+            return $o;
         }
 
         return '';
