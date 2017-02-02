@@ -1,8 +1,6 @@
 <?php
 namespace Pecee\UI\Html;
 
-use Pecee\Widget\Widget;
-
 class Html
 {
 
@@ -22,7 +20,7 @@ class Html
 
     /**
      * @param array $html
-     * @return self
+     * @return static
      */
     public function setInnerHtml(array $html)
     {
@@ -36,11 +34,6 @@ class Html
         $this->innerHtml[] = $html;
 
         return $this;
-    }
-
-    public function addWidget(Widget $widget)
-    {
-        return $this->addInnerHtml($widget->__toString());
     }
 
     public function addItem($htmlItem)
@@ -61,7 +54,7 @@ class Html
      */
     public function replaceAttribute($name, $value = '')
     {
-        $this->attributes[$name] = [$value];
+        $this->attributes[$name] = array($value);
 
         return $this;
     }
@@ -75,15 +68,10 @@ class Html
      */
     public function addAttribute($name, $value = '')
     {
-        if (!isset($this->attributes[$name])) {
-            $this->attributes[$name] = [$value];
-        } else {
-            foreach ($this->attributes[$name] as $val) {
-                if ($val === $value) {
-                    return $this;
-                }
-            }
+        if (isset($this->attributes[$name]) && in_array($value, $this->attributes[$name], true) === false) {
             $this->attributes[$name][] = $value;
+        } else {
+            $this->attributes[$name] = [$value];
         }
 
         return $this;
@@ -133,11 +121,7 @@ class Html
             }
         }
 
-        $output .= '>' . join('', $this->innerHtml);
-
-        $output .= (($this->closingType == self::CLOSE_TYPE_TAG) ? sprintf('</%s>', $this->tag) : '');
-
-        return $output;
+        return $output . '>' . join('', $this->innerHtml) . (($this->closingType === self::CLOSE_TYPE_TAG) ? '</' . $this->tag . '>' : '');
     }
 
     /**
@@ -181,7 +165,7 @@ class Html
 
     public function getAttribute($name)
     {
-        return (isset($this->attributes[$name]) ? $this->attributes[$name] : null);
+        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
 
     public function getAttributes()
