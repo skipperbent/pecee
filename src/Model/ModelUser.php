@@ -62,12 +62,6 @@ class ModelUser extends ModelData
         return static::getUserDataClass();
     }
 
-    protected function onNewDataItemCreate(Model &$data)
-    {
-        $data->{$data::USER_IDENTIFIER_KEY} = $this->id;
-        parent::onNewDataItemCreate($data);
-    }
-
     protected function fetchData()
     {
         $class = static::getUserDataClass();
