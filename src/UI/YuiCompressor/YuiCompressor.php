@@ -30,7 +30,7 @@ class YuiCompressor
 
     public function __construct()
     {
-        $this->jarFile = $_ENV['framework_path'] . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'yuicompressor-2.4.8.jar';
+        $this->jarFile = env('framework_path') . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'yuicompressor-2.4.8.jar';
         $this->tempDir = sys_get_temp_dir();
     }
 

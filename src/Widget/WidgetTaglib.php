@@ -13,7 +13,7 @@ abstract class WidgetTaglib extends Widget
         parent::__construct();
 
         $this->getSite()->addWrappedJs('pecee-widget.js');
-        $this->_pHtmlCacheDir = $_ENV['base_path'] . 'cache/phtml';
+        $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }
 
     public function render()
