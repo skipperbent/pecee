@@ -7,7 +7,7 @@ class ArrayUtil
     public static function filter(array $array, $allowEmpty = true)
     {
         foreach ($array as $key => $value) {
-            if ($value === null || (empty($value) && $allowEmpty === false)) {
+            if ($value === null || ($allowEmpty === false && trim($value) === false)) {
                 unset($array[$key]);
             }
         }
