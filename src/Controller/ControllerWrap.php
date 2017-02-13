@@ -17,7 +17,7 @@ class ControllerWrap
         // Set time limit
         set_time_limit(60);
 
-        $this->tmpDir = $_ENV['base_path'] . 'cache';
+        $this->tmpDir = env('base_path') . 'cache';
         $this->files = strpos(input()->get('files'), ',') ? explode(',', input()->get('files')) : [input()->get('files')];
 
         $this->cacheFile = md5(urldecode(input()->get('files'))) . '.' . $this->getExtension();
@@ -118,7 +118,7 @@ class ControllerWrap
 
                     // Try resources folder
                     if ($content !== null) {
-                        $filePath = $_ENV['base_path'] . '/resources/' . $this->getExtension() . '/' . $file;
+                        $filePath = env('base_path') . '/resources/' . $this->getExtension() . '/' . $file;
                         if (is_file($filePath)) {
                             $content = file_get_contents($filePath);
                         }
