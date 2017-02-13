@@ -24,7 +24,7 @@ class WidgetDebug extends Widget
         $path = explode('\\', get_class($this));
         $path = array_slice($path, 2);
 
-        return $_ENV['framework_path'] . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return env('framework_path') . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     /**

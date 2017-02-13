@@ -5,14 +5,13 @@ use Pecee\Exceptions\TranslationException;
 
 class XmlTranslateProvider implements ITranslationProvider
 {
-
     protected $locale;
     protected $xml;
     protected $dir;
 
     public function __construct()
     {
-        $this->dir = env('XML_TRANSLATION_DIR', '../lang');
+        $this->dir = env('XML_TRANSLATION_DIR', env('base_path') . '/lang');
     }
 
     public function lookup($key)
@@ -24,9 +23,9 @@ class XmlTranslateProvider implements ITranslationProvider
             $children = explode('.', $key);
             foreach ($children as $i => $child) {
                 if ($i === 0) {
-                    $node = (isset($xml->$child) ? $xml->$child : null);
+                    $node = isset($xml->$child) ? $xml->$child : null;
                 } else {
-                    $node = (isset($node->$child) ? $node->$child : null);
+                    $node = isset($node->$child) ? $node->$child : null;
                 }
             }
         } else {
