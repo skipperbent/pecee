@@ -56,6 +56,29 @@ abstract class Widget extends Base
         return '';
     }
 
+    public function showFlash($placement = null)
+    {
+        $o = $this->showMessages($this->errorType, $placement);
+        $o .= $this->showMessages('warning', $placement);
+        $o .= $this->showMessages('info', $placement);
+        $o .= $this->showMessages('success', $placement);
+
+        return $o;
+    }
+
+    public function validationFor($name)
+    {
+        if (parent::validationFor($name)) {
+            $span = new Html('span');
+            $span->addClass('msg error');
+            $span->addInnerHtml(parent::validationFor($name));
+
+            return $span;
+        }
+
+        return '';
+    }
+
     /**
      * @return string
      */
