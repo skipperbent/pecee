@@ -46,17 +46,6 @@ class ModelUser extends ModelData
         $this->last_activity = Carbon::now();
     }
 
-    public function save(array $data = null)
-    {
-        if ($this->{$this->primary} === null) {
-            $user = $this->instance()->filterUsername($this->username)->first();
-            if ($user !== null && $user->id !== $this->id) {
-                throw new UserException(sprintf('The username %s already exists', $this->data->username), static::ERROR_TYPE_EXISTS);
-            }
-        }
-        parent::save($data);
-    }
-
     protected function getDataClass()
     {
         return static::getUserDataClass();
@@ -143,7 +132,13 @@ class ModelUser extends ModelData
 
     public function exist()
     {
-        return $this->filterUsername($this->username)->filterDeleted(false)->first();
+        if ($this->{$this->primary} === null) {
+            $user = $this->instance()->filterUsername($this->username)->first();
+            if ($user !== null && $user->id !== $this->id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function registerActivity()
@@ -257,7 +252,7 @@ class ModelUser extends ModelData
     {
         static::onLoginStart($username, $password);
 
-        /* @var $user ModelUser */
+        /* @var $user static */
         $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
 
         if ($user === null) {
@@ -265,7 +260,7 @@ class ModelUser extends ModelData
         }
 
         // Incorrect user login.
-        if (password_verify($password, $user->password) === false || strtolower($user->username) !== strtolower($username)) {
+        if (password_verify($password, $user->password) === false && strtolower($user->username) !== strtolower($username)) {
             static::onLoginFailed($user);
             throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
         }
@@ -278,7 +273,7 @@ class ModelUser extends ModelData
 
     public function auth()
     {
-        return static::authenticate($this->username, $this->password);
+        return $this->signIn();
     }
 
     /**
@@ -290,12 +285,12 @@ class ModelUser extends ModelData
     }
 
     // Events
-    protected static function onLoginFailed(ModelUser $user)
+    protected static function onLoginFailed(self $user)
     {
         UserBadLogin::track($user->username);
     }
 
-    protected static function onLoginSuccess(ModelUser $user)
+    protected static function onLoginSuccess(self $user)
     {
         UserBadLogin::reset($user->username);
     }

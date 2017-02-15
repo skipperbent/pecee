@@ -4,8 +4,8 @@ namespace Pecee\Model;
 use Carbon\Carbon;
 use Pecee\Integer;
 use Pecee\Model\Exceptions\ModelException;
-use Pecee\Str;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
+use Pecee\Str;
 
 /**
  *
@@ -17,15 +17,15 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static $this take(int $id)
  * @method static $this offset(int $id)
  * @method static $this where(string $key, string $operator = null, string $value = null)
- * @method static $this whereIn(string $key, array|object $values)
+ * @method static $this whereIn(string $key, array | object $values)
  * @method static $this whereNot(string $key, string $operator = null, string $value = null)
- * @method static $this whereNotIn(string $key, array|object $values)
+ * @method static $this whereNotIn(string $key, array | object $values)
  * @method static $this whereNull(string $key)
  * @method static $this whereNotNull(string $key)
  * @method static $this whereBetween(string $key, string $valueFrom, string $valueTo)
  * @method static $this orWhere(string $key, string $operator = null, string $value = null)
- * @method static $this orWhereIn(string $key, array|object $values)
- * @method static $this orWhereNotIn(string $key, array|object $values)
+ * @method static $this orWhereIn(string $key, array | object $values)
+ * @method static $this orWhereNotIn(string $key, array | object $values)
  * @method static $this orWhereNot(string $key, string $operator = null, string $value = null)
  * @method static $this orWhereNull(string $key)
  * @method static $this orWhereNotNull(string $key)
@@ -43,8 +43,8 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
  * @method static $this create(array $data)
  * @method static $this firstOrCreate(array $data)
  * @method static $this firstOrNew(array $data)
- * @method static $this destroy(array|object $ids)
- * @method static $this select(array|object $fields)
+ * @method static $this destroy(array | object $ids)
+ * @method static $this select(array | object $fields)
  * @method static $this groupBy(string $field)
  * @method static $this orderBy(string $field, string $defaultDirection = 'ASC')
  * @method static $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
@@ -73,10 +73,9 @@ abstract class Model implements \IteratorAggregate
 
     public function __construct()
     {
-
         // Set table name if its not already defined
         if ($this->table === null) {
-            $name = explode('\\', get_called_class());
+            $name = explode('\\', static::class);
             $name = str_ireplace('model', '', end($name));
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
@@ -98,9 +97,9 @@ abstract class Model implements \IteratorAggregate
 
         $this->results = ['rows' => []];
 
-        if ($this->timestamps) {
+        if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, ['created_at', 'updated_at']);
-            $this->created_at = Carbon::now()->toDateTimeString();
+            $this->created_at = Carbon::now();
         }
     }
 
@@ -153,7 +152,7 @@ abstract class Model implements \IteratorAggregate
         if ($data !== null) {
 
             /* Only save valid columns */
-            $data = array_filter($data, function($key) {
+            $data = array_filter($data, function ($key) {
                 return (in_array($key, $this->columns, true) === true);
             }, ARRAY_FILTER_USE_KEY);
 
@@ -175,6 +174,11 @@ abstract class Model implements \IteratorAggregate
 
             $this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         } else {
+
+            $updateData = array_filter($updateData, function($value) {
+                return $value !== null;
+            }, ARRAY_FILTER_USE_BOTH);
+
             if ($this->{$this->primary} === null) {
                 $this->{$this->primary} = $this->instance()->getQuery()->insert($updateData);
             } else {
@@ -217,7 +221,7 @@ abstract class Model implements \IteratorAggregate
 
     public function hasRows()
     {
-        return (isset($this->results['rows']) && count($this->results['rows']) > 0);
+        return (bool)(isset($this->results['rows']) && count($this->results['rows']) > 0);
     }
 
     /**
@@ -291,7 +295,7 @@ abstract class Model implements \IteratorAggregate
 
     protected function parseArrayData($data)
     {
-        if (is_array($data)) {
+        if (is_array($data) === true) {
             $out = [];
             foreach ($data as $d) {
                 $out[] = $this->parseArrayData($d);
@@ -300,7 +304,9 @@ abstract class Model implements \IteratorAggregate
             return $out;
         }
 
-        $data = (!is_array($data) && !mb_detect_encoding($data, 'UTF-8', true)) ? utf8_encode($data) : $data;
+        $encoding = mb_detect_encoding($data, 'UTF-8', true);
+        $data = (is_array($data) === false && ($encoding === false || strtolower($encoding) !== 'utf-8')) ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
+
         return Integer::isInteger($data) ? (int)$data : $data;
     }
 
@@ -313,13 +319,12 @@ abstract class Model implements \IteratorAggregate
 
     public function toArray()
     {
+        $rows = $this->getRows();
 
-        $rows = $this->results['rows'];
-
-        if ($rows && is_array($rows)) {
+        if ($rows !== null) {
             foreach ($rows as $key => $row) {
-                $key = (isset($this->rename[$key])) ? $this->rename[$key] : $key;
-                if (in_array($key, $this->hidden)) {
+                $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
+                if (in_array($key, $this->hidden, true) === true) {
                     unset($rows[$key]);
                     continue;
                 }
@@ -379,11 +384,6 @@ abstract class Model implements \IteratorAggregate
         }
 
         return null;
-    }
-
-    public function __clone()
-    {
-        $this->queryable = clone $this->queryable;
     }
 
     public function setQuery(ModelQueryBuilder $query)

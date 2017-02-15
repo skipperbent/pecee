@@ -3,7 +3,7 @@ global $argv, $appPath;
 
 try {
     require_once $appPath . '/bootstrap.php';
-} catch(\PDOException $e) {
+} catch (\PDOException $e) {
     // Ignore database errors for now
 }
 
@@ -13,21 +13,22 @@ try {
 
 echo chr(10);
 
-function loopFolder($path, \Closure $callback, array $filterExtensions = []) {
+function loopFolder($path, \Closure $callback, array $filterExtensions = [])
+{
 
     $handle = opendir($path);
-    while($item = readdir($handle)) {
+    while ($item = readdir($handle)) {
 
-        if($item === '.' || $item === '..') {
+        if ($item === '.' || $item === '..') {
             continue;
         }
 
         $newPath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($item, DIRECTORY_SEPARATOR);
-        if(is_dir($newPath)) {
+        if (is_dir($newPath) === true) {
             loopFolder($newPath, $callback);
-        } else{
+        } else {
 
-            if(count($filterExtensions) && !in_array(\Pecee\IO\File::getExtension($newPath), $filterExtensions, false)) {
+            if (count($filterExtensions) && !in_array(\Pecee\IO\File::getExtension($newPath), $filterExtensions, false)) {
                 continue;
             }
 
@@ -38,25 +39,26 @@ function loopFolder($path, \Closure $callback, array $filterExtensions = []) {
 
 }
 
-function setEnvironmentValue($key, $value = '', $autoCreate = true, $setExample = true) {
+function setEnvironmentValue($key, $value = '', $autoCreate = true, $setExample = true)
+{
 
     global $appPath;
 
-    $setValue = function($file) use($key, $value, $autoCreate) {
-        if(is_file($file)) {
+    $setValue = function ($file) use ($key, $value, $autoCreate) {
+        if (is_file($file)) {
             $lines = explode(chr(10), file_get_contents($file));
 
             $found = false;
 
             foreach ($lines as $i => $line) {
-                if (stripos($line, 'app_name=') !== false) {
+                if (stripos($line, $key . '=') !== false) {
                     $found = true;
                     $lines[$i] = $key . '=' . $value;
                     break;
                 }
             }
 
-            if($autoCreate === true && $found === false) {
+            if ($autoCreate === true && $found === false) {
                 $lines[] = strtoupper($key) . '=' . trim($value);
             }
 
@@ -66,7 +68,7 @@ function setEnvironmentValue($key, $value = '', $autoCreate = true, $setExample 
 
     $setValue($appPath . '/.env');
 
-    if($setExample === true) {
+    if ($setExample === true) {
         $setValue($appPath . '/.env.example');
     }
 }
@@ -107,7 +109,7 @@ switch (strtolower($argv[1])) {
             exit(1);
         }
 
-        if(preg_match_all('/^[a-zA-Z\_]+$/i', $argv[0]) === 0) {
+        if (preg_match_all('/^[a-zA-Z\_]+$/i', $argv[0]) === 0) {
             echo 'Error: invalid namespace (example: Demo)';
             exit(1);
         }
@@ -122,27 +124,28 @@ switch (strtolower($argv[1])) {
 
             return [
                 'has_match' => isset($matches[1]) && count($matches[1]) > 0 || isset($matches[2]) && count($matches[2]) > 0,
-                'contents' => $contents,
+                'contents'  => $contents,
                 'class'     => isset($matches[2][1]) ? $matches[2][1] : null,
                 'namespace' => isset($matches[1][0]) ? $matches[1][0] : null,
                 'full'      => isset($matches[1][0]) ? $matches[1][0] . '\\' . $matches[2][1] : null,
-                'matches' => $matches,
+                'matches'   => $matches,
             ];
         }
 
         $oldNamespace = 'Demo';
 
-        function replaceFile($file, array $map = []) {
+        function replaceFile($file, array $map = [])
+        {
             global $oldNamespace;
             global $newNamespace;
 
             $map = array_merge([
-                $oldNamespace . '::' => $newNamespace . '::',
-                $oldNamespace . '\\' => $newNamespace . '\\',
+                $oldNamespace . '::'          => $newNamespace . '::',
+                $oldNamespace . '\\'          => $newNamespace . '\\',
                 'use ' . $oldNamespace . '\\' => 'use ' . $newNamespace . '\\',
             ], $map);
 
-            if(is_file($file)) {
+            if (is_file($file)) {
                 $contents = file_get_contents($file);
                 $contents = str_ireplace(array_keys($map), array_values($map), $contents);
                 file_put_contents($file, $contents);
@@ -152,19 +155,19 @@ switch (strtolower($argv[1])) {
 
         // --- Fix classes ---
 
-        loopFolder($appPath . '/app', function($file) {
+        loopFolder($appPath . '/app', function ($file) {
 
             global $oldNamespace;
             global $newNamespace;
 
             $info = getClassInfo($file);
 
-            if($info['has_match'] === true) {
+            if ($info['has_match'] === true) {
                 echo '- Class: ' . $file . '...';
 
                 $tmp = explode('\\', $info['namespace']);
 
-                if($oldNamespace === null) {
+                if ($oldNamespace === null) {
                     $oldNamespace = $tmp[0];
                 }
 
@@ -180,7 +183,7 @@ switch (strtolower($argv[1])) {
 
         // --- Fix views ---
 
-        loopFolder($appPath . '/views', function($file) use($newNamespace, $oldNamespace) {
+        loopFolder($appPath . '/views', function ($file) use ($newNamespace, $oldNamespace) {
             echo '- View: ' . $file . '...';
 
             replaceFile($file);
@@ -192,7 +195,7 @@ switch (strtolower($argv[1])) {
 
         // --- Fixing routes file ---
 
-        loopFolder($appPath . '/routes', function($file) use($newNamespace, $oldNamespace) {
+        loopFolder($appPath . '/routes', function ($file) use ($newNamespace, $oldNamespace) {
             echo '- View: ' . $file . '...';
 
             replaceFile($file);
@@ -269,7 +272,7 @@ switch (strtolower($argv[1])) {
         exit(0);
 
     }
-    break;
+        break;
 }
 
 echo 'Error: please enter valid argument';

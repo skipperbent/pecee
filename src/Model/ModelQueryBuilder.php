@@ -28,9 +28,8 @@ class ModelQueryBuilder
     protected function createInstance(\stdClass $item)
     {
         $model = get_class($this->model);
-
         /* @var $model Model */
-        $model = new $model();
+        $model = new $model;
         $model->mergeRows((array)$item);
         $model->onInstanceCreate();
 
@@ -254,7 +253,7 @@ class ModelQueryBuilder
         return (int)$result[0]->sum;
     }
 
-    protected function getValidData($data)
+    protected function getValidData(array $data)
     {
         $out = [];
         foreach ($data as $key => $value) {

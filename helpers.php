@@ -55,7 +55,7 @@ function input()
 
 function redirect($url, $code = null)
 {
-    if ($code) {
+    if ($code !== null) {
         response()->httpCode($code);
     }
 
@@ -72,9 +72,14 @@ function app()
     return request()->app;
 }
 
+/**
+ * @param string $key
+ * @param array|string $args
+ * @return string
+ */
 function lang($key, $args = null)
 {
-    if (!is_array($args)) {
+    if (is_array($args) === false) {
         $args = func_get_args();
         $args = array_slice($args, 1);
     }
