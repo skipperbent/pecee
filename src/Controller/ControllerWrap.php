@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Controller;
 
+use Pecee\Boolean;
 use Pecee\UI\YuiCompressor\YuiCompressor;
 
 class ControllerWrap
@@ -190,7 +191,7 @@ class ControllerWrap
 
     protected function debugMode()
     {
-        return env('DEBUG_FILE_WRAPPER', false);
+        return Boolean::parse(env('DEBUG_FILE_WRAPPER', false));
     }
 
     protected function getTempFile()

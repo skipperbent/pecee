@@ -58,8 +58,8 @@ class Application
 
         // Default stuff
         $this->setTimezone('UTC');
-        $this->setDefaultLocale('en-gb');
-        $this->setLocale('en-gb');
+        $this->setDefaultLocale('en_gb');
+        $this->setLocale('en_gb');
     }
 
     /**
@@ -92,8 +92,8 @@ class Application
     {
         $ip = ($ip === null) ? request()->getIp() : $ip;
 
-        if (is_array($this->adminIps)) {
-            return (in_array($ip, $this->adminIps));
+        if (is_array($this->adminIps) === true) {
+            return in_array($ip, $this->adminIps, true);
         }
 
         return false;
@@ -118,8 +118,8 @@ class Application
 
     public function setLocale($locale)
     {
-        setlocale(LC_ALL, strtolower(str_replace('-', '_', $locale)));
-        $this->locale = $locale;
+        $this->locale = strtolower($locale);
+        setlocale(LC_ALL, $locale);
 
         if ($this->translation->getProvider() !== null) {
             $this->translation->getProvider()->load($locale, $this->defaultLocale);
