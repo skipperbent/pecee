@@ -9,7 +9,7 @@ try {
 
 // TODO: check if bootstrap.php exists.
 // TODO: check if phinx-config exists.
-// TODO: move stuff to seperate classes.
+// TODO: move stuff to separate classes.
 
 echo chr(10);
 
@@ -36,6 +36,39 @@ function loopFolder($path, \Closure $callback, array $filterExtensions = []) {
     }
     closedir($handle);
 
+}
+
+function setEnvironmentValue($key, $value = '', $autoCreate = true, $setExample = true) {
+
+    global $appPath;
+
+    $setValue = function($file) use($key, $value, $autoCreate) {
+        if(is_file($file)) {
+            $lines = explode(chr(10), file_get_contents($file));
+
+            $found = false;
+
+            foreach ($lines as $i => $line) {
+                if (stripos($line, 'app_name=') !== false) {
+                    $found = true;
+                    $lines[$i] = $key . '=' . $value;
+                    break;
+                }
+            }
+
+            if($autoCreate === true && $found === false) {
+                $lines[] = strtoupper($key) . '=' . trim($value);
+            }
+
+            file_put_contents($file, join(chr(10), $lines));
+        }
+    };
+
+    $setValue($appPath . '/.env');
+
+    if($setExample === true) {
+        $setValue($appPath . '/.env.example');
+    }
 }
 
 switch (strtolower($argv[1])) {
@@ -173,31 +206,7 @@ switch (strtolower($argv[1])) {
 
         echo '- Setting new APP_NAME in env...';
 
-        $envFile = $appPath . '/.env';
-        if(is_file($envFile)) {
-            $lines = explode(chr(10), file_get_contents($envFile));
-
-            foreach ($lines as $i => $line) {
-                if (stripos($line, 'app_name=') !== false) {
-                    $lines[$i] = 'APP_NAME=' . $newNamespace;
-                    break;
-                }
-            }
-            file_put_contents($envFile, join(chr(10), $lines));
-        }
-
-        $envFile = $appPath . '/.env.example';
-        if(is_file($envFile)) {
-            $lines = explode(chr(10), file_get_contents($envFile));
-
-            foreach ($lines as $i => $line) {
-                if (stripos($line, 'app_name=') !== false) {
-                    $lines[$i] = 'APP_NAME=' . $newNamespace;
-                    break;
-                }
-            }
-            file_put_contents($envFile, join(chr(10), $lines));
-        }
+        setEnvironmentValue('APP_NAME', $newNamespace);
 
         echo 'OK!' . chr(10);
 
@@ -211,6 +220,14 @@ switch (strtolower($argv[1])) {
     case 'key:generate':
         echo 'New key: ' . \Pecee\Guid::generateSalt() . chr(10);
         exit(0);
+        break;
+    case 'env:key-generate':
+        $key = \Pecee\Guid::generateSalt();
+        setEnvironmentValue('APP_SECRET', $key);
+
+        echo 'App-secret successfully set' . chr(10);
+        exit(0);
+
         break;
     case 'password:create': {
 
@@ -252,8 +269,8 @@ switch (strtolower($argv[1])) {
         exit(0);
 
     }
-        break;
+    break;
 }
 
-echo 'No input specified';
+echo 'Error: please enter valid argument';
 exit(1);
