@@ -1,13 +1,14 @@
 <?php
 namespace Pecee\Widget;
 
-use Pecee\Base;
+use Pecee\Traits\BaseApp;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Site;
 
-abstract class Widget extends Base
+abstract class Widget
 {
+    use BaseApp;
 
     protected $_template;
     protected $_contentTemplate;
