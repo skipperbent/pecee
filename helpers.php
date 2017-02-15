@@ -90,7 +90,7 @@ function lang($key, $args = null)
  */
 function debug($text)
 {
-    if (env('DEBUG', false)) {
+    if (app()->getDebugEnabled() === true) {
         app()->debug->add($text);
     }
 }

@@ -41,6 +41,7 @@ class Debug
             $trace = array_reverse($backtrace);
             $trace = $trace[$i];
             $tmp = [];
+
             if (isset($trace['class'])) {
                 $tmp['class'] = $trace['class'];
             }

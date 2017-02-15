@@ -112,7 +112,7 @@ class TaglibJs extends Taglib
 
         $this->containers[$attrs->id] = $this->replaceJsExpressions($output);
 
-        if (env('DEBUG')) {
+        if (app()->getDebugEnabled() === true) {
             $this->containers[$attrs->id] = str_replace('o+=', "\no+=", $this->containers[$attrs->id]);
             $this->containers[$attrs->id] = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $this->containers[$attrs->id]);
         }
@@ -159,7 +159,7 @@ class TaglibJs extends Taglib
 
         $output = $this->replaceJsExpressions($output);
 
-        if (env('DEBUG')) {
+        if (app()->getDebugEnabled() === true) {
             $output = str_replace('o+=', "\no+=", $output);
             $output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
         }
@@ -201,9 +201,9 @@ class TaglibJs extends Taglib
             }
         }
 
-        $output[] = '</script>';
+        $output = '</script>';
 
-        return join((env('DEBUG') ? chr(10) : ''), $output);
+        return join(((app()->getDebugEnabled() === true) ? chr(10) : ''), $output);
     }
 
 }
