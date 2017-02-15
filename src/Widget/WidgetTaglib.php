@@ -38,7 +38,7 @@ abstract class WidgetTaglib extends Widget
         $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace(DIRECTORY_SEPARATOR, '_', $this->_contentTemplate);
 
         if (is_file($cacheFile)) {
-            if (!env('DEBUG', false)) {
+            if (app()->getDebugEnabled() === false) {
                 $this->renderPhp(file_get_contents($cacheFile));
 
                 return;

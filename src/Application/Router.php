@@ -9,7 +9,6 @@ class Router extends SimpleRouter
 
     public static function start()
     {
-
         debug('Router initialised.');
 
         Session::start();
@@ -29,7 +28,7 @@ class Router extends SimpleRouter
         parent::start();
 
         // Output debug info
-        if (isset($_GET['__debug']) && env('DEBUG', false) === true && strtolower($_GET['__debug']) === 'true' && app()->hasAdminIp()) {
+        if (isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'app' && app()->getDebugEnabled() === true && app()->hasAdminIp()) {
             echo app()->debug;
         }
     }

@@ -4,7 +4,7 @@ namespace Pecee\Model;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pecee\Str;
-use Pixie\QueryBuilder\QueryBuilderHandler;
+use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelQueryBuilder
 {

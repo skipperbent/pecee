@@ -5,7 +5,7 @@ use Carbon\Carbon;
 use Pecee\Integer;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Str;
-use Pixie\QueryBuilder\QueryBuilderHandler;
+use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 /**
  *
@@ -83,7 +83,7 @@ abstract class Model implements \IteratorAggregate
 
         $this->queryable = new ModelQueryBuilder($this, $this->table);
 
-        if (env('DEBUG')) {
+        if (app()->getDebugEnabled() === true) {
 
             $this->queryable->getQuery()->registerEvent('before-*', $this->table,
                 function (QueryBuilderHandler $qb) {
