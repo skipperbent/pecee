@@ -1,12 +1,11 @@
 <?php
 namespace Pecee\Controller;
 
+use Pecee\Base;
 use Pecee\Exceptions\ValidationException;
-use Pecee\Traits\BaseApp;
 
-abstract class ControllerBase
+abstract class ControllerBase extends Base
 {
-    use BaseApp;
 
     public function __construct()
     {

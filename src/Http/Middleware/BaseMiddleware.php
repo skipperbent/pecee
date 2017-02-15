@@ -1,13 +1,10 @@
 <?php
 namespace Pecee\Http\Middleware;
 
+use Pecee\Base;
 use Pecee\Http\Request;
-use Pecee\Traits\BaseApp;
 
-abstract class BaseMiddleware implements IMiddleware
+abstract class BaseMiddleware extends Base implements IMiddleware
 {
-    use BaseApp;
-
     abstract public function handle(Request $request);
-
 }

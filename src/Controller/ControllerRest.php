@@ -1,12 +1,10 @@
 <?php
 namespace Pecee\Controller;
 
+use Pecee\Base;
 use Pecee\Controllers\IRestController;
-use Pecee\Traits\BaseApp;
 
-abstract class ControllerRest implements IRestController
+abstract class ControllerRest extends Base implements IRestController
 {
-
-    use BaseApp;
 
 }
