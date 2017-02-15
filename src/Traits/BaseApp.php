@@ -1,13 +1,13 @@
 <?php
-namespace Pecee;
+namespace Pecee\Traits;
 
 use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
 
-abstract class Base
-{
+trait BaseApp {
+
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_inputSessionKey = 'InputValues';
@@ -253,6 +253,7 @@ abstract class Base
     {
         $messages = $this->_messages->get($this->errorType);
         if ($messages && is_array($messages)) {
+            /* @var $messages array */
             /* @var $message \Pecee\UI\Form\FormMessage */
             foreach ($messages as $message) {
 

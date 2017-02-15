@@ -7,7 +7,7 @@ class ValidateNotNullOrEmpty extends ValidateInput
 
     public function validates()
     {
-        return (is_string($this->input->getValue()) && trim($this->input->getValue()) === false);
+        return (is_string($this->input->getValue()) && trim($this->input->getValue()) !== '');
     }
 
     public function getError()

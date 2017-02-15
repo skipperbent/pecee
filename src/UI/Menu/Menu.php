@@ -186,14 +186,10 @@ class Menu
         /* @var $item MenuItem */
         foreach ($this->items as $item) {
 
-            if ($recursive === true) {
-                $subMenu = $item->getMenu();
-
-                if ($subMenu !== null) {
-                    $subItem = $subMenu->findItemByUrl($url, $strict, $recursive);
-                    if ($subItem !== null) {
-                        return $subItem;
-                    }
+            if ($recursive === true && $item->getMenu() !== null) {
+                $subItem = $item->getMenu()->findItemByUrl($url, $strict, $recursive);
+                if ($subItem !== null) {
+                    return $subItem;
                 }
             }
 
@@ -202,7 +198,13 @@ class Menu
                     return $item;
                 }
             } else {
-                if (false !== strstr(rtrim($url, '/'), rtrim($item->getUrl(), '/'))) {
+                $itemUrl = rtrim($item->getUrl(), '/');
+                $itemUrl = ($itemUrl === '') ? '/' : $itemUrl;
+
+                $url = rtrim($url, '/');
+                $url = ($url === '') ? '/' : $url;
+
+                if (false !== stristr($itemUrl, $url)) {
                     return $item;
                 }
             }
@@ -217,14 +219,10 @@ class Menu
         /* @var $item MenuItem */
         foreach ($this->items as $item) {
 
-            if ($recursive === true) {
-                $subMenu = $item->getMenu();
-
-                if ($subMenu !== null) {
-                    $subItem = $subMenu->findItemByAttribute($name, $value, $strict, $recursive);
-                    if ($subItem !== null) {
-                        return $subItem;
-                    }
+            if ($recursive === true && $item->getMenu() !== null) {
+                $subItem = $item->getMenu()->findItemByAttribute($name, $value, $strict, $recursive);
+                if ($subItem !== null) {
+                    return $subItem;
                 }
             }
 
