@@ -1,11 +1,13 @@
 <?php
 namespace Pecee\Handler;
 
-use Pecee\Base;
 use Pecee\Handlers\IExceptionHandler;
 use Pecee\Http\Request;
+use Pecee\Traits\BaseApp;
 
-abstract class BaseExceptionHandler extends Base implements IExceptionHandler
+abstract class BaseExceptionHandler implements IExceptionHandler
 {
+    use BaseApp;
+
     abstract public function handleError(Request $request, \Exception $error);
 }
