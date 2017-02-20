@@ -3,10 +3,11 @@ namespace Pecee\UI\Html;
 
 class HtmlSelect extends Html
 {
-
     protected $options = [];
+    protected $groups = [];
+    protected $groupsDisabled;
 
-    public function __construct($name = null)
+    public function __construct($name)
     {
         parent::__construct('select');
 
@@ -15,9 +16,26 @@ class HtmlSelect extends Html
         }
     }
 
+    /**
+     * Add option
+     * @param HtmlSelectOption $option
+     * @return static
+     */
     public function addOption(HtmlSelectOption $option)
     {
+        $group = $option->getGroup();
+
+        if ($group !== null) {
+            if (isset($this->groups[$group])) {
+                $this->groups[$group][] = $option;
+            } else {
+                $this->groups[$group] = [$option];
+            }
+        }
+
         $this->options[] = $option;
+
+        return $this;
     }
 
     public function getOptions()
@@ -25,14 +43,55 @@ class HtmlSelect extends Html
         return $this->options;
     }
 
-    public function writeHtml()
+    public function multiple()
     {
-        /* @var $option \Pecee\UI\Html\HtmlSelectOption */
-        foreach ($this->options as $option) {
-            $this->addInnerHtml($option->writeHtml());
+        return $this->addAttribute('multiple', null);
+    }
+
+    public function render()
+    {
+        /* @var $options array */
+        foreach ($this->groups as $name => $options) {
+
+            $html = new Html('optgroup');
+            $html->addAttribute('label', $name);
+
+            if ($this->groupsDisabled !== null && in_array(strtolower($name), $this->groupsDisabled) === true) {
+                $html->addAttribute('disabled', null);
+            }
+
+            /* @var $option HtmlSelectOption */
+            foreach ($options as $option) {
+                $html->addInnerHtml($option);
+            }
+
         }
 
-        return parent::writeHtml();
+        /* @var $option HtmlSelectOption */
+        foreach ($this->options as $option) {
+            if ($option->getGroup() === null) {
+                $this->addInnerHtml($option);
+            }
+        }
+
+        return parent::render();
+    }
+
+    public function disabled()
+    {
+        return $this->addAttribute('disabled', null);
+    }
+
+    /**
+     * Disable entire group
+     * @param string $group
+     * @return static
+     */
+    public function disableGroup($group)
+    {
+        $this->groupsDisabled[] = $group;
+
+        return $this;
     }
 
 }

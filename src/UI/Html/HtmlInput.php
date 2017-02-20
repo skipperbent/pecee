@@ -6,10 +6,7 @@ class HtmlInput extends Html
 
     public function __construct($name, $type, $value = null)
     {
-
         parent::__construct('input');
-
-        $this->closingType = self::CLOSE_TYPE_SELF;
 
         $this->type($type);
         $this->name($name);
@@ -22,22 +19,22 @@ class HtmlInput extends Html
 
     public function name($name)
     {
-        return $this->attr('name', $name);
+        return $this->addAttribute('name', $name);
     }
 
     public function value($value)
     {
-        return $this->attr('value', $value);
+        return $this->addAttribute('value', $value);
     }
 
     public function placeholder($text)
     {
-        return $this->attr('placeholder', $text);
+        return $this->addAttribute('placeholder', $text);
     }
 
-    public function autoComplete($bool = false)
+    public function autoComplete()
     {
-        return $this->attr('autocomplete', (($bool === true) ? 'on' : 'off'));
+        return $this->addAttribute('autocomplete', 'on');
     }
 
     public function readonly()
@@ -67,27 +64,27 @@ class HtmlInput extends Html
 
     public function maxLength($maxLength)
     {
-        return $this->attr('maxlength', $maxLength);
+        return $this->addAttribute('maxlength', $maxLength);
     }
 
     public function size($size)
     {
-        return $this->attr('size', $size);
+        return $this->addAttribute('size', $size);
     }
 
     public function type($type)
     {
-        return $this->attr('type', $type);
+        return $this->addAttribute('type', $type);
     }
 
     public function pattern($pattern)
     {
-        return $this->attr('pattern', $pattern);
+        return $this->addAttribute('pattern', $pattern);
     }
 
     public function checked($checked)
     {
-        if ($checked) {
+        if ($checked === true) {
             $this->addInputAttribute('checked');
         } else {
             $this->removeAttribute('checked');
@@ -96,7 +93,7 @@ class HtmlInput extends Html
 
     public function addInputAttribute($name)
     {
-        $this->attr($name, null);
+        $this->addAttribute($name, null);
 
         return $this;
     }

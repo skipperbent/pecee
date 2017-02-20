@@ -13,31 +13,31 @@ class HtmlForm extends Html
     const METHOD_POST = 'post';
     const METHOD_GET = 'get';
 
-    public function __construct($name, $method = self::METHOD_POST, $action = null, $enctype = self::ENCTYPE_APPLICATION_URLENCODED)
+    public function __construct($name, $method = self::METHOD_POST, $action = null, $encoding = self::ENCTYPE_APPLICATION_URLENCODED)
     {
         parent::__construct('form');
 
-        $this->closingType = self::CLOSE_TYPE_NONE;
+        $this->closingType = static::CLOSE_TYPE_NONE;
 
         $this->name($name);
-        $this->enctype($enctype);
+        $this->enctype($encoding);
         $this->method($method);
-        $this->action((($action === null) ? url() : $action));
+        $this->action(($action === null) ? url() : $action);
 
         // Add csrf token
         if (strtolower($method) !== 'get') {
-            $this->addItem(new HtmlInput(BaseCsrfVerifier::POST_KEY, 'hidden', csrf_token()));
+            $this->addInnerHtml(new HtmlInput(BaseCsrfVerifier::POST_KEY, 'hidden', csrf_token()));
         }
     }
 
     public function name($name)
     {
-        return $this->attr('name', $name);
+        return $this->addAttribute('name', $name);
     }
 
     public function method($method)
     {
-        if ($method !== self::METHOD_GET) {
+        if ($method !== static::METHOD_GET) {
             return $this->addAttribute('method', $method);
         }
 
@@ -46,7 +46,7 @@ class HtmlForm extends Html
 
     public function enctype($enctype)
     {
-        if ($enctype !== self::ENCTYPE_APPLICATION_URLENCODED) {
+        if ($enctype !== static::ENCTYPE_APPLICATION_URLENCODED) {
             return $this->addAttribute('enctype', $enctype);
         }
 
@@ -60,7 +60,7 @@ class HtmlForm extends Html
 
     public function action($action)
     {
-        return $this->attr('action', $action);
+        return $this->addAttribute('action', $action);
     }
 
 }
