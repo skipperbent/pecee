@@ -108,12 +108,12 @@ abstract class Widget extends Base
 
         if (count($this->getSite()->getCssFilesWrapped($section))) {
             $css = url(app()->getCssWrapRouteName(), null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
-            $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_SELF)->attr('href', $css)->attr('rel', 'stylesheet');
+            $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_TAG)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
         foreach ($this->getSite()->getCss($section) as $css) {
             $output .= (new Html('link'))
-                ->setClosingType(Html::CLOSE_TYPE_SELF)
+                ->setClosingType(Html::CLOSE_TYPE_TAG)
                 ->attr('href', $css)
                 ->attr('rel', 'stylesheet');
         }

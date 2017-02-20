@@ -27,9 +27,8 @@ class ModelQueryBuilder
 
     protected function createInstance(\stdClass $item)
     {
-        $model = get_class($this->model);
         /* @var $model Model */
-        $model = new $model;
+        $model = $this->model->getInstance($item);
         $model->mergeRows((array)$item);
         $model->onInstanceCreate();
 
@@ -77,6 +76,11 @@ class ModelQueryBuilder
 
     public function where($key, $operator = null, $value = null)
     {
+        if (func_num_args() === 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
         $this->query->where($key, $operator, $value);
 
         return $this->model;
@@ -91,6 +95,11 @@ class ModelQueryBuilder
 
     public function whereNot($key, $operator = null, $value = null)
     {
+        if (func_num_args() === 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
         $this->query->whereNot($key, $operator, $value);
 
         return $this->model;
@@ -126,6 +135,11 @@ class ModelQueryBuilder
 
     public function orWhere($key, $operator = null, $value = null)
     {
+        if (func_num_args() === 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
         $this->query->orWhere($key, $operator, $value);
 
         return $this->model;
@@ -147,6 +161,11 @@ class ModelQueryBuilder
 
     public function orWhereNot($key, $operator = null, $value = null)
     {
+        if (func_num_args() === 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
         $this->query->orWhereNot($key, $operator, $value);
 
         return $this->model;

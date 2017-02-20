@@ -3,19 +3,18 @@ namespace Pecee\UI\Html;
 
 class Html
 {
-
-    const CLOSE_TYPE_SELF = 'self';
     const CLOSE_TYPE_TAG = 'tag';
     const CLOSE_TYPE_NONE = 'none';
 
     protected $tag;
     protected $innerHtml = [];
-    protected $closingType = self::CLOSE_TYPE_TAG;
+    protected $closingType;
     protected $attributes = [];
 
     public function __construct($tag)
     {
         $this->tag = $tag;
+        $this->closingType = static::CLOSE_TYPE_TAG;
     }
 
     /**
@@ -34,15 +33,6 @@ class Html
         $this->innerHtml[] = $html;
 
         return $this;
-    }
-
-    public function addItem($htmlItem)
-    {
-        if ($htmlItem instanceof static) {
-            return $this->addInnerHtml($htmlItem->__toString());
-        }
-
-        return $this->addInnerHtml($htmlItem);
     }
 
     /**
@@ -101,15 +91,15 @@ class Html
 
     public function id($id)
     {
-        return $this->attr('id', $id);
+        return $this->addAttribute('id', $id);
     }
 
     public function style($css)
     {
-        return $this->attr('style', $css);
+        return $this->addAttribute('style', $css);
     }
 
-    protected function writeHtml()
+    protected function render()
     {
         $output = '<' . $this->tag;
 
@@ -121,7 +111,18 @@ class Html
             }
         }
 
-        return $output . '>' . join('', $this->innerHtml) . (($this->closingType === self::CLOSE_TYPE_TAG) ? '</' . $this->tag . '>' : '');
+        $output .= '>';
+
+        for($i = 0, $max = count($this->innerHtml); $i < $max; $i++) {
+            $html = $this->innerHtml[$i];
+            $output .= ($html instanceof static) ? $html->render() : $html;
+        }
+
+        if($this->closingType === static::CLOSE_TYPE_TAG) {
+            $output .= '</' . $this->tag . '>';
+        }
+
+        return $output;
     }
 
     /**
@@ -131,7 +132,7 @@ class Html
      */
     public function addClass($class)
     {
-        return $this->attr('class', $class, false);
+        return $this->addAttribute('class', $class, false);
     }
 
     /**
@@ -155,7 +156,7 @@ class Html
 
     public function __toString()
     {
-        return $this->writeHtml();
+        return $this->render();
     }
 
     public function getInnerHtml()

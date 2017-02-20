@@ -121,12 +121,26 @@ abstract class Model implements \IteratorAggregate
         return new static();
     }
 
+    /**
+     * @param \stdClass $item
+     * @return static
+     */
+    public function getInstance(\stdClass $item)
+    {
+        return new static;
+    }
+
     public function onInstanceCreate()
     {
+        $this->joinData();
+    }
+
+    protected function joinData()
+    {
         if (count($this->join)) {
-            foreach ($this->join as $join) {
-                $method = Str::camelize($join);
-                $this->{$join} = $this->$method();
+            for($i = 0, $max = count($this->join); $i < $max; $i++) {
+                $join = $this->join[$i];
+                $this->{$join} = $this->{Str::camelize($join)}();
             }
         }
     }

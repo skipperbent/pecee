@@ -14,21 +14,16 @@ use Pecee\UI\Html\HtmlTextarea;
 class Form
 {
 
-    protected $name;
-
     /**
      * Starts new form
      * @param string $name
      * @param string|null $method
      * @param string|null $action
-     * @param string|null $enctype
      * @return \Pecee\UI\Html\HtmlForm
      */
-    public function start($name, $method = HtmlForm::METHOD_POST, $action = null, $enctype = HtmlForm::ENCTYPE_APPLICATION_URLENCODED)
+    public function start($name, $method = HtmlForm::METHOD_POST, $action = null)
     {
-        $this->name = $name;
-
-        return new HtmlForm($name, $method, $action, $enctype);
+        return new HtmlForm($name, $method, $action);
     }
 
     /**
@@ -41,7 +36,7 @@ class Form
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true)
     {
-        if ($saveValue && ($value === null && input()->exists($name) || request()->getMethod() !== 'get')) {
+        if ($saveValue && ($value === null && input()->exists($name) === true || request()->getMethod() !== 'get')) {
             $value = input()->get($name);
         }
 
@@ -62,7 +57,7 @@ class Form
 
         $inputValue = input()->get($name);
 
-        if ($saveValue === true && $inputValue !== null && $inputValue == $value) {
+        if ($saveValue === true && $inputValue !== null && (string)$inputValue === (string)$value) {
             $element->checked(true);
         }
 
@@ -110,7 +105,7 @@ class Form
         $label = new Html('label');
 
         if ($inner !== null) {
-            $label->addItem($inner);
+            $label->addInnerHtml($inner);
         }
 
         if ($for !== null) {
@@ -137,14 +132,14 @@ class Form
 
                 foreach ($data->getData() as $item) {
                     $val = isset($item['value']) ? $item['value'] : $item['name'];
-                    $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || (isset($item['selected']) && $item['selected']) || !$saveValue && $value == $val);
+                    $selected = (input()->get($name) !== null && (string)input()->get($name) === (string)$val || input()->exists($name) === false && (string)$value === (string)$val || (isset($item['selected']) && $item['selected']) || $saveValue === false && (string)$value === (string)$val);
                     $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
                 }
 
             } elseif (is_array($data) === true) {
 
                 foreach ($data as $val => $key) {
-                    $selected = (input()->get($name) !== null && input()->get($name) == $val || !input()->exists($name) && $value == $val || !$saveValue && $value == $val);
+                    $selected = (input()->get($name) !== null && (string)input()->get($name) === (string)$val || input()->exists($name) === false && (string)$value === (string)$val || $saveValue === false && (string)$value === (string)$val);
                     $element->addOption(new HtmlSelectOption($val, $key, $selected));
                 }
 
@@ -167,7 +162,7 @@ class Form
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
     {
-        if ($saveValue && (!$value && input()->get($name) || request()->getMethod() !== 'get')) {
+        if ($saveValue === true && ($value === false && input()->get($name) !== null || request()->getMethod() !== 'get')) {
             $value = input()->get($name);
         }
 
@@ -195,9 +190,7 @@ class Form
      */
     public function button($text, $type = null, $name = null, $value = null)
     {
-        $el = new Html('button');
-
-        $el->addInnerHtml($text);
+        $el = (new Html('button'))->addInnerHtml($text);
 
         if ($type !== null) {
             $el->addAttribute('type', $type);
@@ -210,8 +203,6 @@ class Form
         if ($value !== null) {
             $el->addAttribute('value', $value);
         }
-
-        $el->setClosingType(Html::CLOSE_TYPE_TAG);
 
         return $el;
     }

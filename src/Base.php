@@ -5,6 +5,7 @@ use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
+use Pecee\UI\Form\Validation\ValidateInput;
 
 abstract class Base
 {
@@ -23,9 +24,10 @@ abstract class Base
 
     protected function setInputValues()
     {
-        if (Session::exists($this->_inputSessionKey)) {
+        if (Session::exists($this->_inputSessionKey) === true) {
             $values = Session::get($this->_inputSessionKey);
 
+            /* @var array $values */
             foreach ($values as $key => $value) {
                 $item = input()->getObject($key, new InputItem($key), ['get', 'post'])->setValue($value);
                 if (request()->getMethod() === 'post') {
@@ -73,38 +75,34 @@ abstract class Base
         }
     }
 
-    protected function validateInput()
+    protected function performValidation()
     {
         foreach ($this->_validations as $key => $validations) {
-            /* @var $input \Pecee\Http\Input\InputItem */
-            /* @var $i \Pecee\Http\Input\InputItem */
+
             $input = input()->getObject($key, new InputItem($key, null));
 
-            /* @var $validation \Pecee\UI\Form\Validation\ValidateInput */
-            foreach ($validations as $validation) {
+            for($i = 0, $max = count($validations); $i < $max; $i++) {
 
-                if (is_array($input)) {
-                    foreach ($input as $i) {
-                        if ($validation === null || $validation === '') {
-                            continue;
-                        }
-                        $validation->setInput($i);
-                        if ($validation->runValidation() === false) {
-                            $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $i->getIndex());
-                        }
-                    }
-                } else {
-                    if ($validation === '') {
-                        continue;
-                    }
-                    $validation->setInput($input);
-                    if ($validation->runValidation() === false) {
-                        $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
-                    }
+                /* @var $validation ValidateInput */
+                $validation = $validations[$i];
+
+                if ($validation === null || $validation === '') {
+                    continue;
                 }
 
-            }
+                $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
+                for($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
+
+                    $input = $inputs[$x];
+                    $validation->setInput($input);
+
+                    if ($validation->runValidation() === false) {
+                        $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
+                        $this->onInputError($input, $validation->getError());
+                    }
+                }
+            }
         }
     }
 
@@ -116,12 +114,12 @@ abstract class Base
     protected function appendSiteTitle($title, $separator = '-')
     {
         $separator = ($separator === null) ? '' : ' ' . $separator . ' ';
-        app()->site->setTitle((app()->site->getTitle() . $separator . $title));
+        app()->site->setTitle(app()->site->getTitle() . $separator . $title);
     }
 
     protected function prependSiteTitle($title, $separator = ' - ')
     {
-        app()->site->setTitle(($title . $separator . app()->site->getTitle()));
+        app()->site->setTitle($title . $separator . app()->site->getTitle());
     }
 
     /**
@@ -130,7 +128,7 @@ abstract class Base
      */
     public function isPostBack()
     {
-        return (request()->getMethod() !== 'get');
+        return (bool)(request()->getMethod() !== 'get');
     }
 
     /**
@@ -167,15 +165,16 @@ abstract class Base
     public function getMessages($type, $placement = null)
     {
         // Trigger validation
-        $this->validateInput();
+        $this->performValidation();
 
         $messages = [];
+        $search = $this->_messages->get($type);
 
-        if ($this->_messages->get($type) !== null) {
+        if ($search !== null) {
+            /* @var $search array */
             /* @var $message FormMessage */
-            foreach ($this->_messages->get($type) as $message) {
-
-                if (($placement === null || $message->getPlacement() === $placement)) {
+            foreach ($search as $message) {
+                if ($placement === null || $message->getPlacement() === $placement) {
                     $messages[] = $message;
                 }
             }
@@ -186,7 +185,7 @@ abstract class Base
 
     public function hasMessages($type, $placement = null)
     {
-        return (count($this->getMessages($type, $placement)) > 0);
+        return (bool)count($this->getMessages($type, $placement));
     }
 
     /**
@@ -198,20 +197,16 @@ abstract class Base
      */
     protected function setMessage($message, $type, $placement = null, $index = null)
     {
-        $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
-
         $msg = new FormMessage();
         $msg->setMessage($message);
-        $msg->setPlacement($placement);
+        $msg->setPlacement(($placement === null) ? $this->defaultMessagePlacement : $placement);
         $msg->setIndex($index);
         $this->_messages->set($msg, $type);
     }
 
     public function hasErrors($placement = null, $errorType = null)
     {
-        $errorType = ($errorType === null) ? $this->errorType : $errorType;
-
-        return $this->hasMessages($errorType, $placement);
+        return $this->hasMessages(($errorType === null) ? $this->errorType : $errorType, $placement);
     }
 
     /**
@@ -232,9 +227,7 @@ abstract class Base
      */
     public function getErrors($placement = null, $errorType = null)
     {
-        $errorType = ($errorType === null) ? $this->errorType : $errorType;
-
-        return $this->getMessages($errorType, $placement);
+        return $this->getMessages(($errorType === null) ? $this->errorType : $errorType, $placement);
     }
 
     public function getErrorsArray($placement = null)
@@ -251,11 +244,13 @@ abstract class Base
 
     public function validationFor($index)
     {
-        $messages = $this->_messages->get($this->errorType);
-        if ($messages && is_array($messages)) {
-            /* @var $message \Pecee\UI\Form\FormMessage */
-            foreach ($messages as $message) {
+        $messages = [];
+        $search = $this->_messages->get($this->errorType);
 
+        if ($search !== null) {
+            /* @var $search array */
+            /* @var $message FormMessage */
+            foreach ($search as $message) {
                 $input = null;
                 if (request()->getMethod() !== 'get') {
                     $input = input()->findPost($index);
@@ -272,7 +267,7 @@ abstract class Base
             }
         }
 
-        return null;
+        return $messages;
     }
 
 }

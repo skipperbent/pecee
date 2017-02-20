@@ -21,8 +21,8 @@ class Taglib
         $this->currentTag = $tag;
         $method = self::TAG_PREFIX . ucfirst($tag);
 
-        if (!method_exists($this, $method)) {
-            throw new \Exception('Unknown tag: ' . $tag . ' in ' . get_class($this));
+        if (method_exists($this, $method) === false) {
+            throw new \InvalidArgumentException('Unknown tag: ' . $tag . ' in ' . static::class);
         }
 
         $this->body = $body;

@@ -3,13 +3,13 @@ namespace Pecee\UI\Html;
 
 class HtmlTextarea extends Html
 {
-
     protected $value;
 
     public function __construct($name, $rows = null, $cols = null, $value = null)
     {
-
         parent::__construct('textarea');
+
+        $this->closingType = static::CLOSE_TYPE_TAG;
 
         $this->value = htmlentities($value, ENT_QUOTES, app()->getCharset());
 
@@ -42,17 +42,17 @@ class HtmlTextarea extends Html
 
     public function wrap($wrap)
     {
-        return $this->attr('wrap', $wrap);
+        return $this->addAttribute('wrap', $wrap);
     }
 
     public function rows($rows)
     {
-        return $this->attr('rows', $rows);
+        return $this->addAttribute('rows', $rows);
     }
 
     public function cols($cols)
     {
-        return $this->attr('cols', $cols);
+        return $this->addAttribute('cols', $cols);
     }
 
 }
