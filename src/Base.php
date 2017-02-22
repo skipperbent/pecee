@@ -75,6 +75,10 @@ abstract class Base
         }
     }
 
+    protected function onInputError(InputItem $input, $error) {
+
+    }
+
     protected function performValidation()
     {
         foreach ($this->_validations as $key => $validations) {

@@ -9,15 +9,20 @@ class ValidateUri extends ValidateInput
     const TYPE_RELATIVE = 0x2;
     const TYPE_BOTH = 0x3;
 
-    protected $error;
+    protected $type;
 
-    public function validates($type = self::TYPE_ABSOLUTE)
+    public function __construct($type = self::TYPE_ABSOLUTE)
     {
-        if($type === self::TYPE_BOTH) {
+        $this->type = $type;
+    }
+
+    public function validates()
+    {
+        if($this->type === self::TYPE_BOTH) {
             return (Url::isValidRelative($this->input->getValue()) && Url::isValid($this->input->getValue()));
         }
 
-        if($type === self::TYPE_RELATIVE) {
+        if($this->type === self::TYPE_RELATIVE) {
             return Url::isValidRelative($this->input->getValue());
         }
 
