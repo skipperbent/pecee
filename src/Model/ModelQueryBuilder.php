@@ -341,7 +341,7 @@ class ModelQueryBuilder
         return $item;
     }
 
-    public function destroy($ids)
+    public function destroy(array $ids)
     {
         $this->query->whereIn('id', $ids)->delete();
 
