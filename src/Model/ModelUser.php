@@ -18,7 +18,7 @@ class ModelUser extends ModelData
     const ERROR_TYPE_EXISTS = 0x3;
 
     protected static $instance;
-    protected static $ticketExpireMinutes = 60 * 1;
+    protected static $ticketExpireMinutes = 60;
 
     protected $table = 'user';
 
