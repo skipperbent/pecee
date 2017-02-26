@@ -408,7 +408,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @param mixed $model
+     * @param Model $model
      */
     public function setModel(Model $model)
     {
