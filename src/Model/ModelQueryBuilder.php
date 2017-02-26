@@ -23,6 +23,19 @@ class ModelQueryBuilder
     {
         $this->model = $model;
         $this->query = (new QueryBuilderHandler())->table($table);
+
+        if (app()->getDebugEnabled() === true) {
+
+            $this->query->registerEvent('before-*', $table,
+                function (QueryBuilderHandler $qb) {
+                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+
+            $this->query->registerEvent('after-*', $table,
+                function (QueryBuilderHandler $qb) {
+                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+        }
     }
 
     protected function createInstance(\stdClass $item)
@@ -276,7 +289,7 @@ class ModelQueryBuilder
     {
         $out = [];
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->model->getColumns())) {
+            if (in_array($key, $this->model->getColumns(), true) === true) {
                 $out[$key] = $value;
             }
         }
@@ -341,7 +354,7 @@ class ModelQueryBuilder
         return $item;
     }
 
-    public function destroy(array $ids)
+    public function destroy($ids)
     {
         $this->query->whereIn('id', $ids)->delete();
 

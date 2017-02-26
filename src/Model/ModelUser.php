@@ -133,7 +133,7 @@ class ModelUser extends ModelData
     public function exist()
     {
         if ($this->{$this->primary} === null) {
-            $user = $this->instance()->filterUsername($this->username)->first();
+            $user = static::instance()->filterUsername($this->username)->first();
             if ($user !== null && $user->id !== $this->id) {
                 return true;
             }
@@ -143,7 +143,7 @@ class ModelUser extends ModelData
 
     public function registerActivity()
     {
-        if ($this->isLoggedIn() === true) {
+        if (static::isLoggedIn() === true) {
             $this->last_activity = Carbon::now()->toDateTimeString();
             $this->save();
         }
@@ -197,14 +197,14 @@ class ModelUser extends ModelData
 
     public function filterQuery($query)
     {
-        $userDataClassName = $this->getUserDataClass();
+        $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
         $userDataQuery = $this->newQuery($userDataClass->getTable())
             ->getQuery()
             ->select($userDataClassName::USER_IDENTIFIER_KEY)
-            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
+            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
             ->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
             ->limit(1);
 
@@ -238,7 +238,7 @@ class ModelUser extends ModelData
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', (($like) ? 'LIKE' : '='), (string)$value);
+        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
 
         return $this->where($this->primary, '=', $this->subQuery($subQuery));
     }

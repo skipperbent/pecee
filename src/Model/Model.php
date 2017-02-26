@@ -2,7 +2,6 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
-use Pecee\Integer;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
@@ -11,52 +10,52 @@ use Pecee\Str;
  *
  * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
  *
- * @method static $this prefix(string $prefix)
- * @method static $this limit(int $id)
- * @method static $this skip(int $id)
- * @method static $this take(int $id)
- * @method static $this offset(int $id)
- * @method static $this where(string $key, string $operator = null, string $value = null)
- * @method static $this whereIn(string $key, array | object $values)
- * @method static $this whereNot(string $key, string $operator = null, string $value = null)
- * @method static $this whereNotIn(string $key, array | object $values)
- * @method static $this whereNull(string $key)
- * @method static $this whereNotNull(string $key)
- * @method static $this whereBetween(string $key, string $valueFrom, string $valueTo)
- * @method static $this orWhere(string $key, string $operator = null, string $value = null)
- * @method static $this orWhereIn(string $key, array | object $values)
- * @method static $this orWhereNotIn(string $key, array | object $values)
- * @method static $this orWhereNot(string $key, string $operator = null, string $value = null)
- * @method static $this orWhereNull(string $key)
- * @method static $this orWhereNotNull(string $key)
- * @method static $this orWhereBetween(string $key, string $valueFrom, string $valueTo)
- * @method static ModelCollection get()
- * @method static ModelCollection all()
- * @method static $this find(string $id)
- * @method static $this findOrFail(string $id)
- * @method static $this first()
- * @method static $this firstOrFail()
- * @method static $this count()
- * @method static $this max(string $field)
- * @method static $this sum(string $field)
- * @method static $this update(array $data)
- * @method static $this create(array $data)
- * @method static $this firstOrCreate(array $data = array())
- * @method static $this firstOrNew(array $data = array())
- * @method static $this destroy(array $ids)
- * @method static $this select(array|string $fields)
- * @method static $this groupBy(string $field)
- * @method static $this orderBy(string $field, string $defaultDirection = 'ASC')
- * @method static $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
- * @method static QueryBuilderHandler getQuery()
- * @method static string raw(string $value, array $bindings = [])
- * @method static string subQuery(QueryBuilderHandler $queryBuilder, string $alias = null)
+ * @method $this prefix(string $prefix)
+ * @method $this limit(int $id)
+ * @method $this skip(int $id)
+ * @method $this take(int $id)
+ * @method $this offset(int $id)
+ * @method $this where(string $key, string $operator = null, string $value = null)
+ * @method $this whereIn(string $key, array | object $values)
+ * @method $this whereNot(string $key, string $operator = null, string $value = null)
+ * @method $this whereNotIn(string $key, array | object $values)
+ * @method $this whereNull(string $key)
+ * @method $this whereNotNull(string $key)
+ * @method $this whereBetween(string $key, string $valueFrom, string $valueTo)
+ * @method $this orWhere(string $key, string $operator = null, string $value = null)
+ * @method $this orWhereIn(string $key, array | object $values)
+ * @method $this orWhereNotIn(string $key, array | object $values)
+ * @method $this orWhereNot(string $key, string $operator = null, string $value = null)
+ * @method $this orWhereNull(string $key)
+ * @method $this orWhereNotNull(string $key)
+ * @method $this orWhereBetween(string $key, string $valueFrom, string $valueTo)
+ * @method ModelCollection get()
+ * @method ModelCollection all()
+ * @method $this find(string $id)
+ * @method $this findOrFail(string $id)
+ * @method $this first()
+ * @method $this firstOrFail()
+ * @method $this count()
+ * @method $this max(string $field)
+ * @method $this sum(string $field)
+ * @method $this update(array $data)
+ * @method $this create(array $data)
+ * @method $this firstOrCreate(array $data)
+ * @method $this firstOrNew(array $data)
+ * @method $this destroy(array | object $ids)
+ * @method $this select(array | object $fields)
+ * @method $this groupBy(string $field)
+ * @method $this orderBy(string $field, string $defaultDirection = 'ASC')
+ * @method $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
+ * @method QueryBuilderHandler getQuery()
+ * @method string raw(string $value, array $bindings = [])
+ * @method string subQuery(Model $model, string $alias = null)
  */
 abstract class Model implements \IteratorAggregate
 {
 
     protected $table;
-    protected $results;
+    protected $results = ['rows' => []];
 
     protected $primary = 'id';
     protected $hidden = [];
@@ -82,30 +81,18 @@ abstract class Model implements \IteratorAggregate
 
         $this->queryable = new ModelQueryBuilder($this, $this->table);
 
-        if (app()->getDebugEnabled() === true) {
-
-            $this->queryable->getQuery()->registerEvent('before-*', $this->table,
-                function (QueryBuilderHandler $qb) {
-                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
-                });
-
-            $this->queryable->getQuery()->registerEvent('after-*', $this->table,
-                function (QueryBuilderHandler $qb) {
-                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
-                });
-        }
-
-        $this->results = ['rows' => []];
-
         if ($this->timestamps === true) {
-            $this->columns = array_merge($this->columns, ['created_at', 'updated_at']);
+            $this->columns = array_merge($this->columns, [
+                'created_at',
+                'updated_at'
+            ]);
             $this->created_at = Carbon::now();
         }
     }
 
     public function newQuery($table = null)
     {
-        $model = $this->instance();
+        $model = new static();
         $model->setQuery(new ModelQueryBuilder($this, $table));
 
         return $model;
@@ -150,7 +137,7 @@ abstract class Model implements \IteratorAggregate
      * @see \Pecee\Model\Model::save()
      * @param array|null $data
      * @return static
-     * @throws ModelException
+     * @throws ModelException|\Pecee\Pixie\Exception
      */
     public function save(array $data = null)
     {
@@ -175,7 +162,7 @@ abstract class Model implements \IteratorAggregate
 
         $this->mergeRows($updateData);
 
-        if ($this->exists()) {
+        if ($this->exists() === true) {
 
             if ($this->timestamps) {
                 $this->updated_at = Carbon::now()->toDateTimeString();
@@ -186,7 +173,7 @@ abstract class Model implements \IteratorAggregate
                 unset($updateData[$this->getPrimary()]);
             }
 
-            $this->instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
+            static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         } else {
 
             $updateData = array_filter($updateData, function($value) {
@@ -194,9 +181,9 @@ abstract class Model implements \IteratorAggregate
             }, ARRAY_FILTER_USE_BOTH);
 
             if ($this->{$this->primary} === null) {
-                $this->{$this->primary} = $this->instance()->getQuery()->insert($updateData);
+                $this->{$this->primary} = static::getQuery()->insert($updateData);
             } else {
-                $this->instance()->getQuery()->insert($updateData);
+                static::instance()->getQuery()->insert($updateData);
             }
         }
 
@@ -213,7 +200,7 @@ abstract class Model implements \IteratorAggregate
             $this->queryable->where($this->primary, '=', $this->{$this->primary});
         }
 
-        $this->getQuery()->delete();
+        return $this->queryable->getQuery()->delete();
     }
 
     public function exists()
@@ -245,7 +232,7 @@ abstract class Model implements \IteratorAggregate
      */
     public function getRow($key)
     {
-        return ($this->hasRows() && isset($this->results['rows'][$key])) ? $this->results['rows'][$key] : null;
+        return ($this->hasRows() === true && isset($this->results['rows'][$key])) ? $this->results['rows'][$key] : null;
     }
 
     public function setRow($key, $value)
@@ -311,7 +298,7 @@ abstract class Model implements \IteratorAggregate
     {
         if (is_array($data) === true) {
             $out = [];
-            foreach ($data as $d) {
+            foreach ((array)$data as $d) {
                 $out[] = $this->parseArrayData($d);
             }
 
@@ -321,24 +308,32 @@ abstract class Model implements \IteratorAggregate
         $encoding = mb_detect_encoding($data, 'UTF-8', true);
         $data = (is_array($data) === false && ($encoding === false || strtolower($encoding) !== 'utf-8')) ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
 
-        return Integer::isInteger($data) ? (int)$data : $data;
+        if(is_float($data) === true) {
+            return (float)$data;
+        }
+
+        if(is_bool($data) === true || is_numeric($data) === true) {
+            return (int)$data;
+        }
+
+        return $data;
     }
 
     protected function orderArrayRows(array &$rows)
     {
         uksort($rows, function ($a, $b) {
-            return (array_search($a, $this->columns) > array_search($b, $this->columns));
+            return (array_search($a, $this->columns, true) > array_search($b, $this->columns, true));
         });
     }
 
-    public function toArray()
+    public function toArray(array $filter = [])
     {
         $rows = $this->getRows();
 
         if ($rows !== null) {
             foreach ($rows as $key => $row) {
                 $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
-                if (in_array($key, $this->hidden, true) === true) {
+                if (in_array($key, $this->hidden, true) === true || (count($filter) && in_array($key, $filter, true) === false)) {
                     unset($rows[$key]);
                     continue;
                 }
@@ -358,8 +353,6 @@ abstract class Model implements \IteratorAggregate
                 $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
                 $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
             }
-
-            return $rows;
         }
 
         return $rows;
@@ -371,30 +364,26 @@ abstract class Model implements \IteratorAggregate
     }
 
     /**
-     * @param $method
-     * @param $parameters
-     * @return static|null
+     * @param string $method
+     * @param array $parameters
+     * @return static|QueryBuilderHandler|null
      */
     public function __call($method, $parameters)
     {
-        if (method_exists($this->queryable, $method)) {
+        if (method_exists($this->queryable, $method) === true) {
             return call_user_func_array([$this->queryable, $method], $parameters);
         }
 
         return null;
     }
 
-    /**
-     * @param $method
-     * @param $parameters
-     * @return static
-     */
+
     public static function __callStatic($method, $parameters)
     {
-        $instance = new static;
+        $instance = new static();
 
-        if (method_exists($instance->queryable, $method)) {
-            return call_user_func_array([$instance, $method], $parameters);
+        if (method_exists($instance->queryable, $method) === true) {
+            return call_user_func_array([$instance->queryable, $method], $parameters);
         }
 
         return null;

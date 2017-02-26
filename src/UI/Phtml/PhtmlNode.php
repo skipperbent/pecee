@@ -2,7 +2,6 @@
 namespace Pecee\UI\Phtml;
 
 use Pecee\Guid;
-use Pecee\Registry;
 use Pecee\UI\Html\HtmlElement;
 
 class PhtmlNode extends HtmlElement
@@ -33,7 +32,7 @@ class PhtmlNode extends HtmlElement
 
     public function __toString()
     {
-        if ($this->getTag() == 'phtml') {
+        if ($this->getTag() === 'phtml') {
             return $this->getInnerString();
         }
 
@@ -119,7 +118,7 @@ class PhtmlNode extends HtmlElement
                 $str .= $this->getInnerPHP();
             }
             if ($method) {
-                $taglibs = Registry::getInstance()->get(Phtml::SETTINGS_TAGLIB, []);
+                $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
                 if (isset($taglibs[$this->getNs()])) {
                     $tag = $this->getTag();
                     $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), $body);
@@ -129,7 +128,7 @@ class PhtmlNode extends HtmlElement
             }
         } else {
             if ($method) {
-                $taglibs = Registry::getInstance()->get(Phtml::SETTINGS_TAGLIB, []);
+                $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
                 if (isset($taglibs[$this->getNs()])) {
                     $tag = $this->getTag();
                     $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), null, null);
@@ -138,7 +137,7 @@ class PhtmlNode extends HtmlElement
                 $str .= '/>';
             }
         }
-        if ($this->getParent() == null || $this->getParent()->getTag() == 'phtml') {
+        if ($this->getParent() === null || $this->getParent()->getTag() == 'phtml') {
             $str = self::$prepend . $str . self::$append;
             self::$prepend = '';
             self::$append = '';

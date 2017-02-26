@@ -42,11 +42,11 @@ class UserData extends Model
 
     public static function destroyByIdentifier($identifierId)
     {
-        static::where(static::IDENTIFIER_KEY, '=', $identifierId)->delete();
+        return static::instance()->where(static::IDENTIFIER_KEY, '=', $identifierId)->delete();
     }
 
     public static function getByIdentifier($identifierId)
     {
-        return static::where(static::IDENTIFIER_KEY, '=', $identifierId)->all();
+        return static::instance()->where(static::IDENTIFIER_KEY, '=', $identifierId)->all();
     }
 }

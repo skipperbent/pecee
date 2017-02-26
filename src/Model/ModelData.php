@@ -28,9 +28,9 @@ abstract class ModelData extends Model
 
     protected function updateData()
     {
-
         if ($this->data !== null) {
 
+            /* @var $currentFields array|null */
             $currentFields = $this->fetchData();
 
             if ($currentFields === null) {
@@ -50,16 +50,17 @@ abstract class ModelData extends Model
                         continue;
                     }
 
-                    if (isset($cf[strtolower($key)])) {
+                    if (isset($cf[strtolower($key)]) === true) {
                         if ($cf[$key]->value === $value) {
                             unset($cf[$key]);
                             continue;
-                        } else {
-                            $cf[$key]->{$this->dataKeyField} = $key;
-                            $cf[$key]->{$this->dataValueField} = $value;
-                            $cf[$key]->save();
-                            unset($cf[$key]);
                         }
+
+                        $cf[$key]->{$this->dataKeyField} = $key;
+                        $cf[$key]->{$this->dataValueField} = $value;
+                        $cf[$key]->save();
+                        unset($cf[$key]);
+
                     } else {
                         $field = $this->getDataClass();
                         $field = new $field();
@@ -85,6 +86,7 @@ abstract class ModelData extends Model
 
     public function onInstanceCreate()
     {
+        /* @var $data array */
         $data = $this->fetchData();
         if (count($data)) {
             foreach ($data as $d) {
@@ -97,16 +99,16 @@ abstract class ModelData extends Model
     {
         $keys = array_map('strtolower', array_keys($this->getRows()));
         foreach ($data as $key => $d) {
-            if (!in_array(strtolower($key), $keys)) {
+            if (in_array(strtolower($key), $keys, false) === false) {
                 $this->data->$key = $d;
             }
         }
     }
 
-    public function toArray()
+    public function toArray(array $filter = [])
     {
-        $output = parent::toArray();
-        if (is_array($output)) {
+        $output = parent::toArray($filter);
+        if (is_array($output) === true) {
             return array_merge($this->data->getData(), $output);
         }
 
