@@ -123,7 +123,7 @@ function env($key, $default = null)
  */
 function csrf_token()
 {
-    $baseVerifier = Router::router()->getInstance()->getCsrfVerifier();
+    $baseVerifier = Router::router()->getCsrfVerifier();
     if ($baseVerifier !== null) {
         return $baseVerifier->getToken();
     }

@@ -7,10 +7,8 @@ use Pecee\SimpleRouter\SimpleRouter;
 class Router extends SimpleRouter
 {
 
-    public static function start()
+    public static function init()
     {
-        debug('Router initialised.');
-
         Session::start();
 
         if (app()->getDisableFrameworkRoutes() === false) {
@@ -25,6 +23,14 @@ class Router extends SimpleRouter
         require_once env('base_path') . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
 
         parent::setDefaultNamespace('\\' . env('APP_NAME') . '\\Controller');
+    }
+
+    public static function start()
+    {
+        debug('Router initialised.');
+
+        static::init();
+
         parent::start();
 
         // Output debug info

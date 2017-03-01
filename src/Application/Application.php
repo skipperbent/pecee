@@ -43,6 +43,7 @@ class Application
     protected $jsWrapRouteUrl = '/js-wrap';
     protected $disableFrameworkRoutes = false;
     protected $encryptionMethod = 'AES-256-CBC';
+    protected $settings;
 
     public function __construct()
     {
@@ -264,6 +265,32 @@ class Application
     public function getDisableFrameworkRoutes()
     {
         return $this->disableFrameworkRoutes;
+    }
+
+    /**
+     * Get application parameter
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return static $this
+     */
+    public function add($key, $value)
+    {
+        $this->parameters[$key] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Set application parameter
+     *
+     * @param string $key
+     * @param mixed|null $defaultValue
+     * @return mixed|null
+     */
+    public function get($key, $defaultValue = null)
+    {
+        return isset($this->parameters[$key]) ? $this->parameters[$key] : $defaultValue;
     }
 
     public function __set($name, $value)

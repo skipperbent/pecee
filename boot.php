@@ -15,8 +15,14 @@ set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__ . '/resources');
 
 request()->app = new Pecee\Application\Application();
 
-if(app()->getDebugEnabled() === true) {
+if (app()->getDebugEnabled() === true) {
     $whoops = new \Whoops\Run;
     $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
     $whoops->register();
+}
+
+if (PHP_SAPI === 'cli') {
+    /* Load routes so url() can be used in cli-mode */
+    \Pecee\Application\Router::init();
+    \Pecee\Application\Router::router()->loadRoutes();
 }
