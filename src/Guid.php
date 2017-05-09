@@ -26,7 +26,14 @@ class Guid
         }
 
         $key = substr(hash('sha256', $key, true), 0, 16);
-        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($method));
+
+        $isSourceStrong = false;
+
+        $iv = openssl_random_pseudo_bytes(32, $isSourceStrong);
+        if ($isSourceStrong === false || $iv === false) {
+            throw new \RuntimeException('IV generation failed');
+        }
+
         $data = openssl_encrypt($data, $method, $key, 0, $iv);
 
         return base64_encode($data . '|' . bin2hex($iv));
