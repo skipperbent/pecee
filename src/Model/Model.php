@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model;
 
 use Carbon\Carbon;
@@ -6,53 +7,9 @@ use Pecee\Model\Exceptions\ModelException;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
 
-/**
- *
- * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
- *
- * @method $this prefix(string $prefix)
- * @method $this limit(int $id)
- * @method $this skip(int $id)
- * @method $this take(int $id)
- * @method $this offset(int $id)
- * @method $this where(string $key, string $operator = null, string $value = null)
- * @method $this whereIn(string $key, array | object $values)
- * @method $this whereNot(string $key, string $operator = null, string $value = null)
- * @method $this whereNotIn(string $key, array | object $values)
- * @method $this whereNull(string $key)
- * @method $this whereNotNull(string $key)
- * @method $this whereBetween(string $key, string $valueFrom, string $valueTo)
- * @method $this orWhere(string $key, string $operator = null, string $value = null)
- * @method $this orWhereIn(string $key, array | object $values)
- * @method $this orWhereNotIn(string $key, array | object $values)
- * @method $this orWhereNot(string $key, string $operator = null, string $value = null)
- * @method $this orWhereNull(string $key)
- * @method $this orWhereNotNull(string $key)
- * @method $this orWhereBetween(string $key, string $valueFrom, string $valueTo)
- * @method ModelCollection get()
- * @method ModelCollection all()
- * @method $this find(string $id)
- * @method $this findOrFail(string $id)
- * @method $this first()
- * @method $this firstOrFail()
- * @method $this count()
- * @method $this max(string $field)
- * @method $this sum(string $field)
- * @method $this update(array $data)
- * @method $this create(array $data)
- * @method $this firstOrCreate(array $data)
- * @method $this firstOrNew(array $data)
- * @method $this destroy(array | object $ids)
- * @method $this select(array | object $fields)
- * @method $this groupBy(string $field)
- * @method $this orderBy(string $field, string $defaultDirection = 'ASC')
- * @method $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
- * @method QueryBuilderHandler getQuery()
- * @method string raw(string $value, array $bindings = [])
- * @method string subQuery(Model $model, string $alias = null)
- */
 abstract class Model implements \IteratorAggregate
 {
+    use ModelQueryBuilder;
 
     protected $table;
     protected $results = ['rows' => []];
@@ -65,11 +22,6 @@ abstract class Model implements \IteratorAggregate
     protected $columns = [];
     protected $timestamps = true;
 
-    /**
-     * @var ModelQueryBuilder
-     */
-    protected $queryable;
-
     public function __construct()
     {
         // Set table name if its not already defined
@@ -79,12 +31,10 @@ abstract class Model implements \IteratorAggregate
             $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
         }
 
-        $this->queryable = new ModelQueryBuilder($this, $this->table);
-
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
                 'created_at',
-                'updated_at'
+                'updated_at',
             ]);
             $this->created_at = Carbon::now();
         }
@@ -92,10 +42,20 @@ abstract class Model implements \IteratorAggregate
 
     public function newQuery($table = null)
     {
-        $model = new static();
-        $model->setQuery(new ModelQueryBuilder($this, $table));
+        $this->query = (new QueryBuilderHandler())->table($table);
 
-        return $model;
+        if (app()->getDebugEnabled() === true) {
+
+            $this->query->registerEvent('before-*', $table,
+                function (QueryBuilderHandler $qb) {
+                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+
+            $this->query->registerEvent('after-*', $table,
+                function (QueryBuilderHandler $qb) {
+                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+        }
     }
 
     /**
@@ -125,7 +85,7 @@ abstract class Model implements \IteratorAggregate
     protected function joinData()
     {
         if (count($this->join)) {
-            for($i = 0, $max = count($this->join); $i < $max; $i++) {
+            for ($i = 0, $max = count($this->join); $i < $max; $i++) {
                 $join = $this->join[$i];
                 $this->{$join} = $this->{Str::camelize($join)}();
             }
@@ -176,7 +136,7 @@ abstract class Model implements \IteratorAggregate
             static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         } else {
 
-            $updateData = array_filter($updateData, function($value) {
+            $updateData = array_filter($updateData, function ($value) {
                 return $value !== null;
             }, ARRAY_FILTER_USE_BOTH);
 
@@ -308,11 +268,11 @@ abstract class Model implements \IteratorAggregate
         $encoding = mb_detect_encoding($data, 'UTF-8', true);
         $data = (is_array($data) === false && ($encoding === false || strtolower($encoding) !== 'utf-8')) ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
 
-        if(is_float($data) === true) {
+        if (is_float($data) === true) {
             return (float)$data;
         }
 
-        if(is_bool($data) === true || is_numeric($data) === true) {
+        if (is_bool($data) === true || is_numeric($data) === true) {
             return (int)$data;
         }
 
@@ -361,37 +321,6 @@ abstract class Model implements \IteratorAggregate
     public function getColumns()
     {
         return $this->columns;
-    }
-
-    /**
-     * @param string $method
-     * @param array $parameters
-     * @return static|QueryBuilderHandler|null
-     */
-    public function __call($method, $parameters)
-    {
-        if (method_exists($this->queryable, $method) === true) {
-            return call_user_func_array([$this->queryable, $method], $parameters);
-        }
-
-        return null;
-    }
-
-
-    public static function __callStatic($method, $parameters)
-    {
-        $instance = new static();
-
-        if (method_exists($instance->queryable, $method) === true) {
-            return call_user_func_array([$instance->queryable, $method], $parameters);
-        }
-
-        return null;
-    }
-
-    public function setQuery(ModelQueryBuilder $query)
-    {
-        $this->queryable = $query;
     }
 
     /**

@@ -1,47 +1,23 @@
 <?php
+
 namespace Pecee\Model;
 
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
+use Pecee\Pixie\Exception;
 use Pecee\Str;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
-class ModelQueryBuilder
+trait ModelQueryBuilder
 {
-    protected static $instance;
-
-    /**
-     * @var Model
-     */
-    protected $model;
     /**
      * @var QueryBuilderHandler
      */
     protected $query;
 
-    public function __construct(Model $model, $table)
-    {
-        $this->model = $model;
-        $this->query = (new QueryBuilderHandler())->table($table);
-
-        if (app()->getDebugEnabled() === true) {
-
-            $this->query->registerEvent('before-*', $table,
-                function (QueryBuilderHandler $qb) {
-                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
-                });
-
-            $this->query->registerEvent('after-*', $table,
-                function (QueryBuilderHandler $qb) {
-                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
-                });
-        }
-    }
-
     protected function createInstance(\stdClass $item)
     {
-        /* @var $model Model */
-        $model = $this->model->getInstance($item);
+        $model = new static;
         $model->mergeRows((array)$item);
         $model->onInstanceCreate();
 
@@ -58,23 +34,23 @@ class ModelQueryBuilder
 
     public function prefix($prefix)
     {
-        $this->query->addPrefix($this->model->getTable(), $prefix);
+        $this->query->addPrefix($this->getTable(), $prefix);
 
-        return $this->model;
+        return $this;
     }
 
     public function limit($limit)
     {
         $this->query->limit($limit);
 
-        return $this->model;
+        return $this;
     }
 
     public function skip($skip)
     {
         $this->query->offset($skip);
 
-        return $this->model;
+        return $this;
     }
 
     public function take($amount)
@@ -96,14 +72,14 @@ class ModelQueryBuilder
 
         $this->query->where($key, $operator, $value);
 
-        return $this->model;
+        return $this;
     }
 
     public function whereIn($key, $values)
     {
         $this->query->whereIn($key, $values);
 
-        return $this->model;
+        return $this;
     }
 
     public function whereNot($key, $operator = null, $value = null)
@@ -115,35 +91,35 @@ class ModelQueryBuilder
 
         $this->query->whereNot($key, $operator, $value);
 
-        return $this->model;
+        return $this;
     }
 
     public function whereNotIn($key, $values)
     {
         $this->query->whereNotIn($key, $values);
 
-        return $this->model;
+        return $this;
     }
 
     public function whereNull($key)
     {
         $this->query->whereNull($key);
 
-        return $this->model;
+        return $this;
     }
 
     public function whereNotNull($key)
     {
         $this->query->whereNotNull($key);
 
-        return $this->model;
+        return $this;
     }
 
     public function whereBetween($key, $valueFrom, $valueTo)
     {
         $this->query->whereBetween($key, $valueFrom, $valueTo);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhere($key, $operator = null, $value = null)
@@ -155,21 +131,21 @@ class ModelQueryBuilder
 
         $this->query->orWhere($key, $operator, $value);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhereIn($key, $values)
     {
         $this->query->orWhereIn($key, $values);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhereNotIn($key, $values)
     {
         $this->query->orWhereNotIn($key, $values);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhereNot($key, $operator = null, $value = null)
@@ -181,28 +157,28 @@ class ModelQueryBuilder
 
         $this->query->orWhereNot($key, $operator, $value);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhereNull($key)
     {
         $this->query->orWhereNull($key);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhereNotNull($key)
     {
         $this->query->orWhereNotNull($key);
 
-        return $this->model;
+        return $this;
     }
 
     public function orWhereBetween($key, $valueFrom, $valueTo)
     {
         $this->query->orWhereBetween($key, $valueFrom, $valueTo);
 
-        return $this->model;
+        return $this;
     }
 
     public function get()
@@ -228,7 +204,7 @@ class ModelQueryBuilder
 
     public function find($id)
     {
-        $item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
+        $item = $this->query->where($this->getPrimary(), '=', $id)->first();
         if ($item !== null) {
             return $this->createInstance($item);
         }
@@ -240,7 +216,7 @@ class ModelQueryBuilder
     {
         $item = $this->find($id);
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->getTable())) . ' was not found');
         }
 
         return $item;
@@ -260,7 +236,7 @@ class ModelQueryBuilder
     {
         $item = $this->first();
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->getTable())) . ' was not found');
         }
 
         return $item;
@@ -289,7 +265,7 @@ class ModelQueryBuilder
     {
         $out = [];
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->model->getColumns(), true) === true) {
+            if (in_array($key, $this->getColumns(), true) === true) {
                 $out[$key] = $value;
             }
         }
@@ -305,12 +281,12 @@ class ModelQueryBuilder
 
         $this->query->update($data);
 
-        return $this->model;
+        return $this;
     }
 
     public function create(array $data = [])
     {
-        $data = array_merge($this->model->getRows(), $this->getValidData($data));
+        $data = array_merge($this->getRows(), $this->getValidData($data));
 
         if (count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
@@ -320,10 +296,10 @@ class ModelQueryBuilder
 
         if ($id) {
 
-            $this->model->mergeRows($data);
-            $this->model->{$this->model->getPrimary()} = $id;
+            $this->mergeRows($data);
+            $this->{$this->getPrimary()} = $id;
 
-            return $this->model;
+            return $this;
         }
 
         return false;
@@ -358,35 +334,35 @@ class ModelQueryBuilder
     {
         $this->query->whereIn('id', $ids)->delete();
 
-        return $this->model;
+        return $this;
     }
 
     public function select($fields)
     {
         $this->query->select($fields);
 
-        return $this->model;
+        return $this;
     }
 
     public function groupBy($field)
     {
         $this->query->groupBy($field);
 
-        return $this->model;
+        return $this;
     }
 
     public function orderBy($fields, $defaultDirection = 'ASC')
     {
         $this->query->orderBy($fields, $defaultDirection);
 
-        return $this->model;
+        return $this;
     }
 
     public function join($table, $key, $operator = null, $value = null, $type = 'inner')
     {
         $this->query->join($table, $key, $operator, $value, $type);
 
-        return $this->model;
+        return $this;
     }
 
     public function raw($value, array $bindings = [])
@@ -400,22 +376,6 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return Model
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
-
-    /**
-     * @param Model $model
-     */
-    public function setModel(Model $model)
-    {
-        $this->model = $model;
-    }
-
-    /**
      * @return QueryBuilderHandler
      */
     public function getQuery()
@@ -426,6 +386,16 @@ class ModelQueryBuilder
     public function __clone()
     {
         $this->query = clone $this->query;
+    }
+
+    /**
+     * Get unique identifier for current query
+     * @return string
+     * @throws Exception
+     */
+    public function getQueryIdentifier()
+    {
+        return md5(static::class . $this->getQuery()->getQuery()->getRawSql());
     }
 
 }
