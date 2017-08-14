@@ -324,6 +324,22 @@ abstract class Model implements \IteratorAggregate
     }
 
     /**
+     * @param $method
+     * @param $parameters
+     * @return static
+     */
+    public static function __callStatic($method, $parameters)
+    {
+        $instance = new static;
+
+        if (method_exists($instance->queryable, $method) === true) {
+            return call_user_func_array([$instance, $method], $parameters);
+        }
+
+        return null;
+    }
+
+    /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
      * @return \Traversable An instance of an object implementing <b>Iterator</b> or
