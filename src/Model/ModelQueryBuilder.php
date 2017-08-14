@@ -1,23 +1,47 @@
 <?php
-
 namespace Pecee\Model;
 
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
-use Pecee\Pixie\Exception;
 use Pecee\Str;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
-trait ModelQueryBuilder
+class ModelQueryBuilder
 {
+    protected static $instance;
+
+    /**
+     * @var Model
+     */
+    protected $model;
     /**
      * @var QueryBuilderHandler
      */
     protected $query;
 
+    public function __construct(Model $model, $table)
+    {
+        $this->model = $model;
+        $this->query = (new QueryBuilderHandler())->table($table);
+
+        if (app()->getDebugEnabled() === true) {
+
+            $this->query->registerEvent('before-*', $table,
+                function (QueryBuilderHandler $qb) {
+                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+
+            $this->query->registerEvent('after-*', $table,
+                function (QueryBuilderHandler $qb) {
+                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
+                });
+        }
+    }
+
     protected function createInstance(\stdClass $item)
     {
-        $model = new static;
+        /* @var $model Model */
+        $model = $this->model->getInstance($item);
         $model->mergeRows((array)$item);
         $model->onInstanceCreate();
 
@@ -34,23 +58,23 @@ trait ModelQueryBuilder
 
     public function prefix($prefix)
     {
-        $this->query->addPrefix($this->getTable(), $prefix);
+        $this->query->addPrefix($this->model->getTable(), $prefix);
 
-        return $this;
+        return $this->model;
     }
 
     public function limit($limit)
     {
         $this->query->limit($limit);
 
-        return $this;
+        return $this->model;
     }
 
     public function skip($skip)
     {
         $this->query->offset($skip);
 
-        return $this;
+        return $this->model;
     }
 
     public function take($amount)
@@ -72,14 +96,14 @@ trait ModelQueryBuilder
 
         $this->query->where($key, $operator, $value);
 
-        return $this;
+        return $this->model;
     }
 
     public function whereIn($key, $values)
     {
         $this->query->whereIn($key, $values);
 
-        return $this;
+        return $this->model;
     }
 
     public function whereNot($key, $operator = null, $value = null)
@@ -91,35 +115,35 @@ trait ModelQueryBuilder
 
         $this->query->whereNot($key, $operator, $value);
 
-        return $this;
+        return $this->model;
     }
 
     public function whereNotIn($key, $values)
     {
         $this->query->whereNotIn($key, $values);
 
-        return $this;
+        return $this->model;
     }
 
     public function whereNull($key)
     {
         $this->query->whereNull($key);
 
-        return $this;
+        return $this->model;
     }
 
     public function whereNotNull($key)
     {
         $this->query->whereNotNull($key);
 
-        return $this;
+        return $this->model;
     }
 
     public function whereBetween($key, $valueFrom, $valueTo)
     {
         $this->query->whereBetween($key, $valueFrom, $valueTo);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhere($key, $operator = null, $value = null)
@@ -131,21 +155,21 @@ trait ModelQueryBuilder
 
         $this->query->orWhere($key, $operator, $value);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhereIn($key, $values)
     {
         $this->query->orWhereIn($key, $values);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhereNotIn($key, $values)
     {
         $this->query->orWhereNotIn($key, $values);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhereNot($key, $operator = null, $value = null)
@@ -157,28 +181,28 @@ trait ModelQueryBuilder
 
         $this->query->orWhereNot($key, $operator, $value);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhereNull($key)
     {
         $this->query->orWhereNull($key);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhereNotNull($key)
     {
         $this->query->orWhereNotNull($key);
 
-        return $this;
+        return $this->model;
     }
 
     public function orWhereBetween($key, $valueFrom, $valueTo)
     {
         $this->query->orWhereBetween($key, $valueFrom, $valueTo);
 
-        return $this;
+        return $this->model;
     }
 
     public function get()
@@ -204,7 +228,7 @@ trait ModelQueryBuilder
 
     public function find($id)
     {
-        $item = $this->query->where($this->getPrimary(), '=', $id)->first();
+        $item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
         if ($item !== null) {
             return $this->createInstance($item);
         }
@@ -216,7 +240,7 @@ trait ModelQueryBuilder
     {
         $item = $this->find($id);
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->getTable())) . ' was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
         }
 
         return $item;
@@ -236,7 +260,7 @@ trait ModelQueryBuilder
     {
         $item = $this->first();
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->getTable())) . ' was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
         }
 
         return $item;
@@ -265,7 +289,7 @@ trait ModelQueryBuilder
     {
         $out = [];
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->getColumns(), true) === true) {
+            if (in_array($key, $this->model->getColumns(), true) === true) {
                 $out[$key] = $value;
             }
         }
@@ -281,12 +305,12 @@ trait ModelQueryBuilder
 
         $this->query->update($data);
 
-        return $this;
+        return $this->model;
     }
 
     public function create(array $data = [])
     {
-        $data = array_merge($this->getRows(), $this->getValidData($data));
+        $data = array_merge($this->model->getRows(), $this->getValidData($data));
 
         if (count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
@@ -296,10 +320,10 @@ trait ModelQueryBuilder
 
         if ($id) {
 
-            $this->mergeRows($data);
-            $this->{$this->getPrimary()} = $id;
+            $this->model->mergeRows($data);
+            $this->model->{$this->model->getPrimary()} = $id;
 
-            return $this;
+            return $this->model;
         }
 
         return false;
@@ -334,35 +358,35 @@ trait ModelQueryBuilder
     {
         $this->query->whereIn('id', $ids)->delete();
 
-        return $this;
+        return $this->model;
     }
 
     public function select($fields)
     {
         $this->query->select($fields);
 
-        return $this;
+        return $this->model;
     }
 
     public function groupBy($field)
     {
         $this->query->groupBy($field);
 
-        return $this;
+        return $this->model;
     }
 
     public function orderBy($fields, $defaultDirection = 'ASC')
     {
         $this->query->orderBy($fields, $defaultDirection);
 
-        return $this;
+        return $this->model;
     }
 
     public function join($table, $key, $operator = null, $value = null, $type = 'inner')
     {
         $this->query->join($table, $key, $operator, $value, $type);
 
-        return $this;
+        return $this->model;
     }
 
     public function raw($value, array $bindings = [])
@@ -376,6 +400,22 @@ trait ModelQueryBuilder
     }
 
     /**
+     * @return Model
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    /**
+     * @param Model $model
+     */
+    public function setModel(Model $model)
+    {
+        $this->model = $model;
+    }
+
+    /**
      * @return QueryBuilderHandler
      */
     public function getQuery()
@@ -386,16 +426,6 @@ trait ModelQueryBuilder
     public function __clone()
     {
         $this->query = clone $this->query;
-    }
-
-    /**
-     * Get unique identifier for current query
-     * @return string
-     * @throws Exception
-     */
-    public function getQueryIdentifier()
-    {
-        return md5(static::class . $this->getQuery()->getQuery()->getRawSql());
     }
 
 }
