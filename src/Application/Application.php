@@ -1,6 +1,8 @@
 <?php
 namespace Pecee\Application;
 
+use Pecee\Application\UrlHandler\IUrlHandler;
+use Pecee\Application\UrlHandler\UrlHandler;
 use Pecee\Boolean;
 use Pecee\Translation\Translation;
 use Pecee\UI\Site;
@@ -44,6 +46,11 @@ class Application
     protected $disableFrameworkRoutes = false;
     protected $encryptionMethod = 'AES-256-CBC';
     protected $settings;
+    /**
+     * Callback for handling urls
+     * @var IUrlHandler
+     */
+    protected $urlHandler;
 
     public function __construct()
     {
@@ -56,6 +63,7 @@ class Application
         $this->site = new Site();
         $this->translation = new Translation();
         $this->charset = static::CHARSET_UTF8;
+        $this->urlHandler = new UrlHandler();
 
         // Default stuff
         $this->setTimezone('UTC');
@@ -341,6 +349,26 @@ class Application
     public function getDebugEnabled()
     {
         return $this->debugEnabled;
+    }
+
+    /**
+     * Set url handler callback
+     * @param IUrlHandler $callback
+     * @return $this
+     */
+    public function setUrlHandler(IUrlHandler $callback)
+    {
+        $this->urlHandler = $callback;
+        return $this;
+    }
+
+    /**
+     * Get url handler
+     * @return IUrlHandler
+     */
+    public function getUrlHandler()
+    {
+        return $this->urlHandler;
     }
 
 }

@@ -25,7 +25,7 @@ use Pecee\Application\Router as Router;
  */
 function url($name = null, $parameters = null, $getParams = null)
 {
-    return Router::getUrl($name, $parameters, $getParams);
+    return app()->getUrlHandler()->getUrl($name, $parameters, $getParams);
 }
 
 /**
