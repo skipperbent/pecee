@@ -15,7 +15,6 @@ abstract class Widget extends Base
 
     public function __construct()
     {
-
         parent::__construct();
 
         debug('START WIDGET: ' . static::class);
