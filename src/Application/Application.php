@@ -131,7 +131,7 @@ class Application
         setlocale(LC_ALL, $locale);
 
         if ($this->translation->getProvider() !== null) {
-            $this->translation->getProvider()->load($locale);
+            $this->translation->getProvider()->load($this->locale);
         }
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model;
 
 use Carbon\Carbon;
@@ -138,15 +139,14 @@ class ModelUser extends ModelData
                 return true;
             }
         }
+
         return false;
     }
 
     public function registerActivity()
     {
-        if (static::isLoggedIn() === true) {
-            $this->last_activity = Carbon::now()->toDateTimeString();
-            $this->save();
-        }
+        $this->last_activity = Carbon::now()->toDateTimeString();
+        $this->save();
     }
 
     /**

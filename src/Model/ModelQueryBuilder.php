@@ -1,8 +1,11 @@
 <?php
+
 namespace Pecee\Model;
 
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
+use Pecee\Pixie\Exception;
+use Pecee\Pixie\QueryBuilder\QueryObject;
 use Pecee\Str;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
@@ -27,13 +30,13 @@ class ModelQueryBuilder
         if (app()->getDebugEnabled() === true) {
 
             $this->query->registerEvent('before-*', $table,
-                function (QueryBuilderHandler $qb) {
-                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
+                function (QueryBuilderHandler $qb, QueryObject $qo) {
+                    debug('START QUERY: ' . $qo->getRawSql());
                 });
 
             $this->query->registerEvent('after-*', $table,
-                function (QueryBuilderHandler $qb) {
-                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
+                function (QueryBuilderHandler $qb, QueryObject $qo) {
+                    debug('END QUERY: ' . $qo->getRawSql());
                 });
         }
     }
@@ -43,6 +46,7 @@ class ModelQueryBuilder
         /* @var $model Model */
         $model = $this->model->getInstance($item);
         $model->mergeRows((array)$item);
+        $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
 
         return $model;
@@ -426,6 +430,26 @@ class ModelQueryBuilder
     public function __clone()
     {
         $this->query = clone $this->query;
+    }
+
+    /**
+     * Get unique identifier for current query
+     * @return string
+     * @throws Exception
+     */
+    public function getQueryIdentifier()
+    {
+        return md5(static::class . $this->getQuery()->getQuery()->getRawSql());
+    }
+
+    public function __sleep()
+    {
+        return ['model'];
+    }
+
+    public function __wakeup()
+    {
+        $this->query = (new QueryBuilderHandler())->table($this->model->getTable());
     }
 
 }

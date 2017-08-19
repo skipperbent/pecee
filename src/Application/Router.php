@@ -1,7 +1,6 @@
 <?php
 namespace Pecee\Application;
 
-use Pecee\Session\Session;
 use Pecee\SimpleRouter\SimpleRouter;
 
 class Router extends SimpleRouter
@@ -9,8 +8,6 @@ class Router extends SimpleRouter
 
     public static function init()
     {
-        Session::start();
-
         if (app()->getDisableFrameworkRoutes() === false) {
 
             // Load framework specific controllers

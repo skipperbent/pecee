@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model;
 
 use Carbon\Carbon;
@@ -50,13 +51,12 @@ use Pecee\Str;
  * @method QueryBuilderHandler getQuery()
  * @method string raw(string $value, array $bindings = [])
  * @method string subQuery(Model $model, string $alias = null)
+ * @method string getQueryIdentifier()
  */
 abstract class Model implements \IteratorAggregate
 {
-
     protected $table;
-    protected $results = ['rows' => []];
-
+    protected $results = ['rows' => [], 'original_rows' => []];
     protected $primary = 'id';
     protected $hidden = [];
     protected $with = [];
@@ -84,7 +84,7 @@ abstract class Model implements \IteratorAggregate
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
                 'created_at',
-                'updated_at'
+                'updated_at',
             ]);
             $this->created_at = Carbon::now();
         }
@@ -125,7 +125,7 @@ abstract class Model implements \IteratorAggregate
     protected function joinData()
     {
         if (count($this->join)) {
-            for($i = 0, $max = count($this->join); $i < $max; $i++) {
+            for ($i = 0, $max = count($this->join); $i < $max; $i++) {
                 $join = $this->join[$i];
                 $this->{$join} = $this->{Str::camelize($join)}();
             }
@@ -150,6 +150,8 @@ abstract class Model implements \IteratorAggregate
             $updateData[$column] = $this->{$column};
         }
 
+        $originalRows = $this->getOriginalRows();
+
         if ($data !== null) {
 
             /* Only save valid columns */
@@ -160,9 +162,19 @@ abstract class Model implements \IteratorAggregate
             $updateData = array_merge($updateData, $data);
         }
 
+        foreach ($updateData as $key => $value) {
+            if (array_key_exists($key, $originalRows) === true && $originalRows[$key] === $value) {
+                unset($updateData[$key]);
+            }
+        }
+
+        if (count($updateData) === 0) {
+            return $this;
+        }
+
         $this->mergeRows($updateData);
 
-        if ($this->exists() === true) {
+        if (count($originalRows) > 0 && $this->exists() === true) {
 
             if ($this->timestamps) {
                 $this->updated_at = Carbon::now()->toDateTimeString();
@@ -176,12 +188,12 @@ abstract class Model implements \IteratorAggregate
             static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         } else {
 
-            $updateData = array_filter($updateData, function($value) {
+            $updateData = array_filter($updateData, function ($value) {
                 return $value !== null;
             }, ARRAY_FILTER_USE_BOTH);
 
             if ($this->{$this->primary} === null) {
-                $this->{$this->primary} = static::getQuery()->insert($updateData);
+                $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
             } else {
                 static::instance()->getQuery()->insert($updateData);
             }
@@ -222,7 +234,7 @@ abstract class Model implements \IteratorAggregate
 
     public function hasRows()
     {
-        return (bool)(isset($this->results['rows']) && count($this->results['rows']) > 0);
+        return (isset($this->results['rows']) && count($this->results['rows']) > 0);
     }
 
     /**
@@ -308,11 +320,11 @@ abstract class Model implements \IteratorAggregate
         $encoding = mb_detect_encoding($data, 'UTF-8', true);
         $data = (is_array($data) === false && ($encoding === false || strtolower($encoding) !== 'utf-8')) ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
 
-        if(is_float($data) === true) {
+        if (is_float($data) === true) {
             return (float)$data;
         }
 
-        if(is_bool($data) === true || is_numeric($data) === true) {
+        if (is_bool($data) === true || is_numeric($data) === true) {
             return (int)$data;
         }
 
@@ -377,6 +389,20 @@ abstract class Model implements \IteratorAggregate
         return null;
     }
 
+    /**
+     * Set original rows
+     * @param array $rows
+     * @return static $this
+     */
+    public function setOriginalRows(array $rows)
+    {
+        $this->results['original_rows'] = $rows;
+    }
+
+    public function getOriginalRows()
+    {
+        return $this->results['original_rows'];
+    }
 
     public static function __callStatic($method, $parameters)
     {

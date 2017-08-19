@@ -28,6 +28,10 @@ class Html
         return $this;
     }
 
+    /**
+     * @param string $html
+     * @return static
+     */
     public function addInnerHtml($html)
     {
         $this->innerHtml[] = $html;
@@ -80,6 +84,12 @@ class Html
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param string $value
+     * @param bool $replace
+     * @return static
+     */
     public function attr($name, $value = '', $replace = true)
     {
         if ($replace === true) {
@@ -89,11 +99,19 @@ class Html
         return $this->addAttribute($name, $value);
     }
 
+    /**
+     * @param string $id
+     * @return static
+     */
     public function id($id)
     {
         return $this->addAttribute('id', $id);
     }
 
+    /**
+     * @param string $css
+     * @return static
+     */
     public function style($css)
     {
         return $this->addAttribute('style', $css);

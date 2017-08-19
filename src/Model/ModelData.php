@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
@@ -6,6 +7,7 @@ use Pecee\Collection\CollectionItem;
 abstract class ModelData extends Model
 {
     public $data;
+    protected $updateIdentifier;
 
     protected $dataKeyField = 'key';
     protected $dataValueField = 'value';
@@ -28,7 +30,7 @@ abstract class ModelData extends Model
 
     protected function updateData()
     {
-        if ($this->data !== null) {
+        if ($this->data !== null && $this->getUpdateIdentifier() !== $this->generateUpdateIdentifier()) {
 
             /* @var $currentFields array|null */
             $currentFields = $this->fetchData();
@@ -93,6 +95,8 @@ abstract class ModelData extends Model
                 $this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
             }
         }
+
+        $this->updateIdentifier = $this->generateUpdateIdentifier();
     }
 
     public function setData(array $data)
@@ -113,6 +117,20 @@ abstract class ModelData extends Model
         }
 
         return $output;
+    }
+
+    protected function generateUpdateIdentifier()
+    {
+        return md5(serialize($this->data));
+    }
+
+    /**
+     * Get unique update identifier based on data
+     * @return string
+     */
+    public function getUpdateIdentifier()
+    {
+        return $this->updateIdentifier;
     }
 
 }

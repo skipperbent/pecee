@@ -46,10 +46,18 @@ function request()
 
 /**
  * Get input class
- * @return \Pecee\Http\Input\Input
+ * @param string|null $index Parameter index name
+ * @param string|null $defaultValue Default return value
+ * @param string|array|null $methods Default method
+ * @return string|\Pecee\Http\Input\Input
  */
-function input()
+function input($index = null, $defaultValue = null, $methods = null)
 {
+    if($index !== null)
+    {
+        return request()->getInput()->get($index, $defaultValue, $methods);
+    }
+
     return request()->getInput();
 }
 

@@ -36,8 +36,8 @@ class Form
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true)
     {
-        if ($saveValue && ($value === null && input()->exists($name) === true || request()->getMethod() !== 'get')) {
-            $value = input()->get($name);
+        if ($saveValue && (($value === null && input()->exists($name) === true) || request()->getMethod() !== 'get')) {
+            $value = (string)input($name);
         }
 
         return new HtmlInput($name, $type, $value);
@@ -55,7 +55,7 @@ class Form
     {
         $element = new HtmlInput($name, 'radio', $value);
 
-        $inputValue = input()->get($name);
+        $inputValue = input($name);
 
         if ($saveValue === true && $inputValue !== null && (string)$inputValue === (string)$value) {
             $element->checked(true);
@@ -81,7 +81,7 @@ class Form
             } else {
                 $defaultValue = count($_GET) ? null : $defaultValue;
             }
-            $checked = Boolean::parse(input()->get($name, $defaultValue));
+            $checked = Boolean::parse(input($name, $defaultValue));
             if ($checked) {
                 $element->checked(true);
             }
@@ -132,14 +132,14 @@ class Form
 
                 foreach ($data->getData() as $item) {
                     $val = isset($item['value']) ? $item['value'] : $item['name'];
-                    $selected = (input()->get($name) !== null && (string)input()->get($name) === (string)$val || input()->exists($name) === false && (string)$value === (string)$val || (isset($item['selected']) && $item['selected']) || $saveValue === false && (string)$value === (string)$val);
+                    $selected = ((input($name) !== null && (string)input($name) === (string)$val) || (input()->exists($name) === false && (string)$value === (string)$val) || (isset($item['selected']) && $item['selected']) || ($saveValue === false && (string)$value === (string)$val));
                     $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
                 }
 
             } elseif (is_array($data) === true) {
 
-                foreach ($data as $val => $key) {
-                    $selected = (input()->get($name) !== null && (string)input()->get($name) === (string)$val || input()->exists($name) === false && (string)$value === (string)$val || $saveValue === false && (string)$value === (string)$val);
+                foreach ((array)$data as $val => $key) {
+                    $selected = ((input($name) !== null && (string)input($name) === (string)$val) || (input()->exists($name) === false && (string)$value === (string)$val) || ($saveValue === false && (string)$value === (string)$val));
                     $element->addOption(new HtmlSelectOption($val, $key, $selected));
                 }
 
@@ -162,8 +162,8 @@ class Form
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
     {
-        if ($saveValue === true && ($value === false && input()->get($name) !== null || request()->getMethod() !== 'get')) {
-            $value = input()->get($name);
+        if ($saveValue === true && (($value === false && input($name) !== null) || request()->getMethod() !== 'get')) {
+            $value = (string)input($name);
         }
 
         return new HtmlTextarea($name, $rows, $cols, $value);

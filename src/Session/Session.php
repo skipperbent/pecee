@@ -6,9 +6,9 @@ use Pecee\Guid;
 class Session
 {
 
-    public static function start()
+    protected static function start()
     {
-        if (!static::isActive()) {
+        if (static::isActive() === false) {
             session_name('pecee_session');
             session_start();
         }
@@ -27,8 +27,8 @@ class Session
     public static function destroy($id)
     {
         if (static::exists($id)) {
+            static::start();
             unset($_SESSION[$id]);
-
             return true;
         }
 
@@ -42,6 +42,7 @@ class Session
 
     public static function set($id, $value)
     {
+        static::start();
         $data = [serialize($value), static::getSecret()];
         $data = Guid::encrypt(static::getSecret(), join('|', $data));
         $_SESSION[$id] = $data;

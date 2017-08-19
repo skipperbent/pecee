@@ -32,9 +32,9 @@ class HtmlInput extends Html
         return $this->addAttribute('placeholder', $text);
     }
 
-    public function autoComplete()
+    public function autoComplete($status = true)
     {
-        return $this->addAttribute('autocomplete', 'on');
+        return $this->addAttribute('autocomplete', (($status === true) ? 'on' : 'off'));
     }
 
     public function readonly()
