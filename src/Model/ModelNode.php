@@ -9,7 +9,6 @@ use Pecee\Str;
 
 class ModelNode extends ModelData
 {
-
     const SORT_ID = 'id';
     const SORT_PARENT = 'parent';
     const SORT_TITLE = 'title';
@@ -29,6 +28,7 @@ class ModelNode extends ModelData
     ];
 
     protected $parent, $next, $prev, $children, $type;
+    protected $defaultType;
     protected $table = 'node';
     protected $columns = [
         'id',
@@ -52,6 +52,11 @@ class ModelNode extends ModelData
         $this->path = 0;
         $this->order = 0;
         $this->active = false;
+
+        if ($this->defaultType !== null) {
+            $this->type = $this->defaultType;
+            $this->where('type', '=', $this->defaultType);
+        }
     }
 
     public function isActive()
@@ -239,17 +244,6 @@ class ModelNode extends ModelData
         parent::delete();
     }
 
-    /*protected function fetchField()
-    {
-        $data = NodeData::instance()->filerNodeId($this->id)->all();
-        if ($data->hasRows() === true) {
-            foreach ($data->getRows() as $field) {
-                $key = $field->key;
-                $this->data->$key = $field->value;
-            }
-        }
-    }*/
-
     /**
      * Order by key
      * @param string $key
@@ -323,6 +317,7 @@ class ModelNode extends ModelData
             }
         }
         $this->setRows($out);
+
         //$this->setNumRow($limit);
 
         return $this;
@@ -342,7 +337,7 @@ class ModelNode extends ModelData
             foreach ($this->getRows() as $row) {
                 $keys = (array)$key;
 
-                if(in_array($row, $out, true) !== false) {
+                if (in_array($row, $out, true) !== false) {
                     continue;
                 }
 
@@ -368,7 +363,7 @@ class ModelNode extends ModelData
                         }
                     } elseif ($delimiter === '!=') {
                         if ((string)$k !== (string)$value) {
-                                $out[] = $row;
+                            $out[] = $row;
                         }
                     } elseif ($delimiter === '*') {
                         if (strtolower($k) === (string)$value || stripos($k, $value) !== false) {
@@ -399,10 +394,11 @@ class ModelNode extends ModelData
         return $this->whereIn('id', $ids);
     }
 
-    public function filterActive($active) {
+    public function filterActive($active)
+    {
         return
             $this->where('active', '=', Boolean::parse($active))
-                ->where(function(QueryBuilderHandler $q) {
+                ->where(function (QueryBuilderHandler $q) {
                     $q->whereNull('active_from')
                         ->whereNull('active_to')
                         ->orWhere('active_from', '<=', $q->raw('NOW()'))
@@ -415,9 +411,10 @@ class ModelNode extends ModelData
                 });
     }
 
-    public function filterParentId($parentId = null) {
-        if($parentId === null) {
-            return $this->where(function(QueryBuilderHandler $q) {
+    public function filterParentId($parentId = null)
+    {
+        if ($parentId === null) {
+            return $this->where(function (QueryBuilderHandler $q) {
                 $q->whereNull('parent_id')->orWhereNull('path');
             });
         }
@@ -425,15 +422,18 @@ class ModelNode extends ModelData
         return $this->where('parent_id', '=', $parentId);
     }
 
-    public function filterPath($path) {
+    public function filterPath($path)
+    {
         return $this->where('path', 'LIKE', '%' . $path . '%');
     }
 
-    public function filterType($type) {
+    public function filterType($type)
+    {
         return $this->where('type', '=', $type);
     }
 
-    public function filterTypes(array $types) {
+    public function filterTypes(array $types)
+    {
         return $this->whereIn('type', $types);
     }
 
@@ -445,9 +445,10 @@ class ModelNode extends ModelData
      * @return static $this
      * @throws \InvalidArgumentException
      */
-    public function sortBy($type, $direction = 'ASC') {
+    public function sortBy($type, $direction = 'ASC')
+    {
 
-        if(in_array($type, static::$sortTypes, true) === false) {
+        if (in_array($type, static::$sortTypes, true) === false) {
             throw new \InvalidArgumentException('Invalid sort type');
         }
 
@@ -480,14 +481,25 @@ class ModelNode extends ModelData
         return $this->orderBy($type, $direction);
     }
 
+    public function filterQuery($query)
+    {
+        return $this->where(function (QueryBuilderHandler $q) use ($query) {
 
-    public function filterQuery($query) {
-        return $this->where(function(QueryBuilderHandler $q) use($query) {
-
-            $q->where('title', 'LIKE', '%'. $query .'%')
+            $q->where('title', 'LIKE', '%' . $query . '%')
                 ->orWhere('content', 'LIKE', '%' . $query . '%');
 
         });
+    }
+
+    public function filterKey($key, $value, $operator = '=')
+    {
+        $subQuery = NodeData::instance()
+            ->select(['node_id'])
+            ->where('node_id', '=', $this->raw('node.`id`'))
+            ->where('key', '=', $key)
+            ->where('value', $operator, $value);
+
+        return $this->where('id', '=', $this->subQuery($subQuery));
     }
 
     protected function getDataClass()

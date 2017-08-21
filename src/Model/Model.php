@@ -11,7 +11,7 @@ use Pecee\Str;
  *
  * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
  *
- * @method $this prefix(string $prefix)
+ * @method $this alias(string $prefix)
  * @method $this limit(int $id)
  * @method $this skip(int $id)
  * @method $this take(int $id)

@@ -60,9 +60,9 @@ class ModelQueryBuilder
         return $collection;
     }
 
-    public function prefix($prefix)
+    public function alias($prefix)
     {
-        $this->query->addPrefix($this->model->getTable(), $prefix);
+        $this->query->alias($this->model->getTable(), $prefix);
 
         return $this->model;
     }
