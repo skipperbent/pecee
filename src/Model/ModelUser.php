@@ -170,21 +170,17 @@ class ModelUser extends ModelData
      */
     public static function current()
     {
-        if (static::$instance !== null) {
-            return static::$instance;
-        }
-
-        if (static::isLoggedIn() === true) {
+        if (static::$instance === null && static::isLoggedIn() === true) {
 
             $ticket = static::getTicket();
 
             /* @var $user static */
             static::$instance = static::instance()->filterDeleted()->find($ticket[0]);
+        }
 
-            if (static::$instance !== null) {
-                /* Refresh ticket */
-                static::createTicket($ticket[0]);
-            }
+        if (static::$instance !== null) {
+            /* Refresh ticket */
+            static::createTicket(static::$instance->id);
         }
 
         return static::$instance;

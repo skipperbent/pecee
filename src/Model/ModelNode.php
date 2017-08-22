@@ -173,6 +173,28 @@ class ModelNode extends ModelData
         return $this->children[$this->id];
     }
 
+    public function getParents()
+    {
+        $out = [];
+        if ($this->parent_node_id !== null) {
+
+            /* @var $node self */
+            $node = static::instance()->find($this->parent_node_id);
+
+            while ($node !== null) {
+                $out[] = $node;
+                if ($node->parent_node_id !== null) {
+                    $node = static::instance()->find($node->parent_node_id);
+                    continue;
+                }
+
+                $node = null;
+            }
+        }
+
+        return $out;
+    }
+
     public function getParent()
     {
         if ($this->parent === null && $this->parent_id !== null) {

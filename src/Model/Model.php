@@ -174,7 +174,7 @@ abstract class Model implements \IteratorAggregate
 
         $this->mergeRows($updateData);
 
-        if (count($originalRows) > 0 && $this->exists() === true) {
+        if (count($originalRows) > 0 || $this->exists() === true) {
 
             if ($this->timestamps) {
                 $this->updated_at = Carbon::now()->toDateTimeString();
