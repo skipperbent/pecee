@@ -28,6 +28,8 @@ class ModelNode extends ModelData
 
     protected $parent, $next, $prev, $children, $type;
     protected $defaultType;
+
+    protected $dataPrimary = 'node_id';
     protected $table = 'node';
     protected $columns = [
         'id',
@@ -139,7 +141,7 @@ class ModelNode extends ModelData
     {
         $out = [];
         if ($recursive === true) {
-            $pages = $this->filterPath($this->id)->all();
+            $pages = $this->filterPath($this->id . '%')->all();
         } else {
             $pages = $this->filterParentId($this->id)->all();
         }
@@ -174,24 +176,11 @@ class ModelNode extends ModelData
 
     public function getParents()
     {
-        $out = [];
-        if ($this->parent_node_id !== null) {
-
-            /* @var $node self */
-            $node = static::instance()->find($this->parent_node_id);
-
-            while ($node !== null) {
-                $out[] = $node;
-                if ($node->parent_node_id !== null) {
-                    $node = static::instance()->find($node->parent_node_id);
-                    continue;
-                }
-
-                $node = null;
-            }
+        if ($this->parent_id !== null) {
+            return static::instance()->filterPath($this->parent_id . '>%')->orderBy('path');
         }
 
-        return $out;
+        return null;
     }
 
     public function getParent()
@@ -203,52 +192,10 @@ class ModelNode extends ModelData
         return $this->parent;
     }
 
-    public function updateFields()
-    {
-        if ($this->data !== null) {
-            $currentFields = NodeData::instance()->filerNodeId($this->id)->all();
-            $cf = [];
-            foreach ($currentFields as $field) {
-                $cf[strtolower($field->key)] = $field;
-            }
-            if (count($this->data->getData())) {
-                foreach ($this->data->getData() as $key => $value) {
-                    if ($value === null) {
-                        continue;
-                    }
-
-                    if (isset($cf[strtolower($key)]) === true) {
-                        if ($cf[$key]->value === $value) {
-                            unset($cf[$key]);
-                            continue;
-                        }
-
-                        $cf[$key]->value = $value;
-                        $cf[$key]->key = $key;
-                        $cf[$key]->update();
-                        unset($cf[$key]);
-
-                    } else {
-                        $field = new NodeData();
-                        $field->node_id = $this->id;
-                        $field->key = $key;
-                        $field->value = $value;
-                        $field->save();
-                    }
-                }
-            }
-
-            foreach ($cf as $field) {
-                $field->delete();
-            }
-        }
-    }
-
     public function save(array $data = null)
     {
         $this->calculatePath();
         parent::save($data);
-        $this->updateFields();
         return $this;
     }
 
@@ -295,7 +242,7 @@ class ModelNode extends ModelData
 
     public function filterParentId($parentId = null)
     {
-        if ($parentId === null) {
+        if ($parentId === null || $parentId === 0) {
             return $this->where(function (QueryBuilderHandler $q) {
                 $q->whereNull('parent_id')->orWhereNull('path');
             });
@@ -306,7 +253,7 @@ class ModelNode extends ModelData
 
     public function filterPath($path)
     {
-        return $this->where('path', 'LIKE', '%' . $path . '%');
+        return $this->where('path', 'LIKE', $path);
     }
 
     public function filterType($type)

@@ -5,8 +5,6 @@ use Pecee\Model\Model;
 
 class FileData extends Model
 {
-    const IDENTIFIER_KEY = 'file_id';
-
     protected $timestamps = false;
     protected $table = 'file_data';
 

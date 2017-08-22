@@ -6,6 +6,7 @@ use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData
 {
+    protected $dataPrimary = 'file_id';
     protected $table = 'file';
 
     protected $columns = [

@@ -7,14 +7,19 @@ use Pecee\Collection\CollectionItem;
 abstract class ModelData extends Model
 {
     public $data;
+    protected $dataPrimary;
     protected $updateIdentifier;
-
     protected $dataKeyField = 'key';
     protected $dataValueField = 'value';
 
     public function __construct()
     {
         parent::__construct();
+
+        if ($this->dataPrimary === null) {
+            throw new \ErrorException('Property dataPrimary must be defined');
+        }
+
         $this->data = new CollectionItem();
     }
 
@@ -24,7 +29,7 @@ abstract class ModelData extends Model
 
     protected function onNewDataItemCreate(Model $field)
     {
-        $field->{$field::IDENTIFIER_KEY} = $this->{$this->primary};
+        $field->{$this->getDataPrimary()} = $this->{$this->primary};
         $field->save();
     }
 
@@ -131,6 +136,11 @@ abstract class ModelData extends Model
     public function getUpdateIdentifier()
     {
         return $this->updateIdentifier;
+    }
+
+    public function getDataPrimary()
+    {
+        return $this->dataPrimary;
     }
 
 }

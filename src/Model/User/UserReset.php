@@ -2,11 +2,10 @@
 namespace Pecee\Model\User;
 
 use Pecee\Model\Model;
+use Pecee\Model\ModelUser;
 
 class UserReset extends Model
 {
-    const IDENTIFIER_KEY = 'user_id';
-
     protected $table = 'user_reset';
 
     protected $columns = [
@@ -19,15 +18,17 @@ class UserReset extends Model
 
         parent::__construct();
 
-        $this->columns = array_merge($this->columns, [static::IDENTIFIER_KEY]);
+        $dataPrimaryKey = ModelUser::instance()->getDataPrimary();
 
-        $this->{static::IDENTIFIER_KEY} = $userId;
+        $this->columns = array_merge($this->columns, [$dataPrimaryKey]);
+        $this->{$primaryKey} = $userId;
         $this->key = md5(uniqid());
     }
 
     public function clean()
     {
-        $this->where(static::IDENTIFIER_KEY, '=', $this->{static::IDENTIFIER_KEY})->delete();
+        $dataPrimaryKey = ModelUser::instance()->getDataPrimary();
+        $this->where($dataPrimaryKey, '=', $this->{$dataPrimaryKey})->delete();
     }
 
     public function save(array $data = null)
@@ -45,14 +46,13 @@ class UserReset extends Model
 
     public static function confirm($key)
     {
-
         $reset = static::getByKey($key);
 
         if ($reset !== null) {
             $reset->clean();
             $reset->delete();
 
-            return $reset->{static::IDENTIFIER_KEY};
+            return $reset->{ModelUser::instance()->getDataPrimary()};
         }
 
         return false;
@@ -60,7 +60,7 @@ class UserReset extends Model
 
     public function getIdentifier()
     {
-        return $this->{static::IDENTIFIER_KEY};
+        return $this->{ModelUser::instance()->getDataPrimary()};
     }
 
     public function getKey()

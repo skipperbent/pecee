@@ -21,8 +21,9 @@ class ModelUser extends ModelData
     protected static $instance;
     protected static $ticketExpireMinutes = 60;
 
-    protected $table = 'user';
 
+    protected $dataPrimary = 'user_id';
+    protected $table = 'user';
     protected $columns = [
         'id',
         'username',
@@ -194,13 +195,13 @@ class ModelUser extends ModelData
 
         $userDataQuery = $this->newQuery($userDataClass->getTable())
             ->getQuery()
-            ->select($userDataClassName::USER_IDENTIFIER_KEY)
-            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
+            ->select($this->getDataPrimary())
+            ->where($this->getDataPrimary(), '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getDataPrimary()))
             ->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
             ->limit(1);
 
         return $this->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
-            ->orWhere($this->getPrimary(), '=', $this->raw($userDataQuery));
+            ->orWhere($this->getDataPrimary(), '=', $this->raw($userDataQuery));
     }
 
     public function filterDeleted($deleted = false)
@@ -229,7 +230,7 @@ class ModelUser extends ModelData
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
+        $subQuery = $userDataClass::instance()->select([$this->getDataPrimary()])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
 
         return $this->where($this->primary, '=', $this->subQuery($subQuery));
     }
