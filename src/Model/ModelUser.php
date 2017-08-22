@@ -186,11 +186,6 @@ class ModelUser extends ModelData
         return static::$instance;
     }
 
-    public static function getSecret()
-    {
-        return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
-    }
-
     public function filterQuery($query)
     {
         $userDataClassName = static::getUserDataClass();
