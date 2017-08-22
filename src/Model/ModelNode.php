@@ -5,7 +5,6 @@ namespace Pecee\Model;
 use Pecee\Boolean;
 use Pecee\Model\Node\NodeData;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
-use Pecee\Str;
 
 class ModelNode extends ModelData
 {
@@ -73,7 +72,7 @@ class ModelNode extends ModelData
             $parent = static::instance()->find($this->parent_id);
             $i = 0;
             while ($fetchingPath === true) {
-                if ($parent->hasRows() === true) {
+                if ($parent !== null) {
                     $path[] = $parent->id;
                     $p = $parent->parent_id;
                     if (!empty($p)) {
@@ -250,6 +249,7 @@ class ModelNode extends ModelData
         $this->calculatePath();
         parent::save($data);
         $this->updateFields();
+        return $this;
     }
 
     public function delete()
@@ -264,146 +264,6 @@ class ModelNode extends ModelData
         }
         NodeData::instance()->clear($this->id);
         parent::delete();
-    }
-
-    /**
-     * Order by key
-     * @param string $key
-     * @param string $direction
-     * @return static
-     */
-    public function order($key, $direction = 'DESC')
-    {
-        if ($this->hasRows() === true) {
-            $rows = [];
-            foreach ($this->getRows() as $row) {
-                $k = isset($row->fields[$key]) ? $row->{$key} : $row->data->$key;
-                $k = ((string)$k === 'Tjs=') ? Str::base64Decode($k) : $k;
-                $rows[$k] = $row;
-            }
-
-            if (strtolower($direction) === 'asc') {
-                ksort($rows);
-            } else {
-                krsort($rows);
-            }
-
-            $this->setRows(array_values($rows));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get first or default value
-     * @param string $default
-     * @return static|string
-     */
-    public function getFirstOrDefault($default = null)
-    {
-        if ($this->hasRows() === true) {
-            return $this->getRow(0);
-        }
-
-        return $default;
-    }
-
-    /**
-     * Skip number of rows
-     * @param int $number
-     * @return static
-     */
-    public function skipResult($number)
-    {
-        if ($number > 0 && $this->hasRows() === true) {
-            $rows = $this->getRows();
-            $this->setRows(array_splice($rows, $number));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Limit the output
-     * @param int $limit
-     * @return static
-     */
-    public function limitResult($limit)
-    {
-        $out = [];
-        if ($this->hasRows()) {
-            foreach ($this->getRows() as $i => $row) {
-                if ($i < $limit) {
-                    $out[] = $row;
-                }
-            }
-        }
-        $this->setRows($out);
-
-        //$this->setNumRow($limit);
-
-        return $this;
-    }
-
-    /**
-     * Filter elements
-     * @param string $key
-     * @param string $value
-     * @param string $delimiter
-     * @return static
-     */
-    public function filterResult($key, $value, $delimiter = '=')
-    {
-        $out = [];
-        if ($this->hasRows()) {
-            foreach ($this->getRows() as $row) {
-                $keys = (array)$key;
-
-                if (in_array($row, $out, true) !== false) {
-                    continue;
-                }
-
-                foreach ($keys as $_key) {
-                    $k = array_key_exists($_key, $row->fields) ? $row->{$_key} : $row->data->$_key;
-                    $k = (strpos($k, 'Tjs=') === 1) ? Str::base64Encode($k) : $k;
-
-                    if ($delimiter === '>') {
-                        if ($k > $value) {
-                            $out[] = $row;
-                        }
-                    } elseif ($delimiter === '<') {
-                        if ($k < $value) {
-                            $out[] = $row;
-                        }
-                    } elseif ($delimiter === '>=') {
-                        if ($k >= $value) {
-                            $out[] = $row;
-                        }
-                    } elseif ($delimiter === '<=') {
-                        if ($k <= $value) {
-                            $out[] = $row;
-                        }
-                    } elseif ($delimiter === '!=') {
-                        if ((string)$k !== (string)$value) {
-                            $out[] = $row;
-                        }
-                    } elseif ($delimiter === '*') {
-                        if (strtolower($k) === (string)$value || stripos($k, $value) !== false) {
-                            $out[] = $row;
-                        }
-                    } else {
-                        if ($k === $value) {
-                            $out[] = $row;
-                        }
-                    }
-                }
-            }
-        }
-
-        //$this->setMaxRows(count($out));
-        $this->setRows($out);
-
-        return $this;
     }
 
     /**
@@ -467,7 +327,7 @@ class ModelNode extends ModelData
      * @return static $this
      * @throws \InvalidArgumentException
      */
-    public function sortBy($type, $direction = 'ASC')
+    public function order($type, $direction = 'ASC')
     {
 
         if (in_array($type, static::$sortTypes, true) === false) {
@@ -533,4 +393,5 @@ class ModelNode extends ModelData
     {
         return NodeData::instance()->filerNodeId($this->id)->all();
     }
+
 }

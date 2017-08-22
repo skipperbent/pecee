@@ -3,6 +3,7 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
@@ -120,6 +121,11 @@ abstract class Model implements \IteratorAggregate
     public function onInstanceCreate()
     {
         $this->joinData();
+    }
+
+    public function onCollectionCreate($items)
+    {
+        return new ModelCollection($items);
     }
 
     protected function joinData()

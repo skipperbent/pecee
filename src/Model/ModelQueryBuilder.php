@@ -54,9 +54,8 @@ class ModelQueryBuilder
 
     protected function createCollection(array $items)
     {
-        $collection = new ModelCollection($items);
+        $collection = $this->model->onCollectionCreate($items);
         $collection->setType(static::class);
-
         return $collection;
     }
 
