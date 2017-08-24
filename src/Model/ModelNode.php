@@ -2,6 +2,7 @@
 
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Boolean;
 use Pecee\Model\Node\NodeData;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
@@ -60,9 +61,158 @@ class ModelNode extends ModelData
         }
     }
 
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function getParentId()
+    {
+        return $this->parent_id;
+    }
+
+    public function setParentId($id)
+    {
+        $this->parentId = $id;
+    }
+
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    public function setPath($path)
+    {
+        $this->path = $path;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    public function setType($type)
+    {
+        $this->type = $type;
+    }
+
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    public function setContent($content)
+    {
+        $this->content = $content;
+    }
+
+    public function getActiveFrom()
+    {
+        if ($this->active_from !== null) {
+            return Carbon::parse($this->active_from);
+        }
+
+        return null;
+    }
+
+    public function setActiveFrom(Carbon $date)
+    {
+        $this->active_from = $date->toDateTimeString();
+    }
+
+    public function getActiveTo()
+    {
+        if ($this->active_to !== null) {
+            return Carbon::parse($this->active_to);
+        }
+
+        return null;
+    }
+
+    public function setActiveTo(Carbon $date)
+    {
+        $this->active_to = $date->toDateTimeString();
+    }
+
+    public function getActive()
+    {
+        return ((int)$this->active === 1);
+    }
+
+    public function setActive($active)
+    {
+        $this->active = $active;
+    }
+
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+    public function setLevel($level)
+    {
+        $this->level = $level;
+    }
+
+    public function getOrder()
+    {
+        return (int)$this->order;
+    }
+
+    public function setOrder($order)
+    {
+        $this->order = $order;
+    }
+
+    public function getUpdatedAt()
+    {
+        if ($this->updated_at !== null) {
+            return Carbon::parse($this->updated_at);
+        }
+
+        return null;
+    }
+
+    public function setUpdatedAt(Carbon $date)
+    {
+        $this->updated_at = $date->toDateTimeString();
+    }
+
+    public function getCreatedAt()
+    {
+        return Carbon::parse($this->created_at);
+    }
+
+    public function setCreatedAt(Carbon $date)
+    {
+        $this->created_at = $date->toDateTimeString();
+    }
+
     public function isActive()
     {
-        return ($this->active && ($this->active_from === null || time() >= strtotime($this->active_from)) && ($this->active_to === null || $this->active_to >= time()));
+        if ($this->getActive() === false) {
+            return false;
+        }
+
+        if ($this->getActiveFrom() !== null && $this->getActiveFrom()->isFuture() === true) {
+            return false;
+        }
+
+        if ($this->getActiveTo() !== null && $this->getActiveTo()->isPast() === true) {
+            return false;
+        }
+
+        return true;
     }
 
     protected function calculatePath()
@@ -196,6 +346,7 @@ class ModelNode extends ModelData
     {
         $this->calculatePath();
         parent::save($data);
+
         return $this;
     }
 
