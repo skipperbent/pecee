@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Application;
 
 use Pecee\SimpleRouter\SimpleRouter;
@@ -16,17 +17,14 @@ class Router extends SimpleRouter
 
         }
 
-        // Load routes.php
-        require_once env('base_path') . 'routes' . DIRECTORY_SEPARATOR . 'web.php';
-
-        parent::setDefaultNamespace('\\' . env('APP_NAME') . '\\Controller');
+        if (env('APP_NAME') !== null) {
+            parent::setDefaultNamespace('\\' . env('APP_NAME') . '\\Controller');
+        }
     }
 
     public static function start()
     {
         debug('Router initialised.');
-
-        static::init();
 
         parent::start();
 

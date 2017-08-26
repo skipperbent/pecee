@@ -374,7 +374,7 @@ class ModelNode extends ModelData
         return $this->whereIn('id', $ids);
     }
 
-    public function filterActive($active)
+    public function filterActive($active = true)
     {
         return
             $this->where('active', '=', Boolean::parse($active))

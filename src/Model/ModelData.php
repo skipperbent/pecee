@@ -143,4 +143,37 @@ abstract class ModelData extends Model
         return $this->dataPrimary;
     }
 
+    public function __get($name)
+    {
+        $exists = parent::__isset($name);
+
+        if ($exists === true) {
+            return parent::__get($name);
+        }
+
+        return $this->data->{$name};
+    }
+
+    public function __set($name, $value)
+    {
+        $exists = parent::__isset($name);
+
+        if ($exists === true) {
+            parent::__set($name, $value);
+        } else {
+            $this->data->{$name} = $value;
+        }
+    }
+
+    public function __isset($name)
+    {
+        $exists = parent::__isset($name);
+
+        if ($exists === false) {
+            return array_key_exists(strtolower($name), $this->results['rows']);
+        }
+
+        return $exists;
+    }
+
 }

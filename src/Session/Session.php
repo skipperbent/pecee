@@ -6,7 +6,7 @@ use Pecee\Guid;
 class Session
 {
 
-    protected static function start()
+    public static function start()
     {
         if (static::isActive() === false) {
             session_name('pecee_session');
@@ -16,7 +16,7 @@ class Session
 
     public static function getSecret()
     {
-        return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
+        return env('APP_SECRET', 'NoApplicationSecretDefined');
     }
 
     public static function isActive()
@@ -27,8 +27,8 @@ class Session
     public static function destroy($id)
     {
         if (static::exists($id)) {
-            static::start();
             unset($_SESSION[$id]);
+
             return true;
         }
 
@@ -42,7 +42,6 @@ class Session
 
     public static function set($id, $value)
     {
-        static::start();
         $data = [serialize($value), static::getSecret()];
         $data = Guid::encrypt(static::getSecret(), join('|', $data));
         $_SESSION[$id] = $data;

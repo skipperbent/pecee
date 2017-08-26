@@ -25,7 +25,7 @@ class ControllerWrap
 
         $this->cacheDirectory = env('base_path') . 'cache';
         $this->files = strpos(input('files'), ',') ? explode(',', input('files')) : [input('files')];
-        $this->fileIdentifier = md5(urldecode(input('files'))) . '.' . $this->getExtension();
+        $this->fileIdentifier = md5(urldecode(input('files')));
         $this->path = env('JS_PATH', 'public/js/');
     }
 
@@ -69,7 +69,7 @@ class ControllerWrap
 
     public function getExtension()
     {
-        return 'js';
+        return $this->extension;
     }
 
     protected function getPath()
@@ -211,7 +211,7 @@ class ControllerWrap
 
     protected function getTempFile()
     {
-        return $this->getCacheDirectory() . DIRECTORY_SEPARATOR . $this->getFileIdentifier();
+        return $this->getCacheDirectory() . DIRECTORY_SEPARATOR . $this->getFileIdentifier() . '.' . $this->getExtension();
     }
 
 }
