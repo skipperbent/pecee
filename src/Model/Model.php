@@ -84,8 +84,8 @@ abstract class Model implements \IteratorAggregate
 
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
-                'created_at',
                 'updated_at',
+                'created_at',
             ]);
             $this->created_at = Carbon::now();
         }
@@ -340,7 +340,7 @@ abstract class Model implements \IteratorAggregate
     protected function orderArrayRows(array &$rows)
     {
         uksort($rows, function ($a, $b) {
-            return (array_search($a, $this->columns, true) > array_search($b, $this->columns, true));
+            return (array_search($a, $this->columns, true) < array_search($b, $this->columns, true) === true) ? -1 : 1;
         });
     }
 
@@ -348,17 +348,13 @@ abstract class Model implements \IteratorAggregate
     {
         $rows = $this->getRows();
 
-        if ($rows !== null) {
-            foreach ($rows as $key => $row) {
-                $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
-                if (in_array($key, $this->hidden, true) === true || (count($filter) && in_array($key, $filter, true) === false)) {
-                    unset($rows[$key]);
-                    continue;
-                }
-                $rows[$key] = $this->parseArrayData($row);
+        foreach ($rows as $key => $row) {
+            $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
+            if (in_array($key, $this->hidden, true) === true || (count($filter) && in_array($key, $filter, true) === true)) {
+                unset($rows[$key]);
+                continue;
             }
-
-            $this->orderArrayRows($rows);
+            $rows[$key] = $this->parseArrayData($row);
         }
 
         if (count($this->getResults()) === 1) {
@@ -372,6 +368,8 @@ abstract class Model implements \IteratorAggregate
                 $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
             }
         }
+
+        $this->orderArrayRows($rows);
 
         return $rows;
     }

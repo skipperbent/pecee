@@ -29,8 +29,8 @@ class ModelUser extends ModelData
         'username',
         'password',
         'admin_level',
-        'deleted',
         'last_activity',
+        'deleted',
     ];
 
     public function __construct($username = null, $password = null)

@@ -116,12 +116,13 @@ abstract class ModelData extends Model
 
     public function toArray(array $filter = [])
     {
-        $output = parent::toArray($filter);
-        if (is_array($output) === true) {
-            return array_merge($this->data->getData(), $output);
-        }
+        $rows = parent::toArray($filter);
 
-        return $output;
+        $rows += $this->data->getData();
+
+        return array_filter($rows, function ($key) {
+            return (in_array($key, $this->hidden, true) === false);
+        }, ARRAY_FILTER_USE_KEY);
     }
 
     protected function generateUpdateIdentifier()
