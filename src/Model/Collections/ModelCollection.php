@@ -206,7 +206,7 @@ class ModelCollection extends Collection
      * @param string $displayRow
      * @return array
      */
-    public function toDataset($valueRow = 'id', $displayRow = 'id')
+    public function toDataSet($valueRow = 'id', $displayRow = 'id')
     {
         $output = [];
         /* @var $row \Pecee\Model\Model */
