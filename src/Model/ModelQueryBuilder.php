@@ -44,7 +44,8 @@ class ModelQueryBuilder
     protected function createInstance(\stdClass $item)
     {
         /* @var $model Model */
-        $model = $this->model->getInstance($item);
+        $model = get_class($this->model);
+        $model = new $model();
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
@@ -56,6 +57,7 @@ class ModelQueryBuilder
     {
         $collection = $this->model->onCollectionCreate($items);
         $collection->setType(static::class);
+
         return $collection;
     }
 
@@ -338,9 +340,9 @@ class ModelQueryBuilder
 
         if ($item === null) {
             $item = $this->createInstance((object)$data);
+            $item->setOriginalRows([]);
         }
 
-        $item->mergeRows($data);
         $item->save();
 
         return $item;

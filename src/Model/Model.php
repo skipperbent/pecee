@@ -54,7 +54,7 @@ use Pecee\Str;
  * @method string subQuery(Model $model, string $alias = null)
  * @method string getQueryIdentifier()
  */
-abstract class Model implements \IteratorAggregate, \JsonSerializable
+abstract class Model implements \IteratorAggregate
 {
     protected $table;
     protected $results = ['rows' => [], 'original_rows' => []];
@@ -107,15 +107,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public static function instance()
     {
         return new static();
-    }
-
-    /**
-     * @param \stdClass $item
-     * @return static
-     */
-    public function getInstance(\stdClass $item)
-    {
-        return new static;
     }
 
     public function onInstanceCreate()
@@ -428,18 +419,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function getIterator()
     {
         return new \ArrayIterator($this->getRows());
-    }
-
-    /**
-     * Specify data which should be serialized to JSON
-     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed data which can be serialized by <b>json_encode</b>,
-     * which is a value of any type other than a resource.
-     * @since 5.4.0
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
     }
 
 }

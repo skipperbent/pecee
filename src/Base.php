@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee;
 
 use Pecee\Http\Input\InputItem;
@@ -75,7 +76,8 @@ abstract class Base
         }
     }
 
-    protected function onInputError(InputItem $input, $error) {
+    protected function onInputError(InputItem $input, $error)
+    {
 
     }
 
@@ -85,7 +87,7 @@ abstract class Base
 
             $input = input()->getObject($key, new InputItem($key, null));
 
-            for($i = 0, $max = count($validations); $i < $max; $i++) {
+            for ($i = 0, $max = count($validations); $i < $max; $i++) {
 
                 /* @var $validation ValidateInput */
                 $validation = $validations[$i];
@@ -96,7 +98,7 @@ abstract class Base
 
                 $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
-                for($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
+                for ($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
 
                     $input = $inputs[$x];
                     $validation->setInput($input);
