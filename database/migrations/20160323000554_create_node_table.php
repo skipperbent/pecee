@@ -20,6 +20,7 @@ class CreateNodeTable extends Migration
 			$table->column('level')->integer()->index()->nullable();
 			$table->column('order')->integer()->index()->nullable();
 			$table->column('active')->bool()->index()->nullable();
+			$table->column('deleted')->bool()->index();
 			$table->timestamps();
 		});
 

@@ -7,7 +7,7 @@ use Carbon\Carbon;
 abstract class CacheProvider implements ICacheProvider
 {
 
-    public function getOrSet($key, \Closure $callback, Carbon $expireDate)
+    public function getOrSet($key, \Closure $callback, Carbon $expireDate, array $keywords = [])
     {
 
         $item = $this->get($key);
@@ -15,7 +15,7 @@ abstract class CacheProvider implements ICacheProvider
         if ($item === null) {
             $item = $callback();
             if ($item !== null) {
-                $this->set($key, $item, $expireDate);
+                $this->set($key, $item, $expireDate, $keywords);
             }
         }
 

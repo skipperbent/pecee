@@ -44,6 +44,7 @@ class ModelNode extends ModelData
         'level',
         'order',
         'active',
+        'deleted',
         'updated_at',
         'created_at',
     ];
@@ -152,6 +153,16 @@ class ModelNode extends ModelData
     public function setActive($active)
     {
         $this->active = $active;
+    }
+
+    public function getDeleted()
+    {
+        return ((int)$this->deleted === 1);
+    }
+
+    public function setDeleted($deleted)
+    {
+        $this->deleted = $deleted;
     }
 
     public function getLevel()
@@ -372,6 +383,11 @@ class ModelNode extends ModelData
     public function filterIds(array $ids)
     {
         return $this->whereIn('id', $ids);
+    }
+
+    public function filterDeleted($deleted)
+    {
+        return $this->where('deleted', '=', $deleted);
     }
 
     public function filterActive($active = true)

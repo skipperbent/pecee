@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class Html
@@ -15,6 +16,38 @@ class Html
     {
         $this->tag = $tag;
         $this->closingType = static::CLOSE_TYPE_TAG;
+    }
+
+    /**
+     * Append element
+     * @param Html|string $element
+     * @return static $this
+     */
+    public function append($element)
+    {
+        $this->innerHtml[] = $element;
+
+        return $this;
+    }
+
+    /**
+     * Prepend element
+     * @param Html|string $element
+     * @return static $this
+     */
+    public function prepend($element)
+    {
+        $this->innerHtml = array_unshift($this->innerHtml, $element);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getChildren()
+    {
+        return $this->innerHtml;
     }
 
     /**
@@ -48,7 +81,7 @@ class Html
      */
     public function replaceAttribute($name, $value = '')
     {
-        $this->attributes[$name] = array($value);
+        $this->attributes[$name] = [$value];
 
         return $this;
     }
@@ -117,7 +150,7 @@ class Html
         return $this->addAttribute('style', $css);
     }
 
-    protected function render()
+    public function render()
     {
         $output = '<' . $this->tag;
 
@@ -131,12 +164,12 @@ class Html
 
         $output .= '>';
 
-        for($i = 0, $max = count($this->innerHtml); $i < $max; $i++) {
+        for ($i = 0, $max = count($this->innerHtml); $i < $max; $i++) {
             $html = $this->innerHtml[$i];
             $output .= ($html instanceof static) ? $html->render() : $html;
         }
 
-        if($this->closingType === static::CLOSE_TYPE_TAG) {
+        if ($this->closingType === static::CLOSE_TYPE_TAG) {
             $output .= '</' . $this->tag . '>';
         }
 
