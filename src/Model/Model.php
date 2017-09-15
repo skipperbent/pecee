@@ -48,7 +48,7 @@ use Pecee\Str;
  * @method $this select(array | object $fields)
  * @method $this groupBy(string $field)
  * @method $this orderBy(string $field, string $defaultDirection = 'ASC')
- * @method $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
+ * @method $this join(string|array $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
  * @method QueryBuilderHandler getQuery()
  * @method string raw(string $value, array $bindings = [])
  * @method string subQuery(Model $model, string $alias = null)
@@ -295,7 +295,7 @@ abstract class Model implements \IteratorAggregate
 
     public function __isset($name)
     {
-        return array_key_exists(strtolower($name), $this->results['rows']);
+        return in_array($name, $this->columns, true);
     }
 
     public function getPrimary()
@@ -419,6 +419,11 @@ abstract class Model implements \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->getRows());
+    }
+
+    public function __clone()
+    {
+        $this->setQuery(clone $this->queryable);
     }
 
 }

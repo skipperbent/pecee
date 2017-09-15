@@ -252,7 +252,7 @@ class ModelUser extends ModelData
         }
 
         // Incorrect user login.
-        if (password_verify($password, $user->password) === false && strtolower($user->username) !== strtolower($username)) {
+        if (password_verify($password, $user->password) === false || strtolower($user->username) !== strtolower($username)) {
             static::onLoginFailed($user);
             throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
         }

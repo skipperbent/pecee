@@ -11,7 +11,6 @@ abstract class Widget extends Base
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
-    protected $_form;
 
     public function __construct()
     {
@@ -21,7 +20,6 @@ abstract class Widget extends Base
 
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->_form = new Form();
     }
 
     /**
@@ -68,7 +66,7 @@ abstract class Widget extends Base
     {
         if (parent::validationFor($name)) {
             $span = new Html('div');
-            $span->addClass('text-danger mt-2 small');
+            $span->addClass('text-danger small');
             $span->addInnerHtml(parent::validationFor($name));
 
             return $span;
@@ -172,7 +170,7 @@ abstract class Widget extends Base
      */
     public function form()
     {
-        return $this->_form;
+        return new Form();
     }
 
     /**

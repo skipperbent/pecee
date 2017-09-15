@@ -4,6 +4,7 @@ namespace Pecee\Model;
 
 use Carbon\Carbon;
 use Pecee\Boolean;
+use Pecee\Guid;
 use Pecee\Model\Node\NodeData;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
@@ -44,14 +45,15 @@ class ModelNode extends ModelData
         'level',
         'order',
         'active',
-        'deleted',
         'updated_at',
         'created_at',
     ];
+    protected $mergeData = false;
 
     public function __construct()
     {
         parent::__construct();
+        $this->id = Guid::create();
         $this->path = 0;
         $this->order = 0;
         $this->active = false;
@@ -74,7 +76,7 @@ class ModelNode extends ModelData
 
     public function setParentId($id)
     {
-        $this->parentId = $id;
+        $this->parent_id = $id;
     }
 
     public function getPath()
@@ -153,16 +155,6 @@ class ModelNode extends ModelData
     public function setActive($active)
     {
         $this->active = $active;
-    }
-
-    public function getDeleted()
-    {
-        return ((int)$this->deleted === 1);
-    }
-
-    public function setDeleted($deleted)
-    {
-        $this->deleted = $deleted;
     }
 
     public function getLevel()
@@ -307,11 +299,9 @@ class ModelNode extends ModelData
             $pages = $this->filterParentId($this->id)->all();
         }
 
-        if ($pages->hasRows()) {
-            foreach ($pages->getRows() as $page) {
-                if ($page->type === $type) {
-                    $out[] = $page;
-                }
+        foreach ($pages as $page) {
+            if ($page->type === $type) {
+                $out[] = $page;
             }
         }
 
@@ -324,24 +314,15 @@ class ModelNode extends ModelData
 
     /**
      * Get node children
-     * @return static|null
      */
     public function getChildren()
     {
-        if (isset($this->children[$this->id]) === false) {
-            $this->children[$this->id] = $this->filterParentId($this->id)->all();
-        }
-
-        return $this->children[$this->id];
+        return static::instance()->filterParentId($this->id);
     }
 
     public function getParents()
     {
-        if ($this->parent_id !== null) {
-            return static::instance()->filterPath($this->parent_id . '>%')->orderBy('path');
-        }
-
-        return null;
+        return static::instance()->filterPath($this->parent_id . '>%')->orderBy('path');
     }
 
     public function getParent()
@@ -356,23 +337,7 @@ class ModelNode extends ModelData
     public function save(array $data = null)
     {
         $this->calculatePath();
-        parent::save($data);
-
-        return $this;
-    }
-
-    public function delete()
-    {
-        // Delete children
-        $children = $this->getChildren();
-        if ($children !== null && $children->hasRows() === true) {
-            /* @var $child static */
-            foreach ($children->getRows() as $child) {
-                $child->delete();
-            }
-        }
-        NodeData::instance()->clear($this->id);
-        parent::delete();
+        return parent::save($data);
     }
 
     /**
@@ -383,11 +348,6 @@ class ModelNode extends ModelData
     public function filterIds(array $ids)
     {
         return $this->whereIn('id', $ids);
-    }
-
-    public function filterDeleted($deleted)
-    {
-        return $this->where('deleted', '=', $deleted);
     }
 
     public function filterActive($active = true)
@@ -409,7 +369,7 @@ class ModelNode extends ModelData
 
     public function filterParentId($parentId = null)
     {
-        if ($parentId === null || $parentId === 0) {
+        if ($parentId === null || (string)$parentId === '0') {
             return $this->where(function (QueryBuilderHandler $q) {
                 $q->whereNull('parent_id')->orWhereNull('path');
             });

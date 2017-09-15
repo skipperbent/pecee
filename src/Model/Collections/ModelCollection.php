@@ -179,7 +179,7 @@ class ModelCollection extends Collection
         $output = [];
         /* @var $row \Pecee\Model\Model */
 
-        $filterKeys = (is_string($filterKeys) === true) ? func_get_args() : (array)$filterKeys;
+        $filterKeys = (is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
 
         for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
 

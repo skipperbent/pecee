@@ -11,6 +11,7 @@ abstract class ModelData extends Model
     protected $updateIdentifier;
     protected $dataKeyField = 'key';
     protected $dataValueField = 'value';
+    protected $mergeData = true;
 
     public function __construct()
     {
@@ -118,7 +119,11 @@ abstract class ModelData extends Model
     {
         $rows = parent::toArray($filter);
 
-        $rows += $this->data->getData();
+        if($this->mergeData === true) {
+            $rows += $this->data->getData();
+        } else {
+            $rows['data'] = $this->data->getData();
+        }
 
         return array_filter($rows, function ($key) {
             return (in_array($key, $this->hidden, true) === false);

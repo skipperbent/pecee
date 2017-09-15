@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class HtmlInput extends Html
@@ -85,10 +86,10 @@ class HtmlInput extends Html
     public function checked($checked)
     {
         if ($checked === true) {
-            $this->addInputAttribute('checked');
-        } else {
-            $this->removeAttribute('checked');
+            return $this->addInputAttribute('checked');
         }
+
+        return $this->removeAttribute('checked');
     }
 
     public function addInputAttribute($name)
