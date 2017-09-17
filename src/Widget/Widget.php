@@ -28,9 +28,8 @@ abstract class Widget extends Base
      */
     protected function getTemplatePath()
     {
-        $path = array_slice(explode('\\', static::class), 2);
-
-        return 'views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        $path = substr(static::class, strpos(static::class, 'Widget') + 7);
+        return 'views/content/' . str_replace('\\', DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     public function showMessages($type, $placement = null)

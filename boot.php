@@ -9,7 +9,7 @@ $loader = require $_ENV['base_path'] . '/vendor/autoload.php';
 require_once 'helpers.php';
 
 // Load .env file
-(new josegonzalez\Dotenv\Loader($_ENV['base_path'] . '/.env'))->parse()->toEnv();
+(new josegonzalez\Dotenv\Loader($_ENV['base_path'] . '.env'))->parse()->toEnv();
 
 if (env('APP_NAME') !== null) {
     $loader->addPsr4(env('APP_NAME') . '\\', $_ENV['base_path'] . 'app/');

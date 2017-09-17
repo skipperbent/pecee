@@ -29,7 +29,7 @@ class Guid
 
         $isSourceStrong = false;
 
-        $iv = openssl_random_pseudo_bytes(32, $isSourceStrong);
+        $iv = openssl_random_pseudo_bytes(16, $isSourceStrong);
         if ($isSourceStrong === false || $iv === false) {
             throw new \RuntimeException('IV generation failed');
         }
