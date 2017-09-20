@@ -11,6 +11,7 @@ class HtmlInput extends Html
 
         $this->type($type);
         $this->name($name);
+        $this->setClosingType(static::CLOSE_TYPE_NONE);
 
         if ($value !== null) {
             $this->value($value);

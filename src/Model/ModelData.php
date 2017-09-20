@@ -88,7 +88,13 @@ abstract class ModelData extends Model
 
     public function save(array $data = null)
     {
-        parent::save($data);
+        if(count($data) > 0) {
+            foreach($data as $key => $value) {
+                $this->{$key} = $value;
+            }
+        }
+
+        parent::save();
         $this->updateData();
     }
 

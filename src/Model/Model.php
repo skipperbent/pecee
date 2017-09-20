@@ -48,7 +48,7 @@ use Pecee\Str;
  * @method $this select(array | object $fields)
  * @method $this groupBy(string $field)
  * @method $this orderBy(string $field, string $defaultDirection = 'ASC')
- * @method $this join(string|array $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
+ * @method $this join(string | array $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
  * @method QueryBuilderHandler getQuery()
  * @method string raw(string $value, array $bindings = [])
  * @method string subQuery(Model $model, string $alias = null)
@@ -189,7 +189,7 @@ abstract class Model implements \IteratorAggregate
                 return $value !== null;
             }, ARRAY_FILTER_USE_BOTH);
 
-            if ($this->{$this->primary} === null) {
+            if ($this->isNew() ===  true) {
                 $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
             } else {
                 static::instance()->getQuery()->insert($updateData);
@@ -205,7 +205,7 @@ abstract class Model implements \IteratorAggregate
             throw new ModelException('Columns property not defined.');
         }
 
-        if ($this->{$this->primary} !== null) {
+        if ($this->isNew() === false) {
             $this->queryable->where($this->primary, '=', $this->{$this->primary});
         }
 
@@ -214,7 +214,7 @@ abstract class Model implements \IteratorAggregate
 
     public function exists()
     {
-        if ($this->{$this->primary} === null) {
+        if ($this->isNew() === true) {
             return false;
         }
 
@@ -227,6 +227,11 @@ abstract class Model implements \IteratorAggregate
         }
 
         return false;
+    }
+
+    public function isNew()
+    {
+        return (bool)($this->{$this->primary} === null);
     }
 
     public function hasRows()

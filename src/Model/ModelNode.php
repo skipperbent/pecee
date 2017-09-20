@@ -28,7 +28,7 @@ class ModelNode extends ModelData
         self::SORT_ORDER,
     ];
 
-    protected $parent, $next, $prev, $children, $type;
+    protected $parent, $next, $prev, $children;
     protected $defaultType;
 
     protected $dataPrimary = 'node_id';

@@ -10,9 +10,9 @@ class CreateNodeDataTable extends Migration
     {
         $this->schema->create('node_data', function (Table $table) {
             $table->column('id')->bigint()->primary()->increment();
-            $table->column('node_id')->string(36)->index()->relation('node', 'id');
+            $table->column('node_id')->string(32)->index()->relation('node', 'id');
             $table->column('key')->string(255)->index();
-            $table->column('value')->longtext()->nullable();
+            $table->column('value')->longtext()->nullable()->setIndex(\Pecee\DB\Schema\Column::INDEX_FULLTEXT);
         });
     }
 

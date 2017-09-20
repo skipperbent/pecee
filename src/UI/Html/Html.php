@@ -37,7 +37,7 @@ class Html
      */
     public function prepend($element)
     {
-        $this->innerHtml = array_unshift($this->innerHtml, $element);
+        array_unshift($this->innerHtml, $element);
 
         return $this;
     }

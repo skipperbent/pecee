@@ -32,7 +32,10 @@
   "autoload": {
     "psr-4": {
       "Pecee\\": "src/"
-    }
+    },
+    "files": [
+      "helpers.php"
+    ]
   },
   "config": {
     "preferred-install": "dist"
