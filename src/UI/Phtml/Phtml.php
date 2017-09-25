@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Phtml;
 
 /**
@@ -19,9 +20,46 @@ class Phtml
     const P_EVAL = 'P_EVAL';
     const COMMENT = 'COMMENT';
 
-    private static $IGNORELIST = [self::PHP, self::COMMENT, self::STRING, self::P_EVAL, self::DOCTYPE];
-    private static $IGNOREALLLIST = [self::PHP, self::COMMENT, self::STRING, self::P_EVAL, self::DOCTYPE];
-    private static $SCRIPTAGS = ['script', 'style', 'inline'];
+    private static $IGNORELIST = [
+        self::PHP,
+        self::COMMENT,
+        self::STRING,
+        self::P_EVAL,
+        self::DOCTYPE
+    ];
+
+    private static $IGNOREALLLIST = [
+        self::PHP,
+        self::COMMENT,
+        self::STRING,
+        self::P_EVAL,
+        self::DOCTYPE
+    ];
+
+    private static $SCRIPTAGS = [
+        'script',
+        'style',
+        'inline'
+    ];
+
+    private static $VOIDTAGS = [
+        'area',
+        'base',
+        'br',
+        'col',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'keygen',
+        'link',
+        'menuitem',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr'
+    ];
 
     private $withinStack = [];
     private $current = '';
@@ -50,7 +88,7 @@ class Phtml
         $this->current = '';
         $this->debugTrace = '';
         $this->node = new PhtmlNode();
-        $this->node->setContainer(true);
+        $this->node->setContainer(false);
         $this->node->setTag('phtml');
         $this->phtmlRaw = $string;
         $this->lineCount = 1;
@@ -90,6 +128,7 @@ class Phtml
 
                     break;
                 case '>':
+
                     if (mb_substr($string, $i - 2, 2) == '--' && $this->isWithin(self::COMMENT)) {
                         $this->popWithin();
                         break;
@@ -103,11 +142,13 @@ class Phtml
                     if ($this->lastChar == '?' && $this->isWithin(self::PHP)) {
                         $this->popWithin();
                     } elseif ($this->isWithin(self::TAGEND)) {
+
                         $this->checkEndTag();
                         $this->popWithin();
                         $this->onNodeEnd();
                         $this->ignoreChars = false;
                         $this->ignoreNextChar(1);
+
                     } elseif ($this->isWithin(self::DOCTYPE)) {
                         $this->popWithin();
                         $this->onWordEnd();
@@ -386,6 +427,11 @@ class Phtml
         $this->node = $node;
     }
 
+    protected function isVoidTag($tag)
+    {
+        return in_array($tag, static::$VOIDTAGS);
+    }
+
     protected function onTagEnd()
     {
         if (!$this->isWithin(self::TAG)) {
@@ -396,7 +442,7 @@ class Phtml
         }
         $this->debug("ENDING TAG: " . $this->getNode()->getTag());
 
-        if ($this->lastChar == '/') {
+        if ($this->lastChar == '/' || $this->isVoidTag($this->getNode()->getTag())) {
             $this->onNodeEnd();
         }
 

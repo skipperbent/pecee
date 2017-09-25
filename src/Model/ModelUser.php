@@ -56,8 +56,7 @@ class ModelUser extends ModelData
     protected function fetchData()
     {
         $class = static::getUserDataClass();
-
-        return $class::getByIdentifier($this->id);
+        return $class::instance()->filterIdentifier($this->id)->all();
     }
 
     public function delete()

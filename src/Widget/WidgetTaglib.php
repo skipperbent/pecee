@@ -35,7 +35,7 @@ abstract class WidgetTaglib extends Widget
 
     public function renderContent()
     {
-        $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace(DIRECTORY_SEPARATOR, '_', $this->_contentTemplate);
+        $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $this->_contentTemplate);
 
         if (is_file($cacheFile)) {
             if (app()->getDebugEnabled() === false) {
@@ -55,15 +55,15 @@ abstract class WidgetTaglib extends Widget
                 }
             }
 
-            $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
-            $pHtml = new Phtml();
-            $output = $pHtml->read($this->_contentHtml)->toPHP();
 
-            $this->_contentHtml = $output;
+            $pHtml = new Phtml();
+            $output = $pHtml->read(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH))->toPHP();
 
             $handle = fopen($cacheFile, 'w+b+');
-            fwrite($handle, $this->_contentHtml);
+            fwrite($handle, $output);
             fclose($handle);
+
+            $this->renderPhp($output);
 
         } catch (\Exception $e) {
             $this->_contentHtml = $e->getMessage();

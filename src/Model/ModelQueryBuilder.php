@@ -222,10 +222,8 @@ class ModelQueryBuilder
         /* @var $model Model */
         $models = [];
 
-        if (count($items)) {
-            foreach ($items as $item) {
-                $models[] = $this->createInstance($item);
-            }
+        foreach ($items as $item) {
+            $models[] = $this->createInstance($item);
         }
 
         return $this->createCollection($models);

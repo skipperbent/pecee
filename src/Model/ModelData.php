@@ -3,6 +3,7 @@
 namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
+use Pecee\Model\Collections\ModelCollection;
 
 abstract class ModelData extends Model
 {
@@ -32,6 +33,17 @@ abstract class ModelData extends Model
     {
         $field->{$this->getDataPrimary()} = $this->{$this->primary};
         $field->save();
+    }
+
+    public function onInstanceCreate($inCollection = false)
+    {
+        /* @var $data array */
+        $data = $this->fetchData();
+        foreach ($data as $d) {
+            $this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
+        }
+
+        $this->updateIdentifier = $this->generateUpdateIdentifier();
     }
 
     protected function updateData()
@@ -98,19 +110,6 @@ abstract class ModelData extends Model
         $this->updateData();
     }
 
-    public function onInstanceCreate()
-    {
-        /* @var $data array */
-        $data = $this->fetchData();
-        if (count($data)) {
-            foreach ($data as $d) {
-                $this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
-            }
-        }
-
-        $this->updateIdentifier = $this->generateUpdateIdentifier();
-    }
-
     public function setData(array $data)
     {
         $keys = array_map('strtolower', array_keys($this->getRows()));
@@ -125,7 +124,7 @@ abstract class ModelData extends Model
     {
         $rows = parent::toArray($filter);
 
-        if($this->mergeData === true) {
+        if ($this->mergeData === true) {
             $rows += $this->data->getData();
         } else {
             $rows['data'] = $this->data->getData();

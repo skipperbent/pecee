@@ -336,7 +336,10 @@ class ModelNode extends ModelData
 
     public function save(array $data = null)
     {
-        $this->calculatePath();
+        if($this->isNew() === true) {
+            $this->calculatePath();
+        }
+
         return parent::save($data);
     }
 

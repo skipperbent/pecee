@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model\User;
 
 use Pecee\Model\Model;
@@ -49,5 +50,15 @@ class UserData extends Model
     public static function getByIdentifier($identifierId)
     {
         return static::instance()->where(ModelUser::instance()->getDataPrimary(), '=', $identifierId)->all();
+    }
+
+    public function filterIdentifier($identifier)
+    {
+        return $this->where(ModelUser::instance()->getDataPrimary(), '=', $identifier);
+    }
+
+    public function filterIdentifiers(array $identifiers)
+    {
+        return $this->whereIn(ModelUser::instance()->getDataPrimary(), $identifiers);
     }
 }

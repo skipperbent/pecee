@@ -247,26 +247,15 @@ abstract class Base
         return $output;
     }
 
-    public function validationFor($index)
+    public function getValidation($index)
     {
         $messages = [];
         $search = $this->_messages->get($this->errorType);
 
         if ($search !== null) {
-            /* @var $search array */
             /* @var $message FormMessage */
             foreach ($search as $message) {
-                $input = null;
-                if (request()->getMethod() !== 'get') {
-                    $input = input()->findPost($index);
-                    if ($input === null) {
-                        $input = input()->findFile($index);
-                    }
-                } else {
-                    $input = input()->findGet($index);
-                }
-
-                if ($input !== null && $message->getIndex() === $input->getIndex()) {
+                if ($message->getIndex() === $index) {
                     return $message->getMessage();
                 }
             }

@@ -1,4 +1,4 @@
-if (typeof($p) == 'undefined') {
+if (typeof($p) === 'undefined') {
     var $p = {};
 }
 
@@ -31,16 +31,16 @@ $p.template.prototype = {
     },
     trigger: function (name, data) {
         var binding = this.bindings[name];
-        if (binding == null) {
+        if (typeof binding === 'undefined') {
             throw 'Failed to find binding: ' + name;
         }
-        data = (data == null) ? binding.data : data;
+        data = (typeof data === 'undefined') ? binding.data : data;
         binding.callback(data);
     },
     triggerAll: function () {
         var self = this;
         for (var name in this.bindings) {
-            if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) == -1) {
+            if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
                 this.trigger(name);
                 self.bindingsMap.push(name);
                 this.triggerAll();
@@ -82,7 +82,7 @@ $p.Widget.prototype = {
     setData: function (data) {
         this.data = data;
     },
-    setJSON: function (url) {
+    setJson: function (url) {
         var c = this;
         $.ajax({
             type: 'GET',

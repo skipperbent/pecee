@@ -63,10 +63,10 @@ abstract class Widget extends Base
 
     public function validationFor($name)
     {
-        if (parent::validationFor($name)) {
+        if (parent::getValidation($name)) {
             $span = new Html('div');
             $span->addClass('text-danger small');
-            $span->addInnerHtml(parent::validationFor($name));
+            $span->addInnerHtml(parent::getValidation($name));
 
             return $span;
         }
