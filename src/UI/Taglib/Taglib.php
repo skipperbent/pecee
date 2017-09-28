@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Taglib;
 
-class Taglib
+class Taglib implements ITaglib
 {
 
     const TAG_PREFIX = 'tag';

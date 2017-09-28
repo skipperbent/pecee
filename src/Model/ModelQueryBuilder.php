@@ -351,7 +351,8 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item === null) {
-            return $this->createInstance((object)$data);
+            $item = $this->createInstance((object)$data);
+            return $item;
         }
 
         return $item;

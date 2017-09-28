@@ -80,6 +80,7 @@ class Phtml
 
     /**
      * @param phtml $string
+     * @throws PhtmlException
      * @return PhtmlNode
      */
     public function read($string)
@@ -134,6 +135,7 @@ class Phtml
                         $this->popWithin();
                         break;
                     }
+
                     //Handle conditional comments
                     if (($this->conditionalComment && $this->lastChar == ']') && $this->isWithin(static::COMMENT)) {
                         $this->conditionalComment = false;
@@ -309,6 +311,9 @@ class Phtml
         $this->currentIgnore = '';
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onWordStart()
     {
         if ($this->isWithin(static::STRING)) {
@@ -328,6 +333,9 @@ class Phtml
         return trim($this->current) != '';
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onWordEnd()
     {
         if ($this->char != ':') {
@@ -419,6 +427,9 @@ class Phtml
         }
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onTagStart()
     {
         if ($this->ignoreTags()) {
@@ -439,6 +450,9 @@ class Phtml
         return in_array($tag, static::$VOIDTAGS);
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onTagEnd()
     {
         if (!$this->isWithin(static::TAG)) {
@@ -456,6 +470,9 @@ class Phtml
         $this->popWithin();
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function checkEndTag()
     {
         $endTag = trim($this->currentIgnore, "</> \t\n\r");
@@ -475,6 +492,9 @@ class Phtml
         }
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onNodeEnd()
     {
         if ($this->ignoreAll()) {

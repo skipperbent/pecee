@@ -1,8 +1,10 @@
 <?php
+
 namespace Pecee\UI\Form;
 
 use Pecee\Boolean;
 use Pecee\Dataset\Dataset;
+use Pecee\Http\Middleware\BaseCsrfVerifier;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Html\HtmlCheckbox;
 use Pecee\UI\Html\HtmlForm;
@@ -14,6 +16,8 @@ use Pecee\UI\Html\HtmlTextarea;
 class Form
 {
 
+    protected $enableCsrfToken = true;
+
     /**
      * Starts new form
      * @param string $name
@@ -23,7 +27,13 @@ class Form
      */
     public function start($name, $method = HtmlForm::METHOD_POST, $action = null)
     {
-        return new HtmlForm($name, $method, $action);
+        $form = new HtmlForm($name, $method, $action);
+        // Add csrf token
+        if ($this->enableCsrfToken === true && strtolower($method) !== 'get') {
+            $form->addInnerHtml(new HtmlInput(BaseCsrfVerifier::POST_KEY, 'hidden', csrf_token()));
+        }
+
+        return $form;
     }
 
     /**
@@ -214,6 +224,16 @@ class Form
     public function end()
     {
         return '</form>';
+    }
+
+    public function setEnableCsrfToken($value)
+    {
+        $this->enableCsrfToken = $value;
+    }
+
+    public function isCsrfTokenEnabled()
+    {
+        return $this->enableCsrfToken;
     }
 
 }

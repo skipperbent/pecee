@@ -49,6 +49,7 @@ class ModelNode extends ModelData
         'created_at',
     ];
     protected $mergeData = false;
+    protected $fixedIdentifier = true;
 
     public function __construct()
     {
@@ -218,7 +219,7 @@ class ModelNode extends ModelData
         return true;
     }
 
-    protected function calculatePath()
+    public function calculatePath()
     {
         $path = ['0'];
         $fetchingPath = true;
@@ -328,7 +329,7 @@ class ModelNode extends ModelData
     public function getParent()
     {
         if ($this->parent === null && $this->parent_id !== null) {
-            $this->parent = static::instance()->find($this->parent_id);
+            $this->parent = ModelNode::instance()->find($this->parent_id);
         }
 
         return $this->parent;
@@ -336,7 +337,7 @@ class ModelNode extends ModelData
 
     public function save(array $data = null)
     {
-        if($this->isNew() === true) {
+        if ($this->isNew() === true) {
             $this->calculatePath();
         }
 
@@ -379,6 +380,11 @@ class ModelNode extends ModelData
         }
 
         return $this->where('parent_id', '=', $parentId);
+    }
+
+    public function filterParentIds(array $parentIds)
+    {
+        return $this->whereIn('parent_id', $parentIds);
     }
 
     public function filterPath($path)

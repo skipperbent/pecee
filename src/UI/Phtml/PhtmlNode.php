@@ -4,6 +4,7 @@ namespace Pecee\UI\Phtml;
 
 use Pecee\Guid;
 use Pecee\UI\Html\HtmlElement;
+use Pecee\UI\Taglib\ITaglib;
 
 class PhtmlNode extends HtmlElement
 {
@@ -126,9 +127,10 @@ class PhtmlNode extends HtmlElement
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-                if (isset($taglibs[$this->getNs()])) {
-                    $tag = $this->getTag();
-                    $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), $body);
+                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+
+                if ($taglib !== null && $taglib instanceof ITaglib) {
+                    $str = $taglib->callTag($this->getTag(), $this->getAttrs(), $body);
                 }
             } else {
                 $str .= sprintf('</%s>', $this->getTag());
@@ -136,10 +138,11 @@ class PhtmlNode extends HtmlElement
         } else {
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
-                
-                if (isset($taglibs[$this->getNs()])) {
-                    $tag = $this->getTag();
-                    $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), null, null);
+
+                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+
+                if ($taglib !== null && $taglib instanceof ITaglib) {
+                    $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
                 }
             } else {
 

@@ -1,28 +1,29 @@
 <?php
-namespace Pecee\Widget;
+
+namespace Pecee\Traits\Widget;
 
 use Pecee\UI\Phtml\Phtml;
 
-abstract class WidgetTaglib extends Widget
+trait TaglibRenderer
 {
 
     protected $_pHtmlCacheDir;
 
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->getSite()->addWrappedJs('pecee-widget.js');
-        $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
-    }
-
     public function render()
     {
+        $this->setTaglibJs();
+        $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
+
         $this->renderContent();
         $this->renderTemplate();
         $this->_messages->clear();
 
         return $this->_contentHtml;
+    }
+
+    public function setTaglibJs()
+    {
+        $this->getSite()->addWrappedJs('pecee-widget.js');
     }
 
     protected function renderPhp($content)
@@ -39,7 +40,7 @@ abstract class WidgetTaglib extends Widget
 
         if (is_file($cacheFile) === true) {
             if (app()->getDebugEnabled() === false) {
-                $this->renderPhp(file_get_contents($cacheFile));
+                $this->_contentHtml = file_get_contents($cacheFile);
                 return;
             } else {
                 unlink($cacheFile);
@@ -49,23 +50,23 @@ abstract class WidgetTaglib extends Widget
         try {
 
             if (is_dir($this->_pHtmlCacheDir) === false) {
-                if(mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
+                if (mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
                     throw new \ErrorException('Failed to create temp-cache directory');
                 }
             }
 
+            $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
+
             debug('Parsing Phtml template');
             $pHtml = new Phtml();
-            $output = $pHtml->read(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH))->toPHP();
+            $this->_contentHtml = $pHtml->read($this->_contentHtml)->toPHP();
             debug('Finished parsing Phtml template');
 
             debug('Writing Phtml cache file');
             $handle = fopen($cacheFile, 'w+b+');
-            fwrite($handle, $output);
+            fwrite($handle, $this->_contentHtml);
             fclose($handle);
             debug('Finished writing Phtml cache file');
-
-            $this->renderPhp($output);
 
         } catch (\Exception $e) {
             $this->_contentHtml = $e->getMessage();

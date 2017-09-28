@@ -8,8 +8,9 @@ use Pecee\Guid;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
 use Pecee\Model\User\UserException;
+use Pecee\User\IUserAuthentication;
 
-class ModelUser extends ModelData
+class ModelUser extends ModelData implements IUserAuthentication
 {
     const COOKIE_NAME = 'ticket';
 
@@ -20,7 +21,6 @@ class ModelUser extends ModelData
 
     protected static $instance;
     protected static $ticketExpireMinutes = 60;
-
 
     protected $dataPrimary = 'user_id';
     protected $table = 'user';
@@ -121,7 +121,7 @@ class ModelUser extends ModelData
         return null;
     }
 
-    protected function signIn()
+    public function signIn()
     {
         static::createTicket($this->id);
     }

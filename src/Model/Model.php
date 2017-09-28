@@ -65,6 +65,7 @@ abstract class Model implements \IteratorAggregate
     protected $join = [];
     protected $columns = [];
     protected $timestamps = true;
+    protected $fixedIdentifier = false;
 
     /**
      * @var ModelQueryBuilder
@@ -189,7 +190,7 @@ abstract class Model implements \IteratorAggregate
                 return $value !== null;
             }, ARRAY_FILTER_USE_BOTH);
 
-            if ($this->isNew() ===  true) {
+            if ($this->isNew() === true && $this->fixedIdentifier === false) {
                 $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
             } else {
                 static::instance()->getQuery()->insert($updateData);
@@ -231,7 +232,8 @@ abstract class Model implements \IteratorAggregate
 
     public function isNew()
     {
-        return (bool)($this->{$this->primary} === null);
+        $originalRows = $this->getOriginalRows();
+        return (bool)(isset($originalRows[$this->primary]) === false || $originalRows[$this->primary] === null);
     }
 
     public function hasRows()
