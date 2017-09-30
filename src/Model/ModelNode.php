@@ -462,7 +462,8 @@ class ModelNode extends ModelData
             ->select(['node_id'])
             ->where('node_id', '=', $this->raw('node.`id`'))
             ->where('key', '=', $key)
-            ->where('value', $operator, $value);
+            ->where('value', $operator, $value)
+            ->limit(1);
 
         return $this->where('id', '=', $this->subQuery($subQuery));
     }
