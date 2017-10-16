@@ -323,7 +323,9 @@ class ModelNode extends ModelData
 
     public function getParents()
     {
-        return static::instance()->filterPath($this->parent_id . '>%')->orderBy('path');
+        $parentIds = explode('>', $this->path);
+
+        return static::instance()->filterIds($parentIds)->orderBy('path')->orderBy('order');
     }
 
     public function getParent()
@@ -351,6 +353,10 @@ class ModelNode extends ModelData
      */
     public function filterIds(array $ids)
     {
+        if (count($ids) === 0) {
+            return $this;
+        }
+
         return $this->whereIn('id', $ids);
     }
 

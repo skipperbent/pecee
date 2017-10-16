@@ -42,8 +42,8 @@ use Pecee\Str;
  * @method $this sum(string $field)
  * @method $this update(array $data)
  * @method $this create(array $data)
- * @method $this firstOrCreate(array $data = array())
- * @method $this firstOrNew(array $data = array())
+ * @method $this firstOrCreate(array $data = [])
+ * @method $this firstOrNew(array $data = [])
  * @method $this destroy(array | object $ids)
  * @method $this select(array | object $fields)
  * @method $this groupBy(string $field)
@@ -54,7 +54,7 @@ use Pecee\Str;
  * @method string subQuery(Model $model, string $alias = null)
  * @method string getQueryIdentifier()
  */
-abstract class Model implements \IteratorAggregate
+abstract class Model implements \IteratorAggregate, \JsonSerializable
 {
     protected $table;
     protected $results = ['rows' => [], 'original_rows' => []];
@@ -233,6 +233,7 @@ abstract class Model implements \IteratorAggregate
     public function isNew()
     {
         $originalRows = $this->getOriginalRows();
+
         return (bool)(isset($originalRows[$this->primary]) === false || $originalRows[$this->primary] === null);
     }
 
@@ -431,6 +432,11 @@ abstract class Model implements \IteratorAggregate
     public function __clone()
     {
         $this->setQuery(clone $this->queryable);
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
 }
