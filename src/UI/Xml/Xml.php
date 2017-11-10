@@ -25,7 +25,7 @@ class Xml
                 break;
             case is_bool($data):
                 $parent->setAttribute('type', 'boolean');
-                $parent->addChild(new XmlText(($data) ? 'true' : 'false'));
+                $parent->addChild(new XmlText($data ? 'true' : 'false'));
                 break;
             case is_int($data):
                 $parent->setAttribute('type', 'integer');

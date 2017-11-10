@@ -11,7 +11,7 @@ class FloatUtil
 
     public static function parse($val)
     {
-        return static::isFloat($val) ? $val : floatval(str_replace(['.', ','], ['', '.'], $val));
+        return static::isFloat($val) ? $val : (float)str_replace(['.', ','], ['', '.'], $val);
     }
 
 }

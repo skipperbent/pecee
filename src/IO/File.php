@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\IO;
 
 use Pecee\Url;
@@ -23,7 +24,7 @@ class File
         curl_exec($handle);
         $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-        return ($size) ? $size : null;
+        return $size ? $size : null;
     }
 
     public static function remoteExist($url)
@@ -33,7 +34,7 @@ class File
         curl_exec($handle);
 
         $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        if ($statusCode == 200) {
+        if ($statusCode === 200) {
             return true;
         }
 
@@ -72,12 +73,12 @@ class File
         if (is_dir($source)) {
 
             if (!is_dir($destination)) {
-                if(mkdir($destination, 0755, true) === false) {
+                if (mkdir($destination, 0755, true) === false) {
                     throw new \ErrorException('Failed to create directory: ' . $destination);
                 }
             }
 
-            $files = scandir($source);
+            $files = scandir($source, SCANDIR_SORT_ASCENDING);
             foreach ($files as $file) {
                 if (in_array($file, ['.', '..'], true) === false) {
                     static::move($source . '/' . $file, $destination . '/' . $file);

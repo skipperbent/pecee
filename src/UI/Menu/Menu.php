@@ -204,7 +204,7 @@ class Menu
                 $url = rtrim($url, '/');
                 $url = ($url === '') ? '/' : $url;
 
-                if (false !== stristr($itemUrl, $url)) {
+                if (false !== stripos($itemUrl, $url)) {
                     return $item;
                 }
             }

@@ -17,7 +17,7 @@ class TaglibJs extends Taglib
 
     protected function handleInline($string)
     {
-        $string = str_replace('\\"', '"', str_replace("\\'", '\'', $string));
+        $string = str_replace(["\\'", '\\"'], array('\'', '"'), $string);
         $parts = preg_split('/[;\n]{1,2}/', $string);
         if (count($parts) <= 1) {
             return "($string)";

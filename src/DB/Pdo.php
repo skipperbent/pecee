@@ -117,7 +117,7 @@ class Pdo
     {
         $query = $this->query($query, $parameters);
         if ($query) {
-            return $query->fetchColumn(0);
+            return $query->fetchColumn();
         }
 
         return null;
@@ -143,9 +143,9 @@ class Pdo
         $fp = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $query = '';
         foreach ($fp as $line) {
-            if ($line != '' && strpos($line, '--') === false) {
+            if ($line !== '' && strpos($line, '--') === false) {
                 $query .= $line;
-                if (substr($query, -1) == ';') {
+                if (substr($query, -1) === ';') {
                     $this->nonQuery($query);
                     $query = '';
                 }

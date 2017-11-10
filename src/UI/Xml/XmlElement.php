@@ -141,19 +141,25 @@ class XmlElement implements IXmlNode
         if ($offset < 0) {
             throw new \Exception ("Child offset must be greater than -1" . count($this->children));
         }
+
         $result = [];
+
         if ($offset >= count($this->children)) {
             $this->addChild($node);
 
             return null;
         }
-        for ($i = 0; $i < count($this->children); $i++) {
+
+        $max = count($this->children);
+
+        for ($i = 0; $i < $max; $i++) {
             $result[] = $this->children[$i];
-            if ($i == $offset) {
+            if ($i === $offset) {
                 $result[] = $node;
                 $node->setParent($this);
             }
         }
+
         $this->children = $result;
 
         return $this;
@@ -199,8 +205,9 @@ class XmlElement implements IXmlNode
     public function getElementsByTagNameNS($ns, $tagName)
     {
         $result = [];
-        for ($i = 0; $i < count($this->children); $i++) {
-            if (!($this->children[$i] instanceof XmlElement)) {
+        $max = count($this->children);
+        for ($i = 0; $i < $max; $i++) {
+            if (!($this->children[$i] instanceof static)) {
                 continue;
             }
             if (strtolower($this->children[$i]->getNs()) == strtolower($ns)

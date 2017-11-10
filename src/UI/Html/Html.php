@@ -183,7 +183,7 @@ class Html
      */
     public function addClass($class)
     {
-        return $this->addAttribute('class', $class, false);
+        return $this->addAttribute('class', $class);
     }
 
     /**

@@ -39,13 +39,20 @@ class Guid
         return base64_encode($data . '|' . bin2hex($iv));
     }
 
+    /**
+     * Decrypt key
+     * @param string $key
+     * @param string $data
+     * @param string|null $method
+     * @return bool|string
+     */
     public static function decrypt($key, $data, $method = null)
     {
         if ($method === null) {
             $method = app()->getEncryptionMethod();
         }
 
-        $key = substr(hash('sha256', $key, true), 0, 16);
+        $key = (string)substr(hash('sha256', $key, true), 0, 16);
 
         list($data, $iv) = explode('|', base64_decode($data));
 
@@ -73,7 +80,7 @@ class Guid
         $pass = '';
         while ($i <= $length) {
             $num = mt_rand() % 33;
-            $tmp = substr($chars, $num, 1);
+            $tmp = $chars[$num];
             $pass .= $tmp;
             $i++;
         }

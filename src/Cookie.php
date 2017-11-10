@@ -1,19 +1,31 @@
 <?php
 namespace Pecee;
 
+use Carbon\Carbon;
+
 class Cookie
 {
 
+    /**
+     * Set cookie
+     * @param string $id
+     * @param string $value
+     * @param int $expireTime
+     * @param string|null $domain
+     * @param bool|null $secure
+     * @param string $path
+     * @return bool
+     */
     public static function create($id, $value, $expireTime = null, $domain = null, $secure = null, $path = '/')
     {
-        $expireTime = ($expireTime === null) ? time() + 60 * 60 * 24 * 6004 : $expireTime;
+        $expireTime = ($expireTime === null) ? Carbon::now()->addYear(10)->timestamp : $expireTime;
+        $expireTime = ($expireTime > 0) ? $expireTime : null;
 
         if ($domain === null) {
-            $sub = explode('.', request()->getHost());
-            $domain = (count($sub) > 2) ? request()->getHost() : '.' . request()->getHost();
+            $domain = ((substr_count(request()->getHost(), '.') + 1) > 2) ? request()->getHost() : '.' . request()->getHost();
         }
 
-        return setcookie($id, $value, (($expireTime > 0) ? $expireTime : null), $path, $domain, $secure);
+        return setcookie($id, $value, $expireTime, $path, $domain, $secure);
     }
 
     public static function get($id, $defaultValue = null)
@@ -24,7 +36,7 @@ class Cookie
     public static function delete($id)
     {
         if (static::exists($id) === true) {
-            static::create($id, null, time() - 999);
+            static::create($id, null, time() - 99);
         }
     }
 

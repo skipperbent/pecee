@@ -52,7 +52,7 @@ class Str
     {
         return preg_replace_callback('/(^|[a-z])([A-Z])/',
             function ($matches) {
-                return strtolower(strlen($matches[1]) ? $matches[1] . '_' . $matches[2] : $matches[2]);
+                return strtolower('' !== $matches[1] ? $matches[1] . '_' . $matches[2] : $matches[2]);
             },
             $word
         );

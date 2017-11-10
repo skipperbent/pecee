@@ -193,7 +193,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $userDataQuery = static::instance($userDataClass->getTable())
+        $userDataQuery = static::instance()
             ->getQuery()
             ->select($this->getDataPrimary())
             ->where($this->getDataPrimary(), '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getDataPrimary()))
@@ -237,7 +237,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public static function getByUsername($username)
     {
-        return static::instance()->filterDeleted(false)->filterUsername($username);
+        return static::instance()->filterDeleted()->filterUsername($username);
     }
 
     public static function authenticate($username, $password)
@@ -245,7 +245,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         static::onLoginStart($username, $password);
 
         /* @var $user static */
-        $user = static::instance()->filterDeleted(false)->filterUsername($username)->first();
+        $user = static::instance()->filterDeleted()->filterUsername($username)->first();
 
         if ($user === null) {
             throw new UserException('User does not exist', static::ERROR_TYPE_EXISTS);
@@ -269,7 +269,7 @@ class ModelUser extends ModelData implements IUserAuthentication
     }
 
     /**
-     * @return UserData
+     * @return string
      */
     public static function getUserDataClass()
     {
