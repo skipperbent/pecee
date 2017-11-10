@@ -7,7 +7,7 @@ $loader = require_once $_ENV['base_path'] . '/vendor/autoload.php';
 // Load .env file
 (new josegonzalez\Dotenv\Loader($_ENV['base_path'] . '.env'))->parse()->toEnv();
 
-if (env('APP_NAME') !== null) {
+if ($loader instanceof \Composer\Autoload\ClassLoader && env('APP_NAME') !== null) {
     $loader->addPsr4(env('APP_NAME') . '\\', $_ENV['base_path'] . 'app/');
 }
 
