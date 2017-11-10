@@ -189,10 +189,11 @@ class ModelUser extends ModelData implements IUserAuthentication
     public function filterQuery($query)
     {
         $userDataClassName = static::getUserDataClass();
+
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $userDataQuery = $this->newQuery($userDataClass->getTable())
+        $userDataQuery = static::instance($userDataClass->getTable())
             ->getQuery()
             ->select($this->getDataPrimary())
             ->where($this->getDataPrimary(), '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getDataPrimary()))

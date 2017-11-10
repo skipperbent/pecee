@@ -356,16 +356,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $rows[$key] = $this->parseArrayData($row);
         }
 
-        if (count($this->getResults()) === 1) {
-            foreach ($this->with as $with) {
-                $method = Str::camelize($with);
-                if (method_exists($this, $method) === false) {
-                    throw new ModelException('Missing required method ' . $method);
-                }
-                $output = $this->$method();
-                $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
-                $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
+        foreach ($this->with as $with) {
+            $method = Str::camelize($with);
+            if (method_exists($this, $method) === false) {
+                throw new ModelException('Missing required method ' . $method);
             }
+            $output = $this->$method();
+            $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
+            $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
         }
 
         $this->orderArrayRows($rows);
