@@ -4,8 +4,6 @@ $_ENV['framework_path'] = __DIR__;
 
 $loader = require_once $_ENV['base_path'] . '/vendor/autoload.php';
 
-\Pecee\Session\Session::start();
-
 // Load .env file
 (new josegonzalez\Dotenv\Loader($_ENV['base_path'] . '.env'))->parse()->toEnv();
 
