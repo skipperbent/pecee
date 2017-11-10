@@ -11,18 +11,15 @@ abstract class Widget extends Base
     protected $_template;
     protected $_contentTemplate;
     protected $_contentHtml;
-    protected $_form;
 
     public function __construct()
     {
-
         parent::__construct();
 
         debug('START WIDGET: ' . static::class);
 
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
-        $this->_form = new Form();
     }
 
     /**
@@ -31,9 +28,8 @@ abstract class Widget extends Base
      */
     protected function getTemplatePath()
     {
-        $path = array_slice(explode('\\', static::class), 2);
-
-        return 'views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        $path = substr(static::class, strpos(static::class, 'Widget') + 7);
+        return 'views/content/' . str_replace('\\', DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     public function showMessages($type, $placement = null)
@@ -67,10 +63,10 @@ abstract class Widget extends Base
 
     public function validationFor($name)
     {
-        if (parent::validationFor($name)) {
+        if (parent::getValidation($name)) {
             $span = new Html('div');
-            $span->addClass('text-danger mt-2 small');
-            $span->addInnerHtml(parent::validationFor($name));
+            $span->addClass('text-danger small');
+            $span->addInnerHtml(parent::getValidation($name));
 
             return $span;
         }
@@ -108,12 +104,12 @@ abstract class Widget extends Base
 
         if (count($this->getSite()->getCssFilesWrapped($section))) {
             $css = url(app()->getCssWrapRouteName(), null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
-            $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_TAG)->attr('href', $css)->attr('rel', 'stylesheet');
+            $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
         foreach ($this->getSite()->getCss($section) as $css) {
             $output .= (new Html('link'))
-                ->setClosingType(Html::CLOSE_TYPE_TAG)
+                ->setClosingType(Html::CLOSE_TYPE_NONE)
                 ->attr('href', $css)
                 ->attr('rel', 'stylesheet');
         }
@@ -173,7 +169,7 @@ abstract class Widget extends Base
      */
     public function form()
     {
-        return $this->_form;
+        return new Form();
     }
 
     /**

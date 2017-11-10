@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\DB;
 
 use Pecee\Integer;
@@ -8,7 +9,7 @@ class PdoHelper
 
     public static function parseArgs($args, $offset)
     {
-        if (is_array($args) && count($args) > $offset) {
+        if (is_array($args) === true && count($args) > $offset) {
             return array_slice($args, $offset);
         }
 
@@ -23,10 +24,10 @@ class PdoHelper
      */
     public static function formatQuery($query, $args = null)
     {
-        if (is_array($args) && count($args) > 0) {
+        if (is_array($args) === true && count($args) > 0) {
             $a = [];
             foreach ($args as $arg) {
-                if (is_null($arg)) {
+                if ($arg === null) {
                     $a[] = 'null';
                 } elseif (Integer::isInteger($arg)) {
                     $a[] = sprintf('%s', self::escape($arg));
@@ -34,7 +35,7 @@ class PdoHelper
                     $a[] = sprintf('\'%s\'', self::escape($arg));
                 }
             }
-            if ($query && count($a) > 0) {
+            if ($query !== null && count($a) > 0) {
                 return vsprintf($query, $a);
             }
         }

@@ -141,12 +141,12 @@ class Site
         return $this->header;
     }
 
-    public function getJsFilesWrapped($section)
+    public function getJsFilesWrapped($section = self::SECTION_DEFAULT)
     {
         return isset($this->jsFilesWrapped[$section]) ? $this->jsFilesWrapped[$section] : [];
     }
 
-    public function getCssFilesWrapped($section)
+    public function getCssFilesWrapped($section = self::SECTION_DEFAULT)
     {
         return isset($this->cssFilesWrapped[$section]) ? $this->cssFilesWrapped[$section] : [];
     }

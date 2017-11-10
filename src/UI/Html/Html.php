@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class Html
@@ -18,6 +19,38 @@ class Html
     }
 
     /**
+     * Append element
+     * @param Html|string $element
+     * @return static $this
+     */
+    public function append($element)
+    {
+        $this->innerHtml[] = $element;
+
+        return $this;
+    }
+
+    /**
+     * Prepend element
+     * @param Html|string $element
+     * @return static $this
+     */
+    public function prepend($element)
+    {
+        array_unshift($this->innerHtml, $element);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getChildren()
+    {
+        return $this->innerHtml;
+    }
+
+    /**
      * @param array $html
      * @return static
      */
@@ -28,6 +61,10 @@ class Html
         return $this;
     }
 
+    /**
+     * @param string $html
+     * @return static
+     */
     public function addInnerHtml($html)
     {
         $this->innerHtml[] = $html;
@@ -44,7 +81,7 @@ class Html
      */
     public function replaceAttribute($name, $value = '')
     {
-        $this->attributes[$name] = array($value);
+        $this->attributes[$name] = [$value];
 
         return $this;
     }
@@ -80,6 +117,12 @@ class Html
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @param string $value
+     * @param bool $replace
+     * @return static
+     */
     public function attr($name, $value = '', $replace = true)
     {
         if ($replace === true) {
@@ -89,17 +132,25 @@ class Html
         return $this->addAttribute($name, $value);
     }
 
+    /**
+     * @param string $id
+     * @return static
+     */
     public function id($id)
     {
         return $this->addAttribute('id', $id);
     }
 
+    /**
+     * @param string $css
+     * @return static
+     */
     public function style($css)
     {
         return $this->addAttribute('style', $css);
     }
 
-    protected function render()
+    public function render()
     {
         $output = '<' . $this->tag;
 
@@ -113,12 +164,12 @@ class Html
 
         $output .= '>';
 
-        for($i = 0, $max = count($this->innerHtml); $i < $max; $i++) {
+        for ($i = 0, $max = count($this->innerHtml); $i < $max; $i++) {
             $html = $this->innerHtml[$i];
             $output .= ($html instanceof static) ? $html->render() : $html;
         }
 
-        if($this->closingType === static::CLOSE_TYPE_TAG) {
+        if ($this->closingType === static::CLOSE_TYPE_TAG) {
             $output .= '</' . $this->tag . '>';
         }
 

@@ -1,7 +1,9 @@
 <?php
+
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
@@ -10,7 +12,7 @@ use Pecee\Str;
  *
  * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
  *
- * @method $this prefix(string $prefix)
+ * @method $this alias(string $prefix)
  * @method $this limit(int $id)
  * @method $this skip(int $id)
  * @method $this take(int $id)
@@ -40,23 +42,22 @@ use Pecee\Str;
  * @method $this sum(string $field)
  * @method $this update(array $data)
  * @method $this create(array $data)
- * @method $this firstOrCreate(array $data)
- * @method $this firstOrNew(array $data)
+ * @method $this firstOrCreate(array $data = [])
+ * @method $this firstOrNew(array $data = [])
  * @method $this destroy(array | object $ids)
  * @method $this select(array | object $fields)
  * @method $this groupBy(string $field)
  * @method $this orderBy(string $field, string $defaultDirection = 'ASC')
- * @method $this join(string $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
+ * @method $this join(string | array $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
  * @method QueryBuilderHandler getQuery()
  * @method string raw(string $value, array $bindings = [])
  * @method string subQuery(Model $model, string $alias = null)
+ * @method string getQueryIdentifier()
  */
-abstract class Model implements \IteratorAggregate
+abstract class Model implements \IteratorAggregate, \JsonSerializable
 {
-
     protected $table;
-    protected $results = ['rows' => []];
-
+    protected $results = ['rows' => [], 'original_rows' => []];
     protected $primary = 'id';
     protected $hidden = [];
     protected $with = [];
@@ -64,6 +65,7 @@ abstract class Model implements \IteratorAggregate
     protected $join = [];
     protected $columns = [];
     protected $timestamps = true;
+    protected $fixedIdentifier = false;
 
     /**
      * @var ModelQueryBuilder
@@ -83,8 +85,8 @@ abstract class Model implements \IteratorAggregate
 
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
+                'updated_at',
                 'created_at',
-                'updated_at'
             ]);
             $this->created_at = Carbon::now();
         }
@@ -108,24 +110,20 @@ abstract class Model implements \IteratorAggregate
         return new static();
     }
 
-    /**
-     * @param \stdClass $item
-     * @return static
-     */
-    public function getInstance(\stdClass $item)
-    {
-        return new static;
-    }
-
     public function onInstanceCreate()
     {
         $this->joinData();
     }
 
+    public function onCollectionCreate($items)
+    {
+        return new ModelCollection($items);
+    }
+
     protected function joinData()
     {
         if (count($this->join)) {
-            for($i = 0, $max = count($this->join); $i < $max; $i++) {
+            for ($i = 0, $max = count($this->join); $i < $max; $i++) {
                 $join = $this->join[$i];
                 $this->{$join} = $this->{Str::camelize($join)}();
             }
@@ -150,6 +148,8 @@ abstract class Model implements \IteratorAggregate
             $updateData[$column] = $this->{$column};
         }
 
+        $originalRows = $this->getOriginalRows();
+
         if ($data !== null) {
 
             /* Only save valid columns */
@@ -160,9 +160,19 @@ abstract class Model implements \IteratorAggregate
             $updateData = array_merge($updateData, $data);
         }
 
+        foreach ($updateData as $key => $value) {
+            if (array_key_exists($key, $originalRows) === true && $originalRows[$key] === $value) {
+                unset($updateData[$key]);
+            }
+        }
+
+        if (count($updateData) === 0) {
+            return $this;
+        }
+
         $this->mergeRows($updateData);
 
-        if ($this->exists() === true) {
+        if (count($originalRows) > 0 || $this->exists() === true) {
 
             if ($this->timestamps) {
                 $this->updated_at = Carbon::now()->toDateTimeString();
@@ -176,12 +186,12 @@ abstract class Model implements \IteratorAggregate
             static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         } else {
 
-            $updateData = array_filter($updateData, function($value) {
+            $updateData = array_filter($updateData, function ($value) {
                 return $value !== null;
             }, ARRAY_FILTER_USE_BOTH);
 
-            if ($this->{$this->primary} === null) {
-                $this->{$this->primary} = static::getQuery()->insert($updateData);
+            if ($this->isNew() === true && $this->fixedIdentifier === false) {
+                $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
             } else {
                 static::instance()->getQuery()->insert($updateData);
             }
@@ -196,7 +206,7 @@ abstract class Model implements \IteratorAggregate
             throw new ModelException('Columns property not defined.');
         }
 
-        if ($this->{$this->primary} !== null) {
+        if ($this->isNew() === false) {
             $this->queryable->where($this->primary, '=', $this->{$this->primary});
         }
 
@@ -205,7 +215,7 @@ abstract class Model implements \IteratorAggregate
 
     public function exists()
     {
-        if ($this->{$this->primary} === null) {
+        if ($this->isNew() === true) {
             return false;
         }
 
@@ -220,9 +230,16 @@ abstract class Model implements \IteratorAggregate
         return false;
     }
 
+    public function isNew()
+    {
+        $originalRows = $this->getOriginalRows();
+
+        return (bool)(isset($originalRows[$this->primary]) === false || $originalRows[$this->primary] === null);
+    }
+
     public function hasRows()
     {
-        return (bool)(isset($this->results['rows']) && count($this->results['rows']) > 0);
+        return (isset($this->results['rows']) && count($this->results['rows']) > 0);
     }
 
     /**
@@ -286,7 +303,7 @@ abstract class Model implements \IteratorAggregate
 
     public function __isset($name)
     {
-        return array_key_exists(strtolower($name), $this->results['rows']);
+        return in_array($name, $this->columns, true);
     }
 
     public function getPrimary()
@@ -308,11 +325,11 @@ abstract class Model implements \IteratorAggregate
         $encoding = mb_detect_encoding($data, 'UTF-8', true);
         $data = (is_array($data) === false && ($encoding === false || strtolower($encoding) !== 'utf-8')) ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
 
-        if(is_float($data) === true) {
+        if (is_float($data) === true) {
             return (float)$data;
         }
 
-        if(is_bool($data) === true || is_numeric($data) === true) {
+        if (is_bool($data) === true || is_numeric($data) === true) {
             return (int)$data;
         }
 
@@ -322,7 +339,7 @@ abstract class Model implements \IteratorAggregate
     protected function orderArrayRows(array &$rows)
     {
         uksort($rows, function ($a, $b) {
-            return (array_search($a, $this->columns, true) > array_search($b, $this->columns, true));
+            return (array_search($a, $this->columns, true) < array_search($b, $this->columns, true) === true) ? -1 : 1;
         });
     }
 
@@ -330,17 +347,13 @@ abstract class Model implements \IteratorAggregate
     {
         $rows = $this->getRows();
 
-        if ($rows !== null) {
-            foreach ($rows as $key => $row) {
-                $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
-                if (in_array($key, $this->hidden, true) === true || (count($filter) && in_array($key, $filter, true) === false)) {
-                    unset($rows[$key]);
-                    continue;
-                }
-                $rows[$key] = $this->parseArrayData($row);
+        foreach ($rows as $key => $row) {
+            $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
+            if (in_array($key, $this->hidden, true) === true || (count($filter) && in_array($key, $filter, true) === true)) {
+                unset($rows[$key]);
+                continue;
             }
-
-            $this->orderArrayRows($rows);
+            $rows[$key] = $this->parseArrayData($row);
         }
 
         if (count($this->getResults()) === 1) {
@@ -354,6 +367,8 @@ abstract class Model implements \IteratorAggregate
                 $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
             }
         }
+
+        $this->orderArrayRows($rows);
 
         return $rows;
     }
@@ -371,22 +386,30 @@ abstract class Model implements \IteratorAggregate
     public function __call($method, $parameters)
     {
         if (method_exists($this->queryable, $method) === true) {
-            return call_user_func_array([$this->queryable, $method], $parameters);
+            return $this->queryable->{$method}(...$parameters);
         }
 
         return null;
     }
 
+    /**
+     * Set original rows
+     * @param array $rows
+     * @return static $this
+     */
+    public function setOriginalRows(array $rows)
+    {
+        $this->results['original_rows'] = $rows;
+    }
+
+    public function getOriginalRows()
+    {
+        return $this->results['original_rows'];
+    }
 
     public static function __callStatic($method, $parameters)
     {
-        $instance = new static();
-
-        if (method_exists($instance->queryable, $method) === true) {
-            return call_user_func_array([$instance->queryable, $method], $parameters);
-        }
-
-        return null;
+        return (new static)->$method(...$parameters);
     }
 
     public function setQuery(ModelQueryBuilder $query)
@@ -404,6 +427,16 @@ abstract class Model implements \IteratorAggregate
     public function getIterator()
     {
         return new \ArrayIterator($this->getRows());
+    }
+
+    public function __clone()
+    {
+        $this->setQuery(clone $this->queryable);
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
     }
 
 }

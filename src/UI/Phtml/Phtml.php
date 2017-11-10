@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Phtml;
 
 /**
@@ -8,6 +9,7 @@ class Phtml
 {
 
     const SETTINGS_TAGLIB = 'SETTINGS_TAGLIB';
+
     const NOTHING = 'NOTHING';
     const STRING = 'STRING';
     const TAG = 'TAG';
@@ -19,9 +21,46 @@ class Phtml
     const P_EVAL = 'P_EVAL';
     const COMMENT = 'COMMENT';
 
-    private static $IGNORELIST = [self::PHP, self::COMMENT, self::STRING, self::P_EVAL, self::DOCTYPE];
-    private static $IGNOREALLLIST = [self::PHP, self::COMMENT, self::STRING, self::P_EVAL, self::DOCTYPE];
-    private static $SCRIPTAGS = ['script', 'style', 'inline'];
+    private static $IGNORELIST = [
+        self::PHP,
+        self::COMMENT,
+        self::STRING,
+        self::P_EVAL,
+        self::DOCTYPE
+    ];
+
+    private static $IGNOREALLLIST = [
+        self::PHP,
+        self::COMMENT,
+        self::STRING,
+        self::P_EVAL,
+        self::DOCTYPE
+    ];
+
+    public static $SCRIPTAGS = [
+        'script',
+        'style',
+        'inline'
+    ];
+
+    public static $VOIDTAGS = [
+        'area',
+        'base',
+        'br',
+        'col',
+        'embed',
+        'hr',
+        'img',
+        'input',
+        'keygen',
+        'link',
+        'menuitem',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr'
+    ];
 
     private $withinStack = [];
     private $current = '';
@@ -41,16 +80,17 @@ class Phtml
 
     /**
      * @param phtml $string
+     * @throws PhtmlException
      * @return PhtmlNode
      */
     public function read($string)
     {
         $string = trim($string);
-        $this->withinStack = [self::NOTHING];
+        $this->withinStack = [static::NOTHING];
         $this->current = '';
         $this->debugTrace = '';
         $this->node = new PhtmlNode();
-        $this->node->setContainer(true);
+        $this->node->setContainer(false);
         $this->node->setTag('phtml');
         $this->phtmlRaw = $string;
         $this->lineCount = 1;
@@ -70,50 +110,54 @@ class Phtml
             switch ($chr) {
                 case '<':
                     if (mb_substr($string, $i + 1, 3) == '!--') {
-                        $this->pushWithin(self::COMMENT);
+                        $this->pushWithin(static::COMMENT);
                         break;
                     }
                     if ($this->nextChar == '?') {
-                        $this->pushWithin(self::PHP);
+                        $this->pushWithin(static::PHP);
                         break;
                     }
                     if ($this->nextChar == '/' && !$this->ignoreAll()) {
                         $this->ignoreChars = true;
-                        $this->pushWithin(self::TAGEND);
+                        $this->pushWithin(static::TAGEND);
                         $this->getNode()->setContainer(true);
 
                     } elseif ($this->nextChar == '!') {
-                        $this->pushWithin(self::DOCTYPE);
-                    } elseif (preg_match('/[A-Z0-9]/i', $this->nextChar) && !$this->isWithin(self::SCRIPT)) {
+                        $this->pushWithin(static::DOCTYPE);
+                    } elseif (preg_match('/[A-Z0-9]/i', $this->nextChar)) {
                         $this->onTagStart();
                     }
 
                     break;
                 case '>':
-                    if (mb_substr($string, $i - 2, 2) == '--' && $this->isWithin(self::COMMENT)) {
+
+                    if (mb_substr($string, $i - 2, 2) == '--' && $this->isWithin(static::COMMENT)) {
                         $this->popWithin();
                         break;
                     }
+
                     //Handle conditional comments
-                    if (($this->conditionalComment && $this->lastChar == ']') && $this->isWithin(self::COMMENT)) {
+                    if (($this->conditionalComment && $this->lastChar == ']') && $this->isWithin(static::COMMENT)) {
                         $this->conditionalComment = false;
                         $this->popWithin();
                         break;
                     }
-                    if ($this->lastChar == '?' && $this->isWithin(self::PHP)) {
+                    if ($this->lastChar == '?' && $this->isWithin(static::PHP)) {
                         $this->popWithin();
-                    } elseif ($this->isWithin(self::TAGEND)) {
+                    } elseif ($this->isWithin(static::TAGEND)) {
+
                         $this->checkEndTag();
                         $this->popWithin();
                         $this->onNodeEnd();
                         $this->ignoreChars = false;
                         $this->ignoreNextChar(1);
-                    } elseif ($this->isWithin(self::DOCTYPE)) {
+
+                    } elseif ($this->isWithin(static::DOCTYPE)) {
                         $this->popWithin();
                         $this->onWordEnd();
                     } elseif (!$this->ignoreTags()) {
                         $this->onWordEnd();
-                        if ($this->isWithin(self::TAG)) {
+                        if ($this->isWithin(static::TAG)) {
                             $this->ignoreNextChar(2);
                         }
                         $this->onTagEnd();
@@ -121,7 +165,7 @@ class Phtml
 
                     break;
                 case ':':
-                    if ($this->isWithin(self::ATTR)) {
+                    if ($this->isWithin(static::ATTR)) {
                         break;
                     }
                 case '%':
@@ -129,11 +173,11 @@ class Phtml
                         break;
                     }
                     if ($this->nextChar == '{') {
-                        $this->pushWithin(self::P_EVAL);
+                        $this->pushWithin(static::P_EVAL);
                         break;
                     }
                 case '}':
-                    if ($this->lastChar != '\\' && $this->isWithin(self::P_EVAL)) {
+                    if ($this->lastChar != '\\' && $this->isWithin(static::P_EVAL)) {
                         $this->popWithin();
                         break;
                     }
@@ -144,24 +188,24 @@ class Phtml
                 case "\r":
                 case '/':
                 case '=':
-                    if ($this->ignoreTags() && !$this->isWithin(self::ATTR)) {
+                    if ($this->ignoreTags() && !$this->isWithin(static::ATTR)) {
                         break;
                     }
                     $this->onWordEnd();
                     break;
                 case '"':
                 case '\'':
-                    if (!$this->isWithin(self::TAG, true)) {
+                    if (!$this->isWithin(static::TAG, true)) {
                         break;
                     }
-                    if ($this->isWithin(self::STRING)) {
+                    if ($this->isWithin(static::STRING)) {
                         $this->onStringEnd();
                     } else {
                         $this->onStringStart();
                     }
                     break;
                 case '[':
-                    if (mb_substr($string, $i - 4, 4) == '<!--' && $this->isWithin(self::COMMENT)) {
+                    if (mb_substr($string, $i - 4, 4) == '<!--' && $this->isWithin(static::COMMENT)) {
                         $this->conditionalComment = true;
                     }
                 default:
@@ -191,12 +235,12 @@ class Phtml
 
     protected function ignoreAll()
     {
-        return in_array($this->within(), self::$IGNOREALLLIST);
+        return in_array($this->within(), static::$IGNOREALLLIST);
     }
 
     protected function ignoreTags()
     {
-        return in_array($this->within(), self::$IGNORELIST);
+        return in_array($this->within(), static::$IGNORELIST);
     }
 
     protected function ignoreNextChar($debugKey)
@@ -234,7 +278,7 @@ class Phtml
         $this->stringStartChar = $this->char;
         $this->debug("STRING START");
 
-        $this->pushWithin(self::STRING);
+        $this->pushWithin(static::STRING);
         $this->current = substr($this->current, 1);
     }
 
@@ -267,15 +311,18 @@ class Phtml
         $this->currentIgnore = '';
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onWordStart()
     {
-        if ($this->isWithin(self::STRING)) {
+        if ($this->isWithin(static::STRING)) {
             return;
         }//ignore
         switch ($this->within()) {
-            case self::TAG:
+            case static::TAG:
                 if ($this->getNode()->getTag()) {
-                    $this->pushWithin(self::ATTR);
+                    $this->pushWithin(static::ATTR);
                 }
                 break;
         }
@@ -286,6 +333,9 @@ class Phtml
         return trim($this->current) != '';
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onWordEnd()
     {
         if ($this->char != ':') {
@@ -296,7 +346,7 @@ class Phtml
         } //ignore
 
         switch ($this->within()) {
-            case self::TAG:
+            case static::TAG:
                 if ($this->ignoreTags()) {
                     return;
                 }
@@ -310,11 +360,11 @@ class Phtml
                     $this->getNode()->setTag($current);
                     $this->debug("STARTING NODE: '" . $this->getNode()->getTag() . "'");
                     if ($this->isScriptTag($current)) {
-                        $this->pushBefore(self::SCRIPT);
+                        $this->pushBefore(static::SCRIPT);
                     }
                 }
                 break;
-            case self::ATTR:
+            case static::ATTR:
                 if (!$this->attrName) {
                     $current = preg_replace('/[^A-Z0-9_\-\:]/i', '', $this->getCurrent(false));
                     if (!$current) {
@@ -322,6 +372,12 @@ class Phtml
                     }
                     $this->attrName = $current;
                     $this->debug("ATTR FOUND: $this->attrName");
+
+                    if ($this->nextChar === '') {
+                        $this->getNode()->setAttribute($this->attrName);
+                        $this->attrName = '';
+                        $this->popWithin();
+                    }
                 } else {
                     $val = $this->getCurrent();
                     $val = substr($val, 1, strlen($val) - 2);
@@ -337,7 +393,7 @@ class Phtml
 
     protected function isScriptTag($tag)
     {
-        return in_array(strtolower($tag), self::$SCRIPTAGS);
+        return in_array(strtolower($tag), static::$SCRIPTAGS);
     }
 
     protected function pushWithin($within)
@@ -371,6 +427,9 @@ class Phtml
         }
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onTagStart()
     {
         if ($this->ignoreTags()) {
@@ -378,7 +437,7 @@ class Phtml
         }
         $node = new PhtmlNode();
         $text = $this->getCurrent();
-        $this->pushWithin(self::TAG);
+        $this->pushWithin(static::TAG);
         if ($text) {
             $this->getNode()->addChild(new PhtmlNodeText($text));
         }
@@ -386,9 +445,17 @@ class Phtml
         $this->node = $node;
     }
 
+    protected function isVoidTag($tag)
+    {
+        return in_array($tag, static::$VOIDTAGS);
+    }
+
+    /**
+     * @throws PhtmlException
+     */
     protected function onTagEnd()
     {
-        if (!$this->isWithin(self::TAG)) {
+        if (!$this->isWithin(static::TAG)) {
             return;
         }
         if ($this->ignoreTags()) {
@@ -396,13 +463,16 @@ class Phtml
         }
         $this->debug("ENDING TAG: " . $this->getNode()->getTag());
 
-        if ($this->lastChar == '/') {
+        if ($this->lastChar == '/' || $this->isVoidTag($this->getNode()->getTag())) {
             $this->onNodeEnd();
         }
 
         $this->popWithin();
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function checkEndTag()
     {
         $endTag = trim($this->currentIgnore, "</> \t\n\r");
@@ -422,6 +492,9 @@ class Phtml
         }
     }
 
+    /**
+     * @throws PhtmlException
+     */
     protected function onNodeEnd()
     {
         if ($this->ignoreAll()) {

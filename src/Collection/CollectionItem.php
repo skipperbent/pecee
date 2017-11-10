@@ -3,7 +3,6 @@ namespace Pecee\Collection;
 
 class CollectionItem implements \IteratorAggregate
 {
-
     protected $data = [];
 
     public function __construct(array $rows = null)

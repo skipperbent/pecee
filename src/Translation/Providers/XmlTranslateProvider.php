@@ -8,17 +8,11 @@ class XmlTranslateProvider implements ITranslationProvider
 {
     protected $locale;
     protected $xml;
-    protected $directory;
-
-    public function __construct()
-    {
-        $this->directory = env('XML_TRANSLATION_DIR', env('base_path') . 'lang');
-    }
 
     /**
      * Find xml translation-text
      * @param string $key
-     * @return string|node
+     * @return string|\SimpleXMLIterator
      * @throws TranslationException
      */
     public function lookup($key)
@@ -60,7 +54,7 @@ class XmlTranslateProvider implements ITranslationProvider
     public function load($locale)
     {
         $this->locale = $locale;
-        $path = sprintf('%s/%s.xml', $this->directory, $locale);
+        $path = sprintf('%s/%s.xml', $this->getDirectory(), $locale);
 
         if (is_file($path) === false) {
             throw new TranslationException(sprintf('Language file %s not found for locale %s', $path, $locale));
@@ -75,7 +69,7 @@ class XmlTranslateProvider implements ITranslationProvider
      */
     public function getDirectory()
     {
-        return $this->directory;
+        return env('XML_TRANSLATION_DIR', env('base_path') . 'lang');
     }
 
 }

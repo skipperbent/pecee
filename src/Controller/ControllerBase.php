@@ -11,8 +11,6 @@ abstract class ControllerBase extends Base
     {
         debug('START CONTROLLER ' . static::class);
         parent::__construct();
-
-        $this->_messages->clear();
     }
 
     protected function validate(array $validation = null)

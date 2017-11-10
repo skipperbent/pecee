@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Application;
 
 use Pecee\Widget\Debug\WidgetDebug;
@@ -8,6 +9,7 @@ class Debug
     protected $lastTime;
     protected $stack;
     protected $startTime;
+    protected $backLevel = 3;
 
     public function __construct()
     {
@@ -37,7 +39,7 @@ class Debug
 
         $debug = [];
 
-        for ($i = 0; $i < count($backtrace) - 2; $i++) {
+        for ($i = 0; $i < count($backtrace) - $this->backLevel; $i++) {
             $trace = array_reverse($backtrace);
             $trace = $trace[$i];
             $tmp = [];
@@ -74,9 +76,19 @@ class Debug
         $this->lastTime = microtime(true);
     }
 
-    public function add($text)
+    /**
+     * Add debug entry
+     * @param string $text
+     * @param array|null $args
+     */
+    public function add($text, $args = null)
     {
-        $this->addObject($text);
+        if (is_array($args) === false) {
+            $args = func_get_args();
+            array_shift($args);
+        }
+
+        $this->addObject(vsprintf($text, $args));
     }
 
     public function __toString()

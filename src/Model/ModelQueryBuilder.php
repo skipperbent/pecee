@@ -1,8 +1,11 @@
 <?php
+
 namespace Pecee\Model;
 
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
+use Pecee\Pixie\Exception;
+use Pecee\Pixie\QueryBuilder\QueryObject;
 use Pecee\Str;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
@@ -27,13 +30,13 @@ class ModelQueryBuilder
         if (app()->getDebugEnabled() === true) {
 
             $this->query->registerEvent('before-*', $table,
-                function (QueryBuilderHandler $qb) {
-                    debug('START QUERY: ' . $qb->getQuery()->getRawSql());
+                function (QueryBuilderHandler $qb, QueryObject $qo) {
+                    debug('START QUERY: ' . $qo->getRawSql());
                 });
 
             $this->query->registerEvent('after-*', $table,
-                function (QueryBuilderHandler $qb) {
-                    debug('END QUERY: ' . $qb->getQuery()->getRawSql());
+                function (QueryBuilderHandler $qb, QueryObject $qo) {
+                    debug('END QUERY: ' . $qo->getRawSql());
                 });
         }
     }
@@ -41,8 +44,10 @@ class ModelQueryBuilder
     protected function createInstance(\stdClass $item)
     {
         /* @var $model Model */
-        $model = $this->model->getInstance($item);
+        $model = get_class($this->model);
+        $model = new $model();
         $model->mergeRows((array)$item);
+        $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
 
         return $model;
@@ -50,15 +55,15 @@ class ModelQueryBuilder
 
     protected function createCollection(array $items)
     {
-        $collection = new ModelCollection($items);
+        $collection = $this->model->onCollectionCreate($items);
         $collection->setType(static::class);
 
         return $collection;
     }
 
-    public function prefix($prefix)
+    public function alias($prefix)
     {
-        $this->query->addPrefix($this->model->getTable(), $prefix);
+        $this->query->alias($this->model->getTable(), $prefix);
 
         return $this->model;
     }
@@ -217,10 +222,8 @@ class ModelQueryBuilder
         /* @var $model Model */
         $models = [];
 
-        if (count($items)) {
-            foreach ($items as $item) {
-                $models[] = $this->createInstance($item);
-            }
+        foreach ($items as $item) {
+            $models[] = $this->createInstance($item);
         }
 
         return $this->createCollection($models);
@@ -335,9 +338,9 @@ class ModelQueryBuilder
 
         if ($item === null) {
             $item = $this->createInstance((object)$data);
+            $item->setOriginalRows([]);
         }
 
-        $item->mergeRows($data);
         $item->save();
 
         return $item;
@@ -426,6 +429,26 @@ class ModelQueryBuilder
     public function __clone()
     {
         $this->query = clone $this->query;
+    }
+
+    /**
+     * Get unique identifier for current query
+     * @return string
+     * @throws Exception
+     */
+    public function getQueryIdentifier()
+    {
+        return md5(static::class . $this->getQuery()->getQuery()->getRawSql());
+    }
+
+    public function __sleep()
+    {
+        return ['model'];
+    }
+
+    public function __wakeup()
+    {
+        $this->query = (new QueryBuilderHandler())->table($this->model->getTable());
     }
 
 }

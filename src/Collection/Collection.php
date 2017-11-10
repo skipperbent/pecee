@@ -1,9 +1,9 @@
 <?php
+
 namespace Pecee\Collection;
 
-class Collection implements \IteratorAggregate, \Countable
+class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
 {
-
     protected $rows = [];
 
     public function __construct(array $rows = null)
@@ -31,7 +31,7 @@ class Collection implements \IteratorAggregate, \Countable
 
     public function hasRows()
     {
-        return (count($this->rows));
+        return (count($this->rows) > 0);
     }
 
     public function add($item)
@@ -78,4 +78,15 @@ class Collection implements \IteratorAggregate, \Countable
         return count($this->getRows());
     }
 
+    /**
+     * Specify data which should be serialized to JSON
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return $this->getRows();
+    }
 }

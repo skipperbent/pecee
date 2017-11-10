@@ -2,7 +2,7 @@
 namespace Pecee\Translation\Providers;
 
 use Pecee\Application\Router;
-use Pecee\Model\ModelCollection;
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\ModelLanguage;
 
 class DbTranslateProvider implements ITranslationProvider
@@ -38,7 +38,7 @@ class DbTranslateProvider implements ITranslationProvider
         if ($this->translations !== null && $this->translations->hasRows()) {
 
             foreach ($this->translations->getRows() as $lang) {
-                if (trim($lang->original) == trim($key)) {
+                if (trim($lang->original) === trim($key)) {
                     return $lang->translated;
                 }
             }
@@ -56,11 +56,9 @@ class DbTranslateProvider implements ITranslationProvider
         return $key;
     }
 
-    public function load($locale, $defaultLocale)
+    public function load($locale)
     {
-        if ($locale !== $defaultLocale) {
-            $this->translations = $this->model->filterLocale($locale)->filterContext($this->getContext())->all();
-        }
+        $this->translations = $this->model->filterLocale($locale)->filterContext($this->getContext())->all();
     }
 
 }

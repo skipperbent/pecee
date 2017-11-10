@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Controller;
 
 use Pecee\Boolean;
@@ -6,28 +7,26 @@ use Pecee\UI\YuiCompressor\YuiCompressor;
 
 class ControllerWrap
 {
+    /**
+     * Execution time limit in seconds
+     * @var int
+     */
+    protected $timeLimit = 60;
     protected $files;
-    protected $tmpDir;
-    protected $cacheFile;
+    protected $cacheDirectory;
+    protected $fileIdentifier;
     protected $contentType;
     protected $extension;
     protected $path;
 
     public function __construct()
     {
-        // Set time limit
-        set_time_limit(60);
+        set_time_limit($this->timeLimit);
 
-        $this->tmpDir = env('base_path') . 'cache';
-        $this->files = strpos(input()->get('files'), ',') ? explode(',', input()->get('files')) : [input()->get('files')];
-
-        $this->cacheFile = md5(urldecode(input()->get('files'))) . '.' . $this->getExtension();
-
-        if (is_dir($this->tmpDir) === false) {
-            if(mkdir($this->tmpDir, 0755, true) === false) {
-                throw new \ErrorException('Failed to create temp-directory');
-            }
-        }
+        $this->cacheDirectory = env('base_path') . 'cache';
+        $this->files = strpos(input('files'), ',') ? explode(',', input('files')) : [input('files')];
+        $this->fileIdentifier = md5(urldecode(input('files')));
+        $this->path = env('JS_PATH', 'public/js/');
     }
 
     public function js()
@@ -48,6 +47,21 @@ class ControllerWrap
         $this->wrap();
     }
 
+    protected function getCacheDirectory()
+    {
+        return $this->cacheDirectory;
+    }
+
+    protected function getFiles()
+    {
+        return $this->files;
+    }
+
+    protected function getFileIdentifier()
+    {
+        return $this->fileIdentifier;
+    }
+
     public function getHeader()
     {
         return 'application/javascript';
@@ -55,17 +69,20 @@ class ControllerWrap
 
     public function getExtension()
     {
-        return 'js';
+        return $this->extension;
     }
 
-    public function getPath()
+    protected function getPath()
     {
-        return env('JS_PATH', 'public/js/');
+        return $this->path;
     }
 
     public function wrap()
     {
-        // Set headers
+        if (is_dir($this->getCacheDirectory()) === false && mkdir($this->getCacheDirectory(), 0755, true) === false) {
+            throw new \ErrorException('Failed to create temp-directory');
+        }
+
         response()->headers([
             'Content-type: ' . $this->contentType,
             'Charset: ' . app()->getCharset(),
@@ -88,7 +105,7 @@ class ControllerWrap
             $this->saveTempFile();
         }
 
-        if (!in_array('ob_gzhandler', ob_list_handlers())) {
+        if (in_array('ob_gzhandler', ob_list_handlers(), true) === false) {
             ob_start('ob_gzhandler');
         }
 
@@ -108,21 +125,11 @@ class ControllerWrap
 
                     $file = $this->files[$i];
 
-                    $content = null;
-
                     $content = $this->loadFile($file);
 
                     /* Load content from framework */
                     if ($content === null) {
-                        $content = $this->loadFile($this->path . $file);
-                    }
-
-                    // Try resources folder
-                    if ($content !== null) {
-                        $filePath = env('base_path') . '/resources/' . $this->getExtension() . '/' . $file;
-                        if (is_file($filePath)) {
-                            $content = file_get_contents($filePath);
-                        }
+                        $content = $this->loadFile($this->getPath() . $file);
                     }
 
                     if ($content !== null) {
@@ -161,7 +168,7 @@ class ControllerWrap
             $content = file_get_contents($file, FILE_USE_INCLUDE_PATH);
         }
 
-        // Try module ressources
+        // Try module resources
         if ($content === null && app()->hasModules() !== null) {
             foreach (app()->getModules() as $module) {
                 $moduleFilePath = $module . DIRECTORY_SEPARATOR . $file;
@@ -172,16 +179,24 @@ class ControllerWrap
             }
         }
 
+        // Try resources folder
+        if ($content === null) {
+            $file = strtolower($this->getExtension()) . '/' . $file;
+            if (stream_resolve_include_path($file) !== false) {
+                return file_get_contents($file, FILE_USE_INCLUDE_PATH);
+            }
+        }
+
         return $content;
     }
 
     protected function cleanup()
     {
-        $handle = opendir($this->tmpDir);
+        $handle = opendir($this->getCacheDirectory());
 
         while (false !== ($file = readdir($handle))) {
-            if ($file === $this->cacheFile) {
-                unlink($this->tmpDir . DIRECTORY_SEPARATOR . $file);
+            if ($file === $this->getFileIdentifier()) {
+                unlink($this->getCacheDirectory() . DIRECTORY_SEPARATOR . $file);
                 break;
             }
         }
@@ -196,7 +211,7 @@ class ControllerWrap
 
     protected function getTempFile()
     {
-        return $this->tmpDir . DIRECTORY_SEPARATOR . $this->cacheFile;
+        return $this->getCacheDirectory() . DIRECTORY_SEPARATOR . $this->getFileIdentifier() . '.' . $this->getExtension();
     }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class HtmlInput extends Html
@@ -10,6 +11,7 @@ class HtmlInput extends Html
 
         $this->type($type);
         $this->name($name);
+        $this->setClosingType(static::CLOSE_TYPE_NONE);
 
         if ($value !== null) {
             $this->value($value);
@@ -32,9 +34,9 @@ class HtmlInput extends Html
         return $this->addAttribute('placeholder', $text);
     }
 
-    public function autoComplete()
+    public function autoComplete($status = true)
     {
-        return $this->addAttribute('autocomplete', 'on');
+        return $this->addAttribute('autocomplete', (($status === true) ? 'on' : 'off'));
     }
 
     public function readonly()
@@ -85,10 +87,10 @@ class HtmlInput extends Html
     public function checked($checked)
     {
         if ($checked === true) {
-            $this->addInputAttribute('checked');
-        } else {
-            $this->removeAttribute('checked');
+            return $this->addInputAttribute('checked');
         }
+
+        return $this->removeAttribute('checked');
     }
 
     public function addInputAttribute($name)

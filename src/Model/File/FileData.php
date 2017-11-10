@@ -1,12 +1,11 @@
 <?php
+
 namespace Pecee\Model\File;
 
 use Pecee\Model\Model;
 
 class FileData extends Model
 {
-    const IDENTIFIER_KEY = 'file_id';
-
     protected $timestamps = false;
     protected $table = 'file_data';
 
@@ -37,12 +36,22 @@ class FileData extends Model
 
     public static function destroyByFileId($fileId)
     {
-        static::where('file_id', '=', $fileId)->delete();
+        static::instance()->where('file_id', '=', $fileId)->delete();
     }
 
     public static function getByIdentifier($fileId)
     {
-        return static::where('file_id', '=', $fileId)->all();
+        return static::instance()->where('file_id', '=', $fileId)->all();
+    }
+
+    public function filterFileId($id)
+    {
+        return $this->where('file_id', '=', $id);
+    }
+
+    public function filterFileIds(array $ids)
+    {
+        return $this->whereIn('file_id', $ids);
     }
 
 }

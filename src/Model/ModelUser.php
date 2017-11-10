@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model;
 
 use Carbon\Carbon;
@@ -7,8 +8,9 @@ use Pecee\Guid;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
 use Pecee\Model\User\UserException;
+use Pecee\User\IUserAuthentication;
 
-class ModelUser extends ModelData
+class ModelUser extends ModelData implements IUserAuthentication
 {
     const COOKIE_NAME = 'ticket';
 
@@ -20,15 +22,15 @@ class ModelUser extends ModelData
     protected static $instance;
     protected static $ticketExpireMinutes = 60;
 
+    protected $dataPrimary = 'user_id';
     protected $table = 'user';
-
     protected $columns = [
         'id',
         'username',
         'password',
         'admin_level',
-        'deleted',
         'last_activity',
+        'deleted',
     ];
 
     public function __construct($username = null, $password = null)
@@ -54,8 +56,7 @@ class ModelUser extends ModelData
     protected function fetchData()
     {
         $class = static::getUserDataClass();
-
-        return $class::getByIdentifier($this->id);
+        return $class::instance()->filterIdentifier($this->id)->all();
     }
 
     public function delete()
@@ -120,7 +121,7 @@ class ModelUser extends ModelData
         return null;
     }
 
-    protected function signIn()
+    public function signIn()
     {
         static::createTicket($this->id);
     }
@@ -138,15 +139,14 @@ class ModelUser extends ModelData
                 return true;
             }
         }
+
         return false;
     }
 
     public function registerActivity()
     {
-        if (static::isLoggedIn() === true) {
-            $this->last_activity = Carbon::now()->toDateTimeString();
-            $this->save();
-        }
+        $this->last_activity = Carbon::now()->toDateTimeString();
+        $this->save();
     }
 
     /**
@@ -170,29 +170,20 @@ class ModelUser extends ModelData
      */
     public static function current()
     {
-        if (static::$instance !== null) {
-            return static::$instance;
-        }
-
-        if (static::isLoggedIn() === true) {
+        if (static::$instance === null && static::isLoggedIn() === true) {
 
             $ticket = static::getTicket();
 
             /* @var $user static */
             static::$instance = static::instance()->filterDeleted()->find($ticket[0]);
+        }
 
-            if (static::$instance !== null) {
-                /* Refresh ticket */
-                static::createTicket($ticket[0]);
-            }
+        if (static::$instance !== null) {
+            /* Refresh ticket */
+            static::createTicket(static::$instance->id);
         }
 
         return static::$instance;
-    }
-
-    public static function getSecret()
-    {
-        return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
 
     public function filterQuery($query)
@@ -203,13 +194,13 @@ class ModelUser extends ModelData
 
         $userDataQuery = $this->newQuery($userDataClass->getTable())
             ->getQuery()
-            ->select($userDataClassName::USER_IDENTIFIER_KEY)
-            ->where($userDataClassName::USER_IDENTIFIER_KEY, '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getPrimary()))
+            ->select($this->getDataPrimary())
+            ->where($this->getDataPrimary(), '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getDataPrimary()))
             ->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
             ->limit(1);
 
         return $this->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
-            ->orWhere($this->getPrimary(), '=', $this->raw($userDataQuery));
+            ->orWhere($this->getDataPrimary(), '=', $this->raw($userDataQuery));
     }
 
     public function filterDeleted($deleted = false)
@@ -238,7 +229,7 @@ class ModelUser extends ModelData
         /* @var $userDataClass UserData */
         $userDataClass = new $userDataClassName();
 
-        $subQuery = $userDataClass::instance()->select([$userDataClass::USER_IDENTIFIER_KEY])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
+        $subQuery = $userDataClass::instance()->select([$this->getDataPrimary()])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
 
         return $this->where($this->primary, '=', $this->subQuery($subQuery));
     }
@@ -260,7 +251,7 @@ class ModelUser extends ModelData
         }
 
         // Incorrect user login.
-        if (password_verify($password, $user->password) === false && strtolower($user->username) !== strtolower($username)) {
+        if (password_verify($password, $user->password) === false || strtolower($user->username) !== strtolower($username)) {
             static::onLoginFailed($user);
             throw new UserException('Invalid login', static::ERROR_TYPE_INVALID_LOGIN);
         }

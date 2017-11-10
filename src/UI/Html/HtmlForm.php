@@ -1,7 +1,6 @@
 <?php
-namespace Pecee\UI\Html;
 
-use Pecee\Http\Middleware\BaseCsrfVerifier;
+namespace Pecee\UI\Html;
 
 class HtmlForm extends Html
 {
@@ -23,11 +22,6 @@ class HtmlForm extends Html
         $this->enctype($encoding);
         $this->method($method);
         $this->action(($action === null) ? url() : $action);
-
-        // Add csrf token
-        if (strtolower($method) !== 'get') {
-            $this->addInnerHtml(new HtmlInput(BaseCsrfVerifier::POST_KEY, 'hidden', csrf_token()));
-        }
     }
 
     public function name($name)

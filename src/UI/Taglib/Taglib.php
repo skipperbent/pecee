@@ -1,7 +1,7 @@
 <?php
 namespace Pecee\UI\Taglib;
 
-class Taglib
+class Taglib implements ITaglib
 {
 
     const TAG_PREFIX = 'tag';
@@ -19,7 +19,7 @@ class Taglib
     public function callTag($tag, $attrs, $body)
     {
         $this->currentTag = $tag;
-        $method = self::TAG_PREFIX . ucfirst($tag);
+        $method = static::TAG_PREFIX . ucfirst($tag);
 
         if (method_exists($this, $method) === false) {
             throw new \InvalidArgumentException('Unknown tag: ' . $tag . ' in ' . static::class);
@@ -40,7 +40,7 @@ class Taglib
     {
         $errors = [];
         foreach ($name as $n) {
-            if (!isset($attrs->$n)) {
+            if (isset($attrs->$n) === false) {
                 $errors[] = $n;
             }
         }

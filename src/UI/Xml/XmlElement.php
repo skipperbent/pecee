@@ -79,7 +79,7 @@ class XmlElement implements IXmlNode
         $this->addChildren($children);
     }
 
-    public function setAttribute($name, $value)
+    public function setAttribute($name, $value = null)
     {
         $this->attrs[$name] = $value;
     }

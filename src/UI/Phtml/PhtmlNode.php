@@ -1,8 +1,10 @@
 <?php
+
 namespace Pecee\UI\Phtml;
 
 use Pecee\Guid;
 use Pecee\UI\Html\HtmlElement;
+use Pecee\UI\Taglib\ITaglib;
 
 class PhtmlNode extends HtmlElement
 {
@@ -14,8 +16,8 @@ class PhtmlNode extends HtmlElement
 
     public static function getNextClosure()
     {
-        self::$closureCount++;
-        $basis = self::$closureCount . Guid::create();
+        static::$closureCount++;
+        $basis = static::$closureCount . Guid::create();
 
         return 'closure' . md5($basis);
     }
@@ -92,7 +94,12 @@ class PhtmlNode extends HtmlElement
                 if ($method) {
                     $str .= sprintf('"%s"=>%s,', $name, $this->processAttrValue($val));
                 } else {
-                    $str .= sprintf('%s="%s" ', $name, $val);
+                    if ($val === null) {
+                        $str .= sprintf('%s ', $name);
+                    } else {
+                        $str .= sprintf('%s="%s" ', $name, $val);
+                    }
+
                 }
             }
             if ($method) {
@@ -119,9 +126,11 @@ class PhtmlNode extends HtmlElement
             }
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
-                if (isset($taglibs[$this->getNs()])) {
-                    $tag = $this->getTag();
-                    $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), $body);
+
+                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+
+                if ($taglib !== null && $taglib instanceof ITaglib) {
+                    $str = $taglib->callTag($this->getTag(), $this->getAttrs(), $body);
                 }
             } else {
                 $str .= sprintf('</%s>', $this->getTag());
@@ -129,18 +138,25 @@ class PhtmlNode extends HtmlElement
         } else {
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
-                if (isset($taglibs[$this->getNs()])) {
-                    $tag = $this->getTag();
-                    $str = $taglibs[$this->getNs()]->callTag($tag, $this->getAttrs(), null, null);
+
+                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+
+                if ($taglib !== null && $taglib instanceof ITaglib) {
+                    $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
                 }
             } else {
-                $str .= '/>';
+
+                if (in_array($this->getTag(), Phtml::$VOIDTAGS) === false) {
+                    $str .= '/';
+                }
+
+                $str .= '>';
             }
         }
         if ($this->getParent() === null || $this->getParent()->getTag() == 'phtml') {
-            $str = self::$prepend . $str . self::$append;
-            self::$prepend = '';
-            self::$append = '';
+            $str = static::$prepend . $str . static::$append;
+            static::$prepend = '';
+            static::$append = '';
         }
 
         $str = $this->processEvals($str);

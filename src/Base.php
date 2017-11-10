@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee;
 
 use Pecee\Http\Input\InputItem;
@@ -17,7 +18,6 @@ abstract class Base
 
     public function __construct()
     {
-        debug('BASE CLASS ' . static::class);
         $this->_messages = new SessionMessage();
         $this->setInputValues();
     }
@@ -75,7 +75,8 @@ abstract class Base
         }
     }
 
-    protected function onInputError(InputItem $input, $error) {
+    protected function onInputError(InputItem $input, $error)
+    {
 
     }
 
@@ -85,7 +86,7 @@ abstract class Base
 
             $input = input()->getObject($key, new InputItem($key, null));
 
-            for($i = 0, $max = count($validations); $i < $max; $i++) {
+            for ($i = 0, $max = count($validations); $i < $max; $i++) {
 
                 /* @var $validation ValidateInput */
                 $validation = $validations[$i];
@@ -96,7 +97,7 @@ abstract class Base
 
                 $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
-                for($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
+                for ($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
 
                     $input = $inputs[$x];
                     $validation->setInput($input);
@@ -246,26 +247,15 @@ abstract class Base
         return $output;
     }
 
-    public function validationFor($index)
+    public function getValidation($index)
     {
         $messages = [];
         $search = $this->_messages->get($this->errorType);
 
         if ($search !== null) {
-            /* @var $search array */
             /* @var $message FormMessage */
             foreach ($search as $message) {
-                $input = null;
-                if (request()->getMethod() !== 'get') {
-                    $input = input()->findPost($index);
-                    if ($input === null) {
-                        $input = input()->findFile($index);
-                    }
-                } else {
-                    $input = input()->findGet($index);
-                }
-
-                if ($input !== null && $message->getIndex() === $input->getIndex()) {
+                if ($message->getIndex() === $index) {
                     return $message->getMessage();
                 }
             }

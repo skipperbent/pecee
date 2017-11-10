@@ -82,7 +82,7 @@ switch (strtolower($argv[1])) {
 
         break;
     case 'phinx':
-        $phinx = dirname(dirname(dirname(__DIR__))) . '/bin/phinx';
+        $phinx = $appPath . '/vendor/bin/phinx';
         $config = $appPath . '/config/phinx-config.php';
 
         $argv = array_slice($argv, 2);

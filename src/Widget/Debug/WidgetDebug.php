@@ -6,7 +6,6 @@ use Pecee\Widget\Widget;
 class WidgetDebug extends Widget
 {
     protected $stack;
-    protected $group;
 
     public function __construct(array $stack)
     {
@@ -25,18 +24,6 @@ class WidgetDebug extends Widget
         $path = array_slice($path, 2);
 
         return env('framework_path') . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
-    }
-
-    /**
-     * Render debug
-     * @return string
-     */
-    public function render()
-    {
-        $this->renderContent();
-        $this->renderTemplate();
-
-        return $this->_contentHtml;
     }
 
 }

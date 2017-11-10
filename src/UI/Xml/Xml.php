@@ -20,7 +20,7 @@ class Xml
                     }
                     $node = new XmlElement($key);
                     $parent->addChild($node);
-                    self::toXml($value, $node);
+                    static::toXml($value, $node);
                 }
                 break;
             case is_bool($data):

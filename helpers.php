@@ -25,7 +25,7 @@ use Pecee\Application\Router as Router;
  */
 function url($name = null, $parameters = null, $getParams = null)
 {
-    return Router::getUrl($name, $parameters, $getParams);
+    return app()->getUrlHandler()->getUrl($name, $parameters, $getParams);
 }
 
 /**
@@ -46,10 +46,18 @@ function request()
 
 /**
  * Get input class
- * @return \Pecee\Http\Input\Input
+ * @param string|null $index Parameter index name
+ * @param string|null $defaultValue Default return value
+ * @param string|array|null $methods Default method
+ * @return string|\Pecee\Http\Input\Input
  */
-function input()
+function input($index = null, $defaultValue = null, $methods = null)
 {
+    if($index !== null)
+    {
+        return request()->getInput()->get($index, $defaultValue, $methods);
+    }
+
     return request()->getInput();
 }
 
@@ -92,11 +100,18 @@ function lang($key, $args = null)
  * Requires DEBUG=1 to be present in your env file.
  *
  * @param string $text
+ * @param array|null $args
  */
-function debug($text)
+function debug($text, $args = null)
 {
     if (app()->getDebugEnabled() === true) {
-        app()->debug->add($text);
+        if($args !== null && is_array($args) === false)
+        {
+            $args = func_get_args();
+            array_shift($args);
+        }
+
+        app()->debug->add($text, $args);
     }
 }
 

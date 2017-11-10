@@ -1,12 +1,12 @@
 <?php
+
 namespace Pecee\Model\User;
 
 use Pecee\Model\Model;
+use Pecee\Model\ModelUser;
 
 class UserData extends Model
 {
-    const IDENTIFIER_KEY = 'user_id';
-
     protected $timestamps = false;
 
     protected $columns = [
@@ -23,7 +23,7 @@ class UserData extends Model
         parent::__construct();
 
         $this->columns = array_merge($this->columns, [
-            static::IDENTIFIER_KEY,
+            ModelUser::instance()->getDataPrimary(),
         ]);
 
         $this->user_id = $userId;
@@ -37,16 +37,28 @@ class UserData extends Model
             return false;
         }
 
-        return ($this->where('key', '=', $this->key)->where(static::IDENTIFIER_KEY, '=', $this->{static::IDENTIFIER_KEY})->first() !== null);
+        $dataPrimaryKey = ModelUser::instance()->getDataPrimary();
+
+        return ($this->where('key', '=', $this->key)->where($dataPrimaryKey, '=', $this->{$dataPrimaryKey})->first() !== null);
     }
 
     public static function destroyByIdentifier($identifierId)
     {
-        return static::instance()->where(static::IDENTIFIER_KEY, '=', $identifierId)->delete();
+        return static::instance()->where(ModelUser::instance()->getDataPrimary(), '=', $identifierId)->delete();
     }
 
     public static function getByIdentifier($identifierId)
     {
-        return static::instance()->where(static::IDENTIFIER_KEY, '=', $identifierId)->all();
+        return static::instance()->where(ModelUser::instance()->getDataPrimary(), '=', $identifierId)->all();
+    }
+
+    public function filterIdentifier($identifier)
+    {
+        return $this->where(ModelUser::instance()->getDataPrimary(), '=', $identifier);
+    }
+
+    public function filterIdentifiers(array $identifiers)
+    {
+        return $this->whereIn(ModelUser::instance()->getDataPrimary(), $identifiers);
     }
 }
