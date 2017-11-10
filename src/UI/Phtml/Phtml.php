@@ -380,7 +380,7 @@ class Phtml
                     }
                 } else {
                     $val = $this->getCurrent();
-                    $val = substr($val, 1, strlen($val) - 2);
+                    $val = substr($val, 1, -1);
                     $this->debug("ATTR VAL FOUND FOR: $this->attrName ($val)");
                     $this->getNode()->setAttribute($this->attrName, $val);
                     $this->attrName = '';
@@ -478,7 +478,7 @@ class Phtml
         $endTag = trim($this->currentIgnore, "</> \t\n\r");
         if ($endTag) {
             $ns = '';
-            if (!stristr($endTag, ':')) {
+            if (false === stripos($endTag, ':')) {
                 $tag = $endTag;
             } else {
                 list($ns, $tag) = explode(':', $endTag);

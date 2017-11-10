@@ -15,7 +15,7 @@ class ArrayUtil
         return $array;
     }
 
-    public static function average($arr)
+    public static function average(array $arr)
     {
         $count = count($arr); //total numbers in array
         $total = 0;
@@ -43,7 +43,7 @@ class ArrayUtil
     {
         $val = [];
         array_walk_recursive($arr, function ($v, $k) use ($key, &$val) {
-            if ($k == $key || $key === null) {
+            if ($k === $key || $key === null) {
                 $val[] = $v;
             }
         });
@@ -51,7 +51,7 @@ class ArrayUtil
         return $val;
     }
 
-    public static function append(&$array1, $array2)
+    public static function append(array &$array1, array $array2)
     {
         foreach ($array2 as $key => $value) {
             $array1[] = $value;

@@ -133,7 +133,7 @@ abstract class Base
      */
     public function isPostBack()
     {
-        return (bool)(request()->getMethod() !== 'get');
+        return (request()->getMethod() !== 'get');
     }
 
     /**

@@ -28,7 +28,7 @@ class Taglib implements ITaglib
         $this->body = $body;
         $this->bodies[] = $body;
 
-        return $this->$method(((object)$attrs));
+        return $this->$method((object)$attrs);
     }
 
     public function __call($tag, $args)

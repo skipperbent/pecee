@@ -261,7 +261,7 @@ class ModelNode extends ModelData
                 }
             }
 
-            $this->next = static::instance()->filterActive(true)->filterParentId($parentId)->where('order', '>', $this->order)->first();
+            $this->next = static::instance()->filterActive()->filterParentId($parentId)->where('order', '>', $this->order)->first();
         }
 
         return $this->next;
@@ -279,7 +279,7 @@ class ModelNode extends ModelData
                 }
             }
 
-            $this->prev = static::instance()->filterActive(true)->filterParentId($parentId)->where('order', '<', $this->order)->first();
+            $this->prev = static::instance()->filterActive()->filterParentId($parentId)->where('order', '<', $this->order)->first();
         }
 
         return $this->prev;
@@ -331,7 +331,7 @@ class ModelNode extends ModelData
     public function getParent()
     {
         if ($this->parent === null && $this->parent_id !== null) {
-            $this->parent = ModelNode::instance()->find($this->parent_id);
+            $this->parent = static::instance()->find($this->parent_id);
         }
 
         return $this->parent;

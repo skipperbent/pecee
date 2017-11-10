@@ -1,6 +1,7 @@
 <?php
 namespace Pecee\Model\User;
 
+use Pecee\Guid;
 use Pecee\Model\Model;
 use Pecee\Model\ModelUser;
 
@@ -22,7 +23,7 @@ class UserReset extends Model
 
         $this->columns = array_merge($this->columns, [$dataPrimaryKey]);
         $this->{$primaryKey} = $userId;
-        $this->key = md5(uniqid());
+        $this->key = Guid::create();
     }
 
     public function clean()

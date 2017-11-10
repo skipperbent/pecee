@@ -107,7 +107,7 @@ abstract class Widget extends Base
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
-        foreach ($this->getSite()->getCss($section) as $css) {
+        foreach ((array)$this->getSite()->getCss($section) as $css) {
             $output .= (new Html('link'))
                 ->setClosingType(Html::CLOSE_TYPE_NONE)
                 ->attr('href', $css)
@@ -126,7 +126,7 @@ abstract class Widget extends Base
             $output .= (new Html('script'))->attr('src', $js);
         }
 
-        foreach ($this->getSite()->getJs($section) as $js) {
+        foreach ((array)$this->getSite()->getJs($section) as $js) {
             $output .= (new Html('script'))->attr('src', $js);
         }
 

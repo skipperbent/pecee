@@ -3,7 +3,6 @@
 namespace Pecee\Model;
 
 use Pecee\Collection\CollectionItem;
-use Pecee\Model\Collections\ModelCollection;
 
 abstract class ModelData extends Model
 {

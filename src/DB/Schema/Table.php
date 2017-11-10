@@ -74,7 +74,7 @@ class Table
         if (count($this->columns) > 0) {
             /* @var $column Column */
             foreach ($this->columns as $column) {
-                if ($column->getIndex() == Column::INDEX_PRIMARY) {
+                if ($column->getIndex() === Column::INDEX_PRIMARY) {
                     return $column;
                 }
             }

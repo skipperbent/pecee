@@ -122,11 +122,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     protected function joinData()
     {
-        if (count($this->join)) {
-            for ($i = 0, $max = count($this->join); $i < $max; $i++) {
-                $join = $this->join[$i];
-                $this->{$join} = $this->{Str::camelize($join)}();
-            }
+        foreach ($this->join as $join) {
+            $this->{$join} = $this->{Str::camelize($join)}();
         }
     }
 
@@ -172,7 +169,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $this->mergeRows($updateData);
 
-        if (count($originalRows) > 0 || $this->exists() === true) {
+        if ($this->isNew() === false || count($originalRows) > 0 || $this->exists() === true) {
 
             if ($this->timestamps) {
                 $this->updated_at = Carbon::now()->toDateTimeString();
@@ -190,11 +187,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                 return $value !== null;
             }, ARRAY_FILTER_USE_BOTH);
 
-            if ($this->isNew() === true && $this->fixedIdentifier === false) {
+            if ($this->fixedIdentifier === false) {
                 $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
             } else {
                 static::instance()->getQuery()->insert($updateData);
             }
+
+            $this->results['original_rows'][$this->primary] = $this->{$this->primary};
+
         }
 
         return $this;
@@ -234,7 +234,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         $originalRows = $this->getOriginalRows();
 
-        return (bool)(isset($originalRows[$this->primary]) === false || $originalRows[$this->primary] === null);
+        return (isset($originalRows[$this->primary]) === false || $originalRows[$this->primary] === null);
     }
 
     public function hasRows()
@@ -393,7 +393,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Set original rows
      * @param array $rows
-     * @return static $this
      */
     public function setOriginalRows(array $rows)
     {

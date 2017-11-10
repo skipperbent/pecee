@@ -124,7 +124,6 @@ class YuiCompressor
                 file_put_contents($tmpFile, $item->content);
                 $output = [];
                 exec($this->getCmd($item->options, $item->type, $tmpFile), $output);
-                unlink($tmpFile);
                 $item->minified = (isset($output[0]) ? $output[0] : '');
                 $item->sizeKB = round(strlen($item->content) / 1024, 2);
                 $item->minifiedKB = $item->sizeKB - round(strlen($item->minified) / 1024, 2);
@@ -132,7 +131,9 @@ class YuiCompressor
             }
         }
 
-        return ($single) ? $this->items[count($this->items) - 1] : $this->items;
+        unlink($tmpFile);
+
+        return $single ? $this->items[count($this->items) - 1] : $this->items;
     }
 
     protected function validateType($type)

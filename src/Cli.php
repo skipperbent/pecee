@@ -56,7 +56,7 @@ class Cli
                 if (isset($options[$arg])) {
                     $text = sprintf(self::STR_FORMAT, $options[$arg], $text);
                 } else {
-                    $this->writeLine("Invalid argument: " . $arg);
+                    $this->writeLine('Invalid argument: ' . $arg);
                     $this->write(self::STR_SOUND);
                     exit(1);
                 }

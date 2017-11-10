@@ -18,7 +18,7 @@ class Rewrite extends Model
 
     public function exists()
     {
-        return (static::where('original_path', '=', $this->original_url)->select(['original_path'])->first() !== null);
+        return (static::instance()->where('original_path', '=', $this->original_url)->select(['original_path'])->count() > 0);
     }
 
     /**
