@@ -105,7 +105,7 @@ function env($key, $default = null)
  */
 function csrf_token()
 {
-    $baseVerifier = Router::router()->getCsrfVerifier();
+    $baseVerifier = \Pecee\Router::router()->getCsrfVerifier();
     if ($baseVerifier !== null) {
         return $baseVerifier->getToken();
     }
