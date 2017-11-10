@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Session;
 
 use Pecee\Guid;
@@ -12,6 +13,7 @@ class Session
         if (static::isActive() === false) {
             session_name('pecee_session');
             session_start();
+            static::$active = true;
         }
     }
 
@@ -49,9 +51,11 @@ class Session
 
         $data = [
             serialize($value),
-            static::getSecret()
+            static::getSecret(),
         ];
+
         $data = Guid::encrypt(static::getSecret(), join('|', $data));
+
         $_SESSION[$id] = $data;
     }
 
@@ -60,13 +64,18 @@ class Session
         static::start();
 
         if (static::exists($id)) {
+
             $value = $_SESSION[$id];
+
             if (trim($value) !== '') {
+
                 $value = Guid::decrypt(static::getSecret(), $value);
                 $data = explode('|', $value);
+
                 if (is_array($data) && trim(end($data)) === static::getSecret()) {
                     return unserialize($data[0]);
                 }
+
             }
         }
 
