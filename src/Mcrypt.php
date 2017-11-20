@@ -14,25 +14,13 @@ class Mcrypt {
             throw new \RuntimeException('IV generation failed');
         }
 
-        $data = openssl_encrypt($data, $method, $key, 0, $iv);
-
-        return base64_encode($data . '|' . bin2hex($iv));
+        return openssl_encrypt($data, $method, $key, 0, $iv);
     }
 
     public static function decrypt($key, $data, $method = 'AES-256-CBC')
     {
         $key = substr(hash('sha256', $key, true), 0, 16);
-
-        list($data, $iv) = explode('|', base64_decode($data));
-
-        $binary = hex2bin($iv);
-        if ($binary === false) {
-            return false;
-        }
-
-        $data = openssl_decrypt($data, $method, $key, 0, $binary);
-
-        return $data;
+        return openssl_decrypt($data, $method, $key, 0);
     }
 
     /**
