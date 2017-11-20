@@ -34,7 +34,7 @@ class Session {
 
     public static function set($id, $value) {
         $data = array(serialize($value), static::getSecret());
-        $data = Mcrypt::encrypt(join('|', $data), static::getSecret());
+        $data = Mcrypt::encrypt(static::getSecret(), join('|', $data));
         $_SESSION[$id] = $data;
     }
 
@@ -42,7 +42,7 @@ class Session {
         if(static::exists($id)) {
             $value = $_SESSION[$id];
             if (trim($value) !== '') {
-                $value = Mcrypt::decrypt($value, static::getSecret());
+                $value = Mcrypt::decrypt(static::getSecret(), $value);
                 $data = explode('|', $value);
                 if (is_array($data) && trim(end($data)) === static::getSecret()) {
                     return unserialize($data[0]);
