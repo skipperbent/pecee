@@ -169,7 +169,7 @@ class ModelUser extends ModelData {
 
     protected function signIn($cookieExp){
         $user = array($this->id, $this->password, md5(microtime()), $this->username, $this->admin_level, static::getSalt());
-        $ticket = Mcrypt::encrypt(join('|',$user), static::getSalt());
+        $ticket = Mcrypt::encrypt(static::getSalt(), join('|',$user));
         Cookie::create(static::COOKIE_NAME, $ticket, $cookieExp);
     }
 
@@ -192,7 +192,7 @@ class ModelUser extends ModelData {
     public static function getFromCookie($setData = false) {
         $ticket = Cookie::get(static::COOKIE_NAME);
         if(trim($ticket) !== ''){
-            $ticket = Mcrypt::decrypt($ticket, static::getSalt());
+            $ticket = Mcrypt::decrypt(static::getSalt(), $ticket);
             $user = explode('|', $ticket);
             if (is_array($user) && trim(end($user)) === static::getSalt()) {
                 if ($setData) {
