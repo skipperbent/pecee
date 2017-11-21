@@ -16,7 +16,7 @@ class File
      * @return string Path to the temp-file created
      */
     public static function tmpFile($name, $contents = null, $autoRemove = true) {
-        $file = sys_get_temp_dir() . uniqid($name, false);
+        $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid($name);
 
         if($contents === null) {
             touch($file);
