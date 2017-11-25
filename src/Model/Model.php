@@ -37,9 +37,9 @@ use Pecee\Str;
  * @method $this findOrFail(string $id)
  * @method $this first()
  * @method $this firstOrFail()
- * @method $this count()
- * @method $this max(string $field)
- * @method $this sum(string $field)
+ * @method int count()
+ * @method int max(string $field)
+ * @method int sum(string $field)
  * @method $this update(array $data)
  * @method $this create(array $data)
  * @method $this firstOrCreate(array $data = [])
@@ -402,11 +402,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function getOriginalRows()
     {
         return $this->results['original_rows'];
-    }
-
-    public static function __callStatic($method, $parameters)
-    {
-        return (new static)->$method(...$parameters);
     }
 
     public function setQuery(ModelQueryBuilder $query)
