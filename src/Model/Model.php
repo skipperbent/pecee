@@ -12,7 +12,7 @@ use Pecee\Str;
  *
  * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
  *
- * @method $this alias(string $prefix)
+ * @method $this alias(string $alias)
  * @method $this limit(int $id)
  * @method $this skip(int $id)
  * @method $this take(int $id)
@@ -379,7 +379,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * @param string $method
      * @param array $parameters
-     * @return static|QueryBuilderHandler|null
+     * @return QueryBuilderHandler|null
      */
     public function __call($method, $parameters)
     {
@@ -390,7 +390,19 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return null;
     }
 
-    /**
+	/**
+	 * Call static
+	 * @param string $method
+	 * @param array $parameters
+	 *
+	 * @return static|QueryBuilderHandler|null
+	 */
+    public static function __callStatic($method, $parameters)
+    {
+    	return (new static)->$method(...$parameters);
+    }
+
+	/**
      * Set original rows
      * @param array $rows
      */
