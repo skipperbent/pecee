@@ -61,9 +61,9 @@ class ModelQueryBuilder
         return $collection;
     }
 
-    public function alias($prefix)
+    public function alias($alias)
     {
-        $this->query->alias($this->model->getTable(), $prefix);
+        $this->query->alias($alias, $this->model->getTable());
 
         return $this->model;
     }
