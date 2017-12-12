@@ -1,4 +1,4 @@
-# [WIP] pecee php framework
+# pecee php framework
 
 **Fast, lightweight, open source MVC PHP framework based on Microsoft MVVM.**
 

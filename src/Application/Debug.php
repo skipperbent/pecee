@@ -88,7 +88,7 @@ class Debug
             array_shift($args);
         }
 
-        $this->addObject(vsprintf($text, $args));
+        $this->addObject(vsprintf(str_replace('%', '%%', $text), $args));
     }
 
     public function __toString()
