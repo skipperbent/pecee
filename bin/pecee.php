@@ -92,7 +92,7 @@ switch (strtolower($argv[1])) {
 
 		if (isset($argv[1]) && strtolower($argv[1]) === 'create') {
 			$template = dirname(__DIR__) . '/database/stubs/migration.php';
-			$args[] = '--template="' . $template . '"';
+			$args[] = '--template=' . $template;
 		}
 
 		// Run Phinx
