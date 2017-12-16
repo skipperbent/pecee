@@ -169,7 +169,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $this->mergeRows($updateData);
 
-        if ($this->isNew() === false || count($originalRows) > 0 || $this->exists() === true) {
+        if ($this->exists() === true) {
 
             if ($this->timestamps) {
                 $this->updated_at = Carbon::now()->toDateTimeString();
@@ -390,19 +390,19 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return null;
     }
 
-	/**
-	 * Call static
-	 * @param string $method
-	 * @param array $parameters
-	 *
-	 * @return static|QueryBuilderHandler|null
-	 */
+    /**
+     * Call static
+     * @param string $method
+     * @param array $parameters
+     *
+     * @return static|QueryBuilderHandler|null
+     */
     public static function __callStatic($method, $parameters)
     {
-    	return (new static)->$method(...$parameters);
+        return (new static)->$method(...$parameters);
     }
 
-	/**
+    /**
      * Set original rows
      * @param array $rows
      */
