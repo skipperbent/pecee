@@ -64,7 +64,7 @@ class CollectionItem implements \IteratorAggregate
 
     public function exist($key)
     {
-        return array_key_exists(strtolower($key), $this->data);
+        return isset($this->data[strtolower($key)]);
     }
 
     /**
