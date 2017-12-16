@@ -307,7 +307,7 @@ class Application
 
     public function __get($name)
     {
-        return $this->parameters[$name];
+        return isset($this->parameters[$name]) ? $this->parameters[$name] : null;
     }
 
     public function __isset($name)

@@ -22,7 +22,7 @@ class CollectionItem implements \IteratorAggregate
 
     public function get($name)
     {
-        return $this->exist($name) ? $this->data[strtolower($name)] : null;
+        return $this->data[strtolower($name)];
     }
 
     public function set($name, $value)
@@ -32,7 +32,7 @@ class CollectionItem implements \IteratorAggregate
 
     public function __get($key)
     {
-        return $this->data[strtolower($key)];
+        return $this->exist($key) ? $this->data[strtolower($key)] : null;
     }
 
     public function __set($key, $value)
