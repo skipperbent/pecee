@@ -293,7 +293,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function __get($name)
     {
-        return isset($this->results['rows'][$name]) ? $this->results['rows'][$name] : null;
+        return $this->results['rows'][$name];
     }
 
     public function __set($name, $value)
