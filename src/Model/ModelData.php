@@ -99,7 +99,7 @@ abstract class ModelData extends Model
 
     public function save(array $data = null)
     {
-        if(count($data) > 0) {
+        if($data !== null && count($data) > 0) {
             foreach($data as $key => $value) {
                 $this->{$key} = $value;
             }
