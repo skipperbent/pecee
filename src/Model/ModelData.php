@@ -34,7 +34,7 @@ abstract class ModelData extends Model
         $field->save();
     }
 
-    public function onInstanceCreate($inCollection = false)
+    public function onInstanceCreate()
     {
         /* @var $data array */
         $data = $this->fetchData();
