@@ -171,31 +171,29 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         if ($this->exists() === true) {
 
-            if ($this->timestamps) {
-                $this->updated_at = Carbon::now()->toDateTimeString();
-            }
-
-            if (isset($updateData[$this->getPrimary()])) {
+            if (isset($updateData[$this->getPrimary()]) === true) {
                 // Remove primary key
                 unset($updateData[$this->getPrimary()]);
             }
 
-            static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
-        } else {
-
-            $updateData = array_filter($updateData, function ($value) {
-                return $value !== null;
-            }, ARRAY_FILTER_USE_BOTH);
-
-            if ($this->fixedIdentifier === false) {
-                $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
-            } else {
-                static::instance()->getQuery()->insert($updateData);
+            if ($this->timestamps === true) {
+                $updateData['updated_at'] = Carbon::now()->toDateTimeString();
             }
 
-            $this->results['original_rows'][$this->primary] = $this->{$this->primary};
-
+            return static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         }
+
+        $updateData = array_filter($updateData, function ($value) {
+            return $value !== null;
+        }, ARRAY_FILTER_USE_BOTH);
+
+        if ($this->fixedIdentifier === false) {
+            $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
+        } else {
+            static::instance()->getQuery()->insert($updateData);
+        }
+
+        $this->results['original_rows'][$this->primary] = $this->{$this->primary};
 
         return $this;
     }
@@ -343,13 +341,18 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         });
     }
 
+    /**
+     * @param array|string|null $filter
+     * @return array
+     * @throws ModelException
+     */
     public function toArray(array $filter = [])
     {
         $rows = $this->getRows();
 
         foreach ($rows as $key => $row) {
             $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
-            if (in_array($key, $this->hidden, true) === true || (count($filter) && in_array($key, $filter, true) === true)) {
+            if (in_array($key, $this->hidden, true) === true || (count($filter) > 0 && in_array($key, $filter, true) === false)) {
                 unset($rows[$key]);
                 continue;
             }
