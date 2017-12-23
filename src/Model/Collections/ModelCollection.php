@@ -171,15 +171,18 @@ class ModelCollection extends Collection
 
     /**
      * Get array
+     *
      * @param array|string|null $filterKeys
      * @return array
+     * @throws \Pecee\Model\Exceptions\ModelException
      */
     public function toArray($filterKeys = null)
     {
-        $output = [];
-        /* @var $row \Pecee\Model\Model */
+        $filterKeys = ($filterKeys !== null && is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
 
-        $filterKeys = (is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
+        $output = [];
+
+        /* @var $row \Pecee\Model\Model */
 
         for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
 
@@ -191,7 +194,7 @@ class ModelCollection extends Collection
             }
 
             foreach($filterKeys as $key) {
-                $output[$key] = $row->{$key};
+                $output[$key][] = $row->{$key};
             }
 
         }
