@@ -10,7 +10,7 @@ class Directory
         $dir = opendir($source);
 
         if (!is_dir($destination)) {
-            if(mkdir($destination, 0755, true) === false) {
+            if (mkdir($destination, 0755, true) === false) {
                 throw new \ErrorException('Failed to create directory: ' . $destination);
             }
         }
@@ -28,6 +28,17 @@ class Directory
         }
 
         closedir($dir);
+    }
+
+    public static function delete($path)
+    {
+        $files = glob($path . '/*');
+
+        foreach ($files as $file) {
+            is_dir($file) ? static::delete($file) : unlink($file);
+        }
+
+        rmdir($path);
     }
 
 }
