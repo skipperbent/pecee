@@ -5,9 +5,10 @@ namespace Pecee\Model;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pecee\Pixie\Exception;
-use Pecee\Pixie\QueryBuilder\QueryObject;
-use Pecee\Str;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
+use Pecee\Pixie\QueryBuilder\QueryObject;
+use Pecee\Pixie\QueryBuilder\Raw;
+use Pecee\Str;
 
 class ModelQueryBuilder
 {
@@ -22,19 +23,24 @@ class ModelQueryBuilder
      */
     protected $query;
 
-    public function __construct(Model $model, $table)
+    /**
+     * ModelQueryBuilder constructor.
+     * @param Model $model
+     * @throws Exception
+     */
+    public function __construct(Model $model)
     {
         $this->model = $model;
-        $this->query = (new QueryBuilderHandler())->table($table);
+        $this->query = (new QueryBuilderHandler())->table($model->getTable());
 
         if (app()->getDebugEnabled() === true) {
 
-            $this->query->registerEvent('before-*', $table,
+            $this->query->registerEvent('before-*', $model->getTable(),
                 function (QueryBuilderHandler $qb, QueryObject $qo) {
                     debug('START QUERY: ' . $qo->getRawSql());
                 });
 
-            $this->query->registerEvent('after-*', $table,
+            $this->query->registerEvent('after-*', $model->getTable(),
                 function (QueryBuilderHandler $qb, QueryObject $qo) {
                     debug('END QUERY: ' . $qo->getRawSql());
                 });
@@ -46,6 +52,7 @@ class ModelQueryBuilder
         /* @var $model Model */
         $model = get_class($this->model);
         $model = new $model();
+        $model->with($this->model->getWith());
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
@@ -210,11 +217,17 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function get()
     {
         return $this->all();
     }
 
+    /**
+     * @throws Exception
+     */
     public function all()
     {
         $items = (array)$this->query->get();
@@ -229,6 +242,9 @@ class ModelQueryBuilder
         return $this->createCollection($models);
     }
 
+    /**
+     * @throws Exception
+     */
     public function find($id)
     {
         $item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
@@ -239,6 +255,10 @@ class ModelQueryBuilder
         return null;
     }
 
+    /**
+     * @throws ModelNotFoundException
+     * @throws Exception
+     */
     public function findOrFail($id)
     {
         $item = $this->find($id);
@@ -249,6 +269,9 @@ class ModelQueryBuilder
         return $item;
     }
 
+    /**
+     * @throws Exception
+     */
     public function first()
     {
         $item = $this->query->first();
@@ -259,6 +282,10 @@ class ModelQueryBuilder
         return null;
     }
 
+    /**
+     * @throws ModelNotFoundException
+     * @throws Exception
+     */
     public function firstOrFail()
     {
         $item = $this->first();
@@ -269,11 +296,17 @@ class ModelQueryBuilder
         return $item;
     }
 
+    /**
+     * @throws Exception
+     */
     public function count()
     {
         return $this->query->count();
     }
 
+    /**
+     * @throws Exception
+     */
     public function max($field)
     {
         $result = $this->query->select($this->query->raw('MAX(' . $field . ') AS max'))->get();
@@ -281,6 +314,9 @@ class ModelQueryBuilder
         return (int)$result[0]->max;
     }
 
+    /**
+     * @throws Exception
+     */
     public function sum($field)
     {
         $result = $this->query->select($this->query->raw('SUM(' . $field . ') AS sum'))->get();
@@ -300,6 +336,10 @@ class ModelQueryBuilder
         return $out;
     }
 
+    /**
+     * @throws Exception
+     * @throws ModelException
+     */
     public function update(array $data = [])
     {
         if (count($data) === 0) {
@@ -311,6 +351,10 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @throws Exception
+     * @throws ModelException
+     */
     public function create(array $data = [])
     {
         $data = array_merge($this->model->getRows(), $this->getValidData($data));
@@ -332,6 +376,10 @@ class ModelQueryBuilder
         return false;
     }
 
+    /**
+     * @throws Exception
+     * @throws ModelException
+     */
     public function firstOrCreate(array $data = [])
     {
         $item = $this->first();
@@ -345,6 +393,9 @@ class ModelQueryBuilder
         return $item;
     }
 
+    /**
+     * @throws Exception
+     */
     public function firstOrNew(array $data = [])
     {
         $item = $this->first();
@@ -357,6 +408,11 @@ class ModelQueryBuilder
         return $item;
     }
 
+    /**
+     * @param array $ids
+     * @return Model
+     * @throws Exception
+     */
     public function destroy($ids)
     {
         $this->query->whereIn('id', $ids)->delete();
@@ -385,6 +441,9 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function join($table, $key, $operator = null, $value = null, $type = 'inner')
     {
         $this->query->join($table, $key, $operator, $value, $type);
@@ -397,6 +456,12 @@ class ModelQueryBuilder
         return $this->query->raw($value, $bindings);
     }
 
+    /**
+     * @param Model $model
+     * @param null $alias
+     * @return Raw
+     * @throws Exception
+     */
     public function subQuery(Model $model, $alias = null)
     {
         return $this->query->subQuery($model->getQuery(), $alias);
@@ -446,6 +511,9 @@ class ModelQueryBuilder
         return ['model'];
     }
 
+    /**
+     * @throws Exception
+     */
     public function __wakeup()
     {
         $this->query = (new QueryBuilderHandler())->table($this->model->getTable());

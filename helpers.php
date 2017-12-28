@@ -145,3 +145,19 @@ function csrf_token()
 
     return null;
 }
+
+/**
+ * Base basename for class
+ *
+ * @param string $class
+ * @return string
+ */
+function class_basename($class)
+{
+    $pos = strrpos($class, '\\');
+    if ($pos !== false) {
+        $class = substr($class, $pos + 1);
+    }
+
+    return strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $class));
+}

@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Model\Collections;
 
 use Pecee\Collection\Collection;
@@ -66,6 +67,7 @@ class ModelCollection extends Collection
                 }
             }
         }
+
         return new static($out);
     }
 
@@ -94,13 +96,13 @@ class ModelCollection extends Collection
 
                     $rowValue = null;
 
-                    if($rowKey === $key) {
+                    if ($rowKey === $key) {
                         $rowValue = $value;
-                    } elseif($row instanceof ModelData && isset($row->data->{$_key}) === true) {
+                    } elseif ($row instanceof ModelData && isset($row->data->{$_key}) === true) {
                         $rowValue = $row->data->{$_key};
                     }
 
-                    if($rowValue === null) {
+                    if ($rowValue === null) {
                         continue;
                     }
 
@@ -136,7 +138,6 @@ class ModelCollection extends Collection
                 }
             }
         }
-
 
         return new static($out);
     }
@@ -174,7 +175,6 @@ class ModelCollection extends Collection
      *
      * @param array|string|null $filterKeys
      * @return array
-     * @throws \Pecee\Model\Exceptions\ModelException
      */
     public function toArray($filterKeys = null)
     {
@@ -188,12 +188,12 @@ class ModelCollection extends Collection
 
             $row = $this->rows[$i];
 
-            if($filterKeys === null) {
+            if ($filterKeys === null) {
                 $output[] = $row->toArray();
                 continue;
             }
 
-            foreach($filterKeys as $key) {
+            foreach ($filterKeys as $key) {
                 $output[$key][] = $row->{$key};
             }
 

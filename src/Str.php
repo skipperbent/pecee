@@ -48,19 +48,19 @@ class Str
         return $defaultValue;
     }
 
-    public static function deCamelize($word)
+    public static function deCamelize($word, $separator = '_')
     {
         return preg_replace_callback('/(^|[a-z])([A-Z])/',
-            function ($matches) {
-                return strtolower('' !== $matches[1] ? $matches[1] . '_' . $matches[2] : $matches[2]);
+            function ($matches) use ($separator) {
+                return strtolower('' !== $matches[1] ? $matches[1] . $separator . $matches[2] : $matches[2]);
             },
             $word
         );
     }
 
-    public static function camelize($word)
+    public static function camelize($word, $separator = '_')
     {
-        $word = preg_replace_callback('/(^|_)([a-z])/', function ($matches) {
+        $word = preg_replace_callback('/(^|' . $separator . ')([a-z])/', function ($matches) {
             return strtoupper($matches[2]);
         }, strtolower($word));
         $word[0] = strtolower($word[0]);
