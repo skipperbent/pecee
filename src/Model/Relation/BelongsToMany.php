@@ -1,11 +1,13 @@
 <?php
+
 namespace Pecee\Model\Relation;
 
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Model;
 use Pecee\Model\ModelRelation;
 
-class BelongsToMany extends ModelRelation {
+class BelongsToMany extends ModelRelation
+{
 
     protected $table;
     protected $parentKey;
@@ -26,13 +28,16 @@ class BelongsToMany extends ModelRelation {
         parent::__construct($related, $parent);
     }
 
+    /**
+     * @throws \Pecee\Pixie\Exception
+     */
     public function addConstraints()
     {
-       $this->performJoin();
+        $this->performJoin();
 
-       if(static::$constraints === true) {
-           $this->addWhereConstraints();
-       }
+        if (static::$constraints === true) {
+            $this->addWhereConstraints();
+        }
     }
 
     /**
@@ -44,7 +49,13 @@ class BelongsToMany extends ModelRelation {
         return $this->related->all();
     }
 
-    protected function performJoin(Model $model = null) {
+    /**
+     * @param Model|null $model
+     * @return $this
+     * @throws \Pecee\Pixie\Exception
+     */
+    protected function performJoin(Model $model = null)
+    {
         $model = $model ?: $this->related;
 
         // We need to join to the intermediate table on the related model's primary
@@ -52,7 +63,7 @@ class BelongsToMany extends ModelRelation {
         // model instance. Then we can set the "where" for the parent models.
         $baseTable = $this->related->getTable();
 
-        $key = $baseTable.'.'.$this->relatedKey;
+        $key = $baseTable . '.' . $this->relatedKey;
 
         $model->join($this->table, $key, '=', $this->getQualifiedRelatedPivotKeyName());
 
@@ -80,7 +91,7 @@ class BelongsToMany extends ModelRelation {
      */
     public function getQualifiedForeignPivotKeyName()
     {
-        return $this->table.'.'.$this->foreignPivotKey;
+        return $this->table . '.' . $this->foreignPivotKey;
     }
 
     /**
@@ -90,7 +101,7 @@ class BelongsToMany extends ModelRelation {
      */
     public function getQualifiedRelatedPivotKeyName()
     {
-        return $this->table.'.'.$this->relatedPivotKey;
+        return $this->table . '.' . $this->relatedPivotKey;
     }
 
 }

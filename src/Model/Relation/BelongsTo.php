@@ -1,10 +1,12 @@
 <?php
+
 namespace Pecee\Model\Relation;
 
 use Pecee\Model\Model;
 use Pecee\Model\ModelRelation;
 
-class BelongsTo extends ModelRelation {
+class BelongsTo extends ModelRelation
+{
 
     protected $foreignKey;
     protected $ownerKey;
@@ -28,13 +30,13 @@ class BelongsTo extends ModelRelation {
 
     public function addConstraints()
     {
-        if (static::$constraints  === true) {
+        if (static::$constraints === true) {
             // For belongs to relationships, which are essentially the inverse of has one
             // or has many relationships, we need to actually query on the primary key
             // of the related models matching on the foreign key that's on a parent.
             $table = $this->related->getTable();
 
-            $this->related->where($table.'.'.$this->ownerKey, '=', $this->child->{$this->foreignKey});
+            $this->related->where($table . '.' . $this->ownerKey, '=', $this->child->{$this->foreignKey});
         }
     }
 

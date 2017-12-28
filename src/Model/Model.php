@@ -519,6 +519,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         if (is_array($method) === true) {
             $this->with -= $method;
+
             return $this;
         }
 

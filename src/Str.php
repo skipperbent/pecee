@@ -51,7 +51,7 @@ class Str
     public static function deCamelize($word, $separator = '_')
     {
         return preg_replace_callback('/(^|[a-z])([A-Z])/',
-            function ($matches) use($separator) {
+            function ($matches) use ($separator) {
                 return strtolower('' !== $matches[1] ? $matches[1] . $separator . $matches[2] : $matches[2]);
             },
             $word

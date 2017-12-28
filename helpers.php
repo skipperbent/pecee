@@ -155,7 +155,7 @@ function csrf_token()
 function class_basename($class)
 {
     $pos = strrpos($class, '\\');
-    if($pos !== false) {
+    if ($pos !== false) {
         $class = substr($class, $pos + 1);
     }
 

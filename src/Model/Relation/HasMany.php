@@ -1,10 +1,12 @@
 <?php
+
 namespace Pecee\Model\Relation;
 
 use Pecee\Model\Model;
 use Pecee\Model\ModelRelation;
 
-class HasMany extends ModelRelation {
+class HasMany extends ModelRelation
+{
 
     protected $localKey;
     protected $foreignKey;
