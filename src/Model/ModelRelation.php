@@ -105,18 +105,13 @@ abstract class ModelRelation
      */
     public function __call($name, $arguments)
     {
-        $result = $this->parent->{$name}(...$arguments);
+        $result = $this->related->{$name}(...$arguments);
 
-        if ($result === $this->parent) {
+        if ($result === $this->related) {
             return $this;
         }
 
         return $result;
-    }
-
-    public function __clone()
-    {
-        $this->parent = clone $this->parent;
     }
 
 }
