@@ -174,7 +174,6 @@ class ModelCollection extends Collection
      *
      * @param array|string|null $filterKeys
      * @return array
-     * @throws \Pecee\Model\Exceptions\ModelException
      */
     public function toArray($filterKeys = null)
     {

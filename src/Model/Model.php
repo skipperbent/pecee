@@ -5,54 +5,15 @@ namespace Pecee\Model;
 use Carbon\Carbon;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
+use Pecee\Model\Relation\BelongsTo;
+use Pecee\Model\Relation\BelongsToMany;
+use Pecee\Model\Relation\HasMany;
+use Pecee\Model\Relation\HasOne;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
 
 /**
- *
- * Helper docs to support both static and non-static calls, which redirects to ModelQueryBuilder.
- *
- * @method $this alias(string $alias)
- * @method $this limit(int $id)
- * @method $this skip(int $id)
- * @method $this take(int $id)
- * @method $this offset(int $id)
- * @method $this where(string $key, string $operator = null, string $value = null)
- * @method $this whereIn(string $key, array | object $values)
- * @method $this whereNot(string $key, string $operator = null, string $value = null)
- * @method $this whereNotIn(string $key, array | object $values)
- * @method $this whereNull(string $key)
- * @method $this whereNotNull(string $key)
- * @method $this whereBetween(string $key, string $valueFrom, string $valueTo)
- * @method $this orWhere(string $key, string $operator = null, string $value = null)
- * @method $this orWhereIn(string $key, array | object $values)
- * @method $this orWhereNotIn(string $key, array | object $values)
- * @method $this orWhereNot(string $key, string $operator = null, string $value = null)
- * @method $this orWhereNull(string $key)
- * @method $this orWhereNotNull(string $key)
- * @method $this orWhereBetween(string $key, string $valueFrom, string $valueTo)
- * @method ModelCollection get()
- * @method ModelCollection all()
- * @method $this find(string $id)
- * @method $this findOrFail(string $id)
- * @method $this first()
- * @method $this firstOrFail()
- * @method int count()
- * @method int max(string $field)
- * @method int sum(string $field)
- * @method $this update(array $data)
- * @method $this create(array $data)
- * @method $this firstOrCreate(array $data = [])
- * @method $this firstOrNew(array $data = [])
- * @method $this destroy(array | object $ids)
- * @method $this select(array | object $fields)
- * @method $this groupBy(string $field)
- * @method $this orderBy(string $field, string $defaultDirection = 'ASC')
- * @method $this join(string | array $table, string $key, string $operator = null, string $value = null, string $type = 'inner'))
- * @method QueryBuilderHandler getQuery()
- * @method string raw(string $value, array $bindings = [])
- * @method string subQuery(Model $model, string $alias = null)
- * @method string getQueryIdentifier()
+ * @mixin ModelQueryBuilder
  */
 abstract class Model implements \IteratorAggregate, \JsonSerializable
 {
@@ -62,10 +23,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     protected $hidden = [];
     protected $with = [];
     protected $rename = [];
-    protected $join = [];
     protected $columns = [];
     protected $timestamps = true;
     protected $fixedIdentifier = false;
+    protected $relations = [];
 
     /**
      * @var ModelQueryBuilder
@@ -76,12 +37,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         // Set table name if its not already defined
         if ($this->table === null) {
-            $name = explode('\\', static::class);
-            $name = str_ireplace('model', '', end($name));
-            $this->table = strtolower(preg_replace('/(?<!^)([A-Z])/', '_\\1', $name));
+            $this->table = str_ireplace('model', '', class_basename(static::class));
         }
 
-        $this->queryable = new ModelQueryBuilder($this, $this->table);
+        $this->queryable = new ModelQueryBuilder($this);
 
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
@@ -92,12 +51,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
     }
 
-    public function newQuery($table = null)
+    public function newQuery()
     {
-        $model = new static();
-        $model->setQuery(new ModelQueryBuilder($this, $table));
-
-        return $model;
+        return new static();
     }
 
     /**
@@ -112,7 +68,24 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function onInstanceCreate()
     {
-        $this->joinData();
+        if ($this->isNew() === true) {
+            return;
+        }
+
+        foreach ($this->with as $with) {
+            $method = Str::camelize($with);
+
+            $output = $this->$method();
+
+            if ($output instanceof Model || $output instanceof ModelCollection) {
+                $output = $output->toArray();
+            } elseif ($output instanceof ModelRelation) {
+                $output = $output->getResults()->toArray();
+            }
+
+            $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
+            $this->{$with} = $output;
+        }
     }
 
     public function onCollectionCreate($items)
@@ -120,11 +93,157 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return new ModelCollection($items);
     }
 
-    protected function joinData()
+    /**
+     * Define an inverse one-to-one or many relationship.
+     *
+     * @param  string|null $related
+     * @param  string|null $foreignKey
+     * @param  string|null $ownerKey
+     * @param  string|null $relation
+     * @return BelongsTo
+     */
+    public function belongsTo($related, $foreignKey = null, $ownerKey = null, $relation = null)
     {
-        foreach ($this->join as $join) {
-            $this->{$join} = $this->{Str::camelize($join)}();
+
+        if ($relation === null) {
+            $relation = $this->guessBelongsToRelation();
         }
+
+        /* @var $instance Model */
+        $instance = new $related();
+
+        $foreignKey = $foreignKey ?: Str::camelize($relation) . '_' . $this->getPrimary();
+
+        $ownerKey = $ownerKey ?: $instance->getPrimary();
+
+        return new BelongsTo(
+            $instance, $this, $foreignKey, $ownerKey, $relation
+        );
+
+    }
+
+    /**
+     * Define a many-to-many relationship.
+     *
+     * @param  string $related
+     * @param  string|null $table
+     * @param  string|null $foreignPivotKey
+     * @param  string|null $relatedPivotKey
+     * @param  string|null $parentKey
+     * @param  string|null $relatedKey
+     * @param  string|null $relation
+     * @return BelongsToMany
+     */
+    public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null)
+    {
+
+        if ($relation === null) {
+            $relation = $this->guessBelongsToRelation();
+        }
+
+        /* @var $instance Model */
+        $instance = new $related();
+
+        $foreignPivotKey = $foreignPivotKey ?: $this->getForeignKey();
+
+        $relatedPivotKey = $relatedPivotKey ?: $instance->getForeignKey();
+
+        if ($table === null) {
+            $table = $this->joiningTable($relation);
+        }
+
+        return new BelongsToMany(
+            $instance, $this, $table, $foreignPivotKey,
+            $relatedPivotKey, $parentKey ?: $this->getPrimary(),
+            $relatedKey ?: $instance->getPrimary(), $relation
+        );
+
+    }
+
+    /**
+     * Define a one-to-one relationship.
+     *
+     * @param  string $related
+     * @param  string|null $foreignKey
+     * @param  string|null $localKey
+     * @return HasOne
+     */
+    public function hasOne($related, $foreignKey = null, $localKey = null)
+    {
+
+        /* @var $instance Model */
+        $instance = new $related();
+
+        $foreignKey = $foreignKey ?: $this->getForeignKey();
+
+        $localKey = $localKey ?: $this->getPrimary();
+
+        return new HasOne(
+            $instance, $this, $instance->getTable() . '.' . $foreignKey, $localKey
+        );
+    }
+
+    /**
+     * Define a one-to-many relationship.
+     *
+     * @param  string $related
+     * @param  string|null $foreignKey
+     * @param  string|null $localKey
+     * @return HasMany
+     */
+    public function hasMany($related, $foreignKey = null, $localKey = null)
+    {
+        /* @var $instance Model */
+        $instance = new $related();
+
+        $foreignKey = $foreignKey ?: $this->getForeignKey();
+
+        $localKey = $localKey ?: $this->getPrimary();
+
+        return new HasMany(
+            $instance, $this, $instance->getTable() . '.' . $foreignKey, $localKey
+        );
+    }
+
+    /**
+     * Guess the "belongs to" relationship name.
+     *
+     * @return string
+     */
+    protected function guessBelongsToRelation()
+    {
+        $caller = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+
+        return $caller[2]['function'];
+    }
+
+    /**
+     * Get the joining table name for a many-to-many relation.
+     *
+     * @param  string $related
+     * @return string
+     */
+    public function joiningTable($related)
+    {
+        // The joining table name, by convention, is simply the snake cased models
+        // sorted alphabetically and concatenated with an underscore, so we can
+        // just sort the models and join them together to get the table name.
+        $models = [
+            Str::camelize(class_basename($related)),
+            Str::camelize(class_basename(static::class)),
+        ];
+
+        // Now that we have the model names in an array we can just sort them and
+        // use the implode function to join them together with an underscores,
+        // which is typically used by convention within the database system.
+        sort($models);
+
+        return strtolower(implode('_', $models));
+    }
+
+    public function getForeignKey()
+    {
+        return $this->table . '_' . $this->primary;
     }
 
     /**
@@ -198,6 +317,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $this;
     }
 
+    /**
+     * @return \PDOStatement
+     * @throws ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function delete()
     {
         if (is_array($this->columns) === false) {
@@ -211,6 +335,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $this->queryable->getQuery()->delete();
     }
 
+    /**
+     * @return bool
+     * @throws \Pecee\Pixie\Exception
+     */
     public function exists()
     {
         if ($this->isNew() === true) {
@@ -313,8 +441,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         if (is_array($data) === true) {
             $out = [];
-            foreach ((array)$data as $d) {
-                $out[] = $this->parseArrayData($d);
+            foreach ((array)$data as $key => $d) {
+                $out[$key] = $this->parseArrayData($d);
             }
 
             return $out;
@@ -344,7 +472,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * @param array|string|null $filter
      * @return array
-     * @throws ModelException
      */
     public function toArray(array $filter = [])
     {
@@ -359,19 +486,50 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $rows[$key] = $this->parseArrayData($row);
         }
 
-        foreach ($this->with as $with) {
-            $method = Str::camelize($with);
-            if (method_exists($this, $method) === false) {
-                throw new ModelException('Missing required method ' . $method);
-            }
-            $output = $this->$method();
-            $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
-            $rows[$with] = ($output instanceof self || $output instanceof ModelCollection) ? $output->toArray() : $output;
-        }
-
         $this->orderArrayRows($rows);
 
         return $rows;
+    }
+
+    /**
+     * Add data to output
+     * @param string|array $method
+     * @return static $this
+     */
+    public function with($method)
+    {
+        if (is_array($method) === true) {
+            $this->with += $method;
+
+            return $this;
+        }
+
+        $this->with[] = $method;
+
+        return $this;
+    }
+
+    /**
+     * Remove output data
+     *
+     * @param string|array $method
+     * @return static $this
+     */
+    public function without($method)
+    {
+        if (is_array($method) === true) {
+            $this->with -= $method;
+            return $this;
+        }
+
+        unset($this->with[array_search($method, $this->with, true)]);
+
+        return $this;
+    }
+
+    public function getWith()
+    {
+        return $this->with;
     }
 
     public function getColumns()
@@ -441,6 +599,19 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $this->setQuery(clone $this->queryable);
     }
 
+    public function getAttribute($name)
+    {
+        return $this->{$name};
+    }
+
+    public function setAttribute($name, $value)
+    {
+        $this->{$name} = $value;
+    }
+
+    /**
+     * @return array|mixed
+     */
     public function jsonSerialize()
     {
         return $this->toArray();
