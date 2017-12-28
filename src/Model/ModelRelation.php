@@ -114,9 +114,4 @@ abstract class ModelRelation
         return $result;
     }
 
-    public function __clone()
-    {
-        $this->related = clone $this->related;
-    }
-
 }
