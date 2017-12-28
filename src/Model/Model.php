@@ -47,7 +47,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                 'updated_at',
                 'created_at',
             ]);
-            $this->created_at = Carbon::now();
         }
     }
 
@@ -286,8 +285,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $this;
         }
 
-        $this->mergeRows($updateData);
-
         if ($this->exists() === true) {
 
             if (isset($updateData[$this->getPrimary()]) === true) {
@@ -299,12 +296,20 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                 $updateData['updated_at'] = Carbon::now()->toDateTimeString();
             }
 
+            $this->mergeRows($updateData);
+
             return static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
         }
 
         $updateData = array_filter($updateData, function ($value) {
             return $value !== null;
         }, ARRAY_FILTER_USE_BOTH);
+
+        if ($this->timestamps === true) {
+            $updateData['created_at'] = Carbon::now();
+        }
+
+        $this->mergeRows($updateData);
 
         if ($this->fixedIdentifier === false) {
             $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);

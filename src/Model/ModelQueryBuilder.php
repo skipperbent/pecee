@@ -47,6 +47,10 @@ class ModelQueryBuilder
         }
     }
 
+    /**
+     * @param \stdClass $item
+     * @return Model
+     */
     protected function createInstance(\stdClass $item)
     {
         /* @var $model Model */
