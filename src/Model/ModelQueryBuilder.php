@@ -2,6 +2,7 @@
 
 namespace Pecee\Model;
 
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pecee\Pixie\Exception;
@@ -72,6 +73,10 @@ class ModelQueryBuilder
         return $collection;
     }
 
+    /**
+     * @param string $alias
+     * @return static
+     */
     public function alias($alias)
     {
         $this->query->alias($alias, $this->model->getTable());
@@ -79,6 +84,10 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @param int $limit
+     * @return static
+     */
     public function limit($limit)
     {
         $this->query->limit($limit);
@@ -86,6 +95,10 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @param int $skip
+     * @return static
+     */
     public function skip($skip)
     {
         $this->query->offset($skip);
@@ -93,16 +106,30 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @param int $amount
+     * @return static
+     */
     public function take($amount)
     {
         return $this->limit($amount);
     }
 
+    /**
+     * @param int $offset
+     * @return static
+     */
     public function offset($offset)
     {
         return $this->skip($offset);
     }
 
+    /**
+     * @param string|Raw|\Closure $key
+     * @param string|null $operator
+     * @param mixed|Raw|\Closure|null $value
+     * @return static
+     */
     public function where($key, $operator = null, $value = null)
     {
         if (func_num_args() === 2) {
@@ -115,6 +142,12 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @param string|Raw|\Closure $key
+     * @param array|Raw|\Closure $values
+     *
+     * @return static
+     */
     public function whereIn($key, $values)
     {
         $this->query->whereIn($key, $values);
@@ -122,6 +155,15 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds WHERE NOT statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param string|array|Raw|\Closure|null $operator
+     * @param mixed|Raw|\Closure|null $value
+     *
+     * @return static
+     */
     public function whereNot($key, $operator = null, $value = null)
     {
         if (func_num_args() === 2) {
@@ -134,6 +176,14 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE NOT IN statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param array|Raw|\Closure $values
+     *
+     * @return static
+     */
     public function whereNotIn($key, $values)
     {
         $this->query->whereNotIn($key, $values);
@@ -141,6 +191,13 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds WHERE NULL statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     *
+     * @return static
+     */
     public function whereNull($key)
     {
         $this->query->whereNull($key);
@@ -148,6 +205,13 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds WHERE NOT NULL statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     *
+     * @return static
+     */
     public function whereNotNull($key)
     {
         $this->query->whereNotNull($key);
@@ -155,6 +219,15 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds WHERE BETWEEN statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param string|integer|float $valueFrom
+     * @param string|integer|float $valueTo
+     *
+     * @return static
+     */
     public function whereBetween($key, $valueFrom, $valueTo)
     {
         $this->query->whereBetween($key, $valueFrom, $valueTo);
@@ -162,6 +235,15 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param string|null $operator
+     * @param mixed|Raw|\Closure|null $value
+     *
+     * @return static
+     */
     public function orWhere($key, $operator = null, $value = null)
     {
         if (func_num_args() === 2) {
@@ -174,6 +256,14 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE IN statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param array|Raw|\Closure $values
+     *
+     * @return static
+     */
     public function orWhereIn($key, $values)
     {
         $this->query->orWhereIn($key, $values);
@@ -181,6 +271,14 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds or WHERE NOT IN statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param array|Raw|\Closure $values
+     *
+     * @return static
+     */
     public function orWhereNotIn($key, $values)
     {
         $this->query->orWhereNotIn($key, $values);
@@ -188,6 +286,15 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE NOT statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param string|null $operator
+     * @param mixed|Raw|\Closure|null $value
+     *
+     * @return static
+     */
     public function orWhereNot($key, $operator = null, $value = null)
     {
         if (func_num_args() === 2) {
@@ -200,6 +307,13 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE NULL statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     *
+     * @return static
+     */
     public function orWhereNull($key)
     {
         $this->query->orWhereNull($key);
@@ -207,6 +321,13 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE NOT NULL statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     *
+     * @return static
+     */
     public function orWhereNotNull($key)
     {
         $this->query->orWhereNotNull($key);
@@ -214,6 +335,15 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds OR WHERE BETWEEN statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param string|integer|float $valueFrom
+     * @param string|integer|float $valueTo
+     *
+     * @return static
+     */
     public function orWhereBetween($key, $valueFrom, $valueTo)
     {
         $this->query->orWhereBetween($key, $valueFrom, $valueTo);
@@ -222,6 +352,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return ModelCollection
      * @throws Exception
      */
     public function get()
@@ -230,6 +361,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return ModelCollection
      * @throws Exception
      */
     public function all()
@@ -247,6 +379,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return static
      * @throws Exception
      */
     public function find($id)
@@ -260,6 +393,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return static
      * @throws ModelNotFoundException
      * @throws Exception
      */
@@ -274,6 +408,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return static|null
      * @throws Exception
      */
     public function first()
@@ -287,6 +422,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return static
      * @throws ModelNotFoundException
      * @throws Exception
      */
@@ -301,6 +437,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return int
      * @throws Exception
      */
     public function count()
@@ -309,6 +446,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * return int
      * @throws Exception
      */
     public function max($field)
@@ -319,6 +457,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @return int
      * @throws Exception
      */
     public function sum($field)
@@ -328,9 +467,15 @@ class ModelQueryBuilder
         return (int)$result[0]->sum;
     }
 
+    /**
+     * Get valid data
+     * @param array $data
+     * @return array
+     */
     protected function getValidData(array $data)
     {
         $out = [];
+
         foreach ($data as $key => $value) {
             if (in_array($key, $this->model->getColumns(), true) === true) {
                 $out[$key] = $value;
@@ -341,6 +486,8 @@ class ModelQueryBuilder
     }
 
     /**
+     * @param array $data
+     * @return static
      * @throws Exception
      * @throws ModelException
      */
@@ -356,6 +503,8 @@ class ModelQueryBuilder
     }
 
     /**
+     * @param array $data
+     * @return static|null
      * @throws Exception
      * @throws ModelException
      */
@@ -369,7 +518,7 @@ class ModelQueryBuilder
 
         $id = $this->query->insert($data);
 
-        if ($id) {
+        if ($id !== null) {
 
             $this->model->mergeRows($data);
             $this->model->{$this->model->getPrimary()} = $id;
@@ -377,10 +526,12 @@ class ModelQueryBuilder
             return $this->model;
         }
 
-        return false;
+        return null;
     }
 
     /**
+     * @param array $data
+     * @return static
      * @throws Exception
      * @throws ModelException
      */
@@ -398,6 +549,8 @@ class ModelQueryBuilder
     }
 
     /**
+     * @param array $data
+     * @return static
      * @throws Exception
      */
     public function firstOrNew(array $data = [])
@@ -414,16 +567,20 @@ class ModelQueryBuilder
 
     /**
      * @param array $ids
-     * @return Model
+     * @return static
      * @throws Exception
      */
-    public function destroy($ids)
+    public function destroy(array $ids)
     {
         $this->query->whereIn('id', $ids)->delete();
 
         return $this->model;
     }
 
+    /**
+     * @param string|array $fields
+     * @return static
+     */
     public function select($fields)
     {
         $this->query->select($fields);
@@ -431,6 +588,10 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * @param string|Raw|\Closure|array $field
+     * @return static
+     */
     public function groupBy($field)
     {
         $this->query->groupBy($field);
@@ -438,6 +599,14 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds ORDER BY statement to the current query.
+     *
+     * @param string|Raw|\Closure|array $fields
+     * @param string $defaultDirection
+     *
+     * @return static
+     */
     public function orderBy($fields, $defaultDirection = 'ASC')
     {
         $this->query->orderBy($fields, $defaultDirection);
@@ -446,7 +615,33 @@ class ModelQueryBuilder
     }
 
     /**
+     * Adds new JOIN statement to the current query.
+     *
+     * @param string|Raw|\Closure|array $table
+     * @param string|Raw|\Closure $key
+     * @param string|null $operator
+     * @param string|Raw|\Closure $value
+     * @param string $type
+     *
+     * @return static
      * @throws Exception
+     *
+     * ```
+     * Examples:
+     * - basic usage
+     * ->join('table2', 'table2.person_id', '=', 'table1.id');
+     *
+     * - as alias 'bar'
+     * ->join(['table2','bar'], 'bar.person_id', '=', 'table1.id');
+     *
+     * - complex usage
+     * ->join('another_table', function($table)
+     * {
+     *  $table->on('another_table.person_id', '=', 'my_table.id');
+     *  $table->on('another_table.person_id2', '=', 'my_table.id2');
+     *  $table->orOn('another_table.age', '>', $queryBuilder->raw(1));
+     * })
+     * ```
      */
     public function join($table, $key, $operator = null, $value = null, $type = 'inner')
     {
@@ -455,6 +650,18 @@ class ModelQueryBuilder
         return $this->model;
     }
 
+    /**
+     * Adds a raw string to the current query.
+     * This query will be ignored from any parsing or formatting by the Query builder
+     * and should be used in conjunction with other statements in the query.
+     *
+     * For example: $qb->where('result', '>', $qb->raw('COUNT(`score`)));
+     *
+     * @param string $value
+     * @param array|null|mixed $bindings ...
+     *
+     * @return Raw
+     */
     public function raw($value, array $bindings = [])
     {
         return $this->query->raw($value, $bindings);
