@@ -71,10 +71,16 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return;
         }
 
-        foreach ($this->with as $with) {
-            $method = Str::camelize($with);
+        foreach ($this->with as $key => $with) {
 
-            $output = $this->$method();
+            if ($with instanceof \Closure) {
+                $output = $with($this);
+                $with = $key;
+                unset($this->with[$key]);
+            } else {
+                $method = Str::camelize($with);
+                $output = $this->$method();
+            }
 
             if ($output instanceof Model || $output instanceof ModelCollection) {
                 $output = $output->toArray();
