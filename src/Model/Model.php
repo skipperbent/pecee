@@ -459,8 +459,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $out;
         }
 
-        $encoding = mb_detect_encoding($data, 'UTF-8', true);
-        $data = (is_array($data) === false && ($encoding === false || strtolower($encoding) !== 'utf-8')) ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
+        if (is_string($data) === true) {
+            $encoding = mb_detect_encoding($data, 'UTF-8', true);
+            $data = ($encoding === false || strtolower($encoding) !== 'utf-8') ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
+        }
 
         if (is_float($data) === true) {
             return (float)$data;
@@ -510,7 +512,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function with($method)
     {
         if (is_array($method) === true) {
-            $this->with += $method;
+            $this->with = array_merge($this->with, $method);
 
             return $this;
         }
@@ -529,9 +531,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function without($method)
     {
         if (is_array($method) === true) {
-            foreach($method as $with) {
+            foreach ($method as $with) {
                 $key = array_search($with, $this->with, true);
-                if($key !== false) {
+                if ($key !== false) {
                     unset($this->with[$key]);
                 }
             }
