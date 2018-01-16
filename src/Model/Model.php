@@ -311,7 +311,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $value !== null;
         }, ARRAY_FILTER_USE_BOTH);
 
-        if ($this->timestamps === true) {
+        if ($this->timestamps === true && isset($updateData['created_at']) === false) {
             $updateData['created_at'] = Carbon::now()->toDateTimeString();
         }
 
