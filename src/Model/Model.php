@@ -529,7 +529,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function without($method)
     {
         if (is_array($method) === true) {
-            $this->with -= $method;
+            foreach($method as $with) {
+                $key = array_search($with, $this->with, true);
+                if($key !== false) {
+                    unset($this->with[$key]);
+                }
+            }
 
             return $this;
         }
@@ -628,7 +633,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function hideFields(array $fields)
     {
-        $this->hidden += $fields;
+        $this->hidden = array_merge($this->hidden, $fields);
 
         return $this;
     }
