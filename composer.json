@@ -24,7 +24,7 @@
     "pecee/simple-router": "3.*",
     "robmorgan/phinx": "^0.5.3",
     "nesbot/carbon": "1.*",
-    "pecee/pixie": "3.*",
+    "pecee/pixie": "4.*",
     "filp/whoops": "^2.1"
   },
   "require-dev": {
