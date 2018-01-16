@@ -2,6 +2,8 @@
 
 namespace Pecee\Model;
 
+use Pecee\Model\Collections\ModelCollection;
+
 /**
  * @mixin Model
  */
@@ -96,6 +98,9 @@ abstract class ModelRelation
 
     abstract public function addConstraints();
 
+    /**
+     * @return Model|ModelCollection
+     */
     abstract public function getResults();
 
     /**

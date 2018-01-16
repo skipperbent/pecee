@@ -60,6 +60,7 @@ class ModelQueryBuilder
         $model->with($this->model->getWith());
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
+        $model->hideFields($this->model->getHiddenFields());
         $model->onInstanceCreate();
 
         return $model;
@@ -366,7 +367,7 @@ class ModelQueryBuilder
      */
     public function all()
     {
-        $items = (array)$this->query->get();
+        $items = $this->query->get();
 
         /* @var $model Model */
         $models = [];
