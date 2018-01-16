@@ -312,7 +312,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }, ARRAY_FILTER_USE_BOTH);
 
         if ($this->timestamps === true) {
-            $updateData['created_at'] = Carbon::now();
+            $updateData['created_at'] = Carbon::now()->toDateTimeString();
         }
 
         $this->mergeRows($updateData);
