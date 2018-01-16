@@ -291,7 +291,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $this;
         }
 
-        if ($this->exists() === true) {
+        if ($this->isNew() === false || $this->exists() === true) {
 
             if (isset($updateData[$this->getPrimary()]) === true) {
                 // Remove primary key
@@ -619,6 +619,28 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function setAttribute($name, $value)
     {
         $this->{$name} = $value;
+    }
+
+    /**
+     * Hide fields
+     * @param array $fields
+     * @return $this
+     */
+    public function hideFields(array $fields)
+    {
+        $this->hidden += $fields;
+
+        return $this;
+    }
+
+    /**
+     * Get hidden fields
+     *
+     * @return array
+     */
+    public function getHiddenFields()
+    {
+        return $this->hidden;
     }
 
     /**
