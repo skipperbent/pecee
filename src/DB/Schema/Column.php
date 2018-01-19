@@ -1,9 +1,6 @@
 <?php
 namespace Pecee\DB\Schema;
 
-use Pecee\DB\Pdo;
-use Pecee\DB\PdoHelper;
-
 class Column
 {
     protected $table;
@@ -17,6 +14,8 @@ class Column
     protected $index;
     protected $increment;
     protected $comment;
+    protected $drop = false;
+    protected $change = false;
     protected $relationTable;
     protected $relationColumn;
     protected $relationUpdateType;
@@ -143,7 +142,7 @@ class Column
 
         return $this;
     }
-    
+
     public function increment()
     {
         $this->primary()->setIncrement(true);
@@ -288,80 +287,26 @@ class Column
 
     public function drop()
     {
-        Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->table . '` DROP COLUMN `' . $this->name . '`');
+        $this->drop = true;
+
+        return $this;
+    }
+
+    public function getDrop()
+    {
+        return $this->drop;
     }
 
     public function change()
     {
-        $index = '';
+        $this->change = true;
 
-        if ($this->getIndex() !== null) {
-            $index = sprintf(', ADD %s (`%s`)', $this->getIndex(), $this->getName());
-        }
-
-        $query = 'ALTER TABLE `' . $this->table . '` MODIFY COLUMN ' . $this->getQuery() . $index . ';';
-        Pdo::getInstance()->nonQuery($query);
+        return $this;
     }
 
-    public function getQuery($includeRelations = true)
+    public function getChange()
     {
-        $length = '';
-        if ($this->getLength()) {
-            $length = '(' . $this->getLength() . ')';
-        }
-
-        $query = sprintf('`%s` %s%s %s ', $this->getName(), $this->getType(), $length, $this->getAttributes());
-
-        $query .= (!$this->getNullable()) ? 'NOT null' : 'null';
-
-        if ($this->getDefaultValue()) {
-            $query .= PdoHelper::formatQuery(' DEFAULT %s', [$this->getDefaultValue()]);
-        }
-
-        if ($this->getComment()) {
-            $query .= PdoHelper::formatQuery(' COMMENT %s', [$this->getComment()]);
-        }
-
-        if ($this->getIncrement()) {
-            $query .= ' AUTO_INCREMENT';
-        }
-
-        if ($includeRelations) {
-
-            if ($this->getIndex()) {
-                $query .= sprintf(', %s (`%s`)', $this->getIndex(), $this->getName());
-            }
-
-            if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
-                $query .= sprintf(', FOREIGN KEY(`%s`) REFERENCES `%s`(`%s`) ON UPDATE %s ON DELETE %s',
-                    $this->getName(),
-                    $this->getRelationTable(),
-                    $this->getRelationColumn(),
-                    $this->getRelationUpdateType(),
-                    $this->getRelationDeleteType());
-            }
-        }
-
-        return $query;
-    }
-
-    public function getKeyRelationsQuery()
-    {
-        $query = '';
-        if ($this->getIndex()) {
-            $query .= sprintf('%s (`%s`)', $this->getIndex(), $this->getName());
-        }
-
-        if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
-            $query .= sprintf('CONSTRAINT FOREIGN KEY(`%s`) REFERENCES `%s`(`%s`) ON UPDATE %s ON DELETE %s',
-                $this->getName(),
-                $this->getRelationTable(),
-                $this->getRelationColumn(),
-                $this->getRelationUpdateType(),
-                $this->getRelationDeleteType());
-        }
-
-        return $query;
+        return $this->change;
     }
 
     public function setName($name)

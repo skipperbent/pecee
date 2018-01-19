@@ -38,16 +38,25 @@ class HtmlSelect extends Html
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getOptions()
     {
         return $this->options;
     }
 
+    /**
+     * @return static
+     */
     public function multiple()
     {
         return $this->addAttribute('multiple', null);
     }
 
+    /**
+     * @return string
+     */
     public function render()
     {
         /* @var $options array */
@@ -77,6 +86,9 @@ class HtmlSelect extends Html
         return parent::render();
     }
 
+    /**
+     * @return static
+     */
     public function disabled()
     {
         return $this->addAttribute('disabled', null);

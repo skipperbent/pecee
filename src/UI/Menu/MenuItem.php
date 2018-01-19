@@ -30,11 +30,18 @@ class MenuItem
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return static
+     */
     public function setName($name)
     {
         $this->name = $name;
@@ -42,11 +49,18 @@ class MenuItem
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getUrl()
     {
         return $this->url;
     }
 
+    /**
+     * @param string $url
+     * @return static
+     */
     public function setUrl($url)
     {
         $this->url = $url;
@@ -54,6 +68,10 @@ class MenuItem
         return $this;
     }
 
+    /**
+     * @param string $html
+     * @return static
+     */
     public function setInnerContent($html)
     {
         $this->innerContent = $html;
@@ -61,6 +79,9 @@ class MenuItem
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getInnerContent()
     {
         return $this->innerContent;
@@ -93,6 +114,10 @@ class MenuItem
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @return static
+     */
     public function removeAttribute($name)
     {
         if (isset($this->attributes[$name])) {
@@ -138,6 +163,10 @@ class MenuItem
         return $this;
     }
 
+    /**
+     * @param string $name
+     * @return static
+     */
     public function removeLinkAttribute($name)
     {
         if (isset($this->linkAttributes[$name])) {

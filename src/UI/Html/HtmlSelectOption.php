@@ -51,6 +51,9 @@ class HtmlSelectOption extends Html
         return $this->group;
     }
 
+    /**
+     * @return static
+     */
     public function disabled()
     {
         return $this->addAttribute('disabled', null);
