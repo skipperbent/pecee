@@ -174,13 +174,15 @@ class Table
         $modifyType = '';
 
         if ($type === static::TYPE_ALTER) {
+
+            $modifyType = 'ADD ';
+
             if ($this->columnExists($column->getName())) {
                 $modify = true;
-                $modifyType = 'ADD ';
             }
         }
 
-        $query = sprintf('%s `%s` %s%s %s', (($modify) ? 'MODIFY' : $modifyType), $column->getName(), $column->getType(), $length, $column->getAttributes());
+        $query = sprintf('%s COLUMN `%s` %s%s %s', (($modify) ? 'MODIFY' : $modifyType), $column->getName(), $column->getType(), $length, $column->getAttributes());
 
         $query .= (!$column->getNullable()) ? ' NOT null' : ' null';
 
@@ -265,7 +267,9 @@ class Table
             foreach ($this->columns as $column) {
 
                 if ($column->getDrop() === true) {
-                    Pdo::getInstance()->nonQuery(sprintf('DROP COLUMN `%s`', $column->getName()));
+                    if($this->columnExists($column->getName())) {
+                        Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->name, $column->getName()));
+                    }
                     continue;
                 }
 
