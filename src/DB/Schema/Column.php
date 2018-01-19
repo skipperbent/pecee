@@ -16,6 +16,7 @@ class Column
     protected $comment;
     protected $drop = false;
     protected $change = false;
+    protected $after;
     protected $relationTable;
     protected $relationColumn;
     protected $relationUpdateType;
@@ -266,15 +267,23 @@ class Column
         return $this;
     }
 
+    /**
+     * @param string $table
+     * @param string $column
+     * @param string $delete
+     * @param string $update
+     * @return static
+     * @throws \InvalidArgumentException
+     */
     public function relation($table, $column, $delete = self::RELATION_TYPE_CASCADE, $update = self::RELATION_TYPE_RESTRICT)
     {
 
-        if (!in_array($delete, self::$RELATION_TYPES)) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', self::$RELATION_TYPES));
+        if (in_array($delete, static::$RELATION_TYPES, true) === false) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', static::$RELATION_TYPES));
         }
 
-        if (!in_array($update, self::$RELATION_TYPES)) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', self::$RELATION_TYPES));
+        if (in_array($update, static::$RELATION_TYPES, true) === false) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', static::$RELATION_TYPES));
         }
 
         $this->relationTable = $table;
@@ -429,6 +438,18 @@ class Column
     public function getComment()
     {
         return $this->comment;
+    }
+
+    public function after($column)
+    {
+        $this->after = $column;
+
+        return $this;
+    }
+
+    public function getAfter()
+    {
+        return $this->after;
     }
 
     public function getRelationTable()

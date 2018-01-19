@@ -160,7 +160,7 @@ class Table
 
     public function columnExists($name)
     {
-        return (Pdo::getInstance()->value('SHOW COLUMNS FROM `?` LIKE ?', [$this->name, $name]) !== false);
+        return (Pdo::getInstance()->value('SHOW COLUMNS FROM `' . $this->name . '` LIKE ?', [$name]) !== false);
     }
 
     protected function getColumnQuery($type, Column $column)
@@ -173,16 +173,14 @@ class Table
         $modify = false;
         $modifyType = '';
 
-        if($type === static::TYPE_ALTER) {
-            if($this->columnExists($column->getName())) {
+        if ($type === static::TYPE_ALTER) {
+            if ($this->columnExists($column->getName())) {
                 $modify = true;
-                $modifyType = 'MODIFY ';
-            } else {
                 $modifyType = 'ADD ';
             }
         }
 
-        $query = sprintf('%s `%s` %s%s %s', $modifyType, $column->getName(), $column->getType(), $length, $column->getAttributes());
+        $query = sprintf('%s `%s` %s%s %s', (($modify) ? 'MODIFY' : $modifyType), $column->getName(), $column->getType(), $length, $column->getAttributes());
 
         $query .= (!$column->getNullable()) ? ' NOT null' : ' null';
 
@@ -194,13 +192,17 @@ class Table
             $query .= PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]);
         }
 
+        if ($column->getAfter()) {
+            $query .= sprintf(' AFTER `%s`', $column->getAfter());
+        }
+
         if ($column->getIncrement()) {
             $query .= ' AUTO_INCREMENT';
         }
 
         if ($column->getIndex()) {
 
-            if($modify === true) {
+            if ($modify === true) {
                 $this->dropIndex([$column->getName()]);
             }
 
@@ -209,7 +211,7 @@ class Table
 
         if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
 
-            if($modify === true) {
+            if ($modify === true) {
                 $this->dropForeign([
                     $column->getName(),
                 ]);
@@ -263,7 +265,7 @@ class Table
             foreach ($this->columns as $column) {
 
                 if ($column->getDrop() === true) {
-                    $queries[] = sprintf('DROP COLUMN `%s`', $column->getName());
+                    Pdo::getInstance()->nonQuery(sprintf('DROP COLUMN `%s`', $column->getName()));
                     continue;
                 }
 
@@ -286,7 +288,9 @@ class Table
     public function dropIndex(array $indexes)
     {
         foreach ($indexes as $index) {
-            Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP INDEX `' . $index . '`');
+            if (Pdo::getInstance()->value('SHOW INDEX FROM ' . $this->name . ' WHERE `column_name` = ?', [$index]) !== false) {
+                Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP INDEX `' . $index . '`');
+            }
         }
     }
 
