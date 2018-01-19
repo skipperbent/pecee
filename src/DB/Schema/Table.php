@@ -160,7 +160,7 @@ class Table
 
     public function columnExists($name)
     {
-        return (Pdo::getInstance()->value('SHOW COLUMNS FROM `?` LIKE ?', [$this->name, $name]) !== false);
+        return (Pdo::getInstance()->value('SHOW COLUMNS FROM `'.$this->name.'` LIKE ?', [$name]) !== false);
     }
 
     protected function getColumnQuery($type, Column $column)
