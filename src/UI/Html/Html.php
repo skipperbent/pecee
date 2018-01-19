@@ -106,7 +106,7 @@ class Html
 
     /**
      * @param array $attributes
-     * @return static $this
+     * @return static
      */
     public function setAttributes(array $attributes)
     {
@@ -150,6 +150,9 @@ class Html
         return $this->addAttribute('style', $css);
     }
 
+    /**
+     * @return string
+     */
     public function render()
     {
         $output = '<' . $this->tag;
@@ -196,7 +199,7 @@ class Html
 
     /**
      * @param string $closingType
-     * @return static $this;
+     * @return static
      */
     public function setClosingType($closingType)
     {
@@ -210,21 +213,35 @@ class Html
         return $this->render();
     }
 
+    /**
+     * @return array
+     */
     public function getInnerHtml()
     {
         return $this->innerHtml;
     }
 
+    /**
+     * @param string $name
+     * @return string|null
+     */
     public function getAttribute($name)
     {
         return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
 
+    /**
+     * @return array
+     */
     public function getAttributes()
     {
         return $this->attributes;
     }
 
+    /**
+     * @param string $tag
+     * @return static $this
+     */
     public function setTag($tag)
     {
         $this->tag = $tag;
@@ -232,11 +249,18 @@ class Html
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getTag()
     {
         return $this->tag;
     }
 
+    /**
+     * @param string $name
+     * @return static
+     */
     public function removeAttribute($name)
     {
         if (isset($this->attributes[$name])) {

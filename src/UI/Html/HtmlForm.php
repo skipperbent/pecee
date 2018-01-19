@@ -24,11 +24,19 @@ class HtmlForm extends Html
         $this->action(($action === null) ? url() : $action);
     }
 
+    /**
+     * @param string $name
+     * @return static
+     */
     public function name($name)
     {
         return $this->addAttribute('name', $name);
     }
 
+    /**
+     * @param string $method
+     * @return static
+     */
     public function method($method)
     {
         if ($method !== static::METHOD_GET) {
@@ -38,6 +46,10 @@ class HtmlForm extends Html
         return $this;
     }
 
+    /**
+     * @param string $enctype
+     * @return static
+     */
     public function enctype($enctype)
     {
         if ($enctype !== static::ENCTYPE_APPLICATION_URLENCODED) {
@@ -47,11 +59,18 @@ class HtmlForm extends Html
         return $this;
     }
 
+    /**
+     * @return static
+     */
     public function fileUpload()
     {
         return $this->enctype(static::ENCTYPE_FORM_DATA);
     }
 
+    /**
+     * @param string $action
+     * @return static
+     */
     public function action($action)
     {
         return $this->addAttribute('action', $action);

@@ -142,11 +142,18 @@ class Menu
         return $this;
     }
 
+    /**
+     * @param string $class
+     * @return Menu
+     */
     public function addClass($class)
     {
         return $this->addAttribute('class', $class);
     }
 
+    /**
+     * @return static $this
+     */
     public function removeClass()
     {
         unset($this->attributes['class']);
@@ -154,6 +161,9 @@ class Menu
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getAttributes()
     {
         return $this->attributes;
@@ -246,6 +256,10 @@ class Menu
         return null;
     }
 
+    /**
+     * @param array $attributes
+     * @return string
+     */
     protected function formatAttributes(array $attributes)
     {
         if (count($attributes)) {

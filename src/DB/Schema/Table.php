@@ -1,10 +1,16 @@
 <?php
+
 namespace Pecee\DB\Schema;
 
 use Pecee\DB\Pdo;
+use Pecee\DB\PdoHelper;
 
 class Table
 {
+
+    const TYPE_CREATE = 'create';
+    const TYPE_MODIFY = 'modify';
+    const TYPE_ALTER = 'alter';
 
     const ENGINE_INNODB = 'InnoDB';
     const ENGINE_MEMORY = 'MEMORY';
@@ -52,6 +58,7 @@ class Table
     {
         $this->column('updated_at')->datetime()->nullable()->index();
         $this->column('created_at')->datetime()->index();
+
         return $this;
     }
 
@@ -151,21 +158,98 @@ class Table
         return (Pdo::getInstance()->value('SHOW TABLES LIKE ?', [$this->name]) !== false);
     }
 
+    public function columnExists($name)
+    {
+        return (Pdo::getInstance()->value('SHOW COLUMNS FROM `?` LIKE ?', [$this->name, $name]) !== false);
+    }
+
+    protected function getColumnQuery($type, Column $column)
+    {
+        $length = '';
+        if ($column->getLength()) {
+            $length = '(' . $column->getLength() . ')';
+        }
+
+        $modify = false;
+        $modifyType = '';
+
+        if($type === static::TYPE_ALTER) {
+            if($this->columnExists($column->getName())) {
+                $modify = true;
+                $modifyType = 'MODIFY ';
+            } else {
+                $modifyType = 'ADD ';
+            }
+        }
+
+        $query = sprintf('%s `%s` %s%s %s', $modifyType, $column->getName(), $column->getType(), $length, $column->getAttributes());
+
+        $query .= (!$column->getNullable()) ? ' NOT null' : ' null';
+
+        if ($column->getDefaultValue()) {
+            $query .= PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]);
+        }
+
+        if ($column->getComment()) {
+            $query .= PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]);
+        }
+
+        if ($column->getIncrement()) {
+            $query .= ' AUTO_INCREMENT';
+        }
+
+        if ($column->getIndex()) {
+
+            if($modify === true) {
+                $this->dropIndex([$column->getName()]);
+            }
+
+            $query .= sprintf(', %1$s %2$s (`%3$s`)', $modifyType, $column->getIndex(), $column->getName());
+        }
+
+        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
+
+            if($modify === true) {
+                $this->dropForeign([
+                    $column->getName(),
+                ]);
+            }
+
+            $query .= sprintf(', %1$s CONSTRAINT `%2$s` FOREIGN KEY(`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s',
+                $modifyType,
+                $this->name,
+                $column->getName(),
+                $column->getRelationTable(),
+                $column->getRelationColumn(),
+                $column->getRelationUpdateType(),
+                $column->getRelationDeleteType());
+        }
+
+        return trim($query);
+    }
+
     /**
      * Create table
      */
     public function create()
     {
         if (!$this->exists()) {
-            $query = [];
+            $queries = [];
 
             /* @var $column Column */
             foreach ($this->columns as $column) {
-                $query[] = $column->getQuery();
+
+                if ($column->getDrop() === true) {
+                    continue;
+                }
+
+                $queries[] = $this->getColumnQuery(static::TYPE_CREATE, $column);
             }
 
-            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(', ', $query), $this->engine);
-            Pdo::getInstance()->nonQuery($sql);
+            if (count($queries) > 0) {
+                $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(',', $queries), $this->engine);
+                Pdo::getInstance()->nonQuery($sql);
+            }
         }
     }
 
@@ -173,13 +257,22 @@ class Table
     {
         if ($this->exists()) {
 
+            $queries = [];
+
             /* @var $column Column */
             foreach ($this->columns as $column) {
-                Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` CHANGE `%s` %s', $this->name, $column->getName(), $column->getQuery(false)));
 
-                if ($column->getKeyRelationsQuery() !== '') {
-                    Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` ADD %s', $this->name, $column->getKeyRelationsQuery()));
+                if ($column->getDrop() === true) {
+                    $queries[] = sprintf('DROP COLUMN `%s`', $column->getName());
+                    continue;
                 }
+
+                $queries[] = $this->getColumnQuery(static::TYPE_ALTER, $column);
+            }
+
+            if (count($queries) > 0) {
+                $sql = sprintf('ALTER TABLE `%s` %s', $this->name, join(',', $queries));
+                Pdo::getInstance()->nonQuery($sql);
             }
         }
     }
@@ -202,10 +295,6 @@ class Table
         Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP PRIMARY KEY');
     }
 
-    /*public function dropUnique() {
-
-    }*/
-
     public function dropForeign(array $indexes)
     {
         foreach ($indexes as $index) {
@@ -222,7 +311,7 @@ class Table
 
     public function truncate()
     {
-        Pdo::getInstance()->nonQuery('TRUNCATE TABLE `'. $this->name .'`;');
+        Pdo::getInstance()->nonQuery('TRUNCATE TABLE `' . $this->name . '`;');
     }
 
     public function drop()
