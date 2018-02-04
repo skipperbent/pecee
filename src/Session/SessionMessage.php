@@ -28,7 +28,7 @@ class SessionMessage
     {
         // Ensure no double posting
         if (isset($this->messages[$type]) && is_array($this->messages[$type])) {
-            if (!in_array($message, $this->messages[$type])) {
+            if (in_array($message, $this->messages[$type], true) === false) {
                 $this->messages[$type][] = $message;
                 $this->save();
             }
@@ -61,10 +61,10 @@ class SessionMessage
     public function has($type = null)
     {
         if ($type !== null) {
-            return (isset($this->messages[$type]) && count($this->messages[$type]) > 0);
+            return isset($this->messages[$type]) && count($this->messages[$type]) > 0;
         }
 
-        return (count($this->messages) > 0);
+        return count($this->messages) > 0;
     }
 
     public function clear($type = null)

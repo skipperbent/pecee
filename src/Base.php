@@ -154,11 +154,7 @@ abstract class Base
     public function getMessage($type, $placement = null)
     {
         $messages = $this->getMessages($type, $placement);
-        if (count($messages)) {
-            return $messages[0];
-        }
-
-        return null;
+        return (count($messages) > 0) ? $messages[0] : null;
     }
 
     /**
@@ -175,7 +171,7 @@ abstract class Base
         $messages = [];
         $search = $this->_messages->get($type);
 
-        if ($search !== null) {
+        if ($search !== null && count($search) > 0) {
             /* @var $search array */
             /* @var $message FormMessage */
             foreach ($search as $message) {
