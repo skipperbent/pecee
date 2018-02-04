@@ -125,7 +125,8 @@ class Site
     public function addMeta(array $attributes)
     {
         return $this
-            ->addHeader((new Html('meta'))
+                ->addHeader((new Html('meta'))
+                ->setClosingType(Html::CLOSE_TYPE_NONE)
                 ->setAttributes($attributes));
     }
 
