@@ -15,26 +15,28 @@ class File
      * @param bool $autoRemove
      * @return string Path to the temp-file created
      */
-    public static function tmpFile($name, $contents = null, $autoRemove = true) {
+    public static function tmpFile($name, $contents = null, $autoRemove = true)
+    {
         $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid($name, false);
 
-        if($contents === null) {
+        if ($contents === null) {
             touch($file);
         } else {
             file_put_contents($file, $contents);
         }
 
-        if($autoRemove === false) {
+        if ($autoRemove === false) {
             return $file;
         }
 
-        register_shutdown_function(function() use($file) {
-            unlink($file);
+        register_shutdown_function(function () use ($file) {
+            if (is_file($file) === true) {
+                unlink($file);
+            }
         });
 
         return $file;
     }
-
 
     public static function remoteSize($url)
     {
@@ -75,7 +77,7 @@ class File
 
     public static function getRemoteMime($url)
     {
-        if (Url::isValid($url)) {
+        if (Url::isValid($url) === true) {
             $handle = curl_init($url);
             curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($handle, CURLOPT_FOLLOWLOCATION, true);
@@ -108,10 +110,8 @@ class File
     {
         if (is_dir($source) === true) {
 
-            if (is_dir($destination) === false) {
-                if(mkdir($destination, 0755, true) === false) {
-                    throw new \ErrorException('Failed to create directory: ' . $destination);
-                }
+            if (is_dir($destination) === false && mkdir($destination, 0755, true) === false) {
+                throw new \ErrorException('Failed to create directory: ' . $destination);
             }
 
             $files = scandir($source, SCANDIR_SORT_NONE);
@@ -120,7 +120,7 @@ class File
                     static::move($source . '/' . $file, $destination . '/' . $file);
                 }
             }
-        } elseif (is_file($source)) {
+        } elseif (is_file($source) === true) {
             rename($source, $destination);
         }
     }
