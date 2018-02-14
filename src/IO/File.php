@@ -29,7 +29,9 @@ class File
         }
 
         register_shutdown_function(function() use($file) {
-            unlink($file);
+            if(is_file($file) === true) {
+                unlink($file);
+            }
         });
 
         return $file;
