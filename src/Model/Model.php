@@ -472,6 +472,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $this->invokedElements[] = $name;
         $with = $this->with[$name];
 
+        if (is_numeric($name) === true) {
+            $name = $with;
+        }
+
         if ($with instanceof \Closure) {
             $output = $with($this);
         } else {
@@ -536,16 +540,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function with($method)
     {
-        $method = (array)$method;
-
-        foreach ($method as $key => $item) {
-
-            if (is_numeric($key) === true) {
-                $this->with[$item] = $item;
-            } else {
-                $this->with[$key] = $item;
-            }
-        }
+        $this->with = array_merge($this->with, (array)$method);
 
         return $this;
     }
