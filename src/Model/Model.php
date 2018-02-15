@@ -22,11 +22,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     protected $primary = 'id';
     protected $hidden = [];
     protected $with = [];
+    protected $invokedElements = [];
     protected $rename = [];
     protected $columns = [];
     protected $timestamps = true;
     protected $fixedIdentifier = false;
     protected $relations = [];
+    protected $filter = [];
 
     /**
      * @var ModelQueryBuilder
@@ -67,30 +69,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function onInstanceCreate()
     {
-        if ($this->isNew() === true) {
-            return;
-        }
 
-        foreach ($this->with as $key => $with) {
-
-            if ($with instanceof \Closure) {
-                $output = $with($this);
-                $with = $key;
-                unset($this->with[$key]);
-            } else {
-                $method = Str::camelize($with);
-                $output = $this->$method();
-            }
-
-            if ($output instanceof Model || $output instanceof ModelCollection) {
-                $output = $output->toArray();
-            } elseif ($output instanceof ModelRelation) {
-                $output = $output->getResults()->toArray();
-            }
-
-            $with = isset($this->rename[$with]) ? $this->rename[$with] : $with;
-            $this->{$with} = $output;
-        }
     }
 
     public function onCollectionCreate($items)
@@ -430,6 +409,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function __get($name)
     {
+        $this->invokeElement($name);
+
         return isset($this->results['rows'][$name]) ? $this->results['rows'][$name] : null;
     }
 
@@ -440,6 +421,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function __isset($name)
     {
+        $this->invokeElement($name);
+
         return in_array($name, $this->columns, true);
     }
 
@@ -464,22 +447,47 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $data = ($encoding === false || strtolower($encoding) !== 'utf-8') ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
         }
 
+        if (is_bool($data) === true) {
+            return (bool)$data;
+        }
+
         if (is_float($data) === true) {
             return (float)$data;
         }
 
-        if (is_bool($data) === true || is_numeric($data) === true) {
+        if (is_numeric($data) === true) {
             return (int)$data;
         }
 
         return $data;
     }
 
-    protected function orderArrayRows(array &$rows)
+    protected function invokeElement($name)
     {
-        uksort($rows, function ($a, $b) {
-            return (array_search($a, $this->columns, true) < array_search($b, $this->columns, true) === true) ? -1 : 1;
-        });
+
+        if (isset($this->with[$name]) === false || in_array($name, $this->invokedElements, true) === true) {
+            return;
+        }
+
+        $this->invokedElements[] = $name;
+        $with = $this->with[$name];
+
+        if ($with instanceof \Closure) {
+            $output = $with($this);
+        } else {
+            $method = Str::camelize($name);
+            $output = $this->$method();
+        }
+
+        if ($output instanceof Model || $output instanceof ModelCollection) {
+            $output = $output->toArray();
+        } elseif ($output instanceof ModelRelation) {
+            $output = $output->getResults()->toArray();
+        }
+
+        $name = isset($this->rename[$name]) ? $this->rename[$name] : $name;
+
+        $this->{$name} = $output;
     }
 
     /**
@@ -488,20 +496,37 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function toArray(array $filter = [])
     {
+        $this->filter = array_merge($this->filter, $filter);
+
+        foreach (array_keys($this->with) as $key) {
+            $this->invokeElement($key);
+        }
+
         $rows = $this->getRows();
+
+        $output = [];
 
         foreach ($rows as $key => $row) {
             $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
-            if (in_array($key, $this->hidden, true) === true || (count($filter) > 0 && in_array($key, $filter, true) === false)) {
-                unset($rows[$key]);
-                continue;
+            if (in_array($key, $this->hidden, true) === false) {
+                $output[$key] = $this->parseArrayData($row);
             }
-            $rows[$key] = $this->parseArrayData($row);
         }
 
-        $this->orderArrayRows($rows);
+        if (count($this->filter) > 0) {
 
-        return $rows;
+            $filtered = [];
+
+            foreach ($this->filter as $key) {
+                if (isset($output[$key]) === true) {
+                    $filtered[$key] = $output[$key];
+                }
+            }
+
+            $output = $filtered;
+        }
+
+        return $output;
     }
 
     /**
@@ -511,13 +536,16 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function with($method)
     {
-        if (is_array($method) === true) {
-            $this->with = array_merge($this->with, $method);
+        $method = (array)$method;
 
-            return $this;
+        foreach ($method as $key => $item) {
+
+            if (is_numeric($key) === true) {
+                $this->with[$item] = $item;
+            } else {
+                $this->with[$key] = $item;
+            }
         }
-
-        $this->with[] = $method;
 
         return $this;
     }
@@ -648,6 +676,52 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function getHiddenFields()
     {
         return $this->hidden;
+    }
+
+    /**
+     * Filter fields
+     *
+     * @param array $fields
+     * @return static $this
+     */
+    public function filter(array $fields)
+    {
+        $this->filter = array_merge($this->filter, $fields);
+
+        return $this;
+    }
+
+    /**
+     * Get filtered fields
+     *
+     * @return array
+     */
+    public function getFilteredFields()
+    {
+        return $this->filter;
+    }
+
+    /**
+     * Rename fields
+     *
+     * @param array $fields
+     * @return static $this
+     */
+    public function rename(array $fields)
+    {
+        $this->rename = array_merge($this->rename, $fields);
+
+        return $this;
+    }
+
+    /**
+     * Get renamed fields
+     *
+     * @return array
+     */
+    public function getRenamedFields()
+    {
+        return $this->rename;
     }
 
     /**

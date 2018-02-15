@@ -61,6 +61,8 @@ class ModelQueryBuilder
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->hideFields($this->model->getHiddenFields());
+        $model->rename($this->model->getRenamedFields());
+        $model->filter($this->model->getFilteredFields());
         $model->onInstanceCreate();
 
         return $model;
