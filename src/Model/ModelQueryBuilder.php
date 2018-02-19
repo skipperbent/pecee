@@ -618,6 +618,23 @@ class ModelQueryBuilder
     }
 
     /**
+     * Adds HAVING statement to the current query.
+     *
+     * @param string|Raw|\Closure $key
+     * @param string|mixed $operator
+     * @param string|mixed $value
+     * @param string $joiner
+     *
+     * @return static
+     */
+    public function having($key, $operator, $value, $joiner = 'AND')
+    {
+        $this->query->having($key, $operator, $value, $joiner);
+
+        return $this->model;
+    }
+
+    /**
      * Adds new JOIN statement to the current query.
      *
      * @param string|Raw|\Closure|array $table
@@ -649,6 +666,24 @@ class ModelQueryBuilder
     public function join($table, $key, $operator = null, $value = null, $type = 'inner')
     {
         $this->query->join($table, $key, $operator, $value, $type);
+
+        return $this->model;
+    }
+
+    /**
+     * Adds new LEFT JOIN statement to the current query.
+     *
+     * @param string|Raw|\Closure|array $table
+     * @param string|Raw|\Closure $key
+     * @param string|null $operator
+     * @param string|Raw|\Closure|null $value
+     *
+     * @return static
+     * @throws Exception
+     */
+    public function leftJoin($table, $key, $operator = null, $value = null)
+    {
+        $this->query->leftJoin($table, $key, $operator, $value, 'left');
 
         return $this->model;
     }
