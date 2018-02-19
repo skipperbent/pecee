@@ -33,7 +33,7 @@ class Table
     /**
      * @var array
      */
-    protected $columns;
+    protected $columns = [];
     protected $name;
     protected $engine;
 
@@ -78,12 +78,10 @@ class Table
 
     public function getPrimary($default = null)
     {
-        if (count($this->columns) > 0) {
-            /* @var $column Column */
-            foreach ($this->columns as $column) {
-                if ($column->getIndex() === Column::INDEX_PRIMARY) {
-                    return $column;
-                }
+        /* @var $column Column */
+        foreach ($this->columns as $column) {
+            if ($column->getIndex() === Column::INDEX_PRIMARY) {
+                return $column;
             }
         }
 
@@ -205,7 +203,9 @@ class Table
         if ($column->getIndex()) {
 
             if ($modify === true) {
-                $this->dropIndex([$column->getName()]);
+                $this->dropIndex([
+                    $column->getName(),
+                ]);
             }
 
             $query .= sprintf(', %1$s %2$s (`%3$s`)', $modifyType, $column->getIndex(), $column->getName());
@@ -237,23 +237,25 @@ class Table
      */
     public function create()
     {
-        if (!$this->exists()) {
-            $queries = [];
+        if ($this->exists()) {
+            return;
+        }
 
-            /* @var $column Column */
-            foreach ($this->columns as $column) {
+        $queries = [];
 
-                if ($column->getDrop() === true) {
-                    continue;
-                }
+        /* @var $column Column */
+        foreach ($this->columns as $column) {
 
-                $queries[] = $this->getColumnQuery(static::TYPE_CREATE, $column);
+            if ($column->getDrop() === true) {
+                continue;
             }
 
-            if (count($queries) > 0) {
-                $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(',', $queries), $this->engine);
-                Pdo::getInstance()->nonQuery($sql);
-            }
+            $queries[] = $this->getColumnQuery(static::TYPE_CREATE, $column);
+        }
+
+        if (count($queries) > 0) {
+            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(',', $queries), $this->engine);
+            Pdo::getInstance()->nonQuery($sql);
         }
     }
 
@@ -267,7 +269,7 @@ class Table
             foreach ($this->columns as $column) {
 
                 if ($column->getDrop() === true) {
-                    if($this->columnExists($column->getName())) {
+                    if ($this->columnExists($column->getName())) {
                         Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->name, $column->getName()));
                     }
                     continue;
@@ -287,20 +289,66 @@ class Table
     {
         Pdo::getInstance()->nonQuery('RENAME TABLE `' . $this->name . '` TO `' . $name . '`;');
         $this->name = $name;
+
+        return $this;
     }
 
-    public function dropIndex(array $indexes)
+    /**
+     * @param string|array $indexes
+     * @return static $this
+     */
+    public function dropIndex($indexes)
     {
+        $indexes = (array)$indexes;
         foreach ($indexes as $index) {
-            if (Pdo::getInstance()->value('SHOW INDEX FROM ' . $this->name . ' WHERE `column_name` = ?', [$index]) !== false) {
+            try {
                 Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP INDEX `' . $index . '`');
+            } catch (\PDOException $e) {
+
             }
         }
+
+        return $this;
+    }
+
+    public function createIndex(array $columns = null, $type = Column::INDEX_INDEX, $name = null)
+    {
+        $type = ($type === Column::INDEX_INDEX) ? '' : $type;
+        $columns = ($columns === null) ? [$name] : $columns;
+
+        if($name !== null) {
+
+            $this->dropIndex([
+                $name,
+            ]);
+
+            $name = '`' . $name . '`';
+
+        } else {
+            $name = '';
+        }
+
+        $query = sprintf('ALTER TABLE `%s` ADD %s INDEX %s (%s);', $this->name, $type, $name, PdoHelper::joinArray($columns, true));
+        Pdo::getInstance()->nonQuery($query);
+
+        return $this;
+    }
+
+    public function createFulltext(array $columns = null, $name = null)
+    {
+        return $this->createIndex($columns, Column::INDEX_FULLTEXT, $name);
+    }
+
+    public function fulltext(array $columns = null, $name = null)
+    {
+        return $this->createFulltext($columns, $name);
     }
 
     public function dropPrimary()
     {
         Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP PRIMARY KEY');
+
+        return $this;
     }
 
     public function dropForeign(array $indexes)
@@ -308,13 +356,17 @@ class Table
         foreach ($indexes as $index) {
             Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP FOREIGN KEY `' . $index . '`');
         }
+
+        return $this;
     }
 
     public function dropIfExists()
     {
-        if ($this->exists()) {
+        if ($this->exists() === true) {
             $this->drop();
         }
+
+        return $this;
     }
 
     public function truncate()
