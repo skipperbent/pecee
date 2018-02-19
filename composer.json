@@ -27,6 +27,10 @@
   },
   "require-dev": {
   },
+  "suggest": {
+    "filp/whoops": "^2.1",
+    "pecee/pixie": "4.*"
+  },
   "autoload": {
     "psr-4": {
       "Pecee\\": "src/"
