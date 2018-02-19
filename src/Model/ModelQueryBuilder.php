@@ -77,6 +77,33 @@ class ModelQueryBuilder
     }
 
     /**
+     * Sets the table that the query is using
+     *
+     * @param string|array $tables Single table or multiple tables as an array or as multiple parameters
+     *
+     * @throws Exception
+     * @return static
+     *
+     * ```
+     * Examples:
+     *  - basic usage
+     * ->table('table_one')
+     * ->table(['table_one'])
+     *
+     *  - with aliasing
+     * ->table(['table_one' => 'one'])
+     * ->table($qb->raw('table_one as one'))
+     * ```
+     */
+    public function table($table)
+    {
+
+        $this->query = $this->getQuery()->table($table);
+
+        return $this->model;
+    }
+
+    /**
      * @param string $alias
      * @return static
      */
