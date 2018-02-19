@@ -95,7 +95,8 @@ class ModelQueryBuilder
      * ->table($qb->raw('table_one as one'))
      * ```
      */
-    public function table($table) {
+    public function table($table)
+    {
 
         $this->query = $this->getQuery()->table($table);
 
