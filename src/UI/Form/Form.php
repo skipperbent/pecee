@@ -172,7 +172,7 @@ class Form
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
     {
-        if ($saveValue === true && (($value === false && input($name) !== null) || request()->getMethod() !== 'get')) {
+        if ($saveValue === true && (($value === null && input($name) !== null) || request()->getMethod() !== 'get')) {
             $value = (string)input($name);
         }
 

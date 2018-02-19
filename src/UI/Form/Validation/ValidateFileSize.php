@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Form\Validation;
 
 class ValidateFileSize extends ValidateFile
@@ -22,22 +23,25 @@ class ValidateFileSize extends ValidateFile
 
     public function validates()
     {
-        if ($this->sizeMin !== null && $this->sizeMin <= $this->input->getSize()) {
+        if ($this->sizeMin !== null && $this->sizeMin >= $this->input->getSize()) {
             $this->error = lang('%s cannot be less than %sKB', $this->input->getName(), $this->getInputSize());
+
             return false;
         }
 
-        if ($this->sizeMax !== null && $this->sizeMax >= $this->input->getSize()) {
+        if ($this->sizeMax !== null && $this->sizeMax <= $this->input->getSize()) {
             $this->error = lang('%s cannot be greater than %sKB', $this->input->getName(), $this->getInputSize());
+
             return false;
         }
 
         return true;
     }
 
-    protected function getInputSize() {
+    protected function getInputSize()
+    {
 
-        switch($this->sizeFormat) {
+        switch ($this->sizeFormat) {
             default:
             case static::FORMAT_KB:
                 return $this->input->getSize() * 1024;
