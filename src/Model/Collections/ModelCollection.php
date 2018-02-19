@@ -182,6 +182,12 @@ class ModelCollection extends Collection
 
         $output = [];
 
+        if ($filterKeys !== null) {
+            foreach ($filterKeys as $key) {
+                $output[$key] = [];
+            }
+        }
+
         /* @var $row \Pecee\Model\Model */
 
         for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
