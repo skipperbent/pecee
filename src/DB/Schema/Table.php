@@ -173,14 +173,14 @@ class Table
 
         if ($type === static::TYPE_ALTER) {
 
-            $modifyType = 'ADD ';
+            $modifyType = '';
 
             if ($this->columnExists($column->getName())) {
                 $modify = true;
             }
         }
 
-        $query = sprintf('%s COLUMN `%s` %s%s %s', (($modify) ? 'MODIFY' : $modifyType), $column->getName(), $column->getType(), $length, $column->getAttributes());
+        $query = sprintf('%s `%s` %s%s %s', (($modify) ? 'MODIFY' : $modifyType), $column->getName(), $column->getType(), $length, $column->getAttributes());
 
         $query .= (!$column->getNullable()) ? ' NOT null' : ' null';
 
@@ -316,7 +316,7 @@ class Table
         $type = ($type === Column::INDEX_INDEX) ? '' : $type;
         $columns = ($columns === null) ? [$name] : $columns;
 
-        if($name !== null) {
+        if ($name !== null) {
 
             $this->dropIndex([
                 $name,
