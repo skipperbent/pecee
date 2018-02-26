@@ -5,6 +5,38 @@ namespace Pecee;
 class Str
 {
 
+    /**
+     * Sanitize/compress html
+     * @param string $html
+     * @return string
+     */
+    public static function sanitizeHtml($html)
+    {
+
+        $regex = '%# Collapse ws everywhere but in blacklisted elements.
+        (?>             # Match all whitespans other than single space.
+          [^\S ]\s*     # Either one [\t\r\n\f\v] and zero or more ws,
+        | \s{2,}        # or two or more consecutive-any-whitespace.
+        ) # Note: The remaining regex consumes no text at all...
+        (?=             # Ensure we are not in a blacklist tag.
+          (?:           # Begin (unnecessary) group.
+            (?:         # Zero or more of...
+              [^<]++    # Either one or more non-"<"
+            | <         # or a < starting a non-blacklist tag.
+              (?!/?(?:textarea|pre)\b)
+            )*+         # (This could be "unroll-the-loop"ified.)
+          )             # End (unnecessary) group.
+          (?:           # Begin alternation group.
+            <           # Either a blacklist start tag.
+            (?>textarea|pre)\b
+          | \z          # or end of file.
+          )             # End alternation group.
+        )  # If we made it here, we are not in a blacklist tag.
+        %ix';
+
+        return preg_replace($regex, '', $html);
+    }
+
     public static function getFirstOrDefault($value, $default = null)
     {
         return ($value !== null && trim($value) !== '') ? trim($value) : $default;
