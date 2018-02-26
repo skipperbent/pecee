@@ -2,6 +2,7 @@
 
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Relation\BelongsTo;
