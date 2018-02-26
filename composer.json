@@ -26,6 +26,7 @@
     "nesbot/carbon": "1.*"
   },
   "require-dev": {
+    "pecee/pixie": "4.*"
   },
   "suggest": {
     "filp/whoops": "^2.1",
