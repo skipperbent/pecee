@@ -2,6 +2,7 @@
 
 namespace Pecee\Model;
 
+use Carbon\Carbon;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
@@ -523,6 +524,27 @@ class ModelQueryBuilder
      */
     public function update(array $data = [])
     {
+        // Update multiple items
+        if (\is_array(current($data)) === true) {
+
+            foreach ($data as $key => $item) {
+                if ($this->model->getUpdateTimestamps() === true && isset($item['updated_at']) === false) {
+                    $data[$key]['created_at'] = Carbon::now()->toDateTimeString();
+                }
+
+                if (count($data[$key]) === 0) {
+                    throw new ModelException('Not valid columns found to update.');
+                }
+            }
+
+            return $this->query->update($data);
+        }
+
+        // Update single item
+        if ($this->model->getUpdateTimestamps() === true) {
+            $data['updated_at'] = Carbon::now()->toDateTimeString();
+        }
+
         if (count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
         }
@@ -540,6 +562,29 @@ class ModelQueryBuilder
      */
     public function create(array $data = [])
     {
+        // Create multiple items
+        if (\is_array(current($data)) === true) {
+
+            foreach ($data as $key => $item) {
+                $data[$key] = array_merge($this->model->getRows(), $this->getValidData($item));
+
+                if ($this->model->getUpdateTimestamps() === true && isset($item['created_at']) === false) {
+                    $data[$key]['created_at'] = Carbon::now()->toDateTimeString();
+                }
+
+                if (count($data[$key]) === 0) {
+                    throw new ModelException('Not valid columns found to update.');
+                }
+            }
+
+            return $this->query->insert($data);
+        }
+
+        // Create single item
+        if ($this->model->getUpdateTimestamps() === true && isset($data['created_at']) === false) {
+            $data['created_at'] = Carbon::now()->toDateTimeString();
+        }
+
         $data = array_merge($this->model->getRows(), $this->getValidData($data));
 
         if (count($data) === 0) {
@@ -793,6 +838,11 @@ class ModelQueryBuilder
     public function __wakeup()
     {
         $this->query = (new QueryBuilderHandler())->table($this->model->getTable());
+    }
+
+    public function __destruct()
+    {
+        $this->query = null;
     }
 
 }

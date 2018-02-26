@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee;
 
 class Str
@@ -7,6 +8,11 @@ class Str
     public static function getFirstOrDefault($value, $default = null)
     {
         return ($value !== null && trim($value) !== '') ? trim($value) : $default;
+    }
+
+    public static function encode($source, $encoding = 'UTF-8')
+    {
+        return mb_convert_encoding($source, 'HTML-ENTITIES', $encoding);
     }
 
     public static function isUtf8($str)

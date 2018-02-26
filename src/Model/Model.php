@@ -2,7 +2,6 @@
 
 namespace Pecee\Model;
 
-use Carbon\Carbon;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Relation\BelongsTo;
@@ -619,6 +618,27 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $this->results['original_rows'];
     }
 
+    /**
+     * Automaticially update timestamps
+     * @return bool
+     */
+    public function getUpdateTimestamps()
+    {
+        return $this->timestamps;
+    }
+
+    /**
+     * Automaticially update timestamps
+     * @param bool $value
+     * @return static $this
+     */
+    public function setUpdateTimestamps($value)
+    {
+        $this->timestamps = $value;
+
+        return $this;
+    }
+
     public function setQuery(ModelQueryBuilder $query)
     {
         $this->queryable = $query;
@@ -725,6 +745,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function jsonSerialize()
     {
         return $this->toArray();
+    }
+
+    public function __toString()
+    {
+        return (string)$this->{$this->getPrimary()};
     }
 
 }
