@@ -34,7 +34,7 @@ class Str
         )  # If we made it here, we are not in a blacklist tag.
         %ix';
 
-        return preg_replace($regex, '', $html);
+        return preg_replace($regex, ' ', $html);
     }
 
     public static function getFirstOrDefault($value, $default = null)
