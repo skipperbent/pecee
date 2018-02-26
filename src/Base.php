@@ -111,11 +111,6 @@ abstract class Base
         }
     }
 
-    public function isAjaxRequest()
-    {
-        return (request()->getHeader('http-x-requested-with') !== null && strtolower(request()->getHeader('http-x-requested-with')) === 'xmlhttprequest');
-    }
-
     protected function appendSiteTitle($title, $separator = '-')
     {
         $separator = ($separator === null) ? '' : ' ' . $separator . ' ';
