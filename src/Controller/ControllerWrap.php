@@ -110,6 +110,7 @@ class ControllerWrap
         }
 
         echo file_get_contents($this->getTempFile());
+        exit(0);
     }
 
     protected function saveTempFile()
@@ -181,7 +182,7 @@ class ControllerWrap
 
         // Try resources folder
         if ($content === null) {
-            $file = strtolower($this->getExtension()) . '/' . $file;
+            $file = 'resources/' . $file;
             if (stream_resolve_include_path($file) !== false) {
                 return file_get_contents($file, FILE_USE_INCLUDE_PATH);
             }
