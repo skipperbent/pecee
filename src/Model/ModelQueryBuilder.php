@@ -8,7 +8,6 @@ use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
 use Pecee\Pixie\Exception;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
-use Pecee\Pixie\QueryBuilder\QueryObject;
 use Pecee\Pixie\QueryBuilder\Raw;
 use Pecee\Str;
 
@@ -33,20 +32,7 @@ class ModelQueryBuilder
     public function __construct(Model $model)
     {
         $this->model = $model;
-        $this->query = (new QueryBuilderHandler())->table($model->getTable());
-
-        if (app()->getDebugEnabled() === true) {
-
-            $this->query->registerEvent('before-*', $model->getTable(),
-                function (QueryBuilderHandler $qb, QueryObject $qo) {
-                    debug('START QUERY: ' . $qo->getRawSql());
-                });
-
-            $this->query->registerEvent('after-*', $model->getTable(),
-                function (QueryBuilderHandler $qb, QueryObject $qo) {
-                    debug('END QUERY: ' . $qo->getRawSql());
-                });
-        }
+        $this->query = (new QueryBuilderHandler(app()->db))->table($model->getTable());
     }
 
     /**
