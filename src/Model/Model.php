@@ -433,6 +433,15 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     protected function parseArrayData($data)
     {
+
+        if ($data instanceof Model || $data instanceof ModelCollection) {
+            return $data->toArray();
+        }
+
+        if ($data instanceof ModelRelation) {
+            return $data->getResults()->toArray();
+        }
+
         if (is_array($data) === true) {
             $out = [];
             foreach ((array)$data as $key => $d) {
@@ -464,7 +473,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     protected function invokeElement($name)
     {
-
         if (isset($this->with[$name]) === false || in_array($name, $this->invokedElements, true) === true) {
             return;
         }
@@ -481,12 +489,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         } else {
             $method = Str::camelize($name);
             $output = $this->$method();
-        }
-
-        if ($output instanceof Model || $output instanceof ModelCollection) {
-            $output = $output->toArray();
-        } elseif ($output instanceof ModelRelation) {
-            $output = $output->getResults()->toArray();
         }
 
         $name = isset($this->rename[$name]) ? $this->rename[$name] : $name;
@@ -540,7 +542,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function with($method)
     {
-        $this->with = array_merge($this->with, (array)$method);
+        foreach ((array)$method as $key => $value) {
+            if (is_string($value) === true && is_numeric($key) === true) {
+                $this->with[$value] = $value;
+            } else {
+                $this->with[$key] = $value;
+            }
+        }
 
         return $this;
     }
