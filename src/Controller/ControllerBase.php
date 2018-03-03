@@ -13,20 +13,15 @@ abstract class ControllerBase extends Base
         parent::__construct();
     }
 
-    protected function validate(array $validation = null)
+    protected function validate(array $validation)
     {
         parent::validate($validation);
 
-        if ($this->hasErrors()) {
+        if ($this->hasErrors() === true) {
             $exception = new ValidationException(join(', ', $this->getErrorsArray()), 400);
             $exception->setErrors($this->getErrorsArray());
             throw $exception;
         }
-    }
-
-    public function __destruct()
-    {
-        $this->_messages->clear();
     }
 
 }

@@ -6,7 +6,6 @@ use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
-use Pecee\UI\Form\Validation\ValidateInput;
 
 abstract class Base
 {
@@ -19,26 +18,23 @@ abstract class Base
     public function __construct()
     {
         $this->_messages = new SessionMessage();
-        $this->setInputValues();
     }
 
     protected function setInputValues()
     {
-        if (Session::exists($this->_inputSessionKey) === true) {
-            $values = Session::get($this->_inputSessionKey);
+        $values = Session::get($this->_inputSessionKey, []);
 
-            /* @var array $values */
-            foreach ($values as $key => $value) {
-                $item = input()->getObject($key, new InputItem($key), ['get', 'post'])->setValue($value);
-                if (request()->getMethod() === 'post') {
-                    input()->post[$key] = $item;
-                } else {
-                    input()->get[$key] = $item;
-                }
+        /* @var array $values */
+        foreach ($values as $key => $value) {
+            $item = input()->getObject($key, new InputItem($key), ['get', 'post'])->setValue($value);
+            if (request()->getMethod() === 'post') {
+                input()->post[$key] = $item;
+            } else {
+                input()->get[$key] = $item;
             }
-
-            Session::destroy($this->_inputSessionKey);
         }
+
+        Session::destroy($this->_inputSessionKey);
     }
 
     public function setInputName(array $names)
@@ -62,17 +58,9 @@ abstract class Base
         Session::set($this->_inputSessionKey, $values);
     }
 
-    protected function validate(array $validation = null)
+    protected function validate(array $validation)
     {
-        if ($validation !== null) {
-            foreach ($validation as $key => $validations) {
-                if (is_array($validations) === false) {
-                    $validations = [$validations];
-                }
-
-                $this->_validations[$key] = $validations;
-            }
-        }
+        $this->performValidation($validation);
     }
 
     protected function onInputError(InputItem $input, $error)
@@ -80,33 +68,24 @@ abstract class Base
 
     }
 
-    protected function performValidation()
+    protected function performValidation(array $validation)
     {
-        foreach ($this->_validations as $key => $validations) {
+        foreach ($validation as $key => $validations) {
 
             $input = input()->getObject($key, new InputItem($key, null));
+            $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
-            for ($i = 0, $max = count($validations); $i < $max; $i++) {
+            /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
+            foreach ((array)$validations as $validateClass) {
 
-                /* @var $validation ValidateInput */
-                $validation = $validations[$i];
-
-                if ($validation === null || $validation === '') {
-                    continue;
-                }
-
-                $inputs = ($input instanceof InputItem) ? [$input] : $input;
-
-                for ($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
-
-                    $input = $inputs[$x];
-                    $validation->setInput($input);
-
-                    if ($validation->runValidation() === false) {
-                        $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
-                        $this->onInputError($input, $validation->getError());
+                foreach ($inputs as $input) {
+                    $validateClass->setInput($input);
+                    if ($validateClass->runValidation() === false) {
+                        $this->setMessage($validateClass->getError(), $this->errorType, $validateClass->getPlacement(), $input->getIndex());
+                        $this->onInputError($input, $validateClass->getError());
                     }
                 }
+
             }
         }
     }
@@ -253,6 +232,11 @@ abstract class Base
         }
 
         return $messages;
+    }
+
+    public function __destruct()
+    {
+        $this->_messages->clear();
     }
 
 }
