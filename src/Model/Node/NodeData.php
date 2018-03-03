@@ -16,6 +16,10 @@ class NodeData extends Model
 
     protected $timestamps = false;
 
+    /**
+     * @return bool
+     * @throws \Pecee\Pixie\Exception
+     */
     public function exists()
     {
         if ($this->{$this->primary} === null || $this->node_id === null) {
@@ -27,6 +31,12 @@ class NodeData extends Model
         return ($id !== null);
     }
 
+    /**
+     * @param int $nodeId
+     * @return \PDOStatement
+     * @throws \Pecee\Model\Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function clear($nodeId)
     {
         return $this->where('node_id', $nodeId)->delete();

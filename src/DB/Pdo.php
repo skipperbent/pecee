@@ -8,11 +8,14 @@ class Pdo
 
     protected static $instance;
 
-    const SETTINGS_USERNAME = 'username';
-    const SETTINGS_PASSWORD = 'password';
-    const SETTINGS_CONNECTION_STRING = 'driver';
-
+    /**
+     * @var \PDO
+     */
     protected $connection;
+
+    /**
+     * @var \PDOStatement|null
+     */
     protected $query;
 
     /**
@@ -22,12 +25,12 @@ class Pdo
      */
     public static function getInstance()
     {
-        if (self::$instance === null) {
-            self::$instance = new static(env('DB_DRIVER', 'mysql') . ':host=' . env('DB_HOST') . ';dbname=' . env('DB_DATABASE') . ';charset=' . env('DB_CHARSET', 'utf8'),
+        if (static::$instance === null) {
+            static::$instance = new static(env('DB_DRIVER', 'mysql') . ':host=' . env('DB_HOST') . ';dbname=' . env('DB_DATABASE') . ';charset=' . env('DB_CHARSET', 'utf8'),
                 env('DB_USERNAME'), env('DB_PASSWORD'));
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     protected function __construct($connectionString, $username, $password)
@@ -49,42 +52,47 @@ class Pdo
      * Executes query
      *
      * @param string $query
-     * @param array|null $parameters
+     * @param array $parameters
      * @return \PDOStatement|null
      * @throws \PdoException
      */
-    public function query($query, array $parameters = null)
+    public function query($query, array $parameters = [])
     {
-        $query = $this->connection->prepare($query);
+        $statement = $this->connection->prepare($query);
         $inputParameters = null;
 
-        if (is_array($parameters)) {
+        if (\count($parameters) > 0) {
             $keyTest = array_keys($parameters)[0];
 
-            if (!is_int($keyTest)) {
+            if (\is_int($keyTest) === false) {
                 foreach ($parameters as $key => $value) {
-                    $query->bindParam($key, $value);
+                    $statement->bindParam($key, $value);
                 }
             } else {
                 $inputParameters = $parameters;
             }
         }
 
-        $this->query = $query->queryString;
+        $this->query = $statement->queryString;
         debug('START DB QUERY:' . $this->query);
-        if ($query->execute($inputParameters)) {
+        if ($statement->execute($inputParameters)) {
             debug('END DB QUERY');
-
-            return $query;
+            return $statement;
         }
 
         return null;
     }
 
-    public function all($query, array $parameters = null)
+    /**
+     * @param string $query
+     * @param array|null $parameters
+     * @return array
+     * @throws \PDOException
+     */
+    public function all($query, array $parameters = [])
     {
         $query = $this->query($query, $parameters);
-        if ($query) {
+        if ($query !== null) {
             $results = $query->fetchAll(\PDO::FETCH_ASSOC);
             $output = [];
 
@@ -98,45 +106,56 @@ class Pdo
         return null;
     }
 
-    public function single($query, array $parameters = null)
+    /**
+     * @param string $query
+     * @param array $parameters
+     * @return string|null
+     * @throws \PDOException
+     */
+    public function single($query, array $parameters = [])
     {
         $result = $this->all($query . ' LIMIT 1', $parameters);
-        if ($result !== null) {
-            return $result[0];
-        }
-
-        return null;
+        return ($result !== null) ? $result[0] : null;
     }
 
-    public function nonQuery($query, array $parameters = null)
+    /**
+     * @param string $query
+     * @param array $parameters
+     * @throws \PDOException
+     */
+    public function nonQuery(string $query, array $parameters = [])
     {
         $this->query($query, $parameters);
     }
 
-    public function value($query, array $parameters = null)
+    /**
+     * @param string $query
+     * @param array $parameters
+     * @return string|null
+     * @throws \PDOException
+     */
+    public function value($query, array $parameters = [])
     {
         $query = $this->query($query, $parameters);
-        if ($query) {
-            return $query->fetchColumn();
-        }
-
-        return null;
+        return ($query !== null) ? $query->fetchColumn() : null;
     }
 
-    public function insert($query, array $parameters = null)
+    /**
+     * @param string $query
+     * @param array $parameters
+     * @return null|string
+     * @throws \PDOException
+     */
+    public function insert($query, array $parameters = [])
     {
-        $query = $this->query($query, $parameters);
-        if ($query) {
-            return $this->connection->lastInsertId();
-        }
-
-        return null;
+        return ($this->query($query, $parameters) !== null) ? $this->connection->lastInsertId() : null;
     }
 
     /**
      * Exucutes queries within a .sql file.
      *
      * @param string $file
+     * @throws \PDOException
      */
     public function executeSql($file)
     {

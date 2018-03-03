@@ -9,7 +9,7 @@ use Pecee\UI\Site;
 
 class Application
 {
-    const CHARSET_UTF8 = 'UTF-8';
+    public const CHARSET_UTF8 = 'UTF-8';
 
     protected $debugEnabled = false;
 
@@ -98,10 +98,10 @@ class Application
 
     public function hasAdminIp($ip = null)
     {
-        $ip = ($ip === null) ? request()->getIp() : $ip;
+        $ip = $ip ?? request()->getIp();
 
-        if (is_array($this->adminIps) === true) {
-            return in_array($ip, $this->adminIps, true);
+        if (\is_array($this->adminIps) === true) {
+            return \in_array($ip, $this->adminIps, true);
         }
 
         return false;
@@ -177,7 +177,7 @@ class Application
      */
     public function getModule($name)
     {
-        return isset($this->modules[$name]) ? $this->modules[$name] : null;
+        return $this->modules[$name] ?? null;
     }
 
     /**
@@ -191,7 +191,7 @@ class Application
 
     public function hasModules()
     {
-        return (count($this->modules) > 0);
+        return (\count($this->modules) > 0);
     }
 
     public function getCharset()
@@ -297,7 +297,7 @@ class Application
      */
     public function get($key, $defaultValue = null)
     {
-        return isset($this->parameters[$key]) ? $this->parameters[$key] : $defaultValue;
+        return $this->parameters[$key] ?? $defaultValue;
     }
 
     public function __set($name, $value)
@@ -307,7 +307,7 @@ class Application
 
     public function __get($name)
     {
-        return isset($this->parameters[$name]) ? $this->parameters[$name] : null;
+        return $this->parameters[$name] ?? null;
     }
 
     public function __isset($name)

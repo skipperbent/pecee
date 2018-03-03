@@ -8,18 +8,18 @@ namespace Pecee\UI\Phtml;
 class Phtml
 {
 
-    const SETTINGS_TAGLIB = 'SETTINGS_TAGLIB';
+    public const SETTINGS_TAGLIB = 'SETTINGS_TAGLIB';
 
-    const NOTHING = 'NOTHING';
-    const STRING = 'STRING';
-    const TAG = 'TAG';
-    const TAGEND = 'TAGEND';
-    const DOCTYPE = 'DOCTYPE';
-    const ATTR = 'ATTR';
-    const SCRIPT = 'SCRIPT';
-    const PHP = 'PHP';
-    const P_EVAL = 'P_EVAL';
-    const COMMENT = 'COMMENT';
+    private const NOTHING = 'NOTHING';
+    private const STRING = 'STRING';
+    private const TAG = 'TAG';
+    private const TAGEND = 'TAGEND';
+    private const DOCTYPE = 'DOCTYPE';
+    private const ATTR = 'ATTR';
+    private const SCRIPT = 'SCRIPT';
+    private const PHP = 'PHP';
+    private const P_EVAL = 'P_EVAL';
+    private const COMMENT = 'COMMENT';
 
     private static $IGNORELIST = [
         self::PHP,
@@ -94,7 +94,7 @@ class Phtml
         $this->node->setTag('phtml');
         $this->phtmlRaw = $string;
         $this->lineCount = 1;
-        $ignoredAscii = [10, 13, ord("\t"), ord(" ")];
+        $ignoredAscii = [10, 13, \ord("\t"), \ord(' ')];
         for ($i = 0, $max = mb_strlen($string); $i < $max; $i++) {
             $chr = mb_substr($string, $i, 1);
             $this->charCount++;
@@ -102,7 +102,7 @@ class Phtml
             $this->nextChar = mb_substr($string, $i + 1, 1);
             $this->char = $chr;
 
-            if ($this->char == "\n") {
+            if ($this->char === "\n") {
                 $this->lineCount++;
                 $this->charCount = 0;
             }
@@ -213,8 +213,8 @@ class Phtml
 
                     break;
             }
-            $ascii = ord($this->char);
-            if (in_array($ascii, $ignoredAscii)) {
+            $ascii = \ord($this->char);
+            if (\in_array($ascii, $ignoredAscii, true) === true) {
                 $this->debug("CHR:chr($ascii)");
             } else {
                 $this->debug("CHR:$this->char");
@@ -235,12 +235,12 @@ class Phtml
 
     protected function ignoreAll()
     {
-        return in_array($this->within(), static::$IGNOREALLLIST);
+        return \in_array($this->within(), static::$IGNOREALLLIST, true);
     }
 
     protected function ignoreTags()
     {
-        return in_array($this->within(), static::$IGNORELIST);
+        return \in_array($this->within(), static::$IGNORELIST, true);
     }
 
     protected function ignoreNextChar($debugKey)
@@ -276,7 +276,7 @@ class Phtml
             return;
         }
         $this->stringStartChar = $this->char;
-        $this->debug("STRING START");
+        $this->debug('STRING START');
 
         $this->pushWithin(static::STRING);
         $this->current = substr($this->current, 1);
@@ -288,7 +288,7 @@ class Phtml
             return;
         }
         $this->stringStartChar = '';
-        $this->debug("STRING END");
+        $this->debug('STRING END');
         $this->popWithin();
     }
 
@@ -393,7 +393,7 @@ class Phtml
 
     protected function isScriptTag($tag)
     {
-        return in_array(strtolower($tag), static::$SCRIPTAGS);
+        return \in_array(strtolower($tag), static::$SCRIPTAGS, true);
     }
 
     protected function pushWithin($within)
@@ -415,16 +415,16 @@ class Phtml
 
     protected function within()
     {
-        return $this->withinStack[count($this->withinStack) - 1];
+        return $this->withinStack[\count($this->withinStack) - 1];
     }
 
     protected function isWithin($within, $deep = false)
     {
-        if ($deep) {
-            return in_array($within, $this->withinStack);
-        } else {
-            return $this->within() == $within;
+        if ($deep === true) {
+            return \in_array($within, $this->withinStack, true);
         }
+
+        return $this->within() === $within;
     }
 
     /**
@@ -447,7 +447,7 @@ class Phtml
 
     protected function isVoidTag($tag)
     {
-        return in_array($tag, static::$VOIDTAGS);
+        return \in_array($tag, static::$VOIDTAGS, true);
     }
 
     /**
@@ -461,7 +461,7 @@ class Phtml
         if ($this->ignoreTags()) {
             return;
         }
-        $this->debug("ENDING TAG: " . $this->getNode()->getTag());
+        $this->debug('ENDING TAG: ' . $this->getNode()->getTag());
 
         if ($this->lastChar == '/' || $this->isVoidTag($this->getNode()->getTag())) {
             $this->onNodeEnd();
@@ -478,10 +478,10 @@ class Phtml
         $endTag = trim($this->currentIgnore, "</> \t\n\r");
         if ($endTag) {
             $ns = '';
-            if (false === stripos($endTag, ':')) {
+            if (false === strpos($endTag, ':')) {
                 $tag = $endTag;
             } else {
-                list($ns, $tag) = explode(':', $endTag);
+                [$ns, $tag] = explode(':', $endTag);
             }
 
             if (strtolower($this->getNode()->getTag()) != strtolower($tag) ||
@@ -506,7 +506,7 @@ class Phtml
         if ($text) {
             $this->getNode()->addChild(new PhtmlNodeText($text));
         }
-        $this->debug("ENDING NODE: " . $this->getNode()->getTag());
+        $this->debug('ENDING NODE: ' . $this->getNode()->getTag());
 
         if ($this->isScriptTag($this->getNode()->getTag())) {
             $this->popWithin(); //Pop an extra time for the SCRIPT
@@ -529,7 +529,7 @@ class Phtml
 
     protected function debug($msg)
     {
-        $msg = htmlentities("[" . implode(',', $this->withinStack) . "] " . $msg);
+        $msg = htmlentities('[' . implode(',', $this->withinStack) . '] ' . $msg);
         if ($this->debug) {
             echo "\n$msg";
         } else {

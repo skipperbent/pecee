@@ -31,7 +31,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
 
     public function hasRows()
     {
-        return (count($this->rows) > 0);
+        return (\count($this->rows) > 0);
     }
 
     public function add($item)
@@ -75,7 +75,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
 
     public function count()
     {
-        return count($this->getRows());
+        return \count($this->getRows());
     }
 
     /**

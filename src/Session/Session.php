@@ -31,9 +31,8 @@ class Session
     {
         static::start();
 
-        if (static::exists($id)) {
+        if (static::exists($id) === true) {
             unset($_SESSION[$id]);
-
             return true;
         }
 
@@ -45,6 +44,11 @@ class Session
         return isset($_SESSION[$id]);
     }
 
+    /**
+     * @param string $id
+     * @param string $value
+     * @throws \RuntimeException
+     */
     public static function set($id, $value)
     {
         static::start();
@@ -54,7 +58,7 @@ class Session
             static::getSecret(),
         ];
 
-        $data = Guid::encrypt(static::getSecret(), join('|', $data));
+        $data = Guid::encrypt(static::getSecret(), implode('|', $data));
 
         $_SESSION[$id] = $data;
     }
@@ -63,7 +67,7 @@ class Session
     {
         static::start();
 
-        if (static::exists($id)) {
+        if (static::exists($id) === true) {
 
             $value = $_SESSION[$id];
 
@@ -72,8 +76,8 @@ class Session
                 $value = Guid::decrypt(static::getSecret(), $value);
                 $data = explode('|', $value);
 
-                if (is_array($data) && trim(end($data)) === static::getSecret()) {
-                    return unserialize($data[0]);
+                if (\is_array($data) && trim(end($data)) === static::getSecret()) {
+                    return unserialize($data[0], ['allowed_classes' => true]);
                 }
 
             }

@@ -10,7 +10,7 @@ abstract class Dataset implements \IteratorAggregate
     {
         $output = [];
 
-        if (count($this->data)) {
+        if (\count($this->data)) {
             foreach ($this->data as $data) {
                 $output[$data['name']] = $data['value'];
             }

@@ -3,18 +3,26 @@ namespace Pecee\Queue;
 
 abstract class Queue
 {
-
+    protected $job;
     protected $queue;
 
     public function __construct()
     {
-        $queue = explode('\\', static::class);
-        $this->queue = end($queue);
+        $this->queue = static::class;
     }
 
     abstract public function process($job, $data);
 
     abstract public function send(array $data = []);
+
+    public function setJob($job)
+    {
+        $this->job = $job;
+    }
+
+    public function getJob() {
+        return $this->job;
+    }
 
     /**
      * @return string

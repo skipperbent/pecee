@@ -5,7 +5,7 @@ use Pecee\UI\Form\FormMessage;
 
 class SessionMessage
 {
-    const KEY = 'MSG';
+    public const KEY = 'MSG';
 
     protected $messages;
 
@@ -19,16 +19,24 @@ class SessionMessage
         $this->messages = Session::get(self::KEY);
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     public function save()
     {
         Session::set(self::KEY, $this->messages);
     }
 
+    /**
+     * @param FormMessage $message
+     * @param string|null $type
+     * @throws \RuntimeException
+     */
     public function set(FormMessage $message, $type = null)
     {
         // Ensure no double posting
-        if (isset($this->messages[$type]) && is_array($this->messages[$type])) {
-            if (in_array($message, $this->messages[$type], true) === false) {
+        if (isset($this->messages[$type]) && \is_array($this->messages[$type])) {
+            if (\in_array($message, $this->messages[$type], true) === false) {
                 $this->messages[$type][] = $message;
                 $this->save();
             }
@@ -47,7 +55,7 @@ class SessionMessage
     public function get($type = null, $defaultValue = null)
     {
         if ($type !== null) {
-            return isset($this->messages[$type]) ? $this->messages[$type] : $defaultValue;
+            return $this->messages[$type] ?? $defaultValue;
         }
 
         return $this->messages;
@@ -61,12 +69,16 @@ class SessionMessage
     public function has($type = null)
     {
         if ($type !== null) {
-            return isset($this->messages[$type]) && count($this->messages[$type]) > 0;
+            return isset($this->messages[$type]) && \count($this->messages[$type]) > 0;
         }
 
-        return count($this->messages) > 0;
+        return \count($this->messages) > 0;
     }
 
+    /**
+     * @param string|null $type
+     * @throws \RuntimeException
+     */
     public function clear($type = null)
     {
         if ($type !== null) {

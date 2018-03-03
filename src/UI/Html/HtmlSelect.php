@@ -65,7 +65,7 @@ class HtmlSelect extends Html
             $html = new Html('optgroup');
             $html->addAttribute('label', $name);
 
-            if ($this->groupsDisabled !== null && in_array(strtolower($name), $this->groupsDisabled) === true) {
+            if ($this->groupsDisabled !== null && \in_array(strtolower($name), $this->groupsDisabled, true) === true) {
                 $html->addAttribute('disabled', null);
             }
 

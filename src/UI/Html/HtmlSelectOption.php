@@ -3,6 +3,9 @@ namespace Pecee\UI\Html;
 
 class HtmlSelectOption extends Html
 {
+    /**
+     * @var string|null
+     */
     protected $group;
 
     public function __construct($value, $text = null, $selected = false)
@@ -46,7 +49,7 @@ class HtmlSelectOption extends Html
      * Get group name
      * @return string|null
      */
-    public function getGroup()
+    public function getGroup(): ?string
     {
         return $this->group;
     }

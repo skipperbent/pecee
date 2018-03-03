@@ -132,10 +132,10 @@ class HtmlInput extends Html
     }
 
     /**
-     * @param static $checked
+     * @param bool $checked
      * @return static
      */
-    public function checked($checked)
+    public function checked(bool $checked)
     {
         if ($checked === true) {
             return $this->addInputAttribute('checked');

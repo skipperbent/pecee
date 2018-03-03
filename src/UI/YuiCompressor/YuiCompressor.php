@@ -15,12 +15,13 @@ class YuiCompressor
      * http://yuilibrary.com/projects/yuicompressor/
      */
 
-    const TYPE_JAVASCRIPT = 'js';
-    const TYPE_CSS = 'css';
+    public const TYPE_JAVASCRIPT = 'js';
+    public const TYPE_CSS = 'css';
 
     protected $jarFile;
     protected $tempDir;
     protected $javaExecutable = 'java';
+
     protected $types = [
         self::TYPE_JAVASCRIPT,
         self::TYPE_CSS,
@@ -44,7 +45,7 @@ class YuiCompressor
      * @return YuiCompressor
      * @throws YuiCompressorException
      */
-    public function addFile($type, $file, $options = [])
+    public function addFile($type, $file, array $options = [])
     {
         $this->validateType($type);
 
@@ -54,7 +55,7 @@ class YuiCompressor
 
         $contents = file_get_contents($file);
 
-        return $this->addItem($type, $contents, $options, basename($file), dirname($file));
+        return $this->addItem($type, $contents, $options, basename($file), \dirname($file));
     }
 
     /**
@@ -67,7 +68,7 @@ class YuiCompressor
      * @return YuiCompressor
      * @throws YuiCompressorException
      */
-    public function addContent($type, $content, $options = [])
+    public function addContent($type, $content, array $options = [])
     {
         $this->validateType($type);
 
@@ -118,28 +119,32 @@ class YuiCompressor
             throw new YuiCompressorException('Minify_YuiCompressor : could not create temp file.');
         }
 
-        if (count($this->items)) {
+        if (\count($this->items)) {
             /* @var $item YuiCompressorItem */
             foreach ($this->items as $item) {
                 file_put_contents($tmpFile, $item->content);
                 $output = [];
                 exec($this->getCmd($item->options, $item->type, $tmpFile), $output);
-                $item->minified = (isset($output[0]) ? $output[0] : '');
-                $item->sizeKB = round(strlen($item->content) / 1024, 2);
-                $item->minifiedKB = $item->sizeKB - round(strlen($item->minified) / 1024, 2);
+                $item->minified = $output[0] ?? '';
+                $item->sizeKB = round(\strlen($item->content) / 1024, 2);
+                $item->minifiedKB = $item->sizeKB - round(\strlen($item->minified) / 1024, 2);
                 $item->minifiedRatio = round(($item->minifiedKB / $item->sizeKB) * 100);
             }
         }
 
         unlink($tmpFile);
 
-        return $single ? $this->items[count($this->items) - 1] : $this->items;
+        return $single ? $this->items[\count($this->items) - 1] : $this->items;
     }
 
+    /**
+     * @param string $type
+     * @throws YuiCompressorException
+     */
     protected function validateType($type)
     {
-        if (!in_array($type, $this->types)) {
-            throw new YuiCompressorException('Unknown type: ' . $type . '. Type must be one of the following: ' . join($this->types, ', '));
+        if (\in_array($type, $this->types, true) === false) {
+            throw new YuiCompressorException('Unknown type: ' . $type . '. Type must be one of the following: ' . implode($this->types, ', '));
         }
     }
 

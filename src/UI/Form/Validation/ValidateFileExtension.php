@@ -12,7 +12,7 @@ class ValidateFileExtension extends ValidateFile
 
     public function validates()
     {
-        return in_array($this->input->getExtension(), array_map('strtolower', $this->extensions), false);
+        return \in_array($this->input->getExtension(), array_map('strtolower', $this->extensions), false);
     }
 
     public function getError()

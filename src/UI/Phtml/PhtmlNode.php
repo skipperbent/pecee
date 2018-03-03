@@ -14,6 +14,10 @@ class PhtmlNode extends HtmlElement
     private static $prepend = '';
     private $container = false;
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     public static function getNextClosure()
     {
         static::$closureCount++;
@@ -84,7 +88,7 @@ class PhtmlNode extends HtmlElement
             $str .= $this->getTag();
         }
 
-        if (count($this->getAttrs()) > 0) {
+        if (\count($this->getAttrs()) > 0) {
             if ($method) {
                 $str .= 'array(';
             } else {
@@ -127,9 +131,9 @@ class PhtmlNode extends HtmlElement
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+                $taglib = $taglibs[$this->getNs()] ?? null;
 
-                if ($taglib !== null && $taglib instanceof ITaglib) {
+                if ($taglib instanceof ITaglib) {
                     $str = $taglib->callTag($this->getTag(), $this->getAttrs(), $body);
                 }
             } else {
@@ -139,14 +143,14 @@ class PhtmlNode extends HtmlElement
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+                $taglib = $taglibs[$this->getNs()] ?? null;
 
-                if ($taglib !== null && $taglib instanceof ITaglib) {
+                if ($taglib instanceof ITaglib) {
                     $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
                 }
             } else {
 
-                if (in_array($this->getTag(), Phtml::$VOIDTAGS) === false) {
+                if (\in_array($this->getTag(), Phtml::$VOIDTAGS, true) === false) {
                     $str .= '/';
                 }
 

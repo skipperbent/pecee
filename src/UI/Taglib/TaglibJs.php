@@ -19,13 +19,13 @@ class TaglibJs extends Taglib
     {
         $string = str_replace(["\\'", '\\"'], array('\'', '"'), $string);
         $parts = preg_split('/[;\n]{1,2}/', $string);
-        if (count($parts) <= 1) {
+        if (\count($parts) <= 1) {
             return "($string)";
         }
 
         $result = '';
-        for ($i = 0, $max = count($parts); $i < $max; $i++) {
-            $result .= ($i == (count($parts) - 1)) ? 'return ' . $parts[$i] . ';' : $parts[$i] . ';';
+        for ($i = 0, $max = \count($parts); $i < $max; $i++) {
+            $result .= ($i === (\count($parts) - 1)) ? 'return ' . $parts[$i] . ';' : $parts[$i] . ';';
         }
 
         return sprintf('(function(){%s})()', $result);
@@ -42,14 +42,14 @@ class TaglibJs extends Taglib
         $expressions = [];
         $mOffset = 0;
 
-        foreach ($expressionMatches[0] as $match) {
+        foreach ((array)$expressionMatches[0] as $match) {
 
-            $mText = $match[0];
-            $offset = $match[1];
-            $searchOffset = $offset + strlen($mText);
+            [$mText, $offset] = $match;
+
+            $searchOffset = $offset + \strlen($mText);
             $curlies = 1;
             $end = 0;
-            for ($i = $searchOffset, $max = strlen($string); $i < $max; $i++) {
+            for ($i = $searchOffset, $max = \strlen($string); $i < $max; $i++) {
                 switch ($string[$i]) {
                     case '{':
                         $curlies++;
@@ -58,7 +58,7 @@ class TaglibJs extends Taglib
                         $curlies--;
                         break;
                 }
-                if ($curlies == 0) {
+                if ($curlies === 0) {
                     $end = $i;
                     break;
                 }
@@ -72,14 +72,14 @@ class TaglibJs extends Taglib
 
         }
 
-        if (count($expressions) > 0) {
+        if (\count($expressions) > 0) {
             /* Let's ensure that our js-expression don't get addslashed */
             foreach ($expressions as $expr) {
                 $fixedExpressions[] = '"+' . $this->handleInline($expr['js']) . '+"';
             }
 
             /* Now we replace the expression tags, with the fixed js expression */
-            for ($i = 0, $max = count($expressions); $i < $max; $i++) {
+            for ($i = 0, $max = \count($expressions); $i < $max; $i++) {
                 $string = str_replace($expressions[$i]['raw'], $fixedExpressions[$i], $string);
             }
         }
@@ -87,7 +87,11 @@ class TaglibJs extends Taglib
         return $string;
     }
 
-    protected function tagContainer($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @throws \ErrorException
+     */
+    protected function tagContainer(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['id']);
 
@@ -101,7 +105,7 @@ class TaglibJs extends Taglib
 
         preg_match_all('%<' . static::$JS_WRAPPER_TAG . '>(.*?)</' . static::$JS_WRAPPER_TAG . '>%', $output, $matches);
         if (isset($matches[1])) {
-            foreach ($matches[1] as $m) {
+            foreach ((array)$matches[1] as $m) {
                 $output = str_replace('<' . static::$JS_WRAPPER_TAG . '>' . $m . '</' . static::$JS_WRAPPER_TAG . '>', addslashes($m), $output);
             }
         }
@@ -114,7 +118,12 @@ class TaglibJs extends Taglib
         }
     }
 
-    protected function tagIf($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagIf(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['test']);
 
@@ -126,21 +135,36 @@ class TaglibJs extends Taglib
         return sprintf('</%2$s>";}else{o+="<%2$s>%s', $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagElseIf($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagElseIf(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['test']);
 
         return sprintf('</%3$s>";}else if(%1$s){o+="<%3$s>%2$s', $attrs->test, $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagWhile($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagWhile(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['test']);
 
         return sprintf('</%3$s>";while(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>', $attrs->test, $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagBind($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagBind(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['name']);
 
@@ -148,7 +172,7 @@ class TaglibJs extends Taglib
 
         preg_match_all('%<' . static::$JS_WRAPPER_TAG . '>(.*?)</' . static::$JS_WRAPPER_TAG . '>%', $output, $matches);
         if (isset($matches[1])) {
-            foreach ($matches[1] as $m) {
+            foreach ((array)$matches[1] as $m) {
                 $output = str_replace('<' . static::$JS_WRAPPER_TAG . '>' . $m . '</' . static::$JS_WRAPPER_TAG . '>', addslashes($m), $output);
             }
         }
@@ -160,8 +184,8 @@ class TaglibJs extends Taglib
             $output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
         }
 
-        $data = isset($attrs->data) ? $attrs->data : 'null';
-        $el = isset($attrs->el) ? $attrs->el : 'div';
+        $data = $attrs->data ?? 'null';
+        $el = $attrs->el ?? 'div';
 
         return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
@@ -172,11 +196,16 @@ class TaglibJs extends Taglib
         );
     }
 
-    protected function tagEach($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagEach(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['in']);
-        $row = (!isset($attrs->as)) ? 'row' : $attrs->as;
-        $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
+        $row = isset($attrs->as) === false ? 'row' : $attrs->as;
+        $index = isset($attrs->index) === false ? 'i' : $attrs->index;
 
         return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>',
             $attrs->in,
@@ -187,7 +216,12 @@ class TaglibJs extends Taglib
         );
     }
 
-    protected function tagFor($attrs)
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagFor(\stdClass $attrs)
     {
         $this->requireAttributes($attrs, ['limit', 'start', 'it']);
 
@@ -209,7 +243,7 @@ class TaglibJs extends Taglib
     {
         $output = array_merge(['<script>'], $this->containers, ['</script>']);
 
-        return join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+        return implode((app()->getDebugEnabled() === true) ? \chr(10) : '', $output);
     }
 
 }

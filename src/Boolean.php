@@ -15,7 +15,7 @@ class Boolean
     {
         $bool = filter_var($str, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
-        return ($bool !== null) ? $bool : $defaultValue;
+        return $bool ?? $defaultValue;
     }
 
 }

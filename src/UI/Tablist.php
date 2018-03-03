@@ -28,7 +28,7 @@ class Tablist
         $tab->setClosingType(Html::CLOSE_TYPE_NONE);
         $tab->addAttribute('class', 'pecee-tablist');
         $tab->addAttribute('data-id', $id);
-        $tab->addAttribute('data-visible', ($visible) ? 'true' : 'false');
+        $tab->addAttribute('data-visible', $visible ? 'true' : 'false');
 
         return $tab;
     }

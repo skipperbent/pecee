@@ -26,11 +26,15 @@
     "nesbot/carbon": "1.*"
   },
   "require-dev": {
-    "pecee/pixie": "4.*"
+    "pecee/pixie": "4.*",
+    "pda/pheanstalk": "^3.1",
+    "phpunit/phpunit": "^6.0",
+    "mockery/mockery": "^1"
   },
   "suggest": {
     "filp/whoops": "^2.1",
-    "pecee/pixie": "4.*"
+    "pecee/pixie": "4.*",
+    "pda/pheanstalk": "^3.1"
   },
   "autoload": {
     "psr-4": {

@@ -2,6 +2,7 @@
 
 namespace Pecee\Model\Relation;
 
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Model;
 use Pecee\Model\ModelRelation;
 
@@ -28,7 +29,7 @@ class HasMany extends ModelRelation
     }
 
     /**
-     * @return Model
+     * @return Model|ModelCollection
      * @throws \Pecee\Pixie\Exception
      */
     public function getResults()

@@ -54,7 +54,7 @@ class Str
 
     public static function substr($text, $maxLength, $end = '...', $encoding = 'UTF-8')
     {
-        if (strlen($text) > $maxLength) {
+        if (\strlen($text) > $maxLength) {
             return mb_substr($text, 0, $maxLength, $encoding) . $end;
         }
 
@@ -65,7 +65,7 @@ class Str
     {
         $words = explode(' ', $text);
 
-        return join(' ', array_splice($words, 0, $limit));
+        return implode(' ', array_splice($words, 0, $limit));
     }
 
     public static function base64Encode($obj)
@@ -77,8 +77,8 @@ class Str
     {
         $req = base64_decode($str);
         if ($req !== false) {
-            $req = unserialize($req);
-            if ($req !== false) {
+            $req = unserialize($req, ['allowed_classes' => true]);
+            if ($req !== null) {
                 return $req;
             }
         }

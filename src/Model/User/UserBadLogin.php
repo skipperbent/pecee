@@ -6,8 +6,8 @@ use Pecee\Model\Model;
 class UserBadLogin extends Model
 {
 
-    const TIMEOUT_MINUTES = 30;
-    const MAX_REQUEST_PER_IP = 10;
+    public const TIMEOUT_MINUTES = 30;
+    public const MAX_REQUEST_PER_IP = 10;
 
     protected $table = 'user_bad_login';
 

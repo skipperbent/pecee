@@ -29,6 +29,9 @@ class ControllerWrap
         $this->path = env('JS_PATH', 'public/js/');
     }
 
+    /**
+     * @throws \ErrorException
+     */
     public function js()
     {
         $this->extension = 'js';
@@ -38,6 +41,9 @@ class ControllerWrap
         $this->wrap();
     }
 
+    /**
+     * @throws \ErrorException
+     */
     public function css()
     {
         $this->extension = 'css';
@@ -77,9 +83,12 @@ class ControllerWrap
         return $this->path;
     }
 
+    /**
+     * @throws \ErrorException
+     */
     public function wrap()
     {
-        if (is_dir($this->getCacheDirectory()) === false && mkdir($this->getCacheDirectory(), 0755, true) === false) {
+        if (is_dir($this->getCacheDirectory()) === false && (mkdir($this->getCacheDirectory(), 0755, true) === false || is_dir($this->getCacheDirectory()) === false)) {
             throw new \ErrorException('Failed to create temp-directory');
         }
 
@@ -105,7 +114,7 @@ class ControllerWrap
             $this->saveTempFile();
         }
 
-        if (in_array('ob_gzhandler', ob_list_handlers(), true) === false) {
+        if (\in_array('ob_gzhandler', ob_list_handlers(), true) === false) {
             ob_start('ob_gzhandler');
         }
 
@@ -113,16 +122,19 @@ class ControllerWrap
         exit(0);
     }
 
+    /**
+     * @throws \Pecee\UI\YuiCompressor\YuiCompressorException
+     */
     protected function saveTempFile()
     {
 
-        if (count($this->files)) {
+        if (\count($this->files)) {
 
             $handle = fopen($this->getTempFile(), 'w+b+');
 
             if ($handle !== false) {
 
-                for ($i = 0, $maxFiles = count($this->files); $i < $maxFiles; $i++) {
+                for ($i = 0, $maxFiles = \count($this->files); $i < $maxFiles; $i++) {
 
                     $file = $this->files[$i];
 
@@ -145,7 +157,7 @@ class ControllerWrap
                             }
                         }
 
-                        $buffer = '/* ' . $file . ' */' . chr(10) . $content;
+                        $buffer = '/* ' . $file . ' */' . \chr(10) . $content;
                         fwrite($handle, $buffer);
 
                         // Unset buffer

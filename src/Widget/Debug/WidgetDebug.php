@@ -21,9 +21,9 @@ class WidgetDebug extends Widget
     protected function getTemplatePath()
     {
         $path = explode('\\', static::class);
-        $path = array_slice($path, 2);
+        $path = \array_slice($path, 2);
 
-        return env('framework_path') . '/views/content/' . join(DIRECTORY_SEPARATOR, $path) . '.php';
+        return env('framework_path') . '/views/content/' . implode(DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
 }

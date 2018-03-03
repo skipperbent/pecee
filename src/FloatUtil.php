@@ -6,7 +6,7 @@ class FloatUtil
 
     public static function isFloat($val)
     {
-        return is_float(filter_var($val, FILTER_VALIDATE_FLOAT));
+        return \is_float(filter_var($val, FILTER_VALIDATE_FLOAT));
     }
 
     public static function parse($val)

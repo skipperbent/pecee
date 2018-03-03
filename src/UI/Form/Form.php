@@ -84,12 +84,12 @@ class Form
      */
     public function bool($name, $value = true, $defaultValue = null, $saveValue = true)
     {
-        $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
+        $element = new HtmlCheckbox($name, $defaultValue ?? '1');
         if ($saveValue !== false) {
             if ($defaultValue === null) {
                 $defaultValue = $value;
             } else {
-                $defaultValue = count($_GET) ? null : $defaultValue;
+                $defaultValue = \count($_GET) ? null : $defaultValue;
             }
             $checked = Boolean::parse(input($name, $defaultValue));
             if ($checked) {
@@ -141,12 +141,12 @@ class Form
             if ($data instanceof Dataset) {
 
                 foreach ($data->getData() as $item) {
-                    $val = isset($item['value']) ? $item['value'] : $item['name'];
+                    $val = $item['value'] ?? $item['name'];
                     $selected = ((input($name) !== null && (string)input($name) === (string)$val) || (input()->exists($name) === false && (string)$value === (string)$val) || (isset($item['selected']) && $item['selected']) || ($saveValue === false && (string)$value === (string)$val));
                     $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
                 }
 
-            } elseif (is_array($data) === true) {
+            } elseif (\is_array($data) === true) {
 
                 foreach ((array)$data as $val => $key) {
                     $selected = ((input($name) !== null && (string)input($name) === (string)$val) || (input()->exists($name) === false && (string)$value === (string)$val) || ($saveValue === false && (string)$value === (string)$val));

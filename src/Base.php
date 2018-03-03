@@ -53,26 +53,18 @@ abstract class Base
         }
     }
 
+    /**
+     * @param array|null $values
+     * @throws \RuntimeException
+     */
     public function saveInputValues(array $values = null)
     {
-        if ($values === null) {
-            $values = input()->all();
-        }
-
-        Session::set($this->_inputSessionKey, $values);
+        Session::set($this->_inputSessionKey, $values ?? input()->all());
     }
 
-    protected function validate(array $validation = null)
+    protected function validate(array $validation)
     {
-        if ($validation !== null) {
-            foreach ($validation as $key => $validations) {
-                if (is_array($validations) === false) {
-                    $validations = [$validations];
-                }
-
-                $this->_validations[$key] = $validations;
-            }
-        }
+        $this->performValidation($validation);
     }
 
     protected function onInputError(InputItem $input, $error)
@@ -80,33 +72,24 @@ abstract class Base
 
     }
 
-    protected function performValidation()
+    protected function performValidation(array $validation)
     {
-        foreach ($this->_validations as $key => $validations) {
+        foreach ($validation as $key => $validations) {
 
             $input = input()->getObject($key, new InputItem($key, null));
+            $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
-            for ($i = 0, $max = count($validations); $i < $max; $i++) {
+            /* @var $validateClass ValidateInput */
+            foreach ((array)$validations as $validateClass) {
 
-                /* @var $validation ValidateInput */
-                $validation = $validations[$i];
-
-                if ($validation === null || $validation === '') {
-                    continue;
-                }
-
-                $inputs = ($input instanceof InputItem) ? [$input] : $input;
-
-                for ($x = 0, $xMax = count($inputs); $x < $xMax; $x++) {
-
-                    $input = $inputs[$x];
-                    $validation->setInput($input);
-
-                    if ($validation->runValidation() === false) {
-                        $this->setMessage($validation->getError(), $this->errorType, $validation->getPlacement(), $input->getIndex());
-                        $this->onInputError($input, $validation->getError());
+                foreach ($inputs as $input) {
+                    $validateClass->setInput($input);
+                    if ($validateClass->runValidation() === false) {
+                        $this->setMessage($validateClass->getError(), $this->errorType, $validateClass->getPlacement(), $input->getIndex());
+                        $this->onInputError($input, $validateClass->getError());
                     }
                 }
+
             }
         }
     }
@@ -145,11 +128,13 @@ abstract class Base
      * @param string $type
      * @param string|null $placement
      * @return FormMessage|null
+     * @throws \RuntimeException
      */
     public function getMessage($type, $placement = null)
     {
         $messages = $this->getMessages($type, $placement);
-        return (count($messages) > 0) ? $messages[0] : null;
+
+        return (\count($messages) > 0) ? $messages[0] : null;
     }
 
     /**
@@ -157,6 +142,7 @@ abstract class Base
      * @param string $type
      * @param string|null $placement
      * @return array
+     * @throws \RuntimeException
      */
     public function getMessages($type, $placement = null)
     {
@@ -166,7 +152,7 @@ abstract class Base
         $messages = [];
         $search = $this->_messages->get($type);
 
-        if ($search !== null && count($search) > 0) {
+        if ($search !== null && \count($search) > 0) {
             /* @var $search array */
             /* @var $message FormMessage */
             foreach ($search as $message) {
@@ -179,9 +165,15 @@ abstract class Base
         return $messages;
     }
 
+    /**
+     * @param string $type
+     * @param string|null $placement
+     * @return bool
+     * @throws \RuntimeException
+     */
     public function hasMessages($type, $placement = null)
     {
-        return (bool)count($this->getMessages($type, $placement));
+        return (bool)\count($this->getMessages($type, $placement));
     }
 
     /**
@@ -190,25 +182,33 @@ abstract class Base
      * @param string $type
      * @param string|null $placement Key to use if you want the message to be displayed an unique place
      * @param string|null $index
+     * @throws \RuntimeException
      */
-    protected function setMessage($message, $type, $placement = null, $index = null)
+    protected function setMessage($message, $type, $placement = null, $index = null): void
     {
         $msg = new FormMessage();
         $msg->setMessage($message);
-        $msg->setPlacement(($placement === null) ? $this->defaultMessagePlacement : $placement);
+        $msg->setPlacement($placement ?? $this->defaultMessagePlacement);
         $msg->setIndex($index);
         $this->_messages->set($msg, $type);
     }
 
+    /**
+     * @param string|null $placement
+     * @param string|null $errorType
+     * @return bool
+     * @throws \RuntimeException
+     */
     public function hasErrors($placement = null, $errorType = null)
     {
-        return $this->hasMessages(($errorType === null) ? $this->errorType : $errorType, $placement);
+        return $this->hasMessages($errorType ?? $this->errorType, $placement);
     }
 
     /**
      * Set error
      * @param string $message
      * @param string|null $placement
+     * @throws \RuntimeException
      */
     protected function setError($message, $placement = null)
     {
@@ -220,12 +220,18 @@ abstract class Base
      * @param string|null $placement
      * @param string|null $errorType
      * @return array
+     * @throws \RuntimeException
      */
     public function getErrors($placement = null, $errorType = null)
     {
-        return $this->getMessages(($errorType === null) ? $this->errorType : $errorType, $placement);
+        return $this->getMessages($errorType ?? $this->errorType, $placement);
     }
 
+    /**
+     * @param string $placement
+     * @return array
+     * @throws \RuntimeException
+     */
     public function getErrorsArray($placement = null)
     {
         $output = [];

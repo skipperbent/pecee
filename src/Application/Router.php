@@ -7,6 +7,9 @@ use Pecee\SimpleRouter\SimpleRouter;
 class Router extends SimpleRouter
 {
 
+    /**
+     * @throws \Pecee\Http\Exceptions\MalformedUrlException
+     */
     public static function init()
     {
         if (app()->getDisableFrameworkRoutes() === false) {
@@ -22,6 +25,11 @@ class Router extends SimpleRouter
         }
     }
 
+    /**
+     * @throws \Exception
+     * @throws \Pecee\Http\Exceptions\MalformedUrlException
+     * @throws \Pecee\SimpleRouter\Exceptions\HttpException
+     */
     public static function start()
     {
         debug('Router initialised.');

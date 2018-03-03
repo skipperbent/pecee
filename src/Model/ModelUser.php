@@ -12,12 +12,12 @@ use Pecee\User\IUserAuthentication;
 
 class ModelUser extends ModelData implements IUserAuthentication
 {
-    const COOKIE_NAME = 'ticket';
+    public const COOKIE_NAME = 'ticket';
 
     /* Errors */
-    const ERROR_TYPE_BANNED = 0x1;
-    const ERROR_TYPE_INVALID_LOGIN = 0x2;
-    const ERROR_TYPE_EXISTS = 0x3;
+    public const ERROR_TYPE_BANNED = 0x1;
+    public const ERROR_TYPE_INVALID_LOGIN = 0x2;
+    public const ERROR_TYPE_EXISTS = 0x3;
 
     protected static $instance;
     protected static $ticketExpireMinutes = 60;
@@ -33,6 +33,13 @@ class ModelUser extends ModelData implements IUserAuthentication
         'deleted',
     ];
 
+    /**
+     * ModelUser constructor.
+     * @param null $username
+     * @param null $password
+     * @throws \ErrorException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function __construct($username = null, $password = null)
     {
         parent::__construct();
@@ -91,12 +98,16 @@ class ModelUser extends ModelData implements IUserAuthentication
         }
     }
 
+    /**
+     * @param int $userId
+     * @throws \RuntimeException
+     */
     public static function createTicket($userId)
     {
         /* Remove existing ticket */
         Cookie::delete(static::COOKIE_NAME);
 
-        $ticket = Guid::encrypt(static::getSalt(), join('|', [
+        $ticket = Guid::encrypt(static::getSalt(), implode('|', [
             $userId,
             Carbon::now()->addMinutes(static::$ticketExpireMinutes)->toW3cString(),
         ]));
@@ -115,7 +126,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         if ($ticket !== false) {
             $ticket = explode('|', $ticket);
 
-            return (count($ticket) > 0) ? $ticket : null;
+            return (\count($ticket) > 0) ? $ticket : null;
         }
 
         return null;
@@ -167,6 +178,7 @@ class ModelUser extends ModelData implements IUserAuthentication
      * Get current user
      *
      * @return static
+     * @throws \Pecee\Pixie\Exception
      */
     public static function current()
     {
@@ -188,11 +200,6 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function filterQuery($query)
     {
-        $userDataClassName = static::getUserDataClass();
-
-        /* @var $userDataClass UserData */
-        $userDataClass = new $userDataClassName();
-
         $userDataQuery = static::instance()
             ->getQuery()
             ->select($this->getDataPrimary())

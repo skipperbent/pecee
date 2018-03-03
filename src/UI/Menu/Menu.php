@@ -32,7 +32,7 @@ class Menu
      */
     public function getFirst()
     {
-        if (count($this->items)) {
+        if (\count($this->items)) {
             return $this->items[0];
         }
 
@@ -60,7 +60,7 @@ class Menu
 
     public function hasItems()
     {
-        return count($this->items);
+        return \count($this->items);
     }
 
     /**
@@ -241,7 +241,7 @@ class Menu
             if ($attributes !== null && isset($attributes[$name])) {
 
                 if ($strict === true) {
-                    if (in_array($value, $attributes[$name], true) === true) {
+                    if (\in_array($value, $attributes[$name], true) === true) {
                         return $item;
                     }
                 } else {
@@ -262,11 +262,11 @@ class Menu
      */
     protected function formatAttributes(array $attributes)
     {
-        if (count($attributes)) {
+        if (\count($attributes)) {
             $output = ' ';
             /* Run through each attribute */
             foreach ($attributes as $name => $value) {
-                $output .= $name . '="' . join(' ', $value) . '"';
+                $output .= $name . '="' . implode(' ', $value) . '"';
             }
 
             return $output;
@@ -282,11 +282,11 @@ class Menu
     public function __toString()
     {
         $o = '';
-        if (count($this->items)) {
+        if (\count($this->items)) {
 
             $o .= '<ul' . ($this->class ? ' class="' . $this->class . '"' : '');
 
-            if (count($this->attributes)) {
+            if (\count($this->attributes)) {
                 $o .= $this->formatAttributes($this->attributes);
             }
 

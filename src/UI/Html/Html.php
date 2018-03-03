@@ -4,8 +4,8 @@ namespace Pecee\UI\Html;
 
 class Html
 {
-    const CLOSE_TYPE_TAG = 'tag';
-    const CLOSE_TYPE_NONE = 'none';
+    public const CLOSE_TYPE_TAG = 'tag';
+    public const CLOSE_TYPE_NONE = 'none';
 
     protected $tag;
     protected $innerHtml = [];
@@ -95,7 +95,7 @@ class Html
      */
     public function addAttribute($name, $value = '')
     {
-        if (isset($this->attributes[$name]) && in_array($value, $this->attributes[$name], true) === false) {
+        if (isset($this->attributes[$name]) && \in_array($value, $this->attributes[$name], true) === false) {
             $this->attributes[$name][] = $value;
         } else {
             $this->attributes[$name] = [$value];
@@ -160,14 +160,14 @@ class Html
         foreach ($this->attributes as $key => $val) {
             $output .= ' ' . $key;
             if ($val[0] !== null || strtolower($key) === 'value') {
-                $val = htmlentities(join(' ', $val), ENT_QUOTES, app()->getCharset());
+                $val = htmlentities(implode(' ', $val), ENT_QUOTES, app()->getCharset());
                 $output .= '="' . $val . '"';
             }
         }
 
         $output .= '>';
 
-        for ($i = 0, $max = count($this->innerHtml); $i < $max; $i++) {
+        for ($i = 0, $max = \count($this->innerHtml); $i < $max; $i++) {
             $html = $this->innerHtml[$i];
             $output .= ($html instanceof static) ? $html->render() : $html;
         }
@@ -227,7 +227,7 @@ class Html
      */
     public function getAttribute($name)
     {
-        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+        return $this->attributes[$name] ?? null;
     }
 
     /**

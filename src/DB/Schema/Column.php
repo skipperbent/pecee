@@ -3,74 +3,145 @@ namespace Pecee\DB\Schema;
 
 class Column
 {
+    /**
+     * @var string
+     */
     protected $table;
+
+    /**
+     * @var string|null
+     */
     protected $name;
+
+    /**
+     * @var string|null
+     */
     protected $type;
+
+    /**
+     * @var int|null
+     */
     protected $length;
+
+    /**
+     * @var string|null
+     */
     protected $defaultValue;
+
+    /**
+     * @var string|null
+     */
     protected $encoding;
+
+    /**
+     * @var string|null
+     */
     protected $attributes;
+
+    /**
+     * @var bool|null
+     */
     protected $nullable;
+
+    /**
+     * @var string|null
+     */
     protected $index;
+
+    /**
+     * @var bool|null
+     */
     protected $increment;
+
+    /**
+     * @var string|null
+     */
     protected $comment;
+
+    /**
+     * @var bool
+     */
     protected $drop = false;
+
+    /**
+     * @var bool
+     */
     protected $change = false;
+
+    /**
+     * @var string|null
+     */
     protected $after;
+
+    /**
+     * @var string|null
+     */
     protected $relationTable;
+
+    /**
+     * @var string|null
+     */
     protected $relationColumn;
+
+    /**
+     * @var string|null
+     */
     protected $relationUpdateType;
+
+    /**
+     * @var string|null
+     */
     protected $relationDeleteType;
 
-    const INDEX_PRIMARY = 'PRIMARY KEY';
-    const INDEX_UNIQUE = 'UNIQUE';
-    const INDEX_INDEX = 'INDEX';
-    const INDEX_FULLTEXT = 'FULLTEXT';
+    public const INDEX_PRIMARY = 'PRIMARY KEY';
+    public const INDEX_UNIQUE = 'UNIQUE';
+    public const INDEX_INDEX = 'INDEX';
+    public const INDEX_FULLTEXT = 'FULLTEXT';
 
-    const RELATION_TYPE_RESTRICT = 'RESTRICT';
-    const RELATION_TYPE_CASCADE = 'CASCADE';
-    const RELATION_TYPE_SET_NULL = 'SET NULL';
-    const RELATION_TYPE_NO_ACTION = 'NO ACTION';
+    public const RELATION_TYPE_RESTRICT = 'RESTRICT';
+    public const RELATION_TYPE_CASCADE = 'CASCADE';
+    public const RELATION_TYPE_SET_NULL = 'SET NULL';
+    public const RELATION_TYPE_NO_ACTION = 'NO ACTION';
 
-    const TYPE_VARCHAR = 'VARCHAR';
-    const TYPE_LONGTEXT = 'LONGTEXT';
-    const TYPE_TEXT = 'TEXT';
-    const TYPE_MEDIUMTEXT = 'MEDIUMTEXT';
-    const TYPE_TINYTEXT = 'TINYTEXT';
-    const TYPE_INT = 'INT';
-    const TYPE_TINYINT = 'TINYINT';
-    const TYPE_SMALLINT = 'SMALLINT';
-    const TYPE_MEDIUMINT = 'MEDIUMINT';
-    const TYPE_BIGINT = 'BIGINT';
-    const TYPE_DECIMAL = 'DECIMAL';
-    const TYPE_FLOAT = 'FLOAT';
-    const TYPE_DOUBLE = 'DOUBLE';
-    const TYPE_REAL = 'REAL';
-    const TYPE_BIT = 'BIT';
-    const TYPE_BOOLEAN = 'BOOLEAN';
-    const TYPE_SERIAL = 'SERIAL';
-    const TYPE_DATE = 'DATE';
-    const TYPE_DATETIME = 'DATETIME';
-    const TYPE_TIMESTAMP = 'TIMESTAMP';
-    const TYPE_TIME = 'TIME';
-    const TYPE_YEAR = 'YEAR';
-    const TYPE_CHAR = 'CHAR';
-    const TYPE_BINARY = 'BINARY';
-    const TYPE_VARBINARY = 'VARBINARY';
-    const TYPE_TINYBLOB = 'TINYBLOB';
-    const TYPE_MEDIUMBLOB = 'MEDIUMBLOB';
-    const TYPE_BLOB = 'BLOB';
-    const TYPE_LONGBLOB = 'LONGBLOB';
-    const TYPE_ENUM = 'ENUM';
-    const TYPE_SET = 'SET';
-    const TYPE_GEOMETRY = 'GEOMETRY';
-    const TYPE_POINT = 'POINT';
-    const TYPE_LINESTRING = 'LINESTRING';
-    const TYPE_POLYGON = 'POLYGON';
-    const TYPE_MULTIPOINT = 'MULTIPOINT';
-    const TYPE_MULTILINESTRING = 'MULTILINESTRING';
-    const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
-    const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
+    public const TYPE_VARCHAR = 'VARCHAR';
+    public const TYPE_LONGTEXT = 'LONGTEXT';
+    public const TYPE_TEXT = 'TEXT';
+    public const TYPE_MEDIUMTEXT = 'MEDIUMTEXT';
+    public const TYPE_TINYTEXT = 'TINYTEXT';
+    public const TYPE_INT = 'INT';
+    public const TYPE_TINYINT = 'TINYINT';
+    public const TYPE_SMALLINT = 'SMALLINT';
+    public const TYPE_MEDIUMINT = 'MEDIUMINT';
+    public const TYPE_BIGINT = 'BIGINT';
+    public const TYPE_DECIMAL = 'DECIMAL';
+    public const TYPE_FLOAT = 'FLOAT';
+    public const TYPE_DOUBLE = 'DOUBLE';
+    public const TYPE_REAL = 'REAL';
+    public const TYPE_BIT = 'BIT';
+    public const TYPE_BOOLEAN = 'BOOLEAN';
+    public const TYPE_SERIAL = 'SERIAL';
+    public const TYPE_DATE = 'DATE';
+    public const TYPE_DATETIME = 'DATETIME';
+    public const TYPE_TIMESTAMP = 'TIMESTAMP';
+    public const TYPE_TIME = 'TIME';
+    public const TYPE_YEAR = 'YEAR';
+    public const TYPE_CHAR = 'CHAR';
+    public const TYPE_BINARY = 'BINARY';
+    public const TYPE_VARBINARY = 'VARBINARY';
+    public const TYPE_TINYBLOB = 'TINYBLOB';
+    public const TYPE_MEDIUMBLOB = 'MEDIUMBLOB';
+    public const TYPE_BLOB = 'BLOB';
+    public const TYPE_LONGBLOB = 'LONGBLOB';
+    public const TYPE_ENUM = 'ENUM';
+    public const TYPE_SET = 'SET';
+    public const TYPE_GEOMETRY = 'GEOMETRY';
+    public const TYPE_POINT = 'POINT';
+    public const TYPE_LINESTRING = 'LINESTRING';
+    public const TYPE_POLYGON = 'POLYGON';
+    public const TYPE_MULTIPOINT = 'MULTIPOINT';
+    public const TYPE_MULTILINESTRING = 'MULTILINESTRING';
+    public const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
+    public const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
     public static $INDEXES = [
         self::INDEX_PRIMARY,
@@ -132,18 +203,20 @@ class Column
 
     public function __construct($table)
     {
-        $this->relation = [];
         $this->table = $table;
         $this->change = false;
     }
 
     public function primary()
     {
-        $this->setIndex(self::INDEX_PRIMARY);
+        $this->setIndex(static::INDEX_PRIMARY);
 
         return $this;
     }
 
+    /**
+     * @return static $this
+     */
     public function increment()
     {
         $this->primary()->setIncrement(true);
@@ -153,7 +226,7 @@ class Column
 
     public function index()
     {
-        $this->setIndex(self::INDEX_INDEX);
+        $this->setIndex(static::INDEX_INDEX);
 
         return $this;
     }
@@ -167,7 +240,7 @@ class Column
 
     public function string($length = 255)
     {
-        $this->setType(self::TYPE_VARCHAR);
+        $this->setType(static::TYPE_VARCHAR);
         $this->setLength($length);
 
         return $this;
@@ -175,7 +248,7 @@ class Column
 
     public function integer($lenght = null)
     {
-        $this->setType(self::TYPE_INT);
+        $this->setType(static::TYPE_INT);
         $this->setLength($lenght);
 
         return $this;
@@ -183,14 +256,14 @@ class Column
 
     public function bigint()
     {
-        $this->setType(self::TYPE_BIGINT);
+        $this->setType(static::TYPE_BIGINT);
 
         return $this;
     }
 
     public function bool()
     {
-        $this->setType(self::TYPE_TINYINT);
+        $this->setType(static::TYPE_TINYINT);
         $this->setNullable(true);
         $this->setLength(1);
 
@@ -199,70 +272,70 @@ class Column
 
     public function text()
     {
-        $this->setType(self::TYPE_TEXT);
+        $this->setType(static::TYPE_TEXT);
 
         return $this;
     }
 
     public function longtext()
     {
-        $this->setType(self::TYPE_LONGTEXT);
+        $this->setType(static::TYPE_LONGTEXT);
 
         return $this;
     }
 
     public function datetime()
     {
-        $this->setType(self::TYPE_DATETIME);
+        $this->setType(static::TYPE_DATETIME);
 
         return $this;
     }
 
     public function date()
     {
-        $this->setType(self::TYPE_DATE);
+        $this->setType(static::TYPE_DATE);
 
         return $this;
     }
 
     public function blob()
     {
-        $this->setType(self::TYPE_LONGBLOB);
+        $this->setType(static::TYPE_LONGBLOB);
 
         return $this;
     }
 
     public function float()
     {
-        $this->setType(self::TYPE_FLOAT);
+        $this->setType(static::TYPE_FLOAT);
 
         return $this;
     }
 
     public function double()
     {
-        $this->setType(self::TYPE_DOUBLE);
+        $this->setType(static::TYPE_DOUBLE);
 
         return $this;
     }
 
     public function decimal()
     {
-        $this->setType(self::TYPE_DECIMAL);
+        $this->setType(static::TYPE_DECIMAL);
 
         return $this;
     }
 
     public function timestamp()
     {
-        $this->setType(self::TYPE_TIMESTAMP);
+        $this->setType(static::TYPE_TIMESTAMP);
 
         return $this;
     }
 
     public function time()
     {
-        $this->setType(self::TYPE_TIME);
+        $this->setType(static::TYPE_TIME);
 
         return $this;
     }
@@ -278,12 +351,12 @@ class Column
     public function relation($table, $column, $delete = self::RELATION_TYPE_CASCADE, $update = self::RELATION_TYPE_RESTRICT)
     {
 
-        if (in_array($delete, static::$RELATION_TYPES, true) === false) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', static::$RELATION_TYPES));
+        if (\in_array($delete, static::$RELATION_TYPES, true) === false) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
-        if (in_array($update, static::$RELATION_TYPES, true) === false) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', static::$RELATION_TYPES));
+        if (\in_array($update, static::$RELATION_TYPES, true) === false) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
         $this->relationTable = $table;

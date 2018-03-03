@@ -16,6 +16,10 @@ abstract class WidgetTaglib extends Widget
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }
 
+    /**
+     * @return string
+     * @throws \RuntimeException
+     */
     public function render()
     {
         $this->renderContent();
@@ -41,17 +45,15 @@ abstract class WidgetTaglib extends Widget
             if (app()->getDebugEnabled() === false) {
                 $this->renderPhp(file_get_contents($cacheFile));
                 return;
-            } else {
-                unlink($cacheFile);
             }
+
+            unlink($cacheFile);
         }
 
         try {
 
-            if (is_dir($this->_pHtmlCacheDir) === false) {
-                if(mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
-                    throw new \ErrorException('Failed to create temp-cache directory');
-                }
+            if (is_dir($this->_pHtmlCacheDir) === false && (mkdir($this->_pHtmlCacheDir, 0755, true) === false || is_dir($this->_pHtmlCacheDir) === false)) {
+                throw new \ErrorException('Failed to create temp-cache directory');
             }
 
             debug('Parsing Phtml template');

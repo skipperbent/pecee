@@ -47,7 +47,7 @@ class Url
 
     public static function urlEncodeString($string, $separator = '-', $maxLength = 50)
     {
-        if ($maxLength !== null && strlen($string) > $maxLength) {
+        if ($maxLength !== null && \strlen($string) > $maxLength) {
             $string = substr($string, 0, $maxLength);
         }
 
@@ -60,7 +60,7 @@ class Url
 
         $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
 
-        return preg_replace('/[^\w\ \+\&' . join('', $searchMap) . ']/i', '', $string);
+        return preg_replace('/[^\w\ \+\&' . implode('', $searchMap) . ']/i', '', $string);
     }
 
     public static function isSecure($url)

@@ -4,7 +4,7 @@ namespace Pecee\UI\Taglib;
 class Taglib implements ITaglib
 {
 
-    const TAG_PREFIX = 'tag';
+    private const TAG_PREFIX = 'tag';
 
     protected $body = '';
     protected $bodies = [];
@@ -16,7 +16,14 @@ class Taglib implements ITaglib
         $this->preProcess = $preProcess;
     }
 
-    public function callTag($tag, $attrs, $body)
+    /**
+     * @param string $tag
+     * @param array $attrs
+     * @param string $body
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function callTag($tag, array $attrs, $body = '')
     {
         $this->currentTag = $tag;
         $method = static::TAG_PREFIX . ucfirst($tag);
@@ -31,12 +38,22 @@ class Taglib implements ITaglib
         return $this->$method((object)$attrs);
     }
 
+    /**
+     * @param string $tag
+     * @param array $args
+     * @throws \InvalidArgumentException
+     */
     public function __call($tag, $args)
     {
         $this->callTag($tag, $args[0], $args[1]);
     }
 
-    protected function requireAttributes($attrs, array $name)
+    /**
+     * @param \stdClass $attrs
+     * @param array $name
+     * @throws \ErrorException
+     */
+    protected function requireAttributes(\stdClass $attrs, array $name)
     {
         $errors = [];
         foreach ($name as $n) {
@@ -44,8 +61,8 @@ class Taglib implements ITaglib
                 $errors[] = $n;
             }
         }
-        if (count($errors) > 0) {
-            throw new \ErrorException('The current tag "' . $this->currentTag . '" requires the attribute(s): ' . join(', ', $errors));
+        if (\count($errors) > 0) {
+            throw new \ErrorException('The current tag "' . $this->currentTag . '" requires the attribute(s): ' . implode(', ', $errors));
         }
     }
 

@@ -42,7 +42,7 @@ class ModelQueryBuilder
     protected function createInstance(\stdClass $item)
     {
         /* @var $model Model */
-        $model = get_class($this->model);
+        $model = \get_class($this->model);
         $model = new $model();
         $model->with($this->model->getWith());
         $model->mergeRows((array)$item);
@@ -82,10 +82,10 @@ class ModelQueryBuilder
      * ->table($qb->raw('table_one as one'))
      * ```
      */
-    public function table($table)
+    public function table($tables)
     {
 
-        $this->query = $this->getQuery()->table($table);
+        $this->query = $this->getQuery()->table($tables);
 
         return $this->model;
     }
@@ -149,7 +149,7 @@ class ModelQueryBuilder
      */
     public function where($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
+        if (\func_num_args() === 2) {
             $value = $operator;
             $operator = '=';
         }
@@ -183,7 +183,7 @@ class ModelQueryBuilder
      */
     public function whereNot($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
+        if (\func_num_args() === 2) {
             $value = $operator;
             $operator = '=';
         }
@@ -263,7 +263,7 @@ class ModelQueryBuilder
      */
     public function orWhere($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
+        if (\func_num_args() === 2) {
             $value = $operator;
             $operator = '=';
         }
@@ -314,7 +314,7 @@ class ModelQueryBuilder
      */
     public function orWhereNot($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
+        if (\func_num_args() === 2) {
             $value = $operator;
             $operator = '=';
         }
@@ -396,6 +396,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @param string $id
      * @return static
      * @throws Exception
      */
@@ -410,6 +411,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @param string $id
      * @return static
      * @throws ModelNotFoundException
      * @throws Exception
@@ -463,7 +465,8 @@ class ModelQueryBuilder
     }
 
     /**
-     * return int
+     * @param string|array $field
+     * @return int
      * @throws Exception
      */
     public function max($field)
@@ -474,6 +477,7 @@ class ModelQueryBuilder
     }
 
     /**
+     * @param string $field
      * @return int
      * @throws Exception
      */
@@ -494,7 +498,7 @@ class ModelQueryBuilder
         $out = [];
 
         foreach ($data as $key => $value) {
-            if (in_array($key, $this->model->getColumns(), true) === true) {
+            if (\in_array($key, $this->model->getColumns(), true) === true) {
                 $out[$key] = $value;
             }
         }
@@ -514,16 +518,17 @@ class ModelQueryBuilder
         if (\is_array(current($data)) === true) {
 
             foreach ($data as $key => $item) {
-                if ($this->model->getUpdateTimestamps() === true && isset($item['updated_at']) === false) {
+                if (isset($item['updated_at']) === false && $this->model->getUpdateTimestamps() === true) {
                     $data[$key]['created_at'] = Carbon::now()->toDateTimeString();
                 }
 
-                if (count($data[$key]) === 0) {
+                if (\count($data[$key]) === 0) {
                     throw new ModelException('Not valid columns found to update.');
                 }
             }
 
-            return $this->query->update($data);
+            $this->query->update($data);
+            return $this->model;
         }
 
         // Update single item
@@ -531,7 +536,7 @@ class ModelQueryBuilder
             $data['updated_at'] = Carbon::now()->toDateTimeString();
         }
 
-        if (count($data) === 0) {
+        if (\count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
         }
 
@@ -554,26 +559,27 @@ class ModelQueryBuilder
             foreach ($data as $key => $item) {
                 $data[$key] = array_merge($this->model->getRows(), $this->getValidData($item));
 
-                if ($this->model->getUpdateTimestamps() === true && isset($item['created_at']) === false) {
+                if (isset($item['created_at']) === false && $this->model->getUpdateTimestamps() === true) {
                     $data[$key]['created_at'] = Carbon::now()->toDateTimeString();
                 }
 
-                if (count($data[$key]) === 0) {
+                if (\count($data[$key]) === 0) {
                     throw new ModelException('Not valid columns found to update.');
                 }
             }
 
-            return $this->query->insert($data);
+            $this->query->insert($data);
+            return $this->model;
         }
 
         // Create single item
-        if ($this->model->getUpdateTimestamps() === true && isset($data['created_at']) === false) {
+        if (isset($data['created_at']) === false && $this->model->getUpdateTimestamps() === true) {
             $data['created_at'] = Carbon::now()->toDateTimeString();
         }
 
         $data = array_merge($this->model->getRows(), $this->getValidData($data));
 
-        if (count($data) === 0) {
+        if (\count($data) === 0) {
             throw new ModelException('Not valid columns found to update.');
         }
 
@@ -741,7 +747,7 @@ class ModelQueryBuilder
      */
     public function leftJoin($table, $key, $operator = null, $value = null)
     {
-        $this->query->leftJoin($table, $key, $operator, $value, 'left');
+        $this->query->join($table, $key, $operator, $value, 'left');
 
         return $this->model;
     }

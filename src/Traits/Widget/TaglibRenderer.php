@@ -15,7 +15,6 @@ trait TaglibRenderer
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
 
         $this->renderContent();
-        $this->renderTemplate();
         $this->_messages->clear();
 
         return $this->_contentHtml;
@@ -23,7 +22,7 @@ trait TaglibRenderer
 
     public function setTaglibJs()
     {
-        $this->getSite()->addWrappedJs('pecee-widget.js');
+        app()->site->addWrappedJs('pecee-widget.js');
     }
 
     protected function renderPhp($content)
@@ -42,17 +41,15 @@ trait TaglibRenderer
             if (app()->getDebugEnabled() === false) {
                 $this->_contentHtml = file_get_contents($cacheFile);
                 return;
-            } else {
-                unlink($cacheFile);
             }
+
+            unlink($cacheFile);
         }
 
         try {
 
-            if (is_dir($this->_pHtmlCacheDir) === false) {
-                if (mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
-                    throw new \ErrorException('Failed to create temp-cache directory');
-                }
+            if (is_dir($this->_pHtmlCacheDir) === false && (mkdir($this->_pHtmlCacheDir, 0755, true) === false || is_dir($this->_pHtmlCacheDir) === false)) {
+                throw new \ErrorException('Failed to create temp-cache directory');
             }
 
             $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));

@@ -32,13 +32,19 @@ abstract class Widget extends Base
         return 'views/content/' . str_replace('\\', DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
+    /**
+     * @param string|null $type
+     * @param string|null $placement
+     * @return string
+     * @throws \RuntimeException
+     */
     public function showMessages($type, $placement = null)
     {
-        $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
+        $placement = $placement ?? $this->defaultMessagePlacement;
 
         $errors = $this->getMessages($type, $placement);
 
-        if (count($errors) > 0) {
+        if (\count($errors) > 0) {
             $o = sprintf('<div class="alert alert-%s">', $type);
 
             $msg = [];
@@ -47,12 +53,17 @@ abstract class Widget extends Base
                 $msg[] = $error->getMessage();
             }
 
-            return $o . join('<br>', $msg) . '</div>';
+            return $o . implode('<br>', $msg) . '</div>';
         }
 
         return '';
     }
 
+    /**
+     * @param null $placement
+     * @return string
+     * @throws \RuntimeException
+     */
     public function showFlash($placement = null)
     {
         $o = $this->showMessages($this->errorType, $placement);
@@ -89,13 +100,13 @@ abstract class Widget extends Base
             $this->getSite()->addMeta(['content' => $this->getSite()->getDescription(), 'name' => 'description']);
         }
 
-        if (count($this->getSite()->getKeywords()) > 0) {
-            $this->getSite()->addMeta(['content' => join(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
+        if (\count($this->getSite()->getKeywords()) > 0) {
+            $this->getSite()->addMeta(['content' => implode(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
         }
 
-        if (count($this->getSite()->getHeader()) > 0) {
+        if (\count($this->getSite()->getHeader()) > 0) {
             $header = $this->getSite()->getHeader();
-            $output .= join('', $header);
+            $output .= implode('', $header);
         }
 
         return $output;
@@ -105,8 +116,8 @@ abstract class Widget extends Base
     {
         $output = '';
 
-        if (count($this->getSite()->getCssFilesWrapped($section)) > 0) {
-            $css = url(app()->getCssWrapRouteName(), null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
+        if (\count($this->getSite()->getCssFilesWrapped($section)) > 0) {
+            $css = url(app()->getCssWrapRouteName(), null, ['files' => implode($this->getSite()->getCssFilesWrapped($section), ',')]);
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
@@ -124,8 +135,8 @@ abstract class Widget extends Base
     {
         $output = '';
 
-        if (count($this->getSite()->getJsFilesWrapped($section)) > 0) {
-            $js = url(app()->getJsWrapRouteName(), null, ['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]);
+        if (\count($this->getSite()->getJsFilesWrapped($section)) > 0) {
+            $js = url(app()->getJsWrapRouteName(), null, ['files' => implode($this->getSite()->getJsFilesWrapped($section), ',')]);
             $output .= (new Html('script'))->attr('src', $js);
         }
 
@@ -203,7 +214,11 @@ abstract class Widget extends Base
         try {
             return $this->render();
         } catch (\Exception $e) {
-            $this->setError($e->getMessage());
+            try {
+                $this->setError($e->getMessage());
+            } catch(\Exception $e) {
+
+            }
         }
 
         return '';
@@ -211,6 +226,7 @@ abstract class Widget extends Base
 
     /**
      * @return string
+     * @throws \RuntimeException
      */
     public function render()
     {

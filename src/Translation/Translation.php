@@ -15,9 +15,9 @@ class Translation
      */
     public function _($key, $args = null)
     {
-        if (!is_array($args)) {
-            $args = func_get_args();
-            $args = array_slice($args, 1);
+        if (!\is_array($args)) {
+            $args = \func_get_args();
+            $args = \array_slice($args, 1);
         }
 
         return vsprintf($this->lookup($key), $args);
@@ -31,9 +31,9 @@ class Translation
      */
     public function translate($key, $args = null)
     {
-        if (!is_array($args)) {
-            $args = func_get_args();
-            $args = array_slice($args, 1);
+        if (!\is_array($args)) {
+            $args = \func_get_args();
+            $args = \array_slice($args, 1);
         }
 
         return vsprintf($this->lookup($key), $args);

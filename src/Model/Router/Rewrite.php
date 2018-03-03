@@ -16,6 +16,10 @@ class Rewrite extends Model
         'order',
     ];
 
+    /**
+     * @return bool
+     * @throws \Pecee\Pixie\Exception
+     */
     public function exists()
     {
         return (static::instance()->where('original_path', '=', $this->original_url)->select(['original_path'])->count() > 0);

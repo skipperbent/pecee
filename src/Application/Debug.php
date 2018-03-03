@@ -39,7 +39,7 @@ class Debug
 
         $debug = [];
 
-        for ($i = 0; $i < count($backtrace) - $this->backLevel; $i++) {
+        for ($i = 0; $i < \count($backtrace) - $this->backLevel; $i++) {
             $trace = array_reverse($backtrace);
             $trace = $trace[$i];
             $tmp = [];
@@ -83,8 +83,8 @@ class Debug
      */
     public function add($text, $args = null)
     {
-        if (is_array($args) === false) {
-            $args = func_get_args();
+        if (\is_array($args) === false) {
+            $args = \func_get_args();
             array_shift($args);
         }
 
@@ -95,7 +95,11 @@ class Debug
     {
         $widget = new WidgetDebug($this->stack);
 
-        return $widget->render();
+        try {
+            return $widget->render();
+        } catch(\Exception $e) {
+            return '';
+        }
     }
 
 }

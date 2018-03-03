@@ -8,7 +8,7 @@ class XmlElement implements IXmlNode
 
     private $tag;
     private $parent;
-    private $attrs = [];
+    private $attrs;
     private $children = [];
     private $ns;
 
@@ -105,25 +105,36 @@ class XmlElement implements IXmlNode
 
     public function getChildIndex(IXmlNode $node)
     {
-        return array_search($node, $this->children);
+        return array_search($node, $this->children, true);
     }
 
+    /**
+     * @param int $i
+     * @param IXmlNode $node
+     * @return static $this
+     * @throws \Exception
+     */
     public function setChildAt($i, IXmlNode $node)
     {
-        if ($i < 0 || $i > count($this->children)) {
-            throw new \Exception ("Child offset out of bounds: $i. Child count : " . count($this->children));
+        if ($i < 0 || $i > \count($this->children)) {
+            throw new \Exception ("Child offset out of bounds: $i. Child count : " . \count($this->children));
         }
         unset($this->children[$i]);
-        $this->children[intval($i)] = $node;
+        $this->children[(int)$i] = $node;
         ksort($this->children);
 
         return $this;
     }
 
+    /**
+     * @param int $i
+     * @return static $this
+     * @throws \Exception
+     */
     public function removeChildAt($i)
     {
-        if ($i < 0 || $i > count($this->children)) {
-            throw new \Exception ("Child offset out of bounds: $i. Child count : " . count($this->children));
+        if ($i < 0 || $i > \count($this->children)) {
+            throw new \Exception ("Child offset out of bounds: $i. Child count : " . \count($this->children));
         }
         unset($this->children[$i]);
         $this->children = array_values($this->children);
@@ -131,26 +142,37 @@ class XmlElement implements IXmlNode
         return $this;
     }
 
+    /**
+     * @param IXmlNode $node
+     * @return XmlElement
+     * @throws \Exception
+     */
     public function removeChild(IXmlNode $node)
     {
         return $this->removeChildAt($this->getChildIndex($node));
     }
 
+    /**
+     * @param int $offset
+     * @param IXmlNode $node
+     * @return static $this
+     * @throws \Exception
+     */
     public function addChildAt($offset, IXmlNode $node)
     {
         if ($offset < 0) {
-            throw new \Exception ("Child offset must be greater than -1" . count($this->children));
+            throw new \Exception ('Child offset must be greater than -1' . \count($this->children));
         }
 
         $result = [];
 
-        if ($offset >= count($this->children)) {
+        if ($offset >= \count($this->children)) {
             $this->addChild($node);
 
-            return null;
+            return $this;
         }
 
-        $max = count($this->children);
+        $max = \count($this->children);
 
         for ($i = 0; $i < $max; $i++) {
             $result[] = $this->children[$i];
@@ -165,14 +187,19 @@ class XmlElement implements IXmlNode
         return $this;
     }
 
-    public function addChildren($children)
+    public function addChildren(array $children)
     {
         foreach ($children as $node) {
             $this->addChild($node);
         }
     }
 
-    public function addChildrenAt($offset, $children)
+    /**
+     * @param int $offset
+     * @param array $children
+     * @throws \Exception
+     */
+    public function addChildrenAt($offset, array $children)
     {
         $i = 0;
         foreach ($children as $node) {
@@ -181,12 +208,19 @@ class XmlElement implements IXmlNode
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function detach()
     {
         $this->getParent()->removeChild($this);
     }
 
-    public function replace($otherNode)
+    /**
+     * @param IXmlNode $otherNode
+     * @throws \Exception
+     */
+    public function replace(IXmlNode $otherNode)
     {
         $parent = $this->getParent();
         $i = $parent->getChildIndex($this);
@@ -205,7 +239,7 @@ class XmlElement implements IXmlNode
     public function getElementsByTagNameNS($ns, $tagName)
     {
         $result = [];
-        $max = count($this->children);
+        $max = \count($this->children);
         for ($i = 0; $i < $max; $i++) {
             if (!($this->children[$i] instanceof static)) {
                 continue;
@@ -223,25 +257,25 @@ class XmlElement implements IXmlNode
 
     public function toXml($makeParent = true)
     {
-        $str = "";
-        if (!$this->parent && $makeParent) {
-            $str = '<?xml version="1.0" encoding="UTF-8" ?>' . chr(10);
+        $str = '';
+        if ($this->parent === null && $makeParent === true) {
+            $str = '<?xml version="1.0" encoding="UTF-8" ?>' . \chr(10);
         }
-        $str .= "<";
+        $str .= '<';
         $tagName = '';
         if ($this->getNs() != '') {
             $tagName .= $this->getNs() . ':';
         }
         $tagName .= $this->tag;
         $str .= $tagName;
-        if (count($this->attrs) > 0) {
+        if (\count($this->attrs) > 0) {
             $str .= ' ';
             foreach ($this->attrs as $name => $val) {
                 $str .= sprintf('%s="%s" ', $name, $val);
             }
             $str = trim($str);
         }
-        if (count($this->children) > 0) {
+        if (\count($this->children) > 0) {
             $str .= '>';
             foreach ($this->children as &$child) {
                 $str .= $child->__toString();

@@ -19,13 +19,19 @@ class ModelFile extends ModelData
         'bytes',
     ];
 
+    /**
+     * ModelFile constructor.
+     * @param string $file
+     * @throws \ErrorException
+     * @throws \Exception
+     */
     public function __construct($file)
     {
         parent::__construct();
 
         $this->id = Guid::create();
         $this->filename = basename($file);
-        $this->path = dirname($file);
+        $this->path = \dirname($file);
 
         if (is_file($file)) {
             $this->type = mime_content_type($file);

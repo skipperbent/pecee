@@ -56,7 +56,7 @@ class File
         curl_exec($handle);
         $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-        return $size ? $size : null;
+        return $size ?: null;
     }
 
     public static function remoteExist($url)
@@ -75,6 +75,11 @@ class File
         return false;
     }
 
+    /**
+     * @param string $url
+     * @return string
+     * @throws \ErrorException
+     */
     public static function getRemoteMime($url)
     {
         if (Url::isValid($url) === true) {
@@ -110,13 +115,13 @@ class File
     {
         if (is_dir($source) === true) {
 
-            if (is_dir($destination) === false && mkdir($destination, 0755, true) === false) {
+            if (is_dir($destination) === false && (mkdir($destination, 0755, true) === false || is_dir($destination) === false)) {
                 throw new \ErrorException('Failed to create directory: ' . $destination);
             }
 
             $files = scandir($source, SCANDIR_SORT_NONE);
             foreach ($files as $file) {
-                if (in_array($file, ['.', '..'], true) === false) {
+                if (\in_array($file, ['.', '..'], true) === false) {
                     static::move($source . '/' . $file, $destination . '/' . $file);
                 }
             }

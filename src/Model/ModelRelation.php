@@ -26,7 +26,15 @@ abstract class ModelRelation
      * @var Model
      */
     protected $parent;
+
+    /**
+     * @var string|null
+     */
     protected $alias;
+
+    /**
+     * @var array|\Closure
+     */
     protected $withDefault;
 
     public function __construct(Model $related, Model $parent)
@@ -53,7 +61,7 @@ abstract class ModelRelation
     /**
      * @return Model
      */
-    public function getParent()
+    public function getParent() : Model
     {
         return $this->parent;
     }
@@ -66,34 +74,35 @@ abstract class ModelRelation
      * @param array|\Closure $default
      * @return static $this
      */
-    public function withDefault($default)
+    public function withDefault($default) : self
     {
-
         $this->withDefault = $default;
 
         return $this;
-
     }
 
-    public function getDefaultFor(Model $parent)
+    /**
+     * @param Model $parent
+     * @return Model
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function getDefaultFor(Model $parent) : Model
     {
-
         $instance = $parent->newQuery();
 
         if ($this->withDefault === null) {
             return $instance;
         }
 
-        if (is_callable($this->withDefault) === true) {
-            return call_user_func($this->withDefault, $instance) ?: $instance;
+        if (\is_callable($this->withDefault) === true) {
+            return \call_user_func($this->withDefault, $instance) ?: $instance;
         }
 
-        if (is_array($this->withDefault) === true) {
+        if (\is_array($this->withDefault) === true) {
             $instance->mergeRows($this->withDefault);
         }
 
         return $instance;
-
     }
 
     abstract public function addConstraints();

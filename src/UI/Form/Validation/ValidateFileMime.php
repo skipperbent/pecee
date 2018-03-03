@@ -12,7 +12,7 @@ class ValidateFileMime extends ValidateFile
 
     public function validates()
     {
-        return in_array(strtolower($this->input->getType()), $this->mimeTypes, false);
+        return \in_array(strtolower($this->input->getType()), $this->mimeTypes, false);
     }
 
     public function getError()

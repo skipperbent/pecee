@@ -35,6 +35,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     protected $queryable;
 
+    /**
+     * Model constructor.
+     * @throws \Pecee\Pixie\Exception
+     */
     public function __construct()
     {
         // Set table name if its not already defined
@@ -52,6 +56,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
     }
 
+    /**
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
     public function newQuery()
     {
         return new static();
@@ -61,6 +69,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * Create new instance.
      *
      * @return static
+     * @throws \Pecee\Pixie\Exception
      */
     public static function instance()
     {
@@ -93,7 +102,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $relation = $this->guessBelongsToRelation();
         }
 
-        /* @var $instance Model */
+        /* @var $instance static */
         $instance = new $related();
 
         $foreignKey = $foreignKey ?: Str::camelize($relation) . '_' . $this->getPrimary();
@@ -125,7 +134,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $relation = $this->guessBelongsToRelation();
         }
 
-        /* @var $instance Model */
+        /* @var $instance static */
         $instance = new $related();
 
         $foreignPivotKey = $foreignPivotKey ?: $this->getForeignKey();
@@ -155,7 +164,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function hasOne($related, $foreignKey = null, $localKey = null)
     {
 
-        /* @var $instance Model */
+        /* @var $instance static */
         $instance = new $related();
 
         $foreignKey = $foreignKey ?: $this->getForeignKey();
@@ -177,7 +186,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function hasMany($related, $foreignKey = null, $localKey = null)
     {
-        /* @var $instance Model */
+        /* @var $instance static */
         $instance = new $related();
 
         $foreignKey = $foreignKey ?: $this->getForeignKey();
@@ -239,7 +248,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function save(array $data = null)
     {
-        if (is_array($this->columns) === false) {
+        if (\is_array($this->columns) === false) {
             throw new ModelException('Columns property not defined.');
         }
 
@@ -254,7 +263,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
             /* Only save valid columns */
             $data = array_filter($data, function ($key) {
-                return (in_array($key, $this->columns, true) === true);
+                return (\in_array($key, $this->columns, true) === true);
             }, ARRAY_FILTER_USE_KEY);
 
             $updateData = array_merge($updateData, $data);
@@ -266,7 +275,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
-        if (count($updateData) === 0) {
+        if (\count($updateData) === 0) {
             return $this;
         }
 
@@ -314,7 +323,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function delete()
     {
-        if (is_array($this->columns) === false) {
+        if (\is_array($this->columns) === false) {
             throw new ModelException('Columns property not defined.');
         }
 
@@ -355,7 +364,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function hasRows()
     {
-        return (isset($this->results['rows']) && count($this->results['rows']) > 0);
+        return (isset($this->results['rows']) && \count($this->results['rows']) > 0);
     }
 
     /**
@@ -389,7 +398,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function getRows()
     {
-        return isset($this->results['rows']) ? $this->results['rows'] : [];
+        return $this->results['rows'] ?? [];
     }
 
     public function setResults($results)
@@ -411,7 +420,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         $this->invokeElement($name);
 
-        return isset($this->results['rows'][$name]) ? $this->results['rows'][$name] : null;
+        return $this->results['rows'][$name] ?? null;
     }
 
     public function __set($name, $value)
@@ -423,7 +432,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         $this->invokeElement($name);
 
-        return in_array($name, $this->columns, true);
+        return \in_array($name, $this->columns, true);
     }
 
     public function getPrimary()
@@ -434,7 +443,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     protected function parseArrayData($data)
     {
 
-        if ($data instanceof Model || $data instanceof ModelCollection) {
+        if ($data instanceof static || $data instanceof ModelCollection) {
             return $data->toArray();
         }
 
@@ -442,7 +451,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $data->getResults()->toArray();
         }
 
-        if (is_array($data) === true) {
+        if (\is_array($data) === true) {
             $out = [];
             foreach ((array)$data as $key => $d) {
                 $out[$key] = $this->parseArrayData($d);
@@ -451,16 +460,16 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $out;
         }
 
-        if (is_string($data) === true) {
+        if (\is_string($data) === true) {
             $encoding = mb_detect_encoding($data, 'UTF-8', true);
             $data = ($encoding === false || strtolower($encoding) !== 'utf-8') ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
         }
 
-        if (is_bool($data) === true) {
+        if (\is_bool($data) === true) {
             return (bool)$data;
         }
 
-        if (is_float($data) === true) {
+        if (\is_float($data) === true) {
             return (float)$data;
         }
 
@@ -473,7 +482,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     protected function invokeElement($name)
     {
-        if (isset($this->with[$name]) === false || in_array($name, $this->invokedElements, true) === true) {
+        if (isset($this->with[$name]) === false || \in_array($name, $this->invokedElements, true) === true) {
             return;
         }
 
@@ -491,7 +500,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $output = $this->$method();
         }
 
-        $name = isset($this->rename[$name]) ? $this->rename[$name] : $name;
+        $name = $this->rename[$name] ?? $name;
 
         $this->{$name} = $output;
     }
@@ -513,13 +522,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $output = [];
 
         foreach ($rows as $key => $row) {
-            $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
-            if (in_array($key, $this->hidden, true) === false) {
+            $key = $this->rename[$key] ?? $key;
+            if (\in_array($key, $this->hidden, true) === false) {
                 $output[$key] = $this->parseArrayData($row);
             }
         }
 
-        if (count($this->filter) > 0) {
+        if (\count($this->filter) > 0) {
 
             $filtered = [];
 
@@ -543,7 +552,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function with($method)
     {
         foreach ((array)$method as $key => $value) {
-            if (is_string($value) === true && is_numeric($key) === true) {
+            if (\is_string($value) === true && is_numeric($key) === true) {
                 $this->with[$value] = $value;
             } else {
                 $this->with[$key] = $value;
@@ -561,7 +570,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     public function without($method)
     {
-        if (is_array($method) === true) {
+        if (\is_array($method) === true) {
             foreach ($method as $with) {
                 $key = array_search($with, $this->with, true);
                 if ($key !== false) {
@@ -607,6 +616,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param array $parameters
      *
      * @return static|QueryBuilderHandler|null
+     * @throws \Pecee\Pixie\Exception
      */
     public static function __callStatic($method, $parameters)
     {

@@ -34,7 +34,7 @@ abstract class ValidateInput
      */
     public function runValidation()
     {
-        if($this->allowEmpty === true && (string)trim($this->input->getValue()) === '') {
+        if($this->allowEmpty === true && trim($this->input->getValue()) === '') {
             return true;
         }
 

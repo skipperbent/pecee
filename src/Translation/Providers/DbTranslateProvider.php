@@ -17,11 +17,19 @@ class DbTranslateProvider implements ITranslationProvider
     protected $defaultLocale;
     protected $autoCreate = true;
 
+    /**
+     * DbTranslateProvider constructor.
+     * @throws \Pecee\Pixie\Exception
+     */
     public function __construct()
     {
         $this->model = new ModelLanguage();
     }
 
+    /**
+     * @return string
+     * @throws \Pecee\Http\Exceptions\MalformedUrlException
+     */
     public function getContext()
     {
         $route = Router::request()->getLoadedRoute();
@@ -33,6 +41,13 @@ class DbTranslateProvider implements ITranslationProvider
         return '';
     }
 
+    /**
+     * @param string $key
+     * @return string
+     * @throws \Pecee\Http\Exceptions\MalformedUrlException
+     * @throws \Pecee\Model\Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function lookup($key)
     {
         if ($this->translations !== null && $this->translations->hasRows()) {
@@ -56,6 +71,11 @@ class DbTranslateProvider implements ITranslationProvider
         return $key;
     }
 
+    /**
+     * @param string $locale
+     * @throws \Pecee\Http\Exceptions\MalformedUrlException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function load($locale)
     {
         $this->translations = $this->model->filterLocale($locale)->filterContext($this->getContext())->all();

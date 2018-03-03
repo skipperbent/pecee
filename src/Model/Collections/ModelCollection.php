@@ -88,7 +88,7 @@ class ModelCollection extends Collection
             /* @var $row \Pecee\Model\Model */
             foreach ($this->getRows() as $rowKey => $row) {
 
-                if (in_array($row, $out, true) !== false) {
+                if (\in_array($row, $out, true) !== false) {
                     continue;
                 }
 
@@ -178,7 +178,7 @@ class ModelCollection extends Collection
      */
     public function toArray($filterKeys = null)
     {
-        $filterKeys = ($filterKeys !== null && is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
+        $filterKeys = ($filterKeys !== null && \is_string($filterKeys) === true) ? \func_get_args() : $filterKeys;
 
         $output = [];
 
@@ -190,7 +190,7 @@ class ModelCollection extends Collection
 
         /* @var $row \Pecee\Model\Model */
 
-        for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
+        for ($i = 0, $max = \count($this->rows); $i < $max; $i++) {
 
             $row = $this->rows[$i];
 
@@ -219,7 +219,7 @@ class ModelCollection extends Collection
     {
         $output = [];
         /* @var $row \Pecee\Model\Model */
-        for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
+        for ($i = 0, $max = \count($this->rows); $i < $max; $i++) {
             $row = $this->rows[$i];
             $output[$row->{$valueRow}] = $row->{$displayRow};
         }

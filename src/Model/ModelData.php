@@ -13,6 +13,11 @@ abstract class ModelData extends Model
     protected $dataValueField = 'value';
     protected $mergeData = true;
 
+    /**
+     * ModelData constructor.
+     * @throws \ErrorException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function __construct()
     {
         parent::__construct();
@@ -28,6 +33,11 @@ abstract class ModelData extends Model
 
     abstract protected function fetchData();
 
+    /**
+     * @param Model $field
+     * @throws Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     protected function onNewDataItemCreate(Model $field)
     {
         $field->{$this->getDataPrimary()} = $this->{$this->primary};
@@ -45,6 +55,10 @@ abstract class ModelData extends Model
         $this->updateIdentifier = $this->generateUpdateIdentifier();
     }
 
+    /**
+     * @throws Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     protected function updateData()
     {
         if ($this->data !== null && $this->getUpdateIdentifier() !== $this->generateUpdateIdentifier()) {
@@ -61,7 +75,7 @@ abstract class ModelData extends Model
                 $cf[strtolower($field->{$this->dataKeyField})] = $field;
             }
 
-            if (count($this->data->getData())) {
+            if (\count($this->data->getData())) {
 
                 foreach ($this->data->getData() as $key => $value) {
 
@@ -97,9 +111,15 @@ abstract class ModelData extends Model
         }
     }
 
+    /**
+     * @param array|null $data
+     * @return void|static
+     * @throws Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function save(array $data = null)
     {
-        if($data !== null && count($data) > 0) {
+        if($data !== null && \count($data) > 0) {
             foreach($data as $key => $value) {
                 $this->{$key} = $value;
             }
@@ -113,7 +133,7 @@ abstract class ModelData extends Model
     {
         $keys = array_map('strtolower', array_keys($this->getRows()));
         foreach ($data as $key => $d) {
-            if (in_array(strtolower($key), $keys, false) === false) {
+            if (\in_array(strtolower($key), $keys, false) === false) {
                 $this->data->$key = $d;
             }
         }
@@ -130,7 +150,7 @@ abstract class ModelData extends Model
         }
 
         return array_filter($rows, function ($key) {
-            return (in_array($key, $this->hidden, true) === false);
+            return (\in_array($key, $this->hidden, true) === false);
         }, ARRAY_FILTER_USE_KEY);
     }
 

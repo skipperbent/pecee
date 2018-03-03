@@ -18,7 +18,7 @@ class Cookie
      */
     public static function create($id, $value, $expireTime = null, $domain = null, $secure = null, $path = '/')
     {
-        $expireTime = ($expireTime === null) ? Carbon::now()->addYear(10)->timestamp : $expireTime;
+        $expireTime = $expireTime ?? Carbon::now()->addYear(10)->timestamp;
         $expireTime = ($expireTime > 0) ? $expireTime : null;
 
         if ($domain === null) {

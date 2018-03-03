@@ -10,13 +10,13 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelNode extends ModelData
 {
-    const SORT_ID = 'id';
-    const SORT_PARENT = 'parent';
-    const SORT_TITLE = 'title';
-    const SORT_UPDATED = 'updated';
-    const SORT_CREATED = 'created';
-    const SORT_ACTIVE_CREATED = 'active_created';
-    const SORT_ORDER = 'order';
+    public const SORT_ID = 'id';
+    public const SORT_PARENT = 'parent';
+    public const SORT_TITLE = 'title';
+    public const SORT_UPDATED = 'updated';
+    public const SORT_CREATED = 'created';
+    public const SORT_ACTIVE_CREATED = 'active_created';
+    public const SORT_ORDER = 'order';
 
     public static $sortTypes = [
         self::SORT_ID,
@@ -51,6 +51,12 @@ class ModelNode extends ModelData
     protected $mergeData = false;
     protected $fixedIdentifier = true;
 
+    /**
+     * ModelNode constructor.
+     * @throws \ErrorException
+     * @throws \Exception
+     * @throws \Pecee\Pixie\Exception
+     */
     public function __construct()
     {
         parent::__construct();
@@ -219,6 +225,9 @@ class ModelNode extends ModelData
         return true;
     }
 
+    /**
+     * @throws \Pecee\Pixie\Exception
+     */
     public function calculatePath()
     {
         $path = ['0'];
@@ -245,10 +254,14 @@ class ModelNode extends ModelData
                 $path[] = $this->parent_id;
             }
         }
-        $this->path = join('>', $path);
-        $this->level = count($path);
+        $this->path = implode('>', $path);
+        $this->level = \count($path);
     }
 
+    /**
+     * @return null|static
+     * @throws \Pecee\Pixie\Exception
+     */
     public function getNext()
     {
         if ($this->next === false) {
@@ -267,6 +280,10 @@ class ModelNode extends ModelData
         return $this->next;
     }
 
+    /**
+     * @return null|static
+     * @throws \Pecee\Pixie\Exception
+     */
     public function getPrev()
     {
         if ($this->prev === false) {
@@ -290,6 +307,9 @@ class ModelNode extends ModelData
      * @param string $type
      * @param bool $recursive
      * @return static
+     * @throws \ErrorException
+     * @throws \Exception
+     * @throws \Pecee\Pixie\Exception
      */
     public function getChildrenOfType($type, $recursive = true)
     {
@@ -315,12 +335,17 @@ class ModelNode extends ModelData
 
     /**
      * Get node children
+     * @throws \Pecee\Pixie\Exception
      */
     public function getChildren()
     {
         return static::instance()->filterParentId($this->id);
     }
 
+    /**
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
     public function getParents()
     {
         $parentIds = explode('>', $this->path);
@@ -328,6 +353,10 @@ class ModelNode extends ModelData
         return static::instance()->filterIds($parentIds)->orderBy('path')->orderBy('order');
     }
 
+    /**
+     * @return null|static
+     * @throws \Pecee\Pixie\Exception
+     */
     public function getParent()
     {
         if ($this->parent === null && $this->parent_id !== null) {
@@ -337,6 +366,12 @@ class ModelNode extends ModelData
         return $this->parent;
     }
 
+    /**
+     * @param array|null $data
+     * @return void|static
+     * @throws Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
     public function save(array $data = null)
     {
         if ($this->isNew() === true) {
@@ -353,7 +388,7 @@ class ModelNode extends ModelData
      */
     public function filterIds(array $ids)
     {
-        if (count($ids) === 0) {
+        if (\count($ids) === 0) {
             return $this;
         }
 
@@ -419,7 +454,7 @@ class ModelNode extends ModelData
     public function order($type, $direction = 'ASC')
     {
 
-        if (in_array($type, static::$sortTypes, true) === false) {
+        if (\in_array($type, static::$sortTypes, true) === false) {
             throw new \InvalidArgumentException('Invalid sort type');
         }
 
@@ -462,6 +497,13 @@ class ModelNode extends ModelData
         });
     }
 
+    /**
+     * @param string $key
+     * @param string $value
+     * @param string $operator
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
     public function filterKey($key, $value, $operator = '=')
     {
         $subQuery = NodeData::instance()
@@ -474,11 +516,18 @@ class ModelNode extends ModelData
         return $this->where('id', '=', $this->subQuery($subQuery));
     }
 
+    /**
+     * @return string
+     */
     protected function getDataClass()
     {
         return NodeData::class;
     }
 
+    /**
+     * @return Collections\ModelCollection
+     * @throws \Pecee\Pixie\Exception
+     */
     protected function fetchData()
     {
         return NodeData::instance()->filerNodeId($this->id)->all();
