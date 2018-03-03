@@ -523,7 +523,8 @@ class ModelQueryBuilder
                 }
             }
 
-            return $this->query->update($data);
+            $this->query->update($data);
+            return $this->model;
         }
 
         // Update single item
@@ -563,7 +564,8 @@ class ModelQueryBuilder
                 }
             }
 
-            return $this->query->insert($data);
+            $this->query->insert($data);
+            return $this->model;
         }
 
         // Create single item

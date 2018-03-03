@@ -20,6 +20,7 @@ abstract class Widget extends Base
 
         $this->setTemplate('Default.php');
         $this->setContentTemplate($this->getTemplatePath());
+        $this->setInputValues();
     }
 
     /**
@@ -216,7 +217,6 @@ abstract class Widget extends Base
     {
         $this->renderContent();
         $this->renderTemplate();
-        $this->_messages->clear();
         debug('END WIDGET: ' . static::class);
 
         return $this->_contentHtml;
