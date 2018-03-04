@@ -75,9 +75,10 @@ abstract class Base
             $input = input()->getObject($key, new InputItem($key, null));
             $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
-            /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
-            foreach ((array)$validations as $validateClass) {
+            $validations = is_array($validations) === false ? [$validations] : $validations;
 
+            /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
+            foreach ($validations as $validateClass) {
                 foreach ($inputs as $input) {
                     $validateClass->setInput($input);
                     if ($validateClass->runValidation() === false) {
@@ -128,6 +129,7 @@ abstract class Base
     public function getMessage($type, $placement = null)
     {
         $messages = $this->getMessages($type, $placement);
+
         return (count($messages) > 0) ? $messages[0] : null;
     }
 
