@@ -231,9 +231,4 @@ abstract class Base
         return $messages;
     }
 
-    public function __destruct()
-    {
-        $this->_messages->clear();
-    }
-
 }

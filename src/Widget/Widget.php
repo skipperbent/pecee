@@ -217,6 +217,8 @@ abstract class Widget extends Base
     {
         $this->renderContent();
         $this->renderTemplate();
+        $this->_messages->clear();
+
         debug('END WIDGET: ' . static::class);
 
         return $this->_contentHtml;

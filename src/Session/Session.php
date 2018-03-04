@@ -30,14 +30,7 @@ class Session
     public static function destroy($id)
     {
         static::start();
-
-        if (static::exists($id)) {
-            unset($_SESSION[$id]);
-
-            return true;
-        }
-
-        return false;
+        unset($_SESSION[$id]);
     }
 
     public static function exists($id)
