@@ -42,14 +42,9 @@ class ModelQueryBuilder
     protected function createInstance(\stdClass $item)
     {
         /* @var $model Model */
-        $model = get_class($this->model);
-        $model = new $model();
-        $model->with($this->model->getWith());
-        $model->mergeRows((array)$item);
+        $model = clone $this->model;
+        $model->setRows((array)$item);
         $model->setOriginalRows((array)$item);
-        $model->hideFields($this->model->getHiddenFields());
-        $model->rename($this->model->getRenamedFields());
-        $model->filter($this->model->getFilteredFields());
         $model->onInstanceCreate();
 
         return $model;
@@ -524,6 +519,7 @@ class ModelQueryBuilder
             }
 
             $this->query->update($data);
+
             return $this->model;
         }
 
@@ -565,6 +561,7 @@ class ModelQueryBuilder
             }
 
             $this->query->insert($data);
+
             return $this->model;
         }
 

@@ -22,6 +22,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     protected $primary = 'id';
     protected $hidden = [];
     protected $with = [];
+    protected $withAutoInvokeColumns = [];
     protected $invokedElements = [];
     protected $rename = [];
     protected $columns = [];
@@ -69,7 +70,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function onInstanceCreate()
     {
+        if ($this->isNew() === true) {
+            return;
+        }
 
+        foreach ($this->withAutoInvokeColumns as $column) {
+            $this->invokeElement($column);
+        }
     }
 
     public function onCollectionCreate($items)
@@ -549,6 +556,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                 $this->with[$key] = $value;
             }
         }
+
+        return $this;
+    }
+
+    public function withAutoInvoke(array $columns)
+    {
+        $this->withAutoInvokeColumns = $columns;
 
         return $this;
     }
