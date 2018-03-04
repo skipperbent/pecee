@@ -49,7 +49,7 @@
                     <?= $log['debug'][count($log['debug'])-1]['method']; ?>
                 </td>
                 <td>
-                    <?= $log['file']; ?>
+                    <?= $log['debug'][count($log['debug'])-1]['file']; ?>
                 </td>
                 <td align="center">
                     <?= !isset($log['debug'][count($log['debug'])-1]['line']) ? '-' : $log['debug'][count($log['debug'])-1]['line']; ?>
