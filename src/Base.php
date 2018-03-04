@@ -139,9 +139,6 @@ abstract class Base
      */
     public function getMessages($type, $placement = null)
     {
-        // Trigger validation
-        $this->performValidation();
-
         $messages = [];
         $search = $this->_messages->get($type);
 
