@@ -1,16 +1,16 @@
 <?php
+
 namespace Pecee\DB;
 
 use Pecee\Collection\CollectionItem;
 
 class Pdo
 {
-
-    protected static $instance;
-
     const SETTINGS_USERNAME = 'username';
     const SETTINGS_PASSWORD = 'password';
     const SETTINGS_CONNECTION_STRING = 'driver';
+
+    protected static $instance;
 
     protected $connection;
     protected $query;
@@ -22,12 +22,13 @@ class Pdo
      */
     public static function getInstance()
     {
-        if (self::$instance === null) {
-            self::$instance = new static(env('DB_DRIVER', 'mysql') . ':host=' . env('DB_HOST') . ';dbname=' . env('DB_DATABASE') . ';charset=' . env('DB_CHARSET', 'utf8'),
+        if (static::$instance === null) {
+            static::$instance = new static(
+                env('DB_DRIVER', 'mysql') . ':host=' . env('DB_HOST') . ';dbname=' . env('DB_DATABASE') . ';charset=' . env('DB_CHARSET', 'utf8'),
                 env('DB_USERNAME'), env('DB_PASSWORD'));
         }
 
-        return self::$instance;
+        return static::$instance;
     }
 
     protected function __construct($connectionString, $username, $password)
@@ -43,6 +44,7 @@ class Pdo
     public function close()
     {
         $this->connection = null;
+        static::$instance = null;
     }
 
     /**
@@ -55,27 +57,27 @@ class Pdo
      */
     public function query($query, array $parameters = null)
     {
-        $query = $this->connection->prepare($query);
+        $pdoStatement = $this->connection->prepare($query);
         $inputParameters = null;
 
-        if (is_array($parameters)) {
+        if ($parameters !== null && count($parameters) !== 0) {
             $keyTest = array_keys($parameters)[0];
 
-            if (!is_int($keyTest)) {
+            if (is_int($keyTest) === false) {
                 foreach ($parameters as $key => $value) {
-                    $query->bindParam($key, $value);
+                    $pdoStatement->bindParam($key, $value);
                 }
             } else {
                 $inputParameters = $parameters;
             }
         }
 
-        $this->query = $query->queryString;
+        $this->query = $pdoStatement->queryString;
         debug('START DB QUERY:' . $this->query);
-        if ($query->execute($inputParameters)) {
+        if ($pdoStatement->execute($inputParameters) === true) {
             debug('END DB QUERY');
 
-            return $query;
+            return $pdoStatement;
         }
 
         return null;
@@ -84,7 +86,7 @@ class Pdo
     public function all($query, array $parameters = null)
     {
         $query = $this->query($query, $parameters);
-        if ($query) {
+        if ($query instanceof \PDOStatement) {
             $results = $query->fetchAll(\PDO::FETCH_ASSOC);
             $output = [];
 
@@ -101,13 +103,14 @@ class Pdo
     public function single($query, array $parameters = null)
     {
         $result = $this->all($query . ' LIMIT 1', $parameters);
-        if ($result !== null) {
-            return $result[0];
-        }
 
-        return null;
+        return ($result !== null) ? $result[0] : null;
     }
 
+    /**
+     * @param $query
+     * @param array|null $parameters
+     */
     public function nonQuery($query, array $parameters = null)
     {
         $this->query($query, $parameters);
@@ -116,21 +119,15 @@ class Pdo
     public function value($query, array $parameters = null)
     {
         $query = $this->query($query, $parameters);
-        if ($query) {
-            return $query->fetchColumn();
-        }
 
-        return null;
+        return ($query instanceof \PDOStatement) ? $query->fetchColumn() : null;
     }
 
     public function insert($query, array $parameters = null)
     {
         $query = $this->query($query, $parameters);
-        if ($query) {
-            return $this->connection->lastInsertId();
-        }
 
-        return null;
+        return ($query instanceof \PDOStatement) ? $this->connection->lastInsertId() : null;
     }
 
     /**
