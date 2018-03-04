@@ -32,7 +32,7 @@ class ModelQueryBuilder
     public function __construct(Model $model)
     {
         $this->model = $model;
-        $this->query = (new QueryBuilderHandler(app()->db))->table($model->getTable());
+        $this->query = (new QueryBuilderHandler())->table($model->getTable());
     }
 
     /**
