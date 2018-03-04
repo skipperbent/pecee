@@ -33,6 +33,7 @@ class Pdo
 
     protected function __construct($connectionString, $username, $password)
     {
+        $this->query = null;
         $this->connection = new \PDO($connectionString, $username, $password);
         $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
