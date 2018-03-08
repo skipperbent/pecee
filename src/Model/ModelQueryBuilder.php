@@ -449,34 +449,53 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return int
+     * @param string $field
+     * @return float
      * @throws Exception
      */
-    public function count()
+    public function count($field = '*')
     {
-        return $this->query->count();
+        return $this->query->count($field);
     }
 
     /**
-     * return int
+     * @param string $field
+     * @return float
+     * @throws Exception
+     */
+    public function min($field)
+    {
+        return $this->query->min($field);
+    }
+
+    /**
+     * @param string $field
+     * @return float
      * @throws Exception
      */
     public function max($field)
     {
-        $result = $this->query->select($this->query->raw('MAX(' . $field . ') AS max'))->get();
-
-        return (int)$result[0]->max;
+        return $this->query->max($field);
     }
 
     /**
-     * @return int
+     * @param string $field
+     * @return float
+     * @throws Exception
+     */
+    public function average($field)
+    {
+        return $this->query->average($field);
+    }
+
+    /**
+     * @param string $field
+     * @return float
      * @throws Exception
      */
     public function sum($field)
     {
-        $result = $this->query->select($this->query->raw('SUM(' . $field . ') AS sum'))->get();
-
-        return (int)$result[0]->sum;
+        return $this->query->sum($field);
     }
 
     /**
