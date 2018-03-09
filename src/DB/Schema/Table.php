@@ -168,19 +168,21 @@ class Table
             $length = '(' . $column->getLength() . ')';
         }
 
+        $alterColumn = '';
+
         $modify = false;
-        $modifyType = '';
 
         if ($type === static::TYPE_ALTER) {
 
-            $modifyType = '';
+            $alterColumn = 'ADD COLUMN';
 
             if ($this->columnExists($column->getName())) {
                 $modify = true;
+                $alterColumn = 'MODIFY COLUMN';
             }
         }
 
-        $query = sprintf('%s `%s` %s%s %s', (($modify) ? 'MODIFY' : $modifyType), $column->getName(), $column->getType(), $length, $column->getAttributes());
+        $query = sprintf('%s `%s` %s%s %s', $alterColumn, $column->getName(), $column->getType(), $length, $column->getAttributes());
 
         $query .= (!$column->getNullable()) ? ' NOT null' : ' null';
 
@@ -208,7 +210,11 @@ class Table
                 ]);
             }
 
-            $query .= sprintf(', %1$s %2$s (`%3$s`)', $modifyType, $column->getIndex(), $column->getName());
+            $query .= sprintf(', %1$s %2$s `%3$s`(`%3$s`)',
+                ($column->getIndex() !== Column::INDEX_PRIMARY) ? 'ADD ' : '',
+                $column->getIndex(),
+                $column->getName()
+            );
         }
 
         if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
@@ -219,8 +225,7 @@ class Table
                 ]);
             }
 
-            $query .= sprintf(', %1$s CONSTRAINT FOREIGN KEY(`%2$s`) REFERENCES `%3$s`(`%4$s`) ON UPDATE %5$s ON DELETE %6$s',
-                $modifyType,
+            $query .= sprintf(', CONSTRAINT FOREIGN KEY(`%1$s`) REFERENCES `%2$s`(`%3$s`) ON UPDATE %4$s ON DELETE %5$s',
                 $column->getName(),
                 $column->getRelationTable(),
                 $column->getRelationColumn(),
