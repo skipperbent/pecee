@@ -43,7 +43,7 @@ class ModelQueryBuilder
     {
         /* @var $model Model */
         $model = clone $this->model;
-        $model->setRows((array)$item);
+        $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
 
@@ -79,7 +79,6 @@ class ModelQueryBuilder
      */
     public function table($table)
     {
-
         $this->query = $this->getQuery()->table($table);
 
         return $this->model;
