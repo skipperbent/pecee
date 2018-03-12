@@ -681,7 +681,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function __clone()
     {
-        $this->setQuery(clone $this->queryable);
+        $this->queryable = clone $this->queryable;
+        $this->queryable->setModel($this);
     }
 
     public function getAttribute($name)
