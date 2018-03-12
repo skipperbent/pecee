@@ -211,7 +211,7 @@ class Table
             }
 
             $query .= sprintf(', %1$s %2$s `%3$s`(`%3$s`)',
-                ($column->getIndex() !== Column::INDEX_PRIMARY) ? 'ADD ' : '',
+                ($column->getIndex() !== Column::INDEX_PRIMARY && $modify === true) ? 'ADD ' : '',
                 $column->getIndex(),
                 $column->getName()
             );
