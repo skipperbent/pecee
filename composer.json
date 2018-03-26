@@ -21,7 +21,7 @@
   "require": {
     "php": ">=5.4.0",
     "josegonzalez/dotenv": "3.*",
-    "pecee/simple-router": "3.*",
+    "pecee/simple-router": "4.0.0.0a",
     "robmorgan/phinx": "^0.5.3",
     "nesbot/carbon": "1.*"
   },
