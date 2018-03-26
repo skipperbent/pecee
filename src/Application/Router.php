@@ -22,7 +22,7 @@ class Router extends SimpleRouter
         }
     }
 
-    public static function start()
+    public static function start() : void
     {
         debug('Router initialised.');
 

@@ -22,6 +22,7 @@ use Pecee\Application\Router as Router;
  * @param string|array|null $parameters
  * @param array|null $getParams
  * @return string
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function url($name = null, $parameters = null, $getParams = null)
 {
@@ -30,6 +31,7 @@ function url($name = null, $parameters = null, $getParams = null)
 
 /**
  * @return \Pecee\Http\Response
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function response()
 {
@@ -38,6 +40,7 @@ function response()
 
 /**
  * @return \Pecee\Http\Request
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function request()
 {
@@ -50,15 +53,16 @@ function request()
  * @param string|null $defaultValue Default return value
  * @param string|array|null $methods Default method
  * @return string|\Pecee\Http\Input\Input
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function input($index = null, $defaultValue = null, $methods = null)
 {
     if($index !== null)
     {
-        return request()->getInput()->get($index, $defaultValue, $methods);
+        return request()->getInputHandler()->get($index, $defaultValue, $methods);
     }
 
-    return request()->getInput();
+    return request()->getInputHandler();
 }
 
 function redirect($url, $code = null)
@@ -74,6 +78,7 @@ function redirect($url, $code = null)
  * Get main application class
  *
  * @return \Pecee\Application\Application
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function app()
 {
@@ -84,6 +89,7 @@ function app()
  * @param string $key
  * @param array|string $args
  * @return string
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function lang($key, $args = null)
 {
@@ -101,6 +107,7 @@ function lang($key, $args = null)
  *
  * @param string $text
  * @param array|null $args
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function debug($text, $args = null)
 {
@@ -135,6 +142,7 @@ function env($key, $default = null)
 /**
  * Get current csrf-token
  * @return string|null
+ * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function csrf_token()
 {

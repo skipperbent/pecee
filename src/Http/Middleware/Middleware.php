@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Http\Middleware;
 
 use Pecee\Http\Request;
@@ -6,6 +7,6 @@ use Pecee\Http\Request;
 abstract class Middleware implements IMiddleware
 {
 
-    abstract public function handle(Request $request);
+    abstract public function handle(Request $request): void;
 
 }
