@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Widget;
 
 use Pecee\Base;
@@ -14,13 +15,17 @@ abstract class Widget extends Base
 
     public function __construct()
     {
-        parent::__construct();
 
-        debug('START WIDGET: ' . static::class);
+    }
 
-        $this->setTemplate('Default.php');
-        $this->setContentTemplate($this->getTemplatePath());
-        $this->setInputValues();
+    public function onLoad()
+    {
+
+    }
+
+    public function onPostBack()
+    {
+
     }
 
     /**
@@ -30,16 +35,17 @@ abstract class Widget extends Base
     protected function getTemplatePath()
     {
         $path = substr(static::class, strpos(static::class, 'Widget') + 7);
+
         return 'views/content/' . str_replace('\\', DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
     public function showMessages($type, $placement = null)
     {
-        $placement = ($placement === null) ? $this->defaultMessagePlacement : $placement;
+        $placement = $placement ?? $this->defaultMessagePlacement;
 
         $errors = $this->getMessages($type, $placement);
 
-        if (count($errors) > 0) {
+        if (\count($errors) > 0) {
             $o = sprintf('<div class="alert alert-%s">', $type);
 
             $msg = [];
@@ -48,7 +54,7 @@ abstract class Widget extends Base
                 $msg[] = $error->getMessage();
             }
 
-            return $o . join('<br>', $msg) . '</div>';
+            return $o . implode('<br>', $msg) . '</div>';
         }
 
         return '';
@@ -90,11 +96,11 @@ abstract class Widget extends Base
             $this->getSite()->addMeta(['content' => $this->getSite()->getDescription(), 'name' => 'description']);
         }
 
-        if (count($this->getSite()->getKeywords()) > 0) {
+        if (\count($this->getSite()->getKeywords()) > 0) {
             $this->getSite()->addMeta(['content' => join(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
         }
 
-        if (count($this->getSite()->getHeader()) > 0) {
+        if (\count($this->getSite()->getHeader()) > 0) {
             $header = $this->getSite()->getHeader();
             $output .= join('', $header);
         }
@@ -106,7 +112,7 @@ abstract class Widget extends Base
     {
         $output = '';
 
-        if (count($this->getSite()->getCssFilesWrapped($section)) > 0) {
+        if (\count($this->getSite()->getCssFilesWrapped($section)) > 0) {
             $css = url(app()->getCssWrapRouteName(), null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
@@ -125,7 +131,7 @@ abstract class Widget extends Base
     {
         $output = '';
 
-        if (count($this->getSite()->getJsFilesWrapped($section)) > 0) {
+        if (\count($this->getSite()->getJsFilesWrapped($section)) > 0) {
             $js = url(app()->getJsWrapRouteName(), null, ['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]);
             $output .= (new Html('script'))->attr('src', $js);
         }
@@ -215,9 +221,28 @@ abstract class Widget extends Base
      */
     public function render()
     {
+        if($this->_template === null) {
+            $this->setTemplate('Default.php');
+        }
+
+        if($this->_contentTemplate === null) {
+            $this->setContentTemplate($this->getTemplatePath());
+        }
+
+        $this->setInputValues();
+
+        // Trigger onLoad event
+        $this->onLoad();
+
+        // Trigger postback event
+        if(request()->getMethod() === 'post') {
+            $this->onPostBack();
+        }
+
         $this->renderContent();
         $this->renderTemplate();
-        $this->_messages->clear();
+
+        $this->sessionMessage()->clear();
 
         debug('END WIDGET: ' . static::class);
 

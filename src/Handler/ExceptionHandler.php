@@ -2,8 +2,8 @@
 
 namespace Pecee\Handler;
 
-use Pecee\Handlers\IExceptionHandler;
 use Pecee\Http\Request;
+use Pecee\SimpleRouter\Handlers\IExceptionHandler;
 
 abstract class ExceptionHandler implements IExceptionHandler
 {
