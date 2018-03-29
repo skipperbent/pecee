@@ -4,7 +4,10 @@
  * Contain helper functions which provides shortcuts for various classes.
  */
 
-use Pecee\Application\Router as Router;
+use Pecee\Application\Router;
+use Pecee\Http\Request;
+use Pecee\Http\Response;
+use Pecee\Http\Url;
 
 /**
  * Get url for a route by using either name/alias, class or method name.
@@ -21,28 +24,26 @@ use Pecee\Application\Router as Router;
  * @param string|null $name
  * @param string|array|null $parameters
  * @param array|null $getParams
- * @return string
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
+ * @return \Pecee\Http\Url
+ * @throws \InvalidArgumentException
  */
-function url($name = null, $parameters = null, $getParams = null)
+function url(?string $name = null, $parameters = null, ?array $getParams = null): Url
 {
-    return app()->getUrlHandler()->getUrl($name, $parameters, $getParams);
+    return Router::getUrl($name, $parameters, $getParams);
 }
 
 /**
  * @return \Pecee\Http\Response
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
-function response()
+function response(): Response
 {
     return Router::response();
 }
 
 /**
  * @return \Pecee\Http\Request
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
-function request()
+function request(): Request
 {
     return Router::request();
 }
@@ -51,21 +52,23 @@ function request()
  * Get input class
  * @param string|null $index Parameter index name
  * @param string|null $defaultValue Default return value
- * @param string|array|null $methods Default method
- * @return string|\Pecee\Http\Input\Input
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
+ * @param array ...$methods Default methods
+ * @return \Pecee\Http\Input\InputHandler|\Pecee\Http\Input\IInputItem|string
  */
-function input($index = null, $defaultValue = null, $methods = null)
+function input($index = null, $defaultValue = null, ...$methods)
 {
-    if($index !== null)
-    {
-        return request()->getInputHandler()->get($index, $defaultValue, $methods);
+    if ($index !== null) {
+        return request()->getInputHandler()->getValue($index, $defaultValue, ...$methods);
     }
 
     return request()->getInputHandler();
 }
 
-function redirect($url, $code = null)
+/**
+ * @param string $url
+ * @param int|null $code
+ */
+function redirect(string $url, ?int $code = null): void
 {
     if ($code !== null) {
         response()->httpCode($code);
@@ -78,7 +81,6 @@ function redirect($url, $code = null)
  * Get main application class
  *
  * @return \Pecee\Application\Application
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function app()
 {
@@ -89,7 +91,6 @@ function app()
  * @param string $key
  * @param array|string $args
  * @return string
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
 function lang($key, $args = null)
 {
@@ -106,18 +107,11 @@ function lang($key, $args = null)
  * Requires DEBUG=1 to be present in your env file.
  *
  * @param string $text
- * @param array|null $args
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
+ * @param array $args
  */
-function debug($text, $args = null)
+function debug($text, ...$args)
 {
     if (app()->getDebugEnabled() === true) {
-        if($args !== null && is_array($args) === false)
-        {
-            $args = func_get_args();
-            array_shift($args);
-        }
-
         app()->debug->add($text, $args);
     }
 }
@@ -136,15 +130,14 @@ function add_module($name, $path)
  */
 function env($key, $default = null)
 {
-    return isset($_ENV[$key]) ? $_ENV[$key] : $default;
+    return $_ENV[$key] ?? $default;
 }
 
 /**
  * Get current csrf-token
  * @return string|null
- * @throws \Pecee\Http\Exceptions\MalformedUrlException
  */
-function csrf_token()
+function csrf_token(): ?string
 {
     $baseVerifier = Router::router()->getCsrfVerifier();
     if ($baseVerifier !== null) {

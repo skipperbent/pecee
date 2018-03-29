@@ -79,15 +79,10 @@ class Debug
     /**
      * Add debug entry
      * @param string $text
-     * @param array|null $args
+     * @param array $args
      */
-    public function add($text, $args = null)
+    public function add($text, array $args = [])
     {
-        if (is_array($args) === false) {
-            $args = func_get_args();
-            array_shift($args);
-        }
-
         $this->addObject(vsprintf(str_replace('%', '%%', $text), $args));
     }
 

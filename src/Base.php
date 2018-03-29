@@ -12,12 +12,14 @@ abstract class Base
     protected $errorType = 'danger';
     protected $defaultMessagePlacement = 'default';
     protected $_inputSessionKey = 'InputValues';
-    protected $_messages;
     protected $_validations = [];
 
-    public function __construct()
+    /**
+     * @return SessionMessage
+     */
+    public function sessionMessage() : SessionMessage
     {
-        $this->_messages = new SessionMessage();
+        return new SessionMessage();
     }
 
     protected function setInputValues()
@@ -26,7 +28,9 @@ abstract class Base
 
         /* @var array $values */
         foreach ($values as $key => $value) {
-            $item = input()->getObject($key, new InputItem($key), ['get', 'post'])->setValue($value);
+            $item = input()->get($key, ['get', 'post']) ?? new InputItem($key);
+            $item->setValue($value);
+
             if (request()->getMethod() === 'post') {
                 input()->post[$key] = $item;
             } else {
@@ -40,7 +44,7 @@ abstract class Base
     public function setInputName(array $names)
     {
         foreach ($names as $key => $name) {
-            $item = input()->getObject($key);
+            $item = input()->get($key);
 
             /* @var $item \Pecee\Http\Input\IInputItem */
             if ($item !== null) {
@@ -72,7 +76,7 @@ abstract class Base
     {
         foreach ($validation as $key => $validations) {
 
-            $input = input()->getObject($key, new InputItem($key, null));
+            $input = input()->get($key) ?? new InputItem($key, null);
             $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
             $validations = is_array($validations) === false ? [$validations] : $validations;
@@ -142,7 +146,7 @@ abstract class Base
     public function getMessages($type, $placement = null)
     {
         $messages = [];
-        $search = $this->_messages->get($type);
+        $search = $this->sessionMessage()->get($type);
 
         if ($search !== null && count($search) > 0) {
             /* @var $search array */
@@ -175,7 +179,7 @@ abstract class Base
         $msg->setMessage($message);
         $msg->setPlacement(($placement === null) ? $this->defaultMessagePlacement : $placement);
         $msg->setIndex($index);
-        $this->_messages->set($msg, $type);
+        $this->sessionMessage()->set($msg, $type);
     }
 
     public function hasErrors($placement = null, $errorType = null)
@@ -219,7 +223,7 @@ abstract class Base
     public function getValidation($index)
     {
         $messages = [];
-        $search = $this->_messages->get($this->errorType);
+        $search = $this->sessionMessage()->get($this->errorType);
 
         if ($search !== null) {
             /* @var $message FormMessage */
