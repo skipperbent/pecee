@@ -29,7 +29,6 @@ class Session
 
     public static function destroy($id)
     {
-        static::start();
         unset($_SESSION[$id]);
     }
 
@@ -40,8 +39,6 @@ class Session
 
     public static function set($id, $value)
     {
-        static::start();
-
         $data = [
             serialize($value),
             static::getSecret(),
@@ -54,9 +51,7 @@ class Session
 
     public static function get($id, $defaultValue = null)
     {
-        static::start();
-
-        if (static::exists($id)) {
+        if (static::exists($id) === true) {
 
             $value = $_SESSION[$id];
 
