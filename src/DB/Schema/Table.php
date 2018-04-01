@@ -472,7 +472,7 @@ class Table
      */
     public function foreignExists(string $name): bool
     {
-        return Pdo::getInstance()->value('SELECT * FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_TYPE` = ?', [$name]) === null;
+        return (int)Pdo::getInstance()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name]) > 0;
     }
 
     /**
@@ -485,11 +485,17 @@ class Table
     {
 
         foreach ($indexes as $key => $index) {
+
+            // Skip if the foreign-key is already removed.
+            if ($this->foreignExists($index) === false) {
+                unset($indexes[$key]);
+                continue;
+            }
+
             $indexes[$key] = "DROP FOREIGN KEY `$index`";
         }
 
         // Execute query
-
         Pdo::getInstance()->nonQuery(
             sprintf
             (

@@ -3,8 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="25e055a6-fe98-47bc-a4e8-5a3e0f3a7347" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Translation/Translation.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Translation/Translation.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Widget/Widget.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Widget/Widget.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DB/Schema/Table.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/DB/Schema/Table.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -36,6 +35,27 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Table.php" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/DB/Schema/Table.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="304">
+              <caret line="475" column="5" selection-start-line="475" selection-start-column="5" selection-end-line="475" selection-end-column="5" />
+              <folding>
+                <element signature="e#35#52#0#PHP" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Pdo.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/DB/Pdo.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="241">
+              <caret line="119" column="20" selection-start-line="119" selection-start-column="20" selection-end-line="119" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="Translation.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Translation/Translation.php">
           <provider selected="true" editor-type-id="text-editor">
@@ -45,11 +65,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Widget.php" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Widget.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Widget/Widget.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="109">
-              <caret line="150" column="36" selection-start-line="150" selection-start-column="36" selection-end-line="150" selection-end-column="36" />
+            <state relative-caret-position="309">
+              <caret line="160" column="52" lean-forward="true" selection-start-line="160" selection-start-column="52" selection-end-line="160" selection-end-column="52" />
               <folding>
                 <element signature="e#32#47#0#PHP" expanded="true" />
               </folding>
@@ -76,6 +96,7 @@
       <find>onInput</find>
       <find>-&gt;getValidation</find>
       <find>getValidation</find>
+      <find>drop</find>
     </findStrings>
     <dirStrings>
       <dir>E:\Workspace\pecee\src\DB\Schema</dir>
@@ -95,7 +116,6 @@
         <option value="$PROJECT_DIR$/tests/bootstrap.php" />
         <option value="$PROJECT_DIR$/src/DB/Schema/Schema.php" />
         <option value="$PROJECT_DIR$/bin/pecee.php" />
-        <option value="$PROJECT_DIR$/src/DB/Schema/Table.php" />
         <option value="$PROJECT_DIR$/src/DB/Schema/Column.php" />
         <option value="$PROJECT_DIR$/src/Guid.php" />
         <option value="$PROJECT_DIR$/helpers.php" />
@@ -115,6 +135,7 @@
         <option value="$PROJECT_DIR$/src/Str.php" />
         <option value="$PROJECT_DIR$/src/Translation/Translation.php" />
         <option value="$PROJECT_DIR$/src/Widget/Widget.php" />
+        <option value="$PROJECT_DIR$/src/DB/Schema/Table.php" />
       </list>
     </option>
   </component>
@@ -304,7 +325,7 @@
       <option name="presentableId" value="Default" />
       <updated>1522528580661</updated>
       <workItem from="1522528583048" duration="1936000" />
-      <workItem from="1522530553289" duration="12624000" />
+      <workItem from="1522530553289" duration="14189000" />
     </task>
     <servers />
   </component>
@@ -317,7 +338,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="14560000" />
+    <option name="totallyTimeSpent" value="16125000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -330,6 +351,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="4" weight="0.32828283" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50271606" side_tool="true" weight="0.24444444" />
@@ -431,16 +453,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
           <caret line="256" column="38" lean-forward="true" selection-start-line="256" selection-start-column="38" selection-end-line="256" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/DB/Schema/Table.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="224">
-          <caret line="510" column="56" selection-start-line="510" selection-start-column="56" selection-end-line="510" selection-end-column="56" />
-          <folding>
-            <element signature="e#35#52#0#PHP" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -620,6 +632,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Widget/Widget.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="309">
+          <caret line="160" column="52" lean-forward="true" selection-start-line="160" selection-start-column="52" selection-end-line="160" selection-end-column="52" />
+          <folding>
+            <element signature="e#32#47#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/DB/Pdo.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="241">
+          <caret line="119" column="20" selection-start-line="119" selection-start-column="20" selection-end-line="119" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Translation/Translation.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
@@ -627,12 +656,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Widget/Widget.php">
+    <entry file="file://$PROJECT_DIR$/src/DB/Schema/Table.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="109">
-          <caret line="150" column="36" selection-start-line="150" selection-start-column="36" selection-end-line="150" selection-end-column="36" />
+        <state relative-caret-position="304">
+          <caret line="475" column="5" selection-start-line="475" selection-start-column="5" selection-end-line="475" selection-end-column="5" />
           <folding>
-            <element signature="e#32#47#0#PHP" expanded="true" />
+            <element signature="e#35#52#0#PHP" expanded="true" />
           </folding>
         </state>
       </provider>
