@@ -38,8 +38,8 @@
       <file leaf-file-name="Table.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/DB/Schema/Table.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="304">
-              <caret line="475" column="5" selection-start-line="475" selection-start-column="5" selection-end-line="475" selection-end-column="5" />
+            <state relative-caret-position="300">
+              <caret line="299" column="197" selection-start-line="299" selection-start-column="197" selection-end-line="299" selection-end-column="197" />
               <folding>
                 <element signature="e#35#52#0#PHP" expanded="true" />
               </folding>
@@ -325,7 +325,7 @@
       <option name="presentableId" value="Default" />
       <updated>1522528580661</updated>
       <workItem from="1522528583048" duration="1936000" />
-      <workItem from="1522530553289" duration="14189000" />
+      <workItem from="1522530553289" duration="14803000" />
     </task>
     <servers />
   </component>
@@ -338,7 +338,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16125000" />
+    <option name="totallyTimeSpent" value="16739000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -658,8 +658,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/DB/Schema/Table.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="304">
-          <caret line="475" column="5" selection-start-line="475" selection-start-column="5" selection-end-line="475" selection-end-column="5" />
+        <state relative-caret-position="300">
+          <caret line="299" column="197" selection-start-line="299" selection-start-column="197" selection-end-line="299" selection-end-column="197" />
           <folding>
             <element signature="e#35#52#0#PHP" expanded="true" />
           </folding>
