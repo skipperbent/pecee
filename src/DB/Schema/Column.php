@@ -2,8 +2,6 @@
 
 namespace Pecee\DB\Schema;
 
-use Pecee\Guid;
-
 class Column
 {
     protected $table;
@@ -25,11 +23,6 @@ class Column
     protected $relationColumn;
     protected $relationUpdateType;
     protected $relationDeleteType;
-
-    /**
-     * The maximum length allowed for foreign keys.
-     */
-    public const FOREIGN_KEY_MAX_LENGTH = 64;
 
     public const INDEX_PRIMARY = 'PRIMARY KEY';
     public const INDEX_UNIQUE = 'UNIQUE INDEX';
@@ -462,23 +455,22 @@ class Column
     }
 
     /**
-     * Generate foreign-key
+     * Get foreign-key
      * @return string
      */
-    public function generateForeignKey(): string
+    public function getRelationKey(): string
     {
-        $foreignKey = sprintf('fk_%s_%s_%s', $this->table, $this->getRelationTable(), $this->getName());
-
-        if (\strlen($foreignKey) > static::FOREIGN_KEY_MAX_LENGTH) {
-            return substr($foreignKey, 0, static::FOREIGN_KEY_MAX_LENGTH - 5) . Guid::generateHash(5);
-        }
-
-        return $foreignKey;
+        return sprintf('%s_fk_%s', $this->table, $this->getName());
     }
 
     public function getRemoveRelation(): bool
     {
         return $this->removeRelation;
+    }
+
+    public function getRelationName(): ?string
+    {
+        return $this->relationName;
     }
 
     public function getRelationTable(): ?string
