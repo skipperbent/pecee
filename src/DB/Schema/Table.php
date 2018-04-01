@@ -297,7 +297,7 @@ class Table
             );
         }
 
-        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null && $column->getRemoveRelation() === false) {
+        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null && $column->getRemoveRelation() === false && $this->foreignExists($column->generateForeignKey()) === false) {
 
             $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s, ',
                 ($type === static::TYPE_ALTER) ? 'ADD' : '',
