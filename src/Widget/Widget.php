@@ -18,12 +18,12 @@ abstract class Widget extends Base
 
     }
 
-    public function onLoad()
+    public function onLoad(): void
     {
 
     }
 
-    public function onPostBack()
+    public function onPostBack(): void
     {
 
     }
@@ -32,14 +32,14 @@ abstract class Widget extends Base
      * Calculates template path from given Widget name.
      * @return string
      */
-    protected function getTemplatePath()
+    protected function getTemplatePath(): string
     {
         $path = substr(static::class, strpos(static::class, 'Widget') + 7);
 
         return 'views/content/' . str_replace('\\', DIRECTORY_SEPARATOR, $path) . '.php';
     }
 
-    public function showMessages($type, $placement = null)
+    public function showMessages(string $type, ?string $placement = null): string
     {
         $placement = $placement ?? $this->defaultMessagePlacement;
 
@@ -60,7 +60,7 @@ abstract class Widget extends Base
         return '';
     }
 
-    public function showFlash($placement = null)
+    public function showFlash(?string $placement = null): string
     {
         $o = $this->showMessages($this->errorType, $placement);
         $o .= $this->showMessages('warning', $placement);
@@ -70,10 +70,11 @@ abstract class Widget extends Base
         return $o;
     }
 
-    public function validationFor($name)
+    public function renderValidationFor(string $name): string
     {
-        $validation = parent::getValidation($name);
-        if ($validation) {
+        $validation = parent::getValidationFor($name);
+
+        if ($validation !== null) {
             $span = new Html('div');
             $span->addClass('text-danger small');
             $span->addInnerHtml($validation);
@@ -87,9 +88,8 @@ abstract class Widget extends Base
     /**
      * @return string
      */
-    public function printMeta()
+    public function printMeta(): string
     {
-
         $output = '';
 
         if ($this->getSite()->getDescription() !== null) {
@@ -102,18 +102,18 @@ abstract class Widget extends Base
 
         if (\count($this->getSite()->getHeader()) > 0) {
             $header = $this->getSite()->getHeader();
-            $output .= join('', $header);
+            $output .= implode('', $header);
         }
 
         return $output;
     }
 
-    public function printCss($section = Site::SECTION_DEFAULT)
+    public function printCss(string $section = Site::SECTION_DEFAULT): string
     {
         $output = '';
 
         if (\count($this->getSite()->getCssFilesWrapped($section)) > 0) {
-            $css = url(app()->getCssWrapRouteName(), null, ['files' => join($this->getSite()->getCssFilesWrapped($section), ',')]);
+            $css = url(app()->getCssWrapRouteName(), null, ['files' => implode($this->getSite()->getCssFilesWrapped($section), ',')]);
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
@@ -127,12 +127,12 @@ abstract class Widget extends Base
         return $output;
     }
 
-    public function printJs($section = Site::SECTION_DEFAULT)
+    public function printJs(string $section = Site::SECTION_DEFAULT): string
     {
         $output = '';
 
         if (\count($this->getSite()->getJsFilesWrapped($section)) > 0) {
-            $js = url(app()->getJsWrapRouteName(), null, ['files' => join($this->getSite()->getJsFilesWrapped($section), ',')]);
+            $js = url(app()->getJsWrapRouteName(), null, ['files' => implode($this->getSite()->getJsFilesWrapped($section), ',')]);
             $output .= (new Html('script'))->attr('src', $js);
         }
 
@@ -143,32 +143,32 @@ abstract class Widget extends Base
         return $output;
     }
 
-    protected function getTemplate()
+    protected function getTemplate(): ?string
     {
         return $this->_template;
     }
 
-    protected function setTemplate($path, $relative = true)
+    protected function setTemplate(string $path, bool $relative = true): void
     {
         $this->_template = (($relative === true && trim($path) !== '') ? 'views' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
-    protected function setContentTemplate($template)
+    protected function setContentTemplate(?string $template): void
     {
         $this->_contentTemplate = $template;
     }
 
-    protected function getContentTemplate()
+    protected function getContentTemplate(): ?string
     {
         return $this->_contentTemplate;
     }
 
-    protected function setContentHtml($html)
+    protected function setContentHtml(string $html): void
     {
         $this->_contentHtml = $html;
     }
 
-    protected function getContentHtml()
+    protected function getContentHtml(): ?string
     {
         return $this->_contentHtml;
     }
@@ -177,7 +177,7 @@ abstract class Widget extends Base
      * Creates form element
      * @return Form
      */
-    public function form()
+    public function form(): Form
     {
         return new Form();
     }
@@ -188,27 +188,30 @@ abstract class Widget extends Base
      *
      * @param string $file
      */
-    public function snippet($file)
+    public function snippet(string $file): void
     {
         require 'views/snippets/' . $file;
     }
 
     /**
      * Include widget on page.
+     *
      * @param \Pecee\Widget\Widget $widget
+     * @return string
      */
-    public function widget(Widget $widget)
+    public function widget(Widget $widget): string
     {
         if ($widget->getTemplate() === $this->getTemplate()) {
             $widget->setTemplate(null);
         }
-        echo $widget;
+
+        return (string)$widget->render();
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         try {
-            return $this->render();
+            return (string)$this->render();
         } catch (\Exception $e) {
             $this->setError($e->getMessage());
         }
@@ -219,13 +222,13 @@ abstract class Widget extends Base
     /**
      * @return string
      */
-    public function render()
+    public function render(): ?string
     {
-        if($this->_template === null) {
+        if ($this->_template === null) {
             $this->setTemplate('Default.php');
         }
 
-        if($this->_contentTemplate === null) {
+        if ($this->_contentTemplate === null) {
             $this->setContentTemplate($this->getTemplatePath());
         }
 
@@ -235,7 +238,7 @@ abstract class Widget extends Base
         $this->onLoad();
 
         // Trigger postback event
-        if(request()->getMethod() === 'post') {
+        if (request()->getMethod() === 'post') {
             $this->onPostBack();
         }
 
@@ -249,7 +252,7 @@ abstract class Widget extends Base
         return $this->_contentHtml;
     }
 
-    protected function renderContent()
+    protected function renderContent(): void
     {
         debug('START: rendering content-template: ' . $this->_contentTemplate);
 
@@ -263,7 +266,7 @@ abstract class Widget extends Base
         debug('END: rendering content-template: ' . $this->_contentTemplate);
     }
 
-    protected function renderTemplate()
+    protected function renderTemplate(): void
     {
         debug('START: rendering template: ' . $this->_template);
 

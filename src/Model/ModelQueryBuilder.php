@@ -758,7 +758,7 @@ class ModelQueryBuilder
      */
     public function leftJoin($table, $key, $operator = null, $value = null)
     {
-        $this->query->leftJoin($table, $key, $operator, $value, 'left');
+        $this->query->leftJoin($table, $key, $operator, $value);
 
         return $this->model;
     }

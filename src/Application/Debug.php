@@ -79,18 +79,18 @@ class Debug
     /**
      * Add debug entry
      * @param string $text
-     * @param array $args
+     * @param array ...$args
      */
-    public function add($text, array $args = [])
+    public function add($text, ...$args)
     {
         $this->addObject(vsprintf(str_replace('%', '%%', $text), $args));
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         $widget = new WidgetDebug($this->stack);
 
-        return $widget->render();
+        return (string)$widget->render();
     }
 
 }

@@ -16,7 +16,7 @@ abstract class WidgetTaglib extends Widget
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }
 
-    public function render()
+    public function render(): string
     {
         $this->renderContent();
         $this->renderTemplate();
@@ -25,7 +25,7 @@ abstract class WidgetTaglib extends Widget
         return $this->_contentHtml;
     }
 
-    protected function renderPhp($content)
+    protected function renderPhp(string $content)
     {
         ob_start();
         eval('?>' . $content);
@@ -33,7 +33,7 @@ abstract class WidgetTaglib extends Widget
         ob_end_clean();
     }
 
-    public function renderContent()
+    public function renderContent(): void
     {
         $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $this->_contentTemplate);
 

@@ -10,7 +10,7 @@ class Str
      * @param string $html
      * @return string
      */
-    public static function sanitizeHtml($html)
+    public static function sanitizeHtml(string $html): string
     {
 
         $regex = '%# Collapse ws everywhere but in blacklisted elements.
@@ -37,48 +37,48 @@ class Str
         return preg_replace($regex, ' ', $html);
     }
 
-    public static function getFirstOrDefault($value, $default = null)
+    public static function getFirstOrDefault(string $value, $default = null)
     {
-        return ($value !== null && trim($value) !== '') ? trim($value) : $default;
+        return (empty($value) === false) ? trim($value) : $default;
     }
 
-    public static function encode($source, $encoding = 'UTF-8')
+    public static function encode(string $source, string $encoding = 'UTF-8'): string
     {
         return mb_convert_encoding($source, 'HTML-ENTITIES', $encoding);
     }
 
-    public static function isUtf8($str)
+    public static function isUtf8(string $str): bool
     {
         return ($str === mb_convert_encoding(mb_convert_encoding($str, 'UTF-32', 'UTF-8'), 'UTF-8', 'UTF-32'));
     }
 
-    public static function substr($text, $maxLength, $end = '...', $encoding = 'UTF-8')
+    public static function substr(string $text, string $maxLength, string $end = '...', string $encoding = 'UTF-8'): string
     {
-        if (strlen($text) > $maxLength) {
+        if (\strlen($text) > $maxLength) {
             return mb_substr($text, 0, $maxLength, $encoding) . $end;
         }
 
         return $text;
     }
 
-    public static function wordWrap($text, $limit)
+    public static function wordWrap(string $text, int $limit): string
     {
         $words = explode(' ', $text);
 
-        return join(' ', array_splice($words, 0, $limit));
+        return implode(' ', array_splice($words, 0, $limit));
     }
 
-    public static function base64Encode($obj)
+    public static function base64Encode($obj): string
     {
         return base64_encode(serialize($obj));
     }
 
-    public static function base64Decode($str, $defaultValue = null)
+    public static function base64Decode(string $str, $defaultValue = null)
     {
         $req = base64_decode($str);
         if ($req !== false) {
-            $req = unserialize($req);
-            if ($req !== false) {
+            $req = unserialize($req, ['allowed_classes' => true]);
+            if ($req !== null) {
                 return $req;
             }
         }
@@ -86,7 +86,7 @@ class Str
         return $defaultValue;
     }
 
-    public static function deCamelize($word, $separator = '_')
+    public static function deCamelize(string $word, string $separator = '_'): string
     {
         return preg_replace_callback('/(^|[a-z])([A-Z])/',
             function ($matches) use ($separator) {
@@ -96,14 +96,15 @@ class Str
         );
     }
 
-    public static function camelize($word, $separator = '_')
+    public static function camelize(string $word, string $separator = '_'): string
     {
-        $word = preg_replace_callback('/(^|' . $separator . ')([a-z])/', function ($matches) {
+        $words = preg_replace_callback('/(^|' . $separator . ')([a-z])/', function ($matches) {
             return strtoupper($matches[2]);
         }, strtolower($word));
-        $word[0] = strtolower($word[0]);
 
-        return $word;
+        $words[0] = strtolower($words[0]);
+
+        return $words;
     }
 
     /**
@@ -111,7 +112,7 @@ class Str
      * @param string $email
      * @return bool
      */
-    public static function isEmail($email)
+    public static function isEmail(string $email): bool
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
     }

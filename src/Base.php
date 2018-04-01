@@ -6,6 +6,7 @@ use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
 use Pecee\UI\Form\FormMessage;
+use Pecee\UI\Site;
 
 abstract class Base
 {
@@ -14,15 +15,20 @@ abstract class Base
     protected $_inputSessionKey = 'InputValues';
     protected $_validations = [];
 
+    protected function onInputError(InputItem $input, string $error): void
+    {
+
+    }
+
     /**
      * @return SessionMessage
      */
-    public function sessionMessage() : SessionMessage
+    public function sessionMessage(): SessionMessage
     {
         return new SessionMessage();
     }
 
-    protected function setInputValues()
+    protected function setInputValues(): void
     {
         $values = Session::get($this->_inputSessionKey, []);
 
@@ -41,7 +47,7 @@ abstract class Base
         Session::destroy($this->_inputSessionKey);
     }
 
-    public function setInputName(array $names)
+    public function setInputName(array $names): void
     {
         foreach ($names as $key => $name) {
             $item = input()->get($key);
@@ -53,7 +59,7 @@ abstract class Base
         }
     }
 
-    public function saveInputValues(array $values = null)
+    public function saveInputValues(array $values = null): void
     {
         if ($values === null) {
             $values = input()->all();
@@ -62,17 +68,12 @@ abstract class Base
         Session::set($this->_inputSessionKey, $values);
     }
 
-    protected function validate(array $validation)
+    protected function validate(array $validation): void
     {
         $this->performValidation($validation);
     }
 
-    protected function onInputError(InputItem $input, $error)
-    {
-
-    }
-
-    protected function performValidation(array $validation)
+    protected function performValidation(array $validation): void
     {
         foreach ($validation as $key => $validations) {
 
@@ -95,13 +96,13 @@ abstract class Base
         }
     }
 
-    protected function appendSiteTitle($title, $separator = '-')
+    protected function appendSiteTitle(string $title, ?string $separator = '-'): void
     {
         $separator = ($separator === null) ? '' : ' ' . $separator . ' ';
         app()->site->setTitle(app()->site->getTitle() . $separator . $title);
     }
 
-    protected function prependSiteTitle($title, $separator = ' - ')
+    protected function prependSiteTitle(string $title, string $separator = ' - '): void
     {
         app()->site->setTitle($title . $separator . app()->site->getTitle());
     }
@@ -110,16 +111,16 @@ abstract class Base
      * Checks if there has been a form post-back
      * @return bool
      */
-    public function isPostBack()
+    public function isPostBack(): bool
     {
-        return (request()->getMethod() !== 'get');
+        return request()->getMethod() !== 'get';
     }
 
     /**
      * Get site
-     * @return \Pecee\UI\Site
+     * @return Site
      */
-    public function getSite()
+    public function getSite(): Site
     {
         return app()->site;
     }
@@ -130,11 +131,11 @@ abstract class Base
      * @param string|null $placement
      * @return FormMessage|null
      */
-    public function getMessage($type, $placement = null)
+    public function getMessage(string $type, ?string $placement = null): ?FormMessage
     {
         $messages = $this->getMessages($type, $placement);
 
-        return (count($messages) > 0) ? $messages[0] : null;
+        return \count($messages) > 0 ? $messages[0] : null;
     }
 
     /**
@@ -143,7 +144,7 @@ abstract class Base
      * @param string|null $placement
      * @return array
      */
-    public function getMessages($type, $placement = null)
+    public function getMessages(string $type, ?string $placement = null): array
     {
         $messages = [];
         $search = $this->sessionMessage()->get($type);
@@ -161,9 +162,9 @@ abstract class Base
         return $messages;
     }
 
-    public function hasMessages($type, $placement = null)
+    public function hasMessages(string $type, ?string $placement = null): bool
     {
-        return (bool)count($this->getMessages($type, $placement));
+        return (\count($this->getMessages($type, $placement)) > 0);
     }
 
     /**
@@ -173,26 +174,27 @@ abstract class Base
      * @param string|null $placement Key to use if you want the message to be displayed an unique place
      * @param string|null $index
      */
-    protected function setMessage($message, $type, $placement = null, $index = null)
+    protected function setMessage(string $message, string $type, ?string $placement = null, ?string $index = null): void
     {
         $msg = new FormMessage();
         $msg->setMessage($message);
-        $msg->setPlacement(($placement === null) ? $this->defaultMessagePlacement : $placement);
+        $msg->setPlacement($placement ?? $this->defaultMessagePlacement);
         $msg->setIndex($index);
         $this->sessionMessage()->set($msg, $type);
     }
 
-    public function hasErrors($placement = null, $errorType = null)
+    public function hasErrors(?string $placement = null, ?string $errorType = null): bool
     {
-        return $this->hasMessages(($errorType === null) ? $this->errorType : $errorType, $placement);
+        return $this->hasMessages($errorType ?? $this->errorType, $placement);
     }
 
     /**
      * Set error
+     *
      * @param string $message
      * @param string|null $placement
      */
-    protected function setError($message, $placement = null)
+    protected function setError(string $message, ?string $placement = null): void
     {
         $this->setMessage($message, $this->errorType, $placement);
     }
@@ -203,12 +205,12 @@ abstract class Base
      * @param string|null $errorType
      * @return array
      */
-    public function getErrors($placement = null, $errorType = null)
+    public function getErrors(?string $placement = null, ?string $errorType = null): array
     {
-        return $this->getMessages(($errorType === null) ? $this->errorType : $errorType, $placement);
+        return $this->getMessages($errorType ?? $this->errorType, $placement);
     }
 
-    public function getErrorsArray($placement = null)
+    public function getErrorsArray(?string $placement = null): array
     {
         $output = [];
 
@@ -220,9 +222,8 @@ abstract class Base
         return $output;
     }
 
-    public function getValidation($index)
+    public function getValidationFor(string $index): ?string
     {
-        $messages = [];
         $search = $this->sessionMessage()->get($this->errorType);
 
         if ($search !== null) {
@@ -234,7 +235,7 @@ abstract class Base
             }
         }
 
-        return $messages;
+        return null;
     }
 
 }
