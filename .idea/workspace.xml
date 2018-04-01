@@ -2,38 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="25e055a6-fe98-47bc-a4e8-5a3e0f3a7347" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/php-test-framework.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/phpunit.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/bootstrap.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/markdown-navigator.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/markdown-navigator/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pecee.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pecee.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/pecee.php" beforeDir="false" afterPath="$PROJECT_DIR$/bin/pecee.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/helpers.php" beforeDir="false" afterPath="$PROJECT_DIR$/helpers.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Application/Debug.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Application/Debug.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Application/Router.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Application/Router.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Base.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Base.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/ControllerBase.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/ControllerBase.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DB/Schema/Column.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/DB/Schema/Column.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DB/Schema/Schema.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/DB/Schema/Schema.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DB/Schema/Table.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/DB/Schema/Table.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Guid.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Guid.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/ModelQueryBuilder.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/ModelQueryBuilder.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/ModelUser.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/ModelUser.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/Relation/HasMany.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/Relation/HasMany.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Session/Session.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Session/Session.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Session/SessionMessage.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Session/SessionMessage.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Str.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Str.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Translation/Translation.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Translation/Translation.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/UI/Html/HtmlInput.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/UI/Html/HtmlInput.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Widget/Debug/WidgetDebug.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Widget/Debug/WidgetDebug.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Widget/Widget.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Widget/Widget.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Widget/WidgetTaglib.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Widget/WidgetTaglib.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -64,7 +35,29 @@
     <favorites_list name="pecee" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Translation.php" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Translation/Translation.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="480">
+              <caret line="34" column="5" lean-forward="true" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Widget.php" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Widget/Widget.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="109">
+              <caret line="150" column="36" selection-start-line="150" selection-start-column="36" selection-end-line="150" selection-end-column="36" />
+              <folding>
+                <element signature="e#32#47#0#PHP" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -105,7 +98,6 @@
         <option value="$PROJECT_DIR$/src/DB/Schema/Table.php" />
         <option value="$PROJECT_DIR$/src/DB/Schema/Column.php" />
         <option value="$PROJECT_DIR$/src/Guid.php" />
-        <option value="$PROJECT_DIR$/src/Translation/Translation.php" />
         <option value="$PROJECT_DIR$/helpers.php" />
         <option value="$PROJECT_DIR$/src/Application/Router.php" />
         <option value="$PROJECT_DIR$/src/Session/Session.php" />
@@ -116,12 +108,13 @@
         <option value="$PROJECT_DIR$/src/Widget/Debug/WidgetDebug.php" />
         <option value="$PROJECT_DIR$/src/Model/Relation/HasMany.php" />
         <option value="$PROJECT_DIR$/src/UI/Html/HtmlInput.php" />
-        <option value="$PROJECT_DIR$/src/Widget/Widget.php" />
         <option value="$PROJECT_DIR$/src/Widget/WidgetTaglib.php" />
         <option value="$PROJECT_DIR$/src/Traits/Widget/TaglibRenderer.php" />
         <option value="$PROJECT_DIR$/src/Model/ModelUser.php" />
         <option value="$PROJECT_DIR$/src/Application/Debug.php" />
         <option value="$PROJECT_DIR$/src/Str.php" />
+        <option value="$PROJECT_DIR$/src/Translation/Translation.php" />
+        <option value="$PROJECT_DIR$/src/Widget/Widget.php" />
       </list>
     </option>
   </component>
@@ -188,7 +181,7 @@
       <path value="$PROJECT_DIR$/vendor/phar-io/manifest" />
     </include_path>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-10" />
     <option name="width" value="2295" />
     <option name="height" value="1235" />
@@ -311,7 +304,7 @@
       <option name="presentableId" value="Default" />
       <updated>1522528580661</updated>
       <workItem from="1522528583048" duration="1936000" />
-      <workItem from="1522530553289" duration="10489000" />
+      <workItem from="1522530553289" duration="12624000" />
     </task>
     <servers />
   </component>
@@ -324,7 +317,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12425000" />
+    <option name="totallyTimeSpent" value="14560000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -336,17 +329,17 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="2062" height="1126" extended-state="7" />
+    <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="4" weight="0.32828283" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50271606" side_tool="true" weight="0.24444444" />
       <window_info anchor="bottom" id="Database Changes" order="13" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="6" weight="0.32828283" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32929292" />
-      <window_info anchor="bottom" id="Terminal" order="3" sideWeight="0.49728397" weight="0.24444444" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="3" sideWeight="0.49728397" visible="true" weight="0.24444444" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4986631" visible="true" weight="0.20246914" />
       <window_info anchor="bottom" id="Docker" order="12" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Inspection Results" order="14" visible="true" weight="0.32929292" />
+      <window_info anchor="bottom" id="Inspection Results" order="14" weight="0.32929292" />
       <window_info id="Database" order="3" weight="0.20592593" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3272727" />
       <window_info id="Structure" order="1" sideWeight="0.5013369" side_tool="true" weight="0.1988012" />
@@ -424,13 +417,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="300">
           <caret line="15" column="26" selection-start-line="15" selection-start-column="26" selection-end-line="15" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Translation/Translation.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="140">
-          <caret line="8" column="24" lean-forward="true" selection-start-line="8" selection-start-column="24" selection-end-line="8" selection-end-column="24" />
         </state>
       </provider>
     </entry>
@@ -575,16 +561,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Widget/Widget.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="9" column="32" selection-start-line="9" selection-start-column="32" selection-end-line="9" selection-end-column="32" />
-          <folding>
-            <element signature="e#32#47#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Base.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="80">
@@ -641,6 +617,23 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="440">
           <caret line="85" column="29" selection-start-line="85" selection-start-column="29" selection-end-line="85" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Translation/Translation.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="34" column="5" lean-forward="true" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Widget/Widget.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="150" column="36" selection-start-line="150" selection-start-column="36" selection-end-line="150" selection-end-column="36" />
+          <folding>
+            <element signature="e#32#47#0#PHP" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
