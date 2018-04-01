@@ -53,9 +53,9 @@ function request(): Request
  * @param string|null $index Parameter index name
  * @param string|null $defaultValue Default return value
  * @param array ...$methods Default methods
- * @return \Pecee\Http\Input\InputHandler|\Pecee\Http\Input\IInputItem|string
+ * @return \Pecee\Http\Input\InputHandler|string
  */
-function input($index = null, $defaultValue = null, ...$methods)
+function input(?string $index = null, ?string $defaultValue = null, ...$methods)
 {
     if ($index !== null) {
         return request()->getInputHandler()->getValue($index, $defaultValue, ...$methods);
@@ -89,17 +89,12 @@ function app()
 
 /**
  * @param string $key
- * @param array|string $args
+ * @param array ...$args
  * @return string
  */
-function lang($key, $args = null)
+function lang($key, ...$args): string
 {
-    if (is_array($args) === false) {
-        $args = func_get_args();
-        $args = array_slice($args, 1);
-    }
-
-    return app()->translation->translate($key, $args);
+    return app()->translation->translate($key, ...$args);
 }
 
 /**
@@ -107,16 +102,16 @@ function lang($key, $args = null)
  * Requires DEBUG=1 to be present in your env file.
  *
  * @param string $text
- * @param array $args
+ * @param array ...$args
  */
-function debug($text, ...$args)
+function debug(string $text, ...$args): void
 {
     if (app()->getDebugEnabled() === true) {
-        app()->debug->add($text, $args);
+        app()->debug->add($text, ...$args);
     }
 }
 
-function add_module($name, $path)
+function add_module(string $name, string $path): void
 {
     app()->addModule($name, $path);
 }
@@ -124,11 +119,11 @@ function add_module($name, $path)
 /**
  * Get environment variable
  * @param string $key
- * @param null $default
+ * @param string|null $default
  *
  * @return string|null
  */
-function env($key, $default = null)
+function env(string $key, ?string $default = null): ?string
 {
     return $_ENV[$key] ?? $default;
 }
@@ -153,7 +148,7 @@ function csrf_token(): ?string
  * @param string $class
  * @return string
  */
-function class_basename($class)
+function class_basename(string $class): string
 {
     $pos = strrpos($class, '\\');
     if ($pos !== false) {

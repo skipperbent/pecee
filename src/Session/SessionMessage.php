@@ -5,7 +5,7 @@ use Pecee\UI\Form\FormMessage;
 
 class SessionMessage
 {
-    const KEY = 'MSG';
+    public const KEY = 'MSG';
 
     protected $messages;
 
@@ -27,8 +27,8 @@ class SessionMessage
     public function set(FormMessage $message, $type = null)
     {
         // Ensure no double posting
-        if (isset($this->messages[$type]) === true && is_array($this->messages[$type]) === true) {
-            if (in_array($message, $this->messages[$type], true) === false) {
+        if (isset($this->messages[$type]) === true && \is_array($this->messages[$type]) === true) {
+            if (\in_array($message, $this->messages[$type], true) === false) {
                 $this->messages[$type][] = $message;
                 $this->save();
             }
@@ -47,7 +47,7 @@ class SessionMessage
     public function get($type = null, $defaultValue = null)
     {
         if ($type !== null) {
-            return isset($this->messages[$type]) ? $this->messages[$type] : $defaultValue;
+            return $this->messages[$type] ?? $defaultValue;
         }
 
         return $this->messages;
@@ -61,10 +61,10 @@ class SessionMessage
     public function has($type = null)
     {
         if ($type !== null) {
-            return isset($this->messages[$type]) && count($this->messages[$type]) > 0;
+            return isset($this->messages[$type]) && \count($this->messages[$type]) > 0;
         }
 
-        return count($this->messages) > 0;
+        return \count($this->messages) > 0;
     }
 
     public function clear($type = null)

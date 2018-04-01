@@ -188,11 +188,6 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function filterQuery($query)
     {
-        $userDataClassName = static::getUserDataClass();
-
-        /* @var $userDataClass UserData */
-        $userDataClass = new $userDataClassName();
-
         $userDataQuery = static::instance()
             ->getQuery()
             ->select($this->getDataPrimary())
@@ -200,7 +195,8 @@ class ModelUser extends ModelData implements IUserAuthentication
             ->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
             ->limit(1);
 
-        return $this->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
+        return $this
+            ->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
             ->orWhere($this->getDataPrimary(), '=', $this->raw($userDataQuery));
     }
 

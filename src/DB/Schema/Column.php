@@ -1,5 +1,8 @@
 <?php
+
 namespace Pecee\DB\Schema;
+
+use Pecee\Guid;
 
 class Column
 {
@@ -17,60 +20,66 @@ class Column
     protected $drop = false;
     protected $change = false;
     protected $after;
+    protected $removeRelation = false;
     protected $relationTable;
     protected $relationColumn;
     protected $relationUpdateType;
     protected $relationDeleteType;
 
-    const INDEX_PRIMARY = 'PRIMARY KEY';
-    const INDEX_UNIQUE = 'UNIQUE';
-    const INDEX_INDEX = 'INDEX';
-    const INDEX_FULLTEXT = 'FULLTEXT';
+    /**
+     * The maximum length allowed for foreign keys.
+     */
+    public const FOREIGN_KEY_MAX_LENGTH = 64;
 
-    const RELATION_TYPE_RESTRICT = 'RESTRICT';
-    const RELATION_TYPE_CASCADE = 'CASCADE';
-    const RELATION_TYPE_SET_NULL = 'SET NULL';
-    const RELATION_TYPE_NO_ACTION = 'NO ACTION';
+    public const INDEX_PRIMARY = 'PRIMARY KEY';
+    public const INDEX_UNIQUE = 'UNIQUE INDEX';
+    public const INDEX_INDEX = 'INDEX';
+    public const INDEX_FULLTEXT = 'FULLTEXT INDEX';
 
-    const TYPE_VARCHAR = 'VARCHAR';
-    const TYPE_LONGTEXT = 'LONGTEXT';
-    const TYPE_TEXT = 'TEXT';
-    const TYPE_MEDIUMTEXT = 'MEDIUMTEXT';
-    const TYPE_TINYTEXT = 'TINYTEXT';
-    const TYPE_INT = 'INT';
-    const TYPE_TINYINT = 'TINYINT';
-    const TYPE_SMALLINT = 'SMALLINT';
-    const TYPE_MEDIUMINT = 'MEDIUMINT';
-    const TYPE_BIGINT = 'BIGINT';
-    const TYPE_DECIMAL = 'DECIMAL';
-    const TYPE_FLOAT = 'FLOAT';
-    const TYPE_DOUBLE = 'DOUBLE';
-    const TYPE_REAL = 'REAL';
-    const TYPE_BIT = 'BIT';
-    const TYPE_BOOLEAN = 'BOOLEAN';
-    const TYPE_SERIAL = 'SERIAL';
-    const TYPE_DATE = 'DATE';
-    const TYPE_DATETIME = 'DATETIME';
-    const TYPE_TIMESTAMP = 'TIMESTAMP';
-    const TYPE_TIME = 'TIME';
-    const TYPE_YEAR = 'YEAR';
-    const TYPE_CHAR = 'CHAR';
-    const TYPE_BINARY = 'BINARY';
-    const TYPE_VARBINARY = 'VARBINARY';
-    const TYPE_TINYBLOB = 'TINYBLOB';
-    const TYPE_MEDIUMBLOB = 'MEDIUMBLOB';
-    const TYPE_BLOB = 'BLOB';
-    const TYPE_LONGBLOB = 'LONGBLOB';
-    const TYPE_ENUM = 'ENUM';
-    const TYPE_SET = 'SET';
-    const TYPE_GEOMETRY = 'GEOMETRY';
-    const TYPE_POINT = 'POINT';
-    const TYPE_LINESTRING = 'LINESTRING';
-    const TYPE_POLYGON = 'POLYGON';
-    const TYPE_MULTIPOINT = 'MULTIPOINT';
-    const TYPE_MULTILINESTRING = 'MULTILINESTRING';
-    const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
-    const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
+    public const RELATION_RESTRICT = 'RESTRICT';
+    public const RELATION_CASCADE = 'CASCADE';
+    public const RELATION_NULL = 'SET NULL';
+    public const RELATION_NO_ACTION = 'NO ACTION';
+
+    public const TYPE_VARCHAR = 'VARCHAR';
+    public const TYPE_LONGTEXT = 'LONGTEXT';
+    public const TYPE_TEXT = 'TEXT';
+    public const TYPE_MEDIUMTEXT = 'MEDIUMTEXT';
+    public const TYPE_TINYTEXT = 'TINYTEXT';
+    public const TYPE_INT = 'INT';
+    public const TYPE_TINYINT = 'TINYINT';
+    public const TYPE_SMALLINT = 'SMALLINT';
+    public const TYPE_MEDIUMINT = 'MEDIUMINT';
+    public const TYPE_BIGINT = 'BIGINT';
+    public const TYPE_DECIMAL = 'DECIMAL';
+    public const TYPE_FLOAT = 'FLOAT';
+    public const TYPE_DOUBLE = 'DOUBLE';
+    public const TYPE_REAL = 'REAL';
+    public const TYPE_BIT = 'BIT';
+    public const TYPE_BOOLEAN = 'BOOLEAN';
+    public const TYPE_SERIAL = 'SERIAL';
+    public const TYPE_DATE = 'DATE';
+    public const TYPE_DATETIME = 'DATETIME';
+    public const TYPE_TIMESTAMP = 'TIMESTAMP';
+    public const TYPE_TIME = 'TIME';
+    public const TYPE_YEAR = 'YEAR';
+    public const TYPE_CHAR = 'CHAR';
+    public const TYPE_BINARY = 'BINARY';
+    public const TYPE_VARBINARY = 'VARBINARY';
+    public const TYPE_TINYBLOB = 'TINYBLOB';
+    public const TYPE_MEDIUMBLOB = 'MEDIUMBLOB';
+    public const TYPE_BLOB = 'BLOB';
+    public const TYPE_LONGBLOB = 'LONGBLOB';
+    public const TYPE_ENUM = 'ENUM';
+    public const TYPE_SET = 'SET';
+    public const TYPE_GEOMETRY = 'GEOMETRY';
+    public const TYPE_POINT = 'POINT';
+    public const TYPE_LINESTRING = 'LINESTRING';
+    public const TYPE_POLYGON = 'POLYGON';
+    public const TYPE_MULTIPOINT = 'MULTIPOINT';
+    public const TYPE_MULTILINESTRING = 'MULTILINESTRING';
+    public const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
+    public const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
     public static $INDEXES = [
         self::INDEX_PRIMARY,
@@ -122,147 +131,143 @@ class Column
     ];
 
     public static $RELATION_TYPES = [
-        self::RELATION_TYPE_CASCADE,
-        self::RELATION_TYPE_NO_ACTION,
-        self::RELATION_TYPE_RESTRICT,
-        self::RELATION_TYPE_SET_NULL,
+        self::RELATION_CASCADE,
+        self::RELATION_NO_ACTION,
+        self::RELATION_RESTRICT,
+        self::RELATION_NULL,
     ];
 
-    // Default values
-
-    public function __construct($table)
+    public function __construct(string $table)
     {
-        $this->relation = [];
         $this->table = $table;
-        $this->change = false;
     }
 
-    public function primary()
+    public function primary(): self
     {
-        $this->setIndex(self::INDEX_PRIMARY);
+        $this->setIndex(static::INDEX_PRIMARY);
 
         return $this;
     }
 
-    public function increment()
+    public function increment(): self
     {
         $this->primary()->setIncrement(true);
 
         return $this;
     }
 
-    public function index()
+    public function index(): self
     {
-        $this->setIndex(self::INDEX_INDEX);
+        $this->setIndex(static::INDEX_INDEX);
 
         return $this;
     }
 
-    public function nullable()
+    public function nullable(): self
     {
         $this->setNullable(true);
 
         return $this;
     }
 
-    public function string($length = 255)
+    public function string(int $length = 255): self
     {
-        $this->setType(self::TYPE_VARCHAR);
+        $this->setType(static::TYPE_VARCHAR);
         $this->setLength($length);
 
         return $this;
     }
 
-    public function integer($lenght = null)
+    public function integer(?int $length = null): self
     {
-        $this->setType(self::TYPE_INT);
-        $this->setLength($lenght);
+        $this->setType(static::TYPE_INT);
+        $this->setLength($length);
 
         return $this;
     }
 
-    public function bigint()
+    public function bigint(): self
     {
-        $this->setType(self::TYPE_BIGINT);
+        $this->setType(static::TYPE_BIGINT);
 
         return $this;
     }
 
-    public function bool()
+    public function bool(): self
     {
-        $this->setType(self::TYPE_TINYINT);
+        $this->setType(static::TYPE_TINYINT);
         $this->setNullable(true);
         $this->setLength(1);
 
         return $this;
     }
 
-    public function text()
+    public function text(): self
     {
-        $this->setType(self::TYPE_TEXT);
+        $this->setType(static::TYPE_TEXT);
 
         return $this;
     }
 
-    public function longtext()
+    public function longtext(): self
     {
-        $this->setType(self::TYPE_LONGTEXT);
+        $this->setType(static::TYPE_LONGTEXT);
 
         return $this;
     }
 
-    public function datetime()
+    public function datetime(): self
     {
-        $this->setType(self::TYPE_DATETIME);
+        $this->setType(static::TYPE_DATETIME);
 
         return $this;
     }
 
-    public function date()
+    public function date(): self
     {
-        $this->setType(self::TYPE_DATE);
+        $this->setType(static::TYPE_DATE);
 
         return $this;
     }
 
-    public function blob()
+    public function blob(): self
     {
-        $this->setType(self::TYPE_LONGBLOB);
+        $this->setType(static::TYPE_LONGBLOB);
 
         return $this;
     }
 
-    public function float()
+    public function float(): self
     {
-        $this->setType(self::TYPE_FLOAT);
+        $this->setType(static::TYPE_FLOAT);
 
         return $this;
     }
 
-    public function double()
+    public function double(): self
     {
-        $this->setType(self::TYPE_DOUBLE);
+        $this->setType(static::TYPE_DOUBLE);
 
         return $this;
     }
 
-    public function decimal()
+    public function decimal(): self
     {
-        $this->setType(self::TYPE_DECIMAL);
+        $this->setType(static::TYPE_DECIMAL);
 
         return $this;
     }
 
-    public function timestamp()
+    public function timestamp(): self
     {
-        $this->setType(self::TYPE_TIMESTAMP);
+        $this->setType(static::TYPE_TIMESTAMP);
 
         return $this;
     }
 
-    public function time()
+    public function time(): self
     {
-        $this->setType(self::TYPE_TIME);
+        $this->setType(static::TYPE_TIME);
 
         return $this;
     }
@@ -275,15 +280,15 @@ class Column
      * @return static
      * @throws \InvalidArgumentException
      */
-    public function relation($table, $column, $delete = self::RELATION_TYPE_CASCADE, $update = self::RELATION_TYPE_RESTRICT)
+    public function relation(string $table, string $column, string $delete = self::RELATION_CASCADE, string $update = self::RELATION_RESTRICT): self
     {
 
-        if (in_array($delete, static::$RELATION_TYPES, true) === false) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', static::$RELATION_TYPES));
+        if (\in_array($delete, static::$RELATION_TYPES, true) === false) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
-        if (in_array($update, static::$RELATION_TYPES, true) === false) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . join(', ', static::$RELATION_TYPES));
+        if (\in_array($update, static::$RELATION_TYPES, true) === false) {
+            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
         $this->relationTable = $table;
@@ -294,127 +299,131 @@ class Column
         return $this;
     }
 
-    public function drop()
+    /**
+     * Remove relation
+     *
+     * @param string $table
+     * @param string $column
+     * @return static
+     */
+    public function removeRelation(string $table, string $column): self
+    {
+        $this->removeRelation = true;
+        $this->relationTable = $table;
+        $this->relationColumn = $column;
+
+        return $this;
+    }
+
+    public function drop(): self
     {
         $this->drop = true;
 
         return $this;
     }
 
-    public function getDrop()
+    public function getDrop(): bool
     {
         return $this->drop;
     }
 
-    public function change()
-    {
-        $this->change = true;
-
-        return $this;
-    }
-
-    public function getChange()
-    {
-        return $this->change;
-    }
-
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->name = $name;
 
         return $this;
     }
 
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setType($type)
+    public function setType(string $type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setLength($length)
+    public function setLength(?int $length): self
     {
         $this->length = $length;
 
         return $this;
     }
 
-    public function getLength()
+    public function getLength(): ?int
     {
         return $this->length;
     }
 
-    public function setDefaultValue($value)
+    public function setDefaultValue(string $value): self
     {
         $this->defaultValue = $value;
 
         return $this;
     }
 
-    public function getDefaultValue()
+    public function getDefaultValue(): ?string
     {
         return $this->defaultValue;
     }
 
-    public function setEncoding($encoding)
+    public function setEncoding(string $encoding)
     {
         $this->encoding = $encoding;
 
         return $this;
     }
 
-    public function getEncoding()
+    public function getEncoding(): ?string
     {
         return $this->encoding;
     }
 
-    public function setAttributes($attributes)
+    public function setAttributes(string $attributes): self
     {
         $this->attributes = $attributes;
 
         return $this;
     }
 
-    public function getAttributes()
+    public function getAttributes(): ?string
     {
         return $this->attributes;
     }
 
-    public function setNullable($bool)
+    public function setNullable(bool $bool): self
     {
         $this->nullable = $bool;
 
         return $this;
     }
 
-    public function getNullable()
+    public function getNullable(): ?string
     {
         return $this->nullable;
     }
 
-    public function setIndex($index)
+    public function setIndex(string $index): self
     {
         $this->index = $index;
 
         return $this;
     }
 
-    public function getIndex()
+    public function getIndex(): ?string
     {
         return $this->index;
     }
 
-    public function setIncrement($increment)
+    public function setIncrement(string $increment): self
     {
         $this->increment = $increment;
 
@@ -423,24 +432,24 @@ class Column
         return $this;
     }
 
-    public function getIncrement()
+    public function getIncrement(): ?string
     {
         return $this->increment;
     }
 
-    public function setComment($comment)
+    public function setComment(string $comment): self
     {
         $this->comment = $comment;
 
         return $this;
     }
 
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->comment;
     }
 
-    public function after($column)
+    public function after(string $column): self
     {
         $this->after = $column;
 
@@ -452,24 +461,43 @@ class Column
         return $this->after;
     }
 
-    public function getRelationTable()
+    /**
+     * Generate foreign-key
+     * @return string
+     */
+    public function generateForeignKey(): string
+    {
+        $foreignKey = sprintf('fk_%s_%s_%s', $this->table, $this->getRelationTable(), $this->getName());
+
+        if (\strlen($foreignKey) > static::FOREIGN_KEY_MAX_LENGTH) {
+            return substr($foreignKey, 0, static::FOREIGN_KEY_MAX_LENGTH - 5) . Guid::generateHash(5);
+        }
+
+        return $foreignKey;
+    }
+
+    public function getRemoveRelation(): bool
+    {
+        return $this->removeRelation;
+    }
+
+    public function getRelationTable(): ?string
     {
         return $this->relationTable;
     }
 
-    public function getRelationColumn()
+    public function getRelationColumn(): ?string
     {
         return $this->relationColumn;
     }
 
-    public function getRelationUpdateType()
+    public function getRelationUpdateType(): ?string
     {
         return $this->relationUpdateType;
     }
 
-    public function getRelationDeleteType()
+    public function getRelationDeleteType(): ?string
     {
         return $this->relationDeleteType;
     }
-
 }

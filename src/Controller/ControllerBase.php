@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Controller;
 
 use Pecee\Base;
@@ -16,7 +17,7 @@ abstract class ControllerBase extends Base
      * @param array $validation
      * @throws ValidationException
      */
-    protected function validate(array $validation)
+    protected function validate(array $validation): void
     {
         parent::validate($validation);
 

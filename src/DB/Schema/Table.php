@@ -7,18 +7,17 @@ use Pecee\DB\PdoHelper;
 
 class Table
 {
+    public const TYPE_CREATE = 'create';
+    public const TYPE_MODIFY = 'modify';
+    public const TYPE_ALTER = 'alter';
 
-    const TYPE_CREATE = 'create';
-    const TYPE_MODIFY = 'modify';
-    const TYPE_ALTER = 'alter';
-
-    const ENGINE_INNODB = 'InnoDB';
-    const ENGINE_MEMORY = 'MEMORY';
-    const ENGINE_ARCHIVE = 'ARCHIVE';
-    const ENGINE_CSV = 'CSV';
-    const ENGINE_BLACKHOLE = 'BLACKHOLE';
-    const ENGINE_MRG_MYISAM = 'MRG_MYISAM';
-    const ENGINE_MYISAM = 'MyISAM';
+    public const ENGINE_INNODB = 'InnoDB';
+    public const ENGINE_MEMORY = 'MEMORY';
+    public const ENGINE_ARCHIVE = 'ARCHIVE';
+    public const ENGINE_CSV = 'CSV';
+    public const ENGINE_BLACKHOLE = 'BLACKHOLE';
+    public const ENGINE_MRG_MYISAM = 'MRG_MYISAM';
+    public const ENGINE_MYISAM = 'MyISAM';
 
     public static $ENGINES = [
         self::ENGINE_INNODB,
@@ -37,13 +36,19 @@ class Table
     protected $name;
     protected $engine;
 
-    public function __construct($name = null)
+    public function __construct(?string $name = null)
     {
         $this->name = $name;
-        $this->engine = self::ENGINE_INNODB;
+        $this->engine = static::ENGINE_INNODB;
     }
 
-    public function name($name)
+    /**
+     * Set column name
+     *
+     * @param string $name
+     * @return static
+     */
+    public function name(string $name): self
     {
         $this->name = $name;
 
@@ -51,10 +56,11 @@ class Table
     }
 
     /**
-     * Create timestamp columns
-     * @return static $this
+     * Add timestamp columns
+     *
+     * @return static
      */
-    public function timestamps()
+    public function timestamps(): self
     {
         $this->column('updated_at')->datetime()->nullable()->index();
         $this->column('created_at')->datetime()->index();
@@ -63,10 +69,12 @@ class Table
     }
 
     /**
-     * @param $name
+     * Add new column
+     *
+     * @param string $name
      * @return Column
      */
-    public function column($name)
+    public function column(string $name): Column
     {
         $column = new Column($this->name);
         $column->setName($name);
@@ -76,7 +84,7 @@ class Table
         return $column;
     }
 
-    public function getPrimary($default = null)
+    public function getPrimaryColumn(): ?Column
     {
         /* @var $column Column */
         foreach ($this->columns as $column) {
@@ -85,33 +93,50 @@ class Table
             }
         }
 
-        return $default;
+        return null;
     }
 
-    public function getColumnByIndex($index)
+    /**
+     * Get column by index
+     *
+     * @param string $index
+     * @return Column|null
+     */
+    public function getColumnByIndex(string $index): ?Column
     {
-        return $this->columns[$index];
+        return $this->columns[$index] ?? null;
     }
 
-    public function getColumnNames($lower = false, $excludePrimary = false)
+    /**
+     * Get column names
+     *
+     * @param bool $lower
+     * @param bool $excludePrimary
+     * @return array
+     */
+    public function getColumnNames(bool $lower = false, bool $excludePrimary = false): array
     {
         $names = [];
         /* @var $column Column */
         foreach ($this->columns as $column) {
-            if ($excludePrimary && $column->getIndex() === Column::INDEX_PRIMARY) {
+            if ($excludePrimary === true && $column->getIndex() === Column::INDEX_PRIMARY) {
                 continue;
             }
-            if ($lower) {
-                $names[] = strtolower($column->getName());
-            } else {
-                $names[] = $column->getName();
-            }
+
+            $names[] = ($lower === true) ? strtolower($column->getName()) : $column->getName();
         }
 
         return $names;
     }
 
-    public function getColumn($name, $strict = false)
+    /**
+     * Get column
+     *
+     * @param string $name
+     * @param bool $strict
+     * @return Column|null
+     */
+    public function getColumn(string $name, bool $strict = false): ?Column
     {
         /* @var $column Column */
         foreach ($this->columns as $column) {
@@ -123,125 +148,199 @@ class Table
         return null;
     }
 
-    public function getColumns()
+    /**
+     * Get all columns
+     *
+     * @return array
+     */
+    public function getColumns(): array
     {
         return $this->columns;
     }
 
-    public function setName($name)
+    /**
+     * Set table name
+     * @param string $name
+     * @return static
+     */
+    public function setName(string $name): self
     {
-        $this->name = $name;
+        return $this->name($name);
     }
 
-    public function getName()
+    /**
+     * Get table name
+     *
+     * @return string
+     */
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setEngine($engine)
+    /**
+     * @param $engine
+     * @throws \InvalidArgumentException
+     * @return static
+     */
+    public function setEngine(string $engine): self
     {
-        if (in_array($engine, self::$ENGINES) === false) {
+        if (\in_array($engine, static::$ENGINES, true) === false) {
             throw new \InvalidArgumentException('Invalid or unsupported engine');
         }
+
         $this->engine = $engine;
+
+        return $this;
     }
 
-    public function getEngine()
+    /**
+     * @return string
+     */
+    public function getEngine(): string
     {
         return $this->engine;
     }
 
-    public function exists()
+    /**
+     * Check if table exist.
+     * @return bool
+     */
+    public function exists(): bool
     {
         return (Pdo::getInstance()->value('SHOW TABLES LIKE ?', [$this->name]) !== false);
     }
 
-    public function columnExists($name)
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function columnExists(string $name): bool
     {
         return (Pdo::getInstance()->value('SHOW COLUMNS FROM `' . $this->name . '` LIKE ?', [$name]) !== false);
     }
 
-    protected function getColumnQuery($type, Column $column)
+    /**
+     * Generates column query
+     *
+     * @param string $type
+     * @param Column $column
+     * @return string
+     */
+    protected function generateColumnQuery(string $type, Column $column): ?string
     {
-        $length = '';
-        if ($column->getLength()) {
-            $length = '(' . $column->getLength() . ')';
-        }
-
-        $alterColumn = '';
-
-        $modify = false;
-
-        if ($type === static::TYPE_ALTER) {
-
-            $alterColumn = 'ADD COLUMN';
-
+        if ($column->getDrop() === true) {
             if ($this->columnExists($column->getName())) {
-                $modify = true;
-                $alterColumn = 'MODIFY COLUMN';
+                Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->name, $column->getName()));
             }
+
+            return null;
         }
 
-        $query = sprintf('%s `%s` %s%s %s', $alterColumn, $column->getName(), $column->getType(), $length, $column->getAttributes());
+        if ($column->getRemoveRelation() === true) {
+            $this->dropForeign([
+                $column->generateForeignKey(),
+            ]);
 
-        $query .= (!$column->getNullable()) ? ' NOT null' : ' null';
-
-        if ($column->getDefaultValue()) {
-            $query .= PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]);
+            return null;
         }
 
-        if ($column->getComment()) {
-            $query .= PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]);
+        if ($column->getIndex() === null && $column->getRelationTable() === null) {
+            return null;
         }
 
-        if ($column->getAfter()) {
-            $query .= sprintf(' AFTER `%s`', $column->getAfter());
+        $query = '';
+        $alterColumn = '';
+        $modify = false;
+        $columnType = $column->getType();
+
+        if ($columnType !== null) {
+
+            if ($type === static::TYPE_ALTER) {
+
+                $alterColumn = 'ADD COLUMN';
+
+                if ($this->columnExists($column->getName())) {
+                    $alterColumn = 'CHANGE COLUMN';
+                    $modify = true;
+                }
+            }
+
+            $defaultValue = ($column->getDefaultValue() !== null) ? PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]) : '';
+            $comment = ($column->getComment() !== null) ? PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]) : '';
+
+            $query .= sprintf('%s `%s` %s%s %s%s%s%s%s%s, ',
+                $alterColumn,
+                $column->getName(),
+                $columnType,
+                ($column->getLength() ? " ({$column->getLength()})" : ''),
+                $column->getAttributes(),
+                ($column->getNullable() === false ? ' NOT null' : ' null'),
+                $defaultValue,
+                $comment,
+                ($column->getAfter() !== null) ? " AFTER `{$column->getAfter()}`" : '',
+                ($column->getIncrement() === true ? ' AUTO_INCREMENT' : '')
+            );
         }
 
-        if ($column->getIncrement()) {
-            $query .= ' AUTO_INCREMENT';
-        }
-
-        if ($column->getIndex()) {
-
+        if ($column->getIndex() !== null) {
             if ($modify === true) {
                 $this->dropIndex([
                     $column->getName(),
                 ]);
             }
 
-            $query .= sprintf(', %1$s %2$s `%3$s`(`%3$s`)',
-                ($column->getIndex() !== Column::INDEX_PRIMARY && $modify === true) ? 'ADD ' : '',
+            $query .= sprintf('%1$s %2$s `%3$s`(`%3$s`), ',
+                (($type === static::TYPE_ALTER) ? 'ADD ' : ''),
                 $column->getIndex(),
                 $column->getName()
             );
         }
 
-        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
+        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null && $column->getRemoveRelation() === false) {
 
-            if ($modify === true) {
-                $this->dropForeign([
-                    $column->getName(),
-                ]);
-            }
-
-            $query .= sprintf(', CONSTRAINT FOREIGN KEY(`%1$s`) REFERENCES `%2$s`(`%3$s`) ON UPDATE %4$s ON DELETE %5$s',
+            $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s, ',
+                ($type === static::TYPE_ALTER) ? 'ADD' : '',
+                $column->generateForeignKey(),
                 $column->getName(),
                 $column->getRelationTable(),
                 $column->getRelationColumn(),
                 $column->getRelationUpdateType(),
                 $column->getRelationDeleteType());
+
         }
 
-        return trim($query);
+        return trim($query, ', ');
     }
 
     /**
      * Create table
      */
-    public function create()
+    public function create(): void
     {
-        if ($this->exists()) {
+        if ($this->exists() === true) {
+            return;
+        }
+
+        $queries = [];
+
+        /* @var $column Column */
+        foreach ($this->columns as $column) {
+            $query = $this->generateColumnQuery(static::TYPE_CREATE, $column);
+            if ($query !== null) {
+                $queries[] = $query;
+            }
+        }
+
+        if (\count($queries) > 0) {
+            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(',', $queries), $this->engine);
+            Pdo::getInstance()->nonQuery($sql);
+        }
+    }
+
+    public function alter(): void
+    {
+        if ($this->exists() === false) {
             return;
         }
 
@@ -250,63 +349,45 @@ class Table
         /* @var $column Column */
         foreach ($this->columns as $column) {
 
-            if ($column->getDrop() === true) {
-                continue;
+            $query = $this->generateColumnQuery(static::TYPE_ALTER, $column);
+            if ($query !== null) {
+                $queries[] = $query;
             }
-
-            $queries[] = $this->getColumnQuery(static::TYPE_CREATE, $column);
         }
 
-        if (count($queries) > 0) {
-            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(',', $queries), $this->engine);
+        if (\count($queries) > 0) {
+            $sql = sprintf('ALTER TABLE `%s` %s', $this->name, implode(',', $queries));
             Pdo::getInstance()->nonQuery($sql);
         }
+
     }
 
-    public function alter()
+    /**
+     * Rename table
+     *
+     * @param string $name
+     * @return static
+     */
+    public function rename(string $name): self
     {
-        if ($this->exists()) {
-
-            $queries = [];
-
-            /* @var $column Column */
-            foreach ($this->columns as $column) {
-
-                if ($column->getDrop() === true) {
-                    if ($this->columnExists($column->getName())) {
-                        Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->name, $column->getName()));
-                    }
-                    continue;
-                }
-
-                $queries[] = $this->getColumnQuery(static::TYPE_ALTER, $column);
-            }
-
-            if (count($queries) > 0) {
-                $sql = sprintf('ALTER TABLE `%s` %s', $this->name, join(',', $queries));
-                Pdo::getInstance()->nonQuery($sql);
-            }
-        }
-    }
-
-    public function rename($name)
-    {
-        Pdo::getInstance()->nonQuery('RENAME TABLE `' . $this->name . '` TO `' . $name . '`;');
+        Pdo::getInstance()->nonQuery("RENAME TABLE `{$this->name}` TO `$name`;");
         $this->name = $name;
 
         return $this;
     }
 
     /**
-     * @param string|array $indexes
-     * @return static $this
+     * Remove indexes
+     *
+     * @param array ...$indexes
+     * @return static
      */
-    public function dropIndex($indexes)
+    public function dropIndex(...$indexes): self
     {
         $indexes = (array)$indexes;
         foreach ($indexes as $index) {
             try {
-                Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP INDEX `' . $index . '`');
+                Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP INDEX `%s`;', $this->name, $index));
             } catch (\PDOException $e) {
 
             }
@@ -315,56 +396,164 @@ class Table
         return $this;
     }
 
-    public function createIndex(array $columns = null, $type = Column::INDEX_INDEX, $name = null)
+    /**
+     * Create index
+     *
+     * @param array|null $columns
+     * @param string $type
+     * @param string|null $name
+     * @return static
+     */
+    public function createIndex(array $columns = null, string $type = Column::INDEX_INDEX, ?string $name = null): self
     {
         $type = ($type === Column::INDEX_INDEX) ? '' : $type;
-        $columns = ($columns === null) ? [$name] : $columns;
+        $columns = $columns ?? [$name];
 
         if ($name !== null) {
-
-            $this->dropIndex([
-                $name,
-            ]);
-
+            $this->dropIndex([$name,]);
             $name = '`' . $name . '`';
-
         } else {
             $name = '';
         }
 
-        $query = sprintf('ALTER TABLE `%s` ADD %s INDEX %s (%s);', $this->name, $type, $name, PdoHelper::joinArray($columns, true));
+        $query = sprintf
+        (
+            'ALTER TABLE `%s` ADD %s %s (%s);',
+            $this->name,
+            $type,
+            $name,
+            PdoHelper::joinArray($columns, true)
+        );
+
         Pdo::getInstance()->nonQuery($query);
 
         return $this;
     }
 
-    public function createFulltext(array $columns = null, $name = null)
+    /**
+     * @param array|null $columns
+     * @param string|null $name
+     * @return static
+     */
+    public function createFulltext(array $columns = null, ?string $name = null): self
     {
         return $this->createIndex($columns, Column::INDEX_FULLTEXT, $name);
     }
 
-    public function fulltext(array $columns = null, $name = null)
+    /**
+     * Create new fulltext index
+     *
+     * @param array|null $columns
+     * @param string|null $name
+     * @return static
+     */
+    public function fulltext(array $columns = null, ?string $name = null): self
     {
         return $this->createFulltext($columns, $name);
     }
 
-    public function dropPrimary()
+    /**
+     * Drop primary key
+     *
+     * @return static
+     */
+    public function dropPrimary(): self
     {
-        Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP PRIMARY KEY');
+        Pdo::getInstance()->nonQuery("ALTER TABLE `{$this->name}` DROP PRIMARY KEY");
 
         return $this;
     }
 
-    public function dropForeign(array $indexes)
+    /**
+     * Check if foreign key exists.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function foreignExists(string $name): bool
     {
-        foreach ($indexes as $index) {
-            Pdo::getInstance()->nonQuery('ALTER TABLE `' . $this->name . '` DROP FOREIGN KEY `' . $index . '`');
+        return Pdo::getInstance()->value('SELECT * FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_TYPE` = ?', [$name]) === null;
+    }
+
+    /**
+     * Drop foreign keys
+     *
+     * @param array $indexes
+     * @return static
+     */
+    public function dropForeign(array $indexes): self
+    {
+
+        foreach ($indexes as $key => $index) {
+            $indexes[$key] = "DROP FOREIGN KEY `$index`";
         }
 
+        // Execute query
+
+        Pdo::getInstance()->nonQuery(
+            sprintf
+            (
+                'ALTER TABLE %s %s',
+                $this->name,
+                implode(', ', $indexes)
+            )
+        );
+
         return $this;
     }
 
-    public function dropIfExists()
+    /**
+     * Add foreign key
+     *
+     * @param string $keyName
+     * @param array $referenceColumns
+     * @param array $foreignTable ['table' => ['column1', 'column2']
+     * @param string $onUpdate Relation type constraint on update
+     * @param string $onDelete Relation type constraint on delete
+     * @return static
+     * @throws \InvalidArgumentException
+     */
+    public function addForeign(string $keyName, array $referenceColumns, array $foreignTable, string $onUpdate = Column::RELATION_RESTRICT, string $onDelete = Column::RELATION_CASCADE): self
+    {
+        /* --- Parse foreign table --- */
+
+        $first = reset($foreignTable);
+
+        if ($first === false) {
+            throw new \InvalidArgumentException('Misformed referenceTable parameter.');
+        }
+
+        $foreignTableName = key($first);
+
+        if (\is_string($foreignTableName) === false) {
+            throw new \InvalidArgumentException('Misformed referenceTable parameter. Failed to parse table.');
+        }
+
+        $foreignColumns = array_values((array)$first[$foreignTableName]);
+
+        $query = sprintf
+        (
+            'ALTER TABLE %1$s ADD CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s',
+            $this->name,
+            $keyName,
+            PdoHelper::joinArray($referenceColumns),
+            $foreignTableName,
+            PdoHelper::joinArray($foreignColumns),
+            $onUpdate,
+            $onDelete
+        );
+
+        Pdo::getInstance()->nonQuery($query);
+
+        return $this;
+    }
+
+    /**
+     * Drop table if it exists.
+     *
+     * @return static
+     */
+    public function dropIfExists(): self
     {
         if ($this->exists() === true) {
             $this->drop();
@@ -373,14 +562,28 @@ class Table
         return $this;
     }
 
-    public function truncate()
+    /**
+     * Truncate table
+     *
+     * @return static
+     */
+    public function truncate(): self
     {
-        Pdo::getInstance()->nonQuery('TRUNCATE TABLE `' . $this->name . '`;');
+        Pdo::getInstance()->nonQuery(sprintf('TRUNCATE TABLE `%s`', $this->name));
+
+        return $this;
     }
 
-    public function drop()
+    /**
+     * Drop table
+     *
+     * @return static
+     */
+    public function drop(): self
     {
-        Pdo::getInstance()->nonQuery('DROP TABLE `' . $this->name . '`;');
+        Pdo::getInstance()->nonQuery(sprintf('DROP TABLE `%s`', $this->name));
+
+        return $this;
     }
 
 }

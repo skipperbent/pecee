@@ -261,12 +261,12 @@ switch (strtolower($argv[1])) {
 			exit(1);
 		}
 
-		$user = \Pecee\Model\ModelUser::findOrfail($argv[0]);
+		$user = \Pecee\Model\ModelUser::instance()->findOrfail($argv[0]);
 
 		if ($user === null) {
 			echo sprintf('User with id %s not found', $argv[0]) . chr(10);
 		} else {
-			$password = \Pecee\Guid::createRandomPassword(8);
+			$password = \Pecee\Guid::generateHash(8);
 			$user->setPassword($password);
 			$user->save();
 

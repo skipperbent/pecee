@@ -7,7 +7,7 @@ use Pecee\SimpleRouter\SimpleRouter;
 class Router extends SimpleRouter
 {
 
-    public static function init()
+    public static function init(): void
     {
         if (app()->getDisableFrameworkRoutes() === false) {
 
@@ -22,7 +22,13 @@ class Router extends SimpleRouter
         }
     }
 
-    public static function start() : void
+    /**
+     * @throws \Pecee\Http\Middleware\Exceptions\TokenMismatchException
+     * @throws \Pecee\SimpleRouter\Exceptions\HttpException
+     * @throws \Pecee\SimpleRouter\Exceptions\NotFoundHttpException
+     * @throws \Exception
+     */
+    public static function start(): void
     {
         debug('Router initialised.');
 

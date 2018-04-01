@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Translation;
 
 use Pecee\Translation\Providers\ITranslationProvider;
@@ -9,37 +10,28 @@ class Translation
 
     /**
      * Translate message.
+     *
      * @param string $key
-     * @param array $args
+     * @param array ...$args
      * @return string
      */
-    public function _($key, $args = null)
+    public function _(string $key, ...$args)
     {
-        if (!is_array($args)) {
-            $args = func_get_args();
-            $args = array_slice($args, 1);
-        }
-
-        return vsprintf($this->lookup($key), $args);
+        return vsprintf($this->lookup($key), ...$args);
     }
 
     /**
      * Translate message.
      * @param string $key
-     * @param array $args
+     * @param array ...$args
      * @return string
      */
-    public function translate($key, $args = null)
+    public function translate(string $key, ...$args)
     {
-        if (!is_array($args)) {
-            $args = func_get_args();
-            $args = array_slice($args, 1);
-        }
-
-        return vsprintf($this->lookup($key), $args);
+        return vsprintf($this->lookup($key), ...$args);
     }
 
-    protected function lookup($key)
+    protected function lookup(string $key)
     {
         if ($this->provider instanceof ITranslationProvider) {
             return $this->provider->lookup($key);
