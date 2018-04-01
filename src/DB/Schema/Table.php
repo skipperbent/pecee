@@ -4,6 +4,7 @@ namespace Pecee\DB\Schema;
 
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
+use Pecee\Exceptions\InvalidArgumentException;
 
 class Table
 {
@@ -226,6 +227,7 @@ class Table
      * @param string $type
      * @param Column $column
      * @return string
+     * @throws \InvalidArgumentException
      */
     protected function generateColumnQuery(string $type, Column $column): ?string
     {
@@ -233,14 +235,6 @@ class Table
             if ($this->columnExists($column->getName())) {
                 Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->name, $column->getName()));
             }
-
-            return null;
-        }
-
-        if ($column->getRemoveRelation() === true) {
-            $this->dropForeign([
-                $column->generateForeignKey(),
-            ]);
 
             return null;
         }
@@ -266,9 +260,6 @@ class Table
                 }
             }
 
-            $defaultValue = ($column->getDefaultValue() !== null) ? PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]) : '';
-            $comment = ($column->getComment() !== null) ? PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]) : '';
-
             $query .= sprintf('%s `%s` %s%s %s%s%s%s%s%s, ',
                 $alterColumn,
                 $column->getName(),
@@ -276,8 +267,8 @@ class Table
                 ($column->getLength() ? " ({$column->getLength()})" : ''),
                 $column->getAttributes(),
                 ($column->getNullable() === false ? ' NOT null' : ' null'),
-                $defaultValue,
-                $comment,
+                ($column->getDefaultValue() !== null) ? PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]) : '',
+                ($column->getComment() !== null) ? PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]) : '',
                 ($column->getAfter() !== null) ? " AFTER `{$column->getAfter()}`" : '',
                 ($column->getIncrement() === true ? ' AUTO_INCREMENT' : '')
             );
@@ -297,16 +288,34 @@ class Table
             );
         }
 
-        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null && $column->getRemoveRelation() === false && $this->foreignExists($column->generateForeignKey()) === false) {
+        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
 
-            $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s, ',
-                ($type === static::TYPE_ALTER) ? 'ADD' : '',
-                $column->generateForeignKey(),
-                $column->getName(),
-                $column->getRelationTable(),
-                $column->getRelationColumn(),
-                $column->getRelationUpdateType(),
-                $column->getRelationDeleteType());
+            if ($column->getRemoveRelation() === true) {
+
+                if ($type !== static::TYPE_ALTER) {
+                    throw new InvalidArgumentException('You cannot remove a relation when creating a new table.');
+                }
+
+                $query .= sprintf('DROP FOREIGN KEY `%s`, ', $column->getRelationKey());
+
+            } else {
+
+                if ($this->foreignExist($column->getRelationKey()) === true) {
+                    $this->dropForeign([
+                        $column->getRelationKey(),
+                    ]);
+                }
+
+                $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s, ',
+                    ($type === static::TYPE_ALTER) ? 'ADD' : '',
+                    $column->getRelationKey(),
+                    $column->getName(),
+                    $column->getRelationTable(),
+                    $column->getRelationColumn(),
+                    $column->getRelationUpdateType(),
+                    $column->getRelationDeleteType());
+
+            }
 
         }
 
@@ -315,6 +324,7 @@ class Table
 
     /**
      * Create table
+     * @throws \InvalidArgumentException
      */
     public function create(): void
     {
@@ -327,17 +337,21 @@ class Table
         /* @var $column Column */
         foreach ($this->columns as $column) {
             $query = $this->generateColumnQuery(static::TYPE_CREATE, $column);
-            if ($query !== null) {
+            if (trim($query) !== '') {
                 $queries[] = $query;
             }
         }
 
         if (\count($queries) > 0) {
-            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, join(',', $queries), $this->engine);
+            $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, implode(',', $queries), $this->engine);
             Pdo::getInstance()->nonQuery($sql);
         }
     }
 
+    /**
+     * Modify table
+     * @throws \InvalidArgumentException
+     */
     public function alter(): void
     {
         if ($this->exists() === false) {
@@ -348,9 +362,8 @@ class Table
 
         /* @var $column Column */
         foreach ($this->columns as $column) {
-
             $query = $this->generateColumnQuery(static::TYPE_ALTER, $column);
-            if ($query !== null) {
+            if (trim($query) !== '') {
                 $queries[] = $query;
             }
         }
@@ -470,9 +483,9 @@ class Table
      * @param string $name
      * @return bool
      */
-    public function foreignExists(string $name): bool
+    public function foreignExist(string $name): bool
     {
-        return (int)Pdo::getInstance()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name]) > 0;
+        return (int)Pdo::getInstance()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name]) <= 0;
     }
 
     /**
@@ -483,11 +496,10 @@ class Table
      */
     public function dropForeign(array $indexes): self
     {
-
         foreach ($indexes as $key => $index) {
 
             // Skip if the foreign-key is already removed.
-            if ($this->foreignExists($index) === false) {
+            if ($this->foreignExist($index) === true) {
                 unset($indexes[$key]);
                 continue;
             }
