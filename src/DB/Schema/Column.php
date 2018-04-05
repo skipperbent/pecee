@@ -460,7 +460,7 @@ class Column
      */
     public function getRelationKey(): string
     {
-        return sprintf('%s_fk_%s', $this->table, $this->getName());
+        return sprintf('%s_%s_fk', $this->table, $this->getName());
     }
 
     public function getRemoveRelation(): bool
