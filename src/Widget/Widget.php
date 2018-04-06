@@ -97,7 +97,7 @@ abstract class Widget extends Base
         }
 
         if (\count($this->getSite()->getKeywords()) > 0) {
-            $this->getSite()->addMeta(['content' => join(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
+            $this->getSite()->addMeta(['content' => implode(', ', $this->getSite()->getKeywords()), 'name' => 'keywords']);
         }
 
         if (\count($this->getSite()->getHeader()) > 0) {

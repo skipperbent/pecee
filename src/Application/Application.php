@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Application;
 
 use Pecee\Application\UrlHandler\IUrlHandler;
@@ -10,7 +11,7 @@ use Pecee\UI\Site;
 
 class Application
 {
-    const CHARSET_UTF8 = 'UTF-8';
+    public const CHARSET_UTF8 = 'UTF-8';
 
     protected $debugEnabled = false;
 
@@ -67,7 +68,7 @@ class Application
         $this->setDefaultLocale('en_gb');
         $this->setLocale('en_gb');
         $this->setAdminIps([
-            '127.0.0.1'
+            '127.0.0.1',
         ]);
 
         Session::start();
@@ -76,7 +77,7 @@ class Application
     /**
      * @return array
      */
-    public function getAdminIps()
+    public function getAdminIps(): array
     {
         return $this->adminIps;
     }
@@ -85,26 +86,26 @@ class Application
      * @param array $ips
      * @return static
      */
-    public function setAdminIps(array $ips)
+    public function setAdminIps(array $ips): self
     {
         $this->adminIps = $ips;
 
         return $this;
     }
 
-    public function addAdminIp($ip)
+    public function addAdminIp($ip): self
     {
         $this->adminIps[] = $ip;
 
         return $this;
     }
 
-    public function hasAdminIp($ip = null)
+    public function hasAdminIp(string $ip = null): bool
     {
-        $ip = ($ip === null) ? request()->getIp() : $ip;
+        $ip = $ip ?? \request()->getIp();
 
-        if (is_array($this->adminIps) === true) {
-            return in_array($ip, $this->adminIps, true);
+        if (\is_array($this->adminIps) === true) {
+            return \in_array($ip, $this->adminIps, true);
         }
 
         return false;
@@ -113,7 +114,7 @@ class Application
     /**
      * @return string $timezone
      */
-    public function getTimezone()
+    public function getTimezone(): string
     {
         return $this->timezone;
     }
@@ -121,13 +122,13 @@ class Application
     /**
      * @param string $timezone
      */
-    public function setTimezone($timezone)
+    public function setTimezone(string $timezone): void
     {
         $this->timezone = $timezone;
         date_default_timezone_set($timezone);
     }
 
-    public function setLocale($locale)
+    public function setLocale(string $locale): void
     {
         $this->locale = strtolower($locale);
         setlocale(LC_ALL, $locale);
@@ -137,12 +138,12 @@ class Application
         }
     }
 
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
 
-    public function getDefaultLocale()
+    public function getDefaultLocale(): string
     {
         return $this->defaultLocale;
     }
@@ -153,7 +154,7 @@ class Application
      * @param string $defaultLocale
      * @return static $this
      */
-    public function setDefaultLocale($defaultLocale)
+    public function setDefaultLocale(string $defaultLocale): self
     {
         $this->defaultLocale = $defaultLocale;
 
@@ -166,7 +167,7 @@ class Application
      * @param string $path
      * @return static $this
      */
-    public function addModule($name, $path)
+    public function addModule(string $name, string $path): self
     {
         $this->modules[$name] = $path;
 
@@ -176,28 +177,28 @@ class Application
     /**
      * Get module
      * @param string $name
-     * @return string
+     * @return string|null
      */
-    public function getModule($name)
+    public function getModule($name): ?string
     {
-        return isset($this->modules[$name]) ? $this->modules[$name] : null;
+        return $this->modules[$name] ?? null;
     }
 
     /**
      * Get modules
      * @return array
      */
-    public function getModules()
+    public function getModules(): array
     {
         return $this->modules;
     }
 
-    public function hasModules()
+    public function hasModules(): bool
     {
-        return (count($this->modules) > 0);
+        return (\count($this->modules) > 0);
     }
 
-    public function getCharset()
+    public function getCharset(): string
     {
         return $this->charset;
     }
@@ -206,9 +207,9 @@ class Application
      * Change the default wroute for the js wrapper
      *
      * @param string $url
-     * @return static $this
+     * @return static
      */
-    public function setJsWrapRouteUrl($url)
+    public function setJsWrapRouteUrl(string $url): self
     {
         $this->jsWrapRouteUrl = $url;
 
@@ -221,19 +222,19 @@ class Application
      * @param string $url
      * @return static $this
      */
-    public function setCssWrapRouteUrl($url)
+    public function setCssWrapRouteUrl(string $url): self
     {
         $this->cssWrapRouteUrl = $url;
 
         return $this;
     }
 
-    public function getJsWrapRouteUrl()
+    public function getJsWrapRouteUrl(): ?string
     {
         return $this->jsWrapRouteUrl;
     }
 
-    public function getCssWrapRouteUrl()
+    public function getCssWrapRouteUrl(): ?string
     {
         return $this->cssWrapRouteUrl;
     }
@@ -243,7 +244,7 @@ class Application
      *
      * @return string
      */
-    public function getCssWrapRouteName()
+    public function getCssWrapRouteName(): ?string
     {
         return $this->cssWrapRouteName;
     }
@@ -253,7 +254,7 @@ class Application
      *
      * @return string
      */
-    public function getJsWrapRouteName()
+    public function getJsWrapRouteName(): ?string
     {
         return $this->jsWrapRouteName;
     }
@@ -263,16 +264,16 @@ class Application
      * Useful if running in cli or using a scraped site.
      *
      * @param bool $bool
-     * @return static $this
+     * @return static
      */
-    public function setDisableFrameworkRoutes($bool)
+    public function setDisableFrameworkRoutes(bool $bool): self
     {
         $this->disableFrameworkRoutes = $bool;
 
         return $this;
     }
 
-    public function getDisableFrameworkRoutes()
+    public function getDisableFrameworkRoutes(): bool
     {
         return $this->disableFrameworkRoutes;
     }
@@ -284,7 +285,7 @@ class Application
      * @param mixed $value
      * @return static $this
      */
-    public function add($key, $value)
+    public function add(string $key, $value): self
     {
         $this->parameters[$key] = $value;
 
@@ -298,34 +299,34 @@ class Application
      * @param mixed|null $defaultValue
      * @return mixed|null
      */
-    public function get($key, $defaultValue = null)
+    public function get(string $key, $defaultValue = null)
     {
-        return isset($this->parameters[$key]) ? $this->parameters[$key] : $defaultValue;
+        return $this->parameters[$key] ?? $defaultValue;
     }
 
-    public function __set($name, $value)
+    public function __set(string $name, $value): void
     {
         $this->parameters[$name] = $value;
     }
 
-    public function __get($name)
+    public function __get(string $name)
     {
-        return isset($this->parameters[$name]) ? $this->parameters[$name] : null;
+        return $this->parameters[$name] ?? null;
     }
 
-    public function __isset($name)
+    public function __isset(string $name): bool
     {
         return array_key_exists($name, $this->parameters);
     }
 
-    public function setEncryptionMethod($method)
+    public function setEncryptionMethod(string $method): self
     {
         $this->encryptionMethod = $method;
 
         return $this;
     }
 
-    public function getEncryptionMethod()
+    public function getEncryptionMethod(): string
     {
         return $this->encryptionMethod;
     }
@@ -335,7 +336,7 @@ class Application
      * @param bool $bool
      * @return static
      */
-    public function setDebugEnabled($bool)
+    public function setDebugEnabled(bool $bool): self
     {
         $bool = Boolean::parse($bool);
         $this->debug = ($bool === true) ? new Debug() : null;
@@ -348,7 +349,7 @@ class Application
      * Is debug enabled
      * @return bool
      */
-    public function getDebugEnabled()
+    public function getDebugEnabled(): bool
     {
         return $this->debugEnabled;
     }
@@ -358,9 +359,10 @@ class Application
      * @param IUrlHandler $callback
      * @return $this
      */
-    public function setUrlHandler(IUrlHandler $callback)
+    public function setUrlHandler(IUrlHandler $callback): self
     {
         $this->urlHandler = $callback;
+
         return $this;
     }
 
@@ -368,7 +370,7 @@ class Application
      * Get url handler
      * @return IUrlHandler
      */
-    public function getUrlHandler()
+    public function getUrlHandler(): IUrlHandler
     {
         return $this->urlHandler;
     }

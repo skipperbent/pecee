@@ -9,7 +9,7 @@ class ValidateRepeation extends ValidateInput
 
     public function __construct($compareIndex, $caseSensitive = true)
     {
-        $this->compareInput = input()->get($compareIndex);
+        $this->compareInput = input()->find($compareIndex);
         $this->caseSensitive = $caseSensitive;
     }
 
