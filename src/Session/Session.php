@@ -17,11 +17,6 @@ class Session
         }
     }
 
-    public static function getSecret(): string
-    {
-        return env('APP_SECRET', 'NoApplicationSecretDefined');
-    }
-
     public static function isActive(): bool
     {
         return static::$active;
@@ -45,10 +40,10 @@ class Session
     {
         $data = [
             serialize($value),
-            static::getSecret(),
+            app()->getSecret(),
         ];
 
-        $data = Guid::encrypt(static::getSecret(), implode('|', $data));
+        $data = Guid::encrypt(app()->getSecret(), implode('|', $data));
 
         $_SESSION[$id] = $data;
     }
@@ -61,10 +56,10 @@ class Session
 
             if (trim($value) !== '') {
 
-                $value = Guid::decrypt(static::getSecret(), $value);
+                $value = Guid::decrypt(app()->getSecret(), $value);
                 $data = explode('|', $value);
 
-                if (\is_array($data) && trim(end($data)) === static::getSecret()) {
+                if (\is_array($data) && trim(end($data)) === app()->getSecret()) {
                     return unserialize($data[0], ['allowed_classes' => true]);
                 }
 

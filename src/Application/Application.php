@@ -75,6 +75,16 @@ class Application
     }
 
     /**
+     * Get app secret
+     *
+     * @return string
+     */
+    public function getSecret(): string
+    {
+        return env('APP_SECRET', 'NoApplicationSecretDefined');
+    }
+
+    /**
      * @return array
      */
     public function getAdminIps(): array
