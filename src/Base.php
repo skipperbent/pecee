@@ -34,13 +34,13 @@ abstract class Base
 
         /* @var array $values */
         foreach ($values as $key => $value) {
-            $item = input()->get($key, ['get', 'post']) ?? new InputItem($key);
+            $item = input()->find($key, ['get', 'post']) ?? new InputItem($key);
             $item->setValue($value);
 
             if (request()->getMethod() === 'post') {
-                input()->post[$key] = $item;
+                input()->addPost($key, $item);
             } else {
-                input()->get[$key] = $item;
+                input()->addGet($key, $item);
             }
         }
 
@@ -50,7 +50,7 @@ abstract class Base
     public function setInputName(array $names): void
     {
         foreach ($names as $key => $name) {
-            $item = input()->get($key);
+            $item = input()->find($key);
 
             /* @var $item \Pecee\Http\Input\IInputItem */
             if ($item !== null) {
@@ -77,10 +77,10 @@ abstract class Base
     {
         foreach ($validation as $key => $validations) {
 
-            $input = input()->get($key) ?? new InputItem($key, null);
+            $input = input()->find($key) ?? new InputItem($key, null);
             $inputs = ($input instanceof InputItem) ? [$input] : $input;
 
-            $validations = is_array($validations) === false ? [$validations] : $validations;
+            $validations = \is_array($validations) === false ? [$validations] : $validations;
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
             foreach ($validations as $validateClass) {

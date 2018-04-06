@@ -16,9 +16,9 @@ class Cookie
      * @param string $path
      * @return bool
      */
-    public static function create($id, $value, $expireTime = null, $domain = null, $secure = null, $path = '/')
+    public static function create($id, $value, $expireTime = null, $domain = null, $secure = null, $path = '/'): bool
     {
-        $expireTime = ($expireTime === null) ? Carbon::now()->addYear(10)->timestamp : $expireTime;
+        $expireTime = $expireTime ?? Carbon::now()->addYear(10)->timestamp;
         $expireTime = ($expireTime > 0) ? $expireTime : null;
 
         if ($domain === null) {
@@ -28,19 +28,19 @@ class Cookie
         return setcookie($id, $value, $expireTime, $path, $domain, $secure);
     }
 
-    public static function get($id, $defaultValue = null)
+    public static function get(string $id, $defaultValue = null): bool
     {
         return static::exists($id) ? $_COOKIE[$id] : $defaultValue;
     }
 
-    public static function delete($id)
+    public static function delete(string $id): void
     {
         if (static::exists($id) === true) {
             static::create($id, null, time() - 99);
         }
     }
 
-    public static function exists($id)
+    public static function exists(string $id): bool
     {
         return isset($_COOKIE[$id]);
     }

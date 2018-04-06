@@ -16,7 +16,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
     /**
      * @return array
      */
-    public function getRows()
+    public function getRows(): array
     {
         return $this->rows;
     }
@@ -24,39 +24,39 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
     /**
      * @param array $rows
      */
-    public function setRows(array $rows)
+    public function setRows(array $rows): void
     {
         $this->rows = $rows;
     }
 
-    public function hasRows()
+    public function hasRows(): bool
     {
-        return (count($this->rows) > 0);
+        return (\count($this->rows) > 0);
     }
 
-    public function add($item)
+    public function add($item): void
     {
         $this->rows[] = $item;
     }
 
-    public function get($index, $defaultValue = null)
+    public function get(string $index, $defaultValue = null)
     {
         return $this->exist($index) ? $this->rows[$index] : $defaultValue;
     }
 
-    public function exist($index)
+    public function exist(string $index): bool
     {
         return isset($this->rows[$index]);
     }
 
-    public function remove($index)
+    public function remove(string $index): void
     {
         if ($this->exist($index)) {
             unset($this->rows[$index]);
         }
     }
 
-    public function clear()
+    public function clear(): void
     {
         $this->rows = [];
     }
@@ -75,7 +75,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
 
     public function count()
     {
-        return count($this->getRows());
+        return \count($this->getRows());
     }
 
     /**

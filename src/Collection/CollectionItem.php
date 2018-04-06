@@ -12,7 +12,7 @@ class CollectionItem implements \IteratorAggregate
         }
     }
 
-    public function setData(array $arr)
+    public function setData(array $arr): void
     {
         $this->data = [];
         foreach ($arr as $key => $value) {
@@ -20,49 +20,49 @@ class CollectionItem implements \IteratorAggregate
         }
     }
 
-    public function get($name)
+    public function get(string $name)
     {
         return $this->data[strtolower($name)];
     }
 
-    public function set($name, $value)
+    public function set(string $name, $value): void
     {
         $this->$name = $value;
     }
 
-    public function __get($key)
+    public function __get(string $key)
     {
         return $this->exist($key) ? $this->data[strtolower($key)] : null;
     }
 
-    public function __set($key, $value)
+    public function __set(string $key, $value): void
     {
         $this->data[strtolower($key)] = $value;
     }
 
-    public function __isset($key)
+    public function __isset(string $key): bool
     {
         return $this->exist($key);
     }
 
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
 
-    public function add($key, $value)
+    public function add(string $key, $value): void
     {
         $this->$key = $value;
     }
 
-    public function remove($key)
+    public function remove(string $key): void
     {
         if ($this->exist($key)) {
             unset($this->data[$key]);
         }
     }
 
-    public function exist($key)
+    public function exist(string $key): bool
     {
         return isset($this->data[strtolower($key)]);
     }
