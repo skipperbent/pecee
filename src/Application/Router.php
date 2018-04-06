@@ -18,7 +18,7 @@ class Router extends SimpleRouter
         }
 
         if (env('APP_NAME') !== null) {
-            parent::setDefaultNamespace('\\' . env('APP_NAME') . '\\Controller');
+            parent::setDefaultNamespace('\\' . env('APP_NAME') . '\\Controllers');
         }
     }
 
@@ -35,8 +35,7 @@ class Router extends SimpleRouter
         parent::start();
 
         // Output debug info
-
-        if (isset($_GET['__debug']) && strtolower($_GET['__debug']) === 'app' && app()->getDebugEnabled() === true && app()->hasAdminIp()) {
+        if (isset($_GET['__debug']) === true && strtolower($_GET['__debug']) === 'app' && app()->getDebugEnabled() === true) {
             echo app()->debug;
         }
     }
