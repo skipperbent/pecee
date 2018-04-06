@@ -4,12 +4,12 @@ namespace Pecee;
 class Url
 {
 
-    public static function hasParams($url)
+    public static function hasParams($url): bool
     {
         return (strpos($url, '?') > -1);
     }
 
-    public static function paramsToArray($query)
+    public static function paramsToArray($query): array
     {
         $output = [];
         parse_str(trim($query, '?'), $output);
@@ -17,12 +17,12 @@ class Url
         return $output;
     }
 
-    public static function getParamsSeparator($url)
+    public static function getParamsSeparator($url): string
     {
         return (strpos($url, '?') > -1) ? '&' : '?';
     }
 
-    public static function isValid($url)
+    public static function isValid($url): bool
     {
         return (preg_match('/^\w+:\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url) === 1);
     }
@@ -32,12 +32,12 @@ class Url
      * @param string $url
      * @return bool
      */
-    public static function isValidRelative($url)
+    public static function isValidRelative($url): bool
     {
         return !preg_match('/[^\w.-]/', $url);
     }
 
-    public static function isValidHostname($hostname)
+    public static function isValidHostname($hostname): bool
     {
         return (preg_match('/^ (?: [a-z0-9] (?:[a-z0-9\\-]* [a-z0-9])? \\. )*  #Subdomains
    							[a-z0-9] (?:[a-z0-9\\-]* [a-z0-9])?            #Domain
@@ -47,7 +47,7 @@ class Url
 
     public static function urlEncodeString($string, $separator = '-', $maxLength = 50)
     {
-        if ($maxLength !== null && strlen($string) > $maxLength) {
+        if ($maxLength !== null && \strlen($string) > $maxLength) {
             $string = substr($string, 0, $maxLength);
         }
 
@@ -63,7 +63,7 @@ class Url
         return preg_replace('/[^\w\ \+\&' . join('', $searchMap) . ']/i', '', $string);
     }
 
-    public static function isSecure($url)
+    public static function isSecure(string $url): bool
     {
         return (strtolower(parse_url($url, PHP_URL_SCHEME)) === 'https');
     }

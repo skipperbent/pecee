@@ -9,13 +9,13 @@ class Boolean
      *
      * @param string $str
      * @param mixed $defaultValue
-     * @return bool|mixed
+     * @return bool
      */
-    public static function parse($str, $defaultValue = false)
+    public static function parse($str, $defaultValue = false): bool
     {
         $bool = filter_var($str, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
-        return ($bool !== null) ? $bool : $defaultValue;
+        return $bool ?? $defaultValue;
     }
 
 }

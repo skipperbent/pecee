@@ -1,10 +1,11 @@
 <?php
+
 namespace Pecee;
 
 class ArrayUtil
 {
 
-    public static function filter(array $array, $allowEmpty = true)
+    public static function filter(array $array, $allowEmpty = true): array
     {
         foreach ($array as $key => $value) {
             if ($value === null || ($allowEmpty === false && trim($value) !== '')) {
@@ -17,17 +18,18 @@ class ArrayUtil
 
     public static function average(array $arr)
     {
-        $count = count($arr); //total numbers in array
+        $count = \count($arr); //total numbers in array
         $total = 0;
         foreach ($arr as $value) {
             $total += $value; // total value of array numbers
         }
+
         return ($total / $count); // get average value
     }
 
-    public static function toStdClass($array)
+    public static function toStdClass($array): \stdClass
     {
-        if (is_array($array)) {
+        if (\is_array($array)) {
             return (object)array_map(__METHOD__, $array);
         }
 
@@ -39,7 +41,7 @@ class ArrayUtil
     * @param $arr array
     * @return null|string|array
     */
-    public static function valueRecursive(array $arr, $key = null)
+    public static function valueRecursive(array $arr, $key = null): array
     {
         $val = [];
         array_walk_recursive($arr, function ($v, $k) use ($key, &$val) {
@@ -51,7 +53,7 @@ class ArrayUtil
         return $val;
     }
 
-    public static function append(array &$array1, array $array2)
+    public static function append(array &$array1, array $array2): array
     {
         foreach ($array2 as $key => $value) {
             $array1[] = $value;

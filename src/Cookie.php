@@ -28,7 +28,7 @@ class Cookie
         return setcookie($id, $value, $expireTime, $path, $domain, $secure);
     }
 
-    public static function get(string $id, $defaultValue = null): bool
+    public static function get(string $id, $defaultValue = null): ?string
     {
         return static::exists($id) ? $_COOKIE[$id] : $defaultValue;
     }
