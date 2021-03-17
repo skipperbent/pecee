@@ -13,7 +13,7 @@ class Column
     protected $attributes;
     protected $nullable;
     protected $index;
-    protected $increment;
+    protected $increment = false;
     protected $comment;
     protected $drop = false;
     protected $change = false;
@@ -399,9 +399,9 @@ class Column
         return $this;
     }
 
-    public function getNullable(): ?string
+    public function getNullable(): ?bool
     {
-        return $this->nullable;
+        return (bool)$this->nullable;
     }
 
     public function setIndex(string $index): self
@@ -416,7 +416,7 @@ class Column
         return $this->index;
     }
 
-    public function setIncrement(string $increment): self
+    public function setIncrement(bool $increment): self
     {
         $this->increment = $increment;
 
@@ -425,9 +425,9 @@ class Column
         return $this;
     }
 
-    public function getIncrement(): ?string
+    public function getIncrement(): bool
     {
-        return $this->increment;
+        return (bool)$this->increment;
     }
 
     public function setComment(string $comment): self
@@ -492,4 +492,13 @@ class Column
     {
         return $this->relationDeleteType;
     }
+
+    /**
+     * @return Table|null
+     */
+    public function getTable()
+    {
+        return $this->table;
+    }
+
 }
