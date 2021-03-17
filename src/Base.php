@@ -35,7 +35,7 @@ abstract class Base
         /* @var array $values */
         foreach ($values as $key => $value) {
             $item = input()->find($key, ['get', 'post']) ?? new InputItem($key);
-            $item->setValue($value);
+            $item->setValue((string)$value);
 
             if (request()->getMethod() === 'post') {
                 input()->addPost($key, $item);

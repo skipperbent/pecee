@@ -239,10 +239,6 @@ class Table
             return null;
         }
 
-        if ($column->getIndex() === null && $column->getRelationTable() === null) {
-            return null;
-        }
-
         $query = '';
         $alterColumn = '';
         $modify = false;
@@ -485,7 +481,7 @@ class Table
      */
     public function foreignExist(string $name): bool
     {
-        return (int)Pdo::getInstance()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name]) <= 0;
+        return ((int)Pdo::getInstance()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name])) > 0;
     }
 
     /**
