@@ -186,4 +186,12 @@ abstract class ModelData extends Model
         return $exists;
     }
 
+    public function __clone()
+    {
+        parent::__clone();
+
+        // Reset when cloning
+        $this->data = new CollectionItem();
+    }
+
 }
