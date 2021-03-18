@@ -113,7 +113,7 @@ abstract class Widget extends Base
         $output = '';
 
         if (\count($this->getSite()->getCssFilesWrapped($section)) > 0) {
-            $css = url(app()->getCssWrapRouteName(), null, ['files' => implode($this->getSite()->getCssFilesWrapped($section), ',')]);
+            $css = url(app()->getCssWrapRouteName(), null, ['files' => implode(',', $this->getSite()->getCssFilesWrapped($section))]);
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
@@ -132,7 +132,7 @@ abstract class Widget extends Base
         $output = '';
 
         if (\count($this->getSite()->getJsFilesWrapped($section)) > 0) {
-            $js = url(app()->getJsWrapRouteName(), null, ['files' => implode($this->getSite()->getJsFilesWrapped($section), ',')]);
+            $js = url(app()->getJsWrapRouteName(), null, ['files' => implode(',', $this->getSite()->getJsFilesWrapped($section))]);
             $output .= (new Html('script'))->attr('src', $js);
         }
 
