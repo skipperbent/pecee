@@ -36,6 +36,12 @@ abstract class ModelData extends Model
 
     public function onInstanceCreate()
     {
+        $this->data = new CollectionItem();
+        
+        if($this->isNew() === true) {
+            return;
+        }
+
         /* @var $data array */
         $data = $this->fetchData();
         foreach ($data as $d) {
@@ -47,6 +53,10 @@ abstract class ModelData extends Model
 
     protected function updateData()
     {
+        if($this->isNew() === true) {
+            return;
+        }
+
         if ($this->data !== null && $this->getUpdateIdentifier() !== $this->generateUpdateIdentifier()) {
 
             /* @var $currentFields array|null */
@@ -184,14 +194,6 @@ abstract class ModelData extends Model
         }
 
         return $exists;
-    }
-
-    public function __clone()
-    {
-        parent::__clone();
-
-        // Reset when cloning
-        $this->data = new CollectionItem();
     }
 
 }

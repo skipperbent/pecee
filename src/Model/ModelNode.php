@@ -377,6 +377,10 @@ class ModelNode extends ModelData
                 });
     }
 
+    /**
+     * @param string|null $parentId
+     * @return static
+     */
     public function filterParentId($parentId = null)
     {
         if ($parentId === null || (string)$parentId === '0') {
