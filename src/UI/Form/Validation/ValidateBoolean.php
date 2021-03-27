@@ -1,12 +1,14 @@
 <?php
 namespace Pecee\UI\Form\Validation;
 
+use Pecee\Boolean;
+
 class ValidateBoolean extends ValidateInput
 {
 
     public function validates()
     {
-        return ($this->input->getValue() === true || $this->input->getValue() === false);
+        return Boolean::parse($this->input->getValue());
     }
 
     public function getError()

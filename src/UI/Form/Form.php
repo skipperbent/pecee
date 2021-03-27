@@ -84,7 +84,7 @@ class Form
      */
     public function bool($name, $value = true, $defaultValue = null, $saveValue = true)
     {
-        $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : $defaultValue);
+        $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : (int)$defaultValue);
         if ($saveValue !== false) {
             if ($defaultValue === null) {
                 $defaultValue = $value;

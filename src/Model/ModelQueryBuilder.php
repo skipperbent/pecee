@@ -635,11 +635,12 @@ class ModelQueryBuilder
     {
         $item = $this->first();
 
-        if ($item === null) {
-            $item = $this->createInstance((object)$data);
-            $item->setOriginalRows([]);
+        if ($item !== null) {
+            return $item;
         }
 
+        $item = $this->createInstance((object)$data);
+        $item->setOriginalRows([]);
         return $item;
     }
 

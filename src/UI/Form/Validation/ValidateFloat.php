@@ -7,7 +7,7 @@ class ValidateFloat extends ValidateInput
 {
     public function validates()
     {
-        return FloatUtil::isFloat(FloatUtil::parse($this->input->getValue()));
+        return FloatUtil::isFloat($this->input->getValue());
     }
 
     public function getError()

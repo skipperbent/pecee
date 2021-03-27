@@ -15,7 +15,7 @@ abstract class Widget extends Base
 
     public function __construct()
     {
-
+        // Here for backwards compatibility
     }
 
     public function onLoad(): void
@@ -46,7 +46,7 @@ abstract class Widget extends Base
         $errors = $this->getMessages($type, $placement);
 
         if (\count($errors) > 0) {
-            $o = sprintf('<div class="alert alert-%s">', $type);
+            $output = (new Html('div'))->addClass('alert')->addClass(sprintf('alert-%s', $type));
 
             $msg = [];
             /* @var $error \Pecee\UI\Form\FormMessage */
@@ -54,7 +54,9 @@ abstract class Widget extends Base
                 $msg[] = $error->getMessage();
             }
 
-            return $o . implode('<br>', $msg) . '</div>';
+            $output->addInnerHtml(implode('<br/>', $msg));
+
+            return $output;
         }
 
         return '';
@@ -259,8 +261,7 @@ abstract class Widget extends Base
         if ($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
-            $this->_contentHtml = ob_get_contents();
-            ob_end_clean();
+            $this->_contentHtml = ob_get_clean();
         }
 
         debug('END: rendering content-template: ' . $this->_contentTemplate);
@@ -273,8 +274,7 @@ abstract class Widget extends Base
         if ($this->_template !== '') {
             ob_start();
             include $this->_template;
-            $this->_contentHtml = ob_get_contents();
-            ob_end_clean();
+            $this->_contentHtml = ob_get_clean();
         }
 
         debug('END: rendering template ' . $this->_template);

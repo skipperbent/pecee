@@ -34,7 +34,8 @@ class Url
      */
     public static function isValidRelative($url): bool
     {
-        return !preg_match('/[^\w.-]/', $url);
+        // PHP filter_var does not support relative urls, so we simulate a full URL
+        return !(filter_var('http://www.example.com/'.ltrim($url,'/'), FILTER_VALIDATE_URL) === false);
     }
 
     public static function isValidHostname($hostname): bool

@@ -89,7 +89,7 @@ function app()
 
 /**
  * @param string $key
- * @param array ...$args
+ * @param string|array ...$args
  * @return string
  */
 function lang($key, ...$args): string
