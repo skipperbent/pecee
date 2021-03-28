@@ -54,7 +54,7 @@ abstract class Widget extends Base
                 $msg[] = $error->getMessage();
             }
 
-            $output->addInnerHtml(implode('<br/>', $msg));
+            $output->addInnerHtml(implode('<br>', $msg));
 
             return $output;
         }

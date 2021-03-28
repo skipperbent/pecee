@@ -86,12 +86,17 @@ class Form
     {
         $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : (int)$defaultValue);
         if ($saveValue !== false) {
-            if ($defaultValue === null) {
-                $defaultValue = $value;
+            // On Postback
+            if(request()->getMethod() !== 'get') {
+                $checked = Boolean::parse(input($name));
             } else {
-                $defaultValue = count($_GET) ? null : $defaultValue;
+                if ($defaultValue === null) {
+                    $defaultValue = $value;
+                } else {
+                    $defaultValue = count($_GET) ? null : $defaultValue;
+                }
+                $checked = Boolean::parse(input($name, $defaultValue));
             }
-            $checked = Boolean::parse(input($name, $defaultValue));
             if ($checked) {
                 $element->checked(true);
             }
