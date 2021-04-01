@@ -12,12 +12,12 @@ use Pecee\User\IUserAuthentication;
 
 class ModelUser extends ModelData implements IUserAuthentication
 {
-    const COOKIE_NAME = 'ticket';
+    public const COOKIE_NAME = 'ticket';
 
     /* Errors */
-    const ERROR_TYPE_BANNED = 0x1;
-    const ERROR_TYPE_INVALID_LOGIN = 0x2;
-    const ERROR_TYPE_EXISTS = 0x3;
+    public const ERROR_TYPE_BANNED = 0x1;
+    public const ERROR_TYPE_INVALID_LOGIN = 0x2;
+    public const ERROR_TYPE_EXISTS = 0x3;
 
     protected static $instance;
     protected static $ticketExpireMinutes = 60;

@@ -417,20 +417,18 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function __get($name)
     {
         $this->invokeElement($name);
-
         return isset($this->results['rows'][$name]) ? $this->results['rows'][$name] : null;
     }
 
     public function __set($name, $value)
     {
-        $this->results['rows'][strtolower($name)] = $value;
+        $this->results['rows'][$name] = $value;
     }
 
     public function __isset($name)
     {
         $this->invokeElement($name);
-
-        return in_array($name, $this->columns, true);
+        return isset($this->results['rows'][$name]) || in_array($name, $this->columns, true);
     }
 
     public function getPrimary()
@@ -440,7 +438,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     protected function parseArrayData($data)
     {
-
         if ($data instanceof Model || $data instanceof ModelCollection) {
             return $data->toArray();
         }
@@ -491,16 +488,24 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $name = $with;
         }
 
+        $output = $with;
+
         if ($with instanceof \Closure) {
             $output = $with($this);
         } else {
-            $method = Str::camelize($name);
-            $output = $this->$method();
+            $method = $name;
+
+            if(method_exists($this, $method)) {
+                $output = $this->{$method}();
+                if($output instanceof ModelRelation) {
+                    $output = $output->getResults();
+                }
+            }
         }
 
-        $name = isset($this->rename[$name]) ? $this->rename[$name] : $name;
-
-        $this->{$name} = $output;
+        //$name = Str::deCamelize($this->rename[$name] ?? $name);
+        $name = $this->rename[$name] ?? $name;
+        $this->results['rows'][$name] = $output;
     }
 
     /**
@@ -522,7 +527,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         foreach ($rows as $key => $row) {
             $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
             if (in_array($key, $this->hidden, true) === false) {
-                $output[$key] = $this->parseArrayData($row);
+                $output[Str::deCamelize($key)] = $this->parseArrayData($row);
             }
         }
 

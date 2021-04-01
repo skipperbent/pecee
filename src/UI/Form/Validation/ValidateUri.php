@@ -5,9 +5,9 @@ use Pecee\Url;
 
 class ValidateUri extends ValidateInput
 {
-    const TYPE_ABSOLUTE = 0x1;
-    const TYPE_RELATIVE = 0x2;
-    const TYPE_BOTH = 0x3;
+    public const TYPE_ABSOLUTE = 0x1;
+    public const TYPE_RELATIVE = 0x2;
+    public const TYPE_BOTH = 0x3;
 
     protected $type;
 

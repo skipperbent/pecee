@@ -2,6 +2,7 @@
 
 namespace Pecee;
 
+use Pecee\Http\Input\IInputItem;
 use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
@@ -15,7 +16,7 @@ abstract class Base
     protected $_inputSessionKey = 'InputValues';
     protected $_validations = [];
 
-    protected function onInputError(InputItem $input, string $error): void
+    protected function onInputError(IInputItem $input, string $error): void
     {
 
     }
@@ -78,8 +79,7 @@ abstract class Base
         foreach ($validation as $key => $validations) {
 
             $input = input()->find($key) ?? new InputItem($key, null);
-            $inputs = ($input instanceof InputItem) ? [$input] : $input;
-
+            $inputs = ($input instanceof IInputItem) ? [$input] : $input;
             $validations = \is_array($validations) === false ? [$validations] : $validations;
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */

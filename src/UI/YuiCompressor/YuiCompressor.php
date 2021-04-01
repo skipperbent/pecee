@@ -15,8 +15,8 @@ class YuiCompressor
      * http://yuilibrary.com/projects/yuicompressor/
      */
 
-    const TYPE_JAVASCRIPT = 'js';
-    const TYPE_CSS = 'css';
+    public const TYPE_JAVASCRIPT = 'js';
+    public const TYPE_CSS = 'css';
 
     protected $jarFile;
     protected $tempDir;

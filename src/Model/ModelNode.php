@@ -10,13 +10,13 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelNode extends ModelData
 {
-    const SORT_ID = 'id';
-    const SORT_PARENT = 'parent';
-    const SORT_TITLE = 'title';
-    const SORT_UPDATED = 'updated';
-    const SORT_CREATED = 'created';
-    const SORT_ACTIVE_CREATED = 'active_created';
-    const SORT_ORDER = 'order';
+    public const SORT_ID = 'id';
+    public const SORT_PARENT = 'parent';
+    public const SORT_TITLE = 'title';
+    public const SORT_UPDATED = 'updated';
+    public const SORT_CREATED = 'created';
+    public const SORT_ACTIVE_CREATED = 'active_created';
+    public const SORT_ORDER = 'order';
 
     public static $sortTypes = [
         self::SORT_ID,

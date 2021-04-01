@@ -4,42 +4,42 @@ namespace Pecee;
 class Cli
 {
 
-    const COLOR_GREY = 'grey';
-    const COLOR_RED = 'red';
-    const COLOR_GREEN = 'green';
-    const COLOR_YELLOW = 'yellow';
-    const COLOR_BLUE = 'blue';
-    const COLOR_MAGENTA = 'magenta';
-    const COLOR_CYAN = 'cyan';
-    const COLOR_WHITE = 'white';
+    public const COLOR_GREY = 'grey';
+    public const COLOR_RED = 'red';
+    public const COLOR_GREEN = 'green';
+    public const COLOR_YELLOW = 'yellow';
+    public const COLOR_BLUE = 'blue';
+    public const COLOR_MAGENTA = 'magenta';
+    public const COLOR_CYAN = 'cyan';
+    public const COLOR_WHITE = 'white';
 
     public static $COLORS = [self::COLOR_GREY, self::COLOR_RED, self::COLOR_GREEN, self::COLOR_YELLOW, self::COLOR_BLUE, self::COLOR_MAGENTA, self::COLOR_CYAN, self::COLOR_WHITE];
 
-    const BG_GREY = 'bg_grey';
-    const BG_RED = 'bg_red';
-    const BG_GREEN = 'bg_green';
-    const BG_YELLOW = 'bg_yellow';
-    const BG_BLUE = 'bg_blue';
-    const BG_MAGENTA = 'bg_magenta';
-    const BG_CYAN = 'bg_cyan';
-    const BG_WHITE = 'bg_white';
+    public const BG_GREY = 'bg_grey';
+    public const BG_RED = 'bg_red';
+    public const BG_GREEN = 'bg_green';
+    public const BG_YELLOW = 'bg_yellow';
+    public const BG_BLUE = 'bg_blue';
+    public const BG_MAGENTA = 'bg_magenta';
+    public const BG_CYAN = 'bg_cyan';
+    public const BG_WHITE = 'bg_white';
 
     public static $BACKGROUNDS = [self::BG_GREY, self::BG_RED, self::BG_GREEN, self::BG_YELLOW, self::BG_BLUE, self::BG_MAGENTA, self::BG_CYAN, self::BG_WHITE];
 
-    const STYLE_BOLD = 'bold';
-    const STYLE_DARK = 'dark';
-    const STYLE_UNDERLINE = 'underline';
-    const STYLE_BLINK = 'blink';
-    const STYLE_REVERSE = 'reverse';
-    const STYLE_CONCEALED = 'concealed';
+    public const STYLE_BOLD = 'bold';
+    public const STYLE_DARK = 'dark';
+    public const STYLE_UNDERLINE = 'underline';
+    public const STYLE_BLINK = 'blink';
+    public const STYLE_REVERSE = 'reverse';
+    public const STYLE_CONCEALED = 'concealed';
 
     public static $STYLES = [self::STYLE_BOLD, self::STYLE_DARK, self::STYLE_UNDERLINE, self::STYLE_BLINK, self::STYLE_REVERSE, self::STYLE_CONCEALED];
 
-    const STR_RESET = "\033[0m";
-    const STR_FORMAT = "\033[%dm%s";
-    const STR_SOUND = "\x07";
-    const STR_CLEARLINE = "\r";
-    const STR_CURSOR_FIRST = "\033[0;0H";
+    public const STR_RESET = "\033[0m";
+    public const STR_FORMAT = "\033[%dm%s";
+    public const STR_SOUND = "\x07";
+    public const STR_CLEARLINE = "\r";
+    public const STR_CURSOR_FIRST = "\033[0;0H";
 
     /**
      * Returns text formatted with color, background color and/or attributes.

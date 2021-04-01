@@ -4,10 +4,10 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateFileSize extends ValidateFile
 {
-    const FORMAT_KB = 0x1;
-    const FORMAT_MB = 0x2;
-    const FORMAT_GB = 0x3;
-    const FORMAT_TB = 0x4;
+    public const FORMAT_KB = 0x1;
+    public const FORMAT_MB = 0x2;
+    public const FORMAT_GB = 0x3;
+    public const FORMAT_TB = 0x4;
 
     protected $error;
     protected $sizeMin;

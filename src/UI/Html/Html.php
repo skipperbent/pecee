@@ -4,8 +4,8 @@ namespace Pecee\UI\Html;
 
 class Html
 {
-    const CLOSE_TYPE_TAG = 'tag';
-    const CLOSE_TYPE_NONE = 'none';
+    public const CLOSE_TYPE_TAG = 'tag';
+    public const CLOSE_TYPE_NONE = 'none';
 
     protected $tag;
     protected $innerHtml = [];
