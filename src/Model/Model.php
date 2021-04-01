@@ -87,10 +87,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Define an inverse one-to-one or many relationship.
      *
-     * @param  string|null $related
-     * @param  string|null $foreignKey
-     * @param  string|null $ownerKey
-     * @param  string|null $relation
+     * @param string|null $related
+     * @param string|null $foreignKey
+     * @param string|null $ownerKey
+     * @param string|null $relation
      * @return BelongsTo
      */
     public function belongsTo($related, $foreignKey = null, $ownerKey = null, $relation = null)
@@ -116,13 +116,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Define a many-to-many relationship.
      *
-     * @param  string $related
-     * @param  string|null $table
-     * @param  string|null $foreignPivotKey
-     * @param  string|null $relatedPivotKey
-     * @param  string|null $parentKey
-     * @param  string|null $relatedKey
-     * @param  string|null $relation
+     * @param string $related
+     * @param string|null $table
+     * @param string|null $foreignPivotKey
+     * @param string|null $relatedPivotKey
+     * @param string|null $parentKey
+     * @param string|null $relatedKey
+     * @param string|null $relation
      * @return BelongsToMany
      */
     public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null)
@@ -154,14 +154,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Define a one-to-one relationship.
      *
-     * @param  string $related
-     * @param  string|null $foreignKey
-     * @param  string|null $localKey
+     * @param string $related
+     * @param string|null $foreignKey
+     * @param string|null $localKey
      * @return HasOne
      */
     public function hasOne($related, $foreignKey = null, $localKey = null)
     {
-
         /* @var $instance Model */
         $instance = new $related();
 
@@ -177,9 +176,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Define a one-to-many relationship.
      *
-     * @param  string $related
-     * @param  string|null $foreignKey
-     * @param  string|null $localKey
+     * @param string $related
+     * @param string|null $foreignKey
+     * @param string|null $localKey
      * @return HasMany
      */
     public function hasMany($related, $foreignKey = null, $localKey = null)
@@ -211,7 +210,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Get the joining table name for a many-to-many relation.
      *
-     * @param  string $related
+     * @param string $related
      * @return string
      */
     public function joiningTable($related)
@@ -239,10 +238,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     /**
      * Save item
-     * @see \Pecee\Model\Model::save()
      * @param array|null $data
      * @return static
      * @throws ModelException|\Pecee\Pixie\Exception
+     * @see \Pecee\Model\Model::save()
      */
     public function save(array $data = null)
     {
@@ -417,7 +416,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function __get($name)
     {
         $this->invokeElement($name);
-        return isset($this->results['rows'][$name]) ? $this->results['rows'][$name] : null;
+
+        return $this->results['rows'][$name] ?? null;
     }
 
     public function __set($name, $value)
@@ -428,6 +428,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function __isset($name)
     {
         $this->invokeElement($name);
+
         return isset($this->results['rows'][$name]) || in_array($name, $this->columns, true);
     }
 
@@ -475,8 +476,28 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $data;
     }
 
-    protected function invokeElement($name)
+    protected function invokeElement($name): void
     {
+        if (is_string($name) && !isset($this->relations[$name]) && method_exists($this, $name)) {
+
+            $this->relations[$name] = true;
+
+            try {
+                $reflection = new \ReflectionClass($this);
+                $method = $reflection->getMethod($name);
+
+                if ($method->getNumberOfParameters() === 0) {
+                    $output = $this->{$name}();
+                    if ($output instanceof ModelRelation) {
+                        $this->results['rows'][$name] = $output->getResults();
+                        return;
+                    }
+                }
+            } catch (\ReflectionException $e) {
+
+            }
+        }
+
         if (isset($this->with[$name]) === false || in_array($name, $this->invokedElements, true) === true) {
             return;
         }
@@ -492,15 +513,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         if ($with instanceof \Closure) {
             $output = $with($this);
-        } else {
-            $method = $name;
-
-            if(method_exists($this, $method)) {
-                $output = $this->{$method}();
-                if($output instanceof ModelRelation) {
-                    $output = $output->getResults();
-                }
-            }
+        } else if (method_exists($this, $name)) {
+            $output = $this->{$name}();
         }
 
         //$name = Str::deCamelize($this->rename[$name] ?? $name);

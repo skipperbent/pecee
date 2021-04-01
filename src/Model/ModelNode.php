@@ -75,9 +75,10 @@ class ModelNode extends ModelData
         return $this->parent_id;
     }
 
-    public function setParentId($id)
+    public function setParentId($id): self
     {
         $this->parent_id = $id;
+        return $this;
     }
 
     public function getPath()
@@ -85,9 +86,10 @@ class ModelNode extends ModelData
         return $this->path;
     }
 
-    public function setPath($path)
+    public function setPath($path): self
     {
         $this->path = $path;
+        return $this;
     }
 
     public function getType()
@@ -95,9 +97,10 @@ class ModelNode extends ModelData
         return $this->type;
     }
 
-    public function setType($type)
+    public function setType($type): self
     {
         $this->type = $type;
+        return $this;
     }
 
     public function getTitle()
@@ -105,9 +108,10 @@ class ModelNode extends ModelData
         return $this->title;
     }
 
-    public function setTitle($title)
+    public function setTitle($title): self
     {
         $this->title = $title;
+        return $this;
     }
 
     public function getContent()
@@ -115,9 +119,10 @@ class ModelNode extends ModelData
         return $this->content;
     }
 
-    public function setContent($content)
+    public function setContent($content): self
     {
         $this->content = $content;
+        return $this;
     }
 
     public function getActiveFrom()
@@ -129,9 +134,10 @@ class ModelNode extends ModelData
         return null;
     }
 
-    public function setActiveFrom(Carbon $date)
+    public function setActiveFrom(Carbon $date): self
     {
         $this->active_from = $date->toDateTimeString();
+        return $this;
     }
 
     public function getActiveTo()
@@ -143,9 +149,10 @@ class ModelNode extends ModelData
         return null;
     }
 
-    public function setActiveTo(Carbon $date)
+    public function setActiveTo(Carbon $date): self
     {
         $this->active_to = $date->toDateTimeString();
+        return $this;
     }
 
     public function getActive()
@@ -153,9 +160,10 @@ class ModelNode extends ModelData
         return ((int)$this->active === 1);
     }
 
-    public function setActive($active)
+    public function setActive($active): self
     {
         $this->active = $active;
+        return $this;
     }
 
     public function getLevel()
@@ -163,9 +171,10 @@ class ModelNode extends ModelData
         return $this->level;
     }
 
-    public function setLevel($level)
+    public function setLevel($level): self
     {
         $this->level = $level;
+        return $this;
     }
 
     public function getOrder()
@@ -173,9 +182,10 @@ class ModelNode extends ModelData
         return (int)$this->order;
     }
 
-    public function setOrder($order)
+    public function setOrder($order): self
     {
         $this->order = $order;
+        return $this;
     }
 
     public function getUpdatedAt()
@@ -187,9 +197,10 @@ class ModelNode extends ModelData
         return null;
     }
 
-    public function setUpdatedAt(Carbon $date)
+    public function setUpdatedAt(Carbon $date): self
     {
         $this->updated_at = $date->toDateTimeString();
+        return $this;
     }
 
     public function getCreatedAt()
@@ -197,9 +208,10 @@ class ModelNode extends ModelData
         return Carbon::parse($this->created_at);
     }
 
-    public function setCreatedAt(Carbon $date)
+    public function setCreatedAt(Carbon $date): self
     {
         $this->created_at = $date->toDateTimeString();
+        return $this;
     }
 
     public function isActive()

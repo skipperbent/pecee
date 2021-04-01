@@ -23,14 +23,14 @@ class ValidateFileSize extends ValidateFile
 
     public function validates()
     {
-        if ($this->sizeMin !== null && $this->sizeMin >= $this->input->getSize()) {
-            $this->error = lang('%s cannot be less than %sKB', $this->input->getName(), $this->getInputSize());
+        if ($this->sizeMin !== null && $this->sizeMin >= $this->getInputSize()) {
+            $this->error = lang('%s cannot be less than %sKB', $this->input->getName(), $this->sizeMin);
 
             return false;
         }
 
-        if ($this->sizeMax !== null && $this->sizeMax <= $this->input->getSize()) {
-            $this->error = lang('%s cannot be greater than %sKB', $this->input->getName(), $this->getInputSize());
+        if ($this->sizeMax !== null && $this->sizeMax <= $this->getInputSize()) {
+            $this->error = lang('%s cannot be greater than %sKB', $this->input->getName(), $this->sizeMax);
 
             return false;
         }
@@ -40,17 +40,16 @@ class ValidateFileSize extends ValidateFile
 
     protected function getInputSize()
     {
-
         switch ($this->sizeFormat) {
             default:
             case static::FORMAT_KB:
-                return $this->input->getSize() * 1024;
+                return $this->input->getSize() / 1024;
             case static::FORMAT_MB:
-                return $this->input->getSize() * 1024 * 1024;
+                return $this->input->getSize() / 1024 / 1024;
             case static::FORMAT_GB:
-                return $this->input->getSize() * 1024 * 1024 * 1024;
+                return $this->input->getSize() / 1024 / 1024 / 1024;
             case static::FORMAT_TB:
-                return $this->input->getSize() * 1024 * 1024 * 1024 * 1024;
+                return $this->input->getSize() / 1024 / 1024 / 1024 / 1024;
         }
 
     }
