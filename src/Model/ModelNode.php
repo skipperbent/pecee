@@ -56,7 +56,6 @@ class ModelNode extends ModelData
         parent::__construct();
         $this->id = Guid::create();
         $this->path = 0;
-        $this->order = 0;
         $this->active = false;
 
         if ($this->defaultType !== null) {
@@ -78,6 +77,7 @@ class ModelNode extends ModelData
     public function setParentId($id): self
     {
         $this->parent_id = $id;
+
         return $this;
     }
 
@@ -89,6 +89,7 @@ class ModelNode extends ModelData
     public function setPath($path): self
     {
         $this->path = $path;
+
         return $this;
     }
 
@@ -100,6 +101,7 @@ class ModelNode extends ModelData
     public function setType($type): self
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -111,6 +113,7 @@ class ModelNode extends ModelData
     public function setTitle($title): self
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -122,6 +125,7 @@ class ModelNode extends ModelData
     public function setContent($content): self
     {
         $this->content = $content;
+
         return $this;
     }
 
@@ -137,6 +141,7 @@ class ModelNode extends ModelData
     public function setActiveFrom(Carbon $date): self
     {
         $this->active_from = $date->toDateTimeString();
+
         return $this;
     }
 
@@ -152,17 +157,19 @@ class ModelNode extends ModelData
     public function setActiveTo(Carbon $date): self
     {
         $this->active_to = $date->toDateTimeString();
+
         return $this;
     }
 
-    public function getActive()
+    public function getActive(): bool
     {
         return ((int)$this->active === 1);
     }
 
-    public function setActive($active): self
+    public function setActive(bool $active): self
     {
         $this->active = $active;
+
         return $this;
     }
 
@@ -174,6 +181,7 @@ class ModelNode extends ModelData
     public function setLevel($level): self
     {
         $this->level = $level;
+
         return $this;
     }
 
@@ -185,6 +193,7 @@ class ModelNode extends ModelData
     public function setOrder($order): self
     {
         $this->order = $order;
+
         return $this;
     }
 
@@ -200,6 +209,7 @@ class ModelNode extends ModelData
     public function setUpdatedAt(Carbon $date): self
     {
         $this->updated_at = $date->toDateTimeString();
+
         return $this;
     }
 
@@ -211,6 +221,7 @@ class ModelNode extends ModelData
     public function setCreatedAt(Carbon $date): self
     {
         $this->created_at = $date->toDateTimeString();
+
         return $this;
     }
 
@@ -351,6 +362,8 @@ class ModelNode extends ModelData
 
     public function save(array $data = null)
     {
+        $this->updateOrder();
+
         if ($this->isNew() === true) {
             $this->calculatePath();
         }
@@ -480,14 +493,34 @@ class ModelNode extends ModelData
 
     public function filterKey($key, $value, $operator = '=')
     {
-        $subQuery = NodeData::instance()
-            ->select(['node_id'])
-            ->where('node_id', '=', $this->raw('node.`id`'))
-            ->where('key', '=', $key)
-            ->where('value', $operator, $value)
-            ->limit(1);
+        $subQuery = $this->subQuery(NodeData::instance()
+            ->select(['data.node_id'])
+            ->alias('data')
+            ->where('data.node_id', '=', 'id')
+            ->where('data.key', '=', $key)
+            ->where('data.value', '=', $value)
+            ->limit(1));
 
-        return $this->where('id', '=', $this->subQuery($subQuery));
+        return $this->where('id', '=', $subQuery);
+    }
+
+    public function updateOrder(): void
+    {
+        // Ignore if order is already set
+        if($this->order !== null) {
+            return;
+        }
+
+        $order = 0;
+        if ($this->isNew() === true && $this->parent_id !== null) {
+            // Starts with 0 so will be automaticially incremented
+            $order = static::instance()
+                ->select(['id'])
+                ->filterParentId($this->parent_id)
+                ->count('id');
+        }
+
+        $this->setOrder($order);
     }
 
     protected function getDataClass()
