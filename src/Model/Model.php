@@ -534,11 +534,15 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $this->invokeElement($key);
         }
 
-        $rows = $this->getRows();
-
         $output = [];
 
-        foreach ($rows as $key => $row) {
+        // Ensure default columns are always present
+        foreach($this->columns as $column)
+        {
+            $output[$column] = $this->{$column};
+        }
+
+        foreach ($this->getRows() as $key => $row) {
             $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
             if (in_array($key, $this->hidden, true) === false) {
                 $output[Str::deCamelize($key)] = $this->parseArrayData($row);

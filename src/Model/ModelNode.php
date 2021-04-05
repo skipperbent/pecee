@@ -496,7 +496,7 @@ class ModelNode extends ModelData
         $subQuery = $this->subQuery(NodeData::instance()
             ->select(['data.node_id'])
             ->alias('data')
-            ->where('data.node_id', '=', 'id')
+            ->where('data.node_id', '=', $this->raw('node.`id`'))
             ->where('data.key', '=', $key)
             ->where('data.value', '=', $value)
             ->limit(1));

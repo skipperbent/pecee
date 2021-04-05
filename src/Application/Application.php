@@ -314,6 +314,19 @@ class Application
         return $this->parameters[$key] ?? $defaultValue;
     }
 
+    /**
+     * Set application parameter
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return static $this
+     */
+    public function set(string $key, $value): self
+    {
+        $this->__set($key, $value);
+        return $this;
+    }
+
     public function __set(string $name, $value): void
     {
         $this->parameters[$name] = $value;

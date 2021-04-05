@@ -61,7 +61,7 @@ class Url
 
         $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
 
-        return preg_replace('/[^\w\ \+\&' . join('', $searchMap) . ']/i', '', $string);
+        return preg_replace('/[^\w\ \.\+\&' . join('', $searchMap) . ']/i', '', $string);
     }
 
     public static function isSecure(string $url): bool

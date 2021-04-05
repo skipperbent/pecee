@@ -236,13 +236,13 @@ abstract class Widget extends Base
 
         $this->setInputValues();
 
-        // Trigger onLoad event
-        $this->onLoad();
-
         // Trigger postback event
         if (request()->getMethod() === 'post') {
             $this->onPostBack();
         }
+
+        // Trigger onLoad event
+        $this->onLoad();
 
         $this->renderContent();
         $this->renderTemplate();

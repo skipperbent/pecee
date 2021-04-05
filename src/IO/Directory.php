@@ -41,4 +41,13 @@ class Directory
         rmdir($path);
     }
 
+    public static function isEmpty($directory): bool
+    {
+        if (!is_dir($dir)) {
+            return true;
+        }
+
+        return (count(scandir($dir)) === 2);
+    }
+
 }
