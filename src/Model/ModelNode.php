@@ -491,7 +491,14 @@ class ModelNode extends ModelData
         });
     }
 
-    public function filterKey($key, $value, $operator = '=')
+    /**
+     * @param string $key
+     * @param string $value
+     * @param string $operator
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function filterKey(string $key, string $value, string $operator = '=')
     {
         $subQuery = $this->subQuery(NodeData::instance()
             ->select(['data.node_id'])
