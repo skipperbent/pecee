@@ -3,6 +3,7 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use Fluent\Model\ModelUser;
 use Pecee\Boolean;
 use Pecee\Guid;
 use Pecee\Model\Node\NodeData;
@@ -28,7 +29,7 @@ class ModelNode extends ModelData
         self::SORT_ORDER,
     ];
 
-    protected $parent, $next, $prev, $children;
+    protected $parent, $next, $prev, $children, $user;
     protected $defaultType;
 
     protected $dataPrimary = 'node_id';
@@ -36,6 +37,7 @@ class ModelNode extends ModelData
     protected $columns = [
         'id',
         'parent_id',
+        'user_id',
         'path',
         'type',
         'title',
@@ -45,6 +47,7 @@ class ModelNode extends ModelData
         'level',
         'order',
         'active',
+        'deleted',
         'updated_at',
         'created_at',
     ];
@@ -57,11 +60,29 @@ class ModelNode extends ModelData
         $this->id = Guid::create();
         $this->path = 0;
         $this->active = false;
+        $this->deleted = false;
 
         if ($this->defaultType !== null) {
             $this->type = $this->defaultType;
             $this->where('type', '=', $this->defaultType);
         }
+    }
+
+    public function getUserId()
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * @return ModelUser
+     */
+    public function getUser()
+    {
+        if ($this->user === null) {
+            $this->user = ModelUser::instance()->find($this->getUserId());
+        }
+
+        return $this->user;
     }
 
     public function getId()

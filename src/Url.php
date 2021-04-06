@@ -46,7 +46,7 @@ class Url
 							/ix', $hostname) === 1);
     }
 
-    public static function urlEncodeString($string, $separator = '-', $maxLength = 50)
+    public static function urlEncodeString($string, $separator = '-', $maxLength = null)
     {
         if ($maxLength !== null && \strlen($string) > $maxLength) {
             $string = substr($string, 0, $maxLength);
