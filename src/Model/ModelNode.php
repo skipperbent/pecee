@@ -68,6 +68,18 @@ class ModelNode extends ModelData
         }
     }
 
+    public function delete()
+    {
+        // Delete children
+
+        /* @var $child static */
+        foreach($this->getChildren()->all() as $child) {
+            $child->delete();
+        }
+
+        return parent::delete();
+    }
+
     public function getUserId()
     {
         return $this->user_id;
@@ -513,6 +525,8 @@ class ModelNode extends ModelData
     }
 
     /**
+     * Filter by key
+     *
      * @param string $key
      * @param string $value
      * @param string $operator
@@ -521,15 +535,37 @@ class ModelNode extends ModelData
      */
     public function filterKey(string $key, string $value, string $operator = '=')
     {
+        $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
         $subQuery = $this->subQuery(NodeData::instance()
             ->select(['data.node_id'])
             ->alias('data')
-            ->where('data.node_id', '=', $this->raw('node.`id`'))
+            ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
             ->where('data.key', '=', $key)
             ->where('data.value', '=', $value)
             ->limit(1));
 
         return $this->where('id', '=', $subQuery);
+    }
+
+    /**
+     * Filter by multiple key values
+     *
+     * @param string $key
+     * @param array $values
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function filterKeys(string $key, array $values)
+    {
+        $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
+        $subQuery = $this->subQuery(NodeData::instance()
+            ->select(['data.node_id'])
+            ->alias('data')
+            ->where('data.node_id', '=', $this->raw( "`$table`.`id`"))
+            ->where('data.key', '=', $key)
+            ->whereIn('data.value', $values));
+
+        return $this->whereIn('id', $subQuery);
     }
 
     public function updateOrder(): void
