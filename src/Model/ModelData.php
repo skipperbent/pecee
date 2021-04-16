@@ -165,9 +165,7 @@ abstract class ModelData extends Model
 
     public function __get($name)
     {
-        $exists = parent::__isset($name);
-
-        if ($exists === true) {
+        if (parent::__isset($name) === true) {
             return parent::__get($name);
         }
 
