@@ -68,6 +68,15 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return new static();
     }
 
+    /**
+     * @param \stdClass $data
+     * @return static $this
+     */
+    public function onNewInstance(\stdClass $data): self
+    {
+        return clone $this;
+    }
+
     public function onInstanceCreate()
     {
         if ($this->isNew() === true) {

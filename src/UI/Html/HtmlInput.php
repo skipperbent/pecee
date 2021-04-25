@@ -50,7 +50,7 @@ class HtmlInput extends Html
      * @param bool $status
      * @return static
      */
-    public function autoComplete($status = true)
+    public function autoComplete($status = false)
     {
         return $this->addAttribute('autocomplete', (($status === true) ? 'on' : 'off'));
     }

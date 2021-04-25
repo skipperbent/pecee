@@ -41,8 +41,7 @@ class ModelQueryBuilder
      */
     protected function createInstance(\stdClass $item)
     {
-        /* @var $model Model */
-        $model = clone $this->model;
+        $model = $this->model->onNewInstance($item);
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
