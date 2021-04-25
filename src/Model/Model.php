@@ -490,6 +490,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                     $output = $this->{$name}();
                     if ($output instanceof ModelRelation) {
                         $this->results['rows'][$name] = $output->getResults();
+
                         return;
                     }
                 }
@@ -513,8 +514,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         if ($with instanceof \Closure) {
             $output = $with($this);
-        } else if (method_exists($this, $name)) {
-            $output = $this->{$name}();
+        } else {
+            if (method_exists($this, $name)) {
+                $output = $this->{$name}();
+                // Remove get method-name from key name
+                $name = str_ireplace('get', '', $name);
+            }
         }
 
         //$name = Str::deCamelize($this->rename[$name] ?? $name);
@@ -537,8 +542,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $output = [];
 
         // Ensure default columns are always present
-        foreach($this->columns as $column)
-        {
+        foreach ($this->columns as $column) {
             $output[$column] = $this->{$column};
         }
 

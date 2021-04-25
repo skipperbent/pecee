@@ -22,6 +22,14 @@ abstract class ModelData extends Model
         }
 
         $this->data = new CollectionItem();
+
+        $this->with(['data' => function (self $object) {
+            $rows = $object->data->getData();
+
+            return array_filter($rows, function ($key) {
+                return (in_array($key, $this->hidden, true) === false);
+            }, ARRAY_FILTER_USE_KEY);
+        }]);
     }
 
     abstract protected function getDataClass();
@@ -37,8 +45,8 @@ abstract class ModelData extends Model
     public function onInstanceCreate()
     {
         $this->data = new CollectionItem();
-        
-        if($this->isNew() === true) {
+
+        if ($this->isNew() === true) {
             return;
         }
 
@@ -53,7 +61,7 @@ abstract class ModelData extends Model
 
     protected function updateData()
     {
-        if($this->isNew() === true) {
+        if ($this->isNew() === true) {
             return;
         }
 
@@ -109,8 +117,8 @@ abstract class ModelData extends Model
 
     public function save(array $data = null)
     {
-        if($data !== null && count($data) > 0) {
-            foreach($data as $key => $value) {
+        if ($data !== null && count($data) > 0) {
+            foreach ($data as $key => $value) {
                 $this->{$key} = $value;
             }
         }
@@ -134,14 +142,14 @@ abstract class ModelData extends Model
         $rows = parent::toArray($filter);
 
         if ($this->mergeData === true) {
-            $rows += $this->data->getData();
-        } else {
-            $rows['data'] = $this->data->getData();
+            $data = $rows['data'] ?? null;
+            if ($data !== null) {
+                unset($rows['data']);
+                $rows += $data;
+            }
         }
 
-        return array_filter($rows, function ($key) {
-            return (in_array($key, $this->hidden, true) === false);
-        }, ARRAY_FILTER_USE_KEY);
+        return $rows;
     }
 
     protected function generateUpdateIdentifier()
