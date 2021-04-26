@@ -487,6 +487,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     protected function invokeElement($name): void
     {
+        if(in_array($name, $this->invokedElements, true) === true) {
+            return;
+        }
+
+        $this->invokedElements[] = $name;
+
         if (is_string($name) && !isset($this->relations[$name]) && method_exists($this, $name)) {
 
             $this->relations[$name] = true;
@@ -499,7 +505,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                     $output = $this->{$name}();
                     if ($output instanceof ModelRelation) {
                         $this->results['rows'][$name] = $output->getResults();
-
                         return;
                     }
                 }
@@ -508,11 +513,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
-        if (isset($this->with[$name]) === false || in_array($name, $this->invokedElements, true) === true) {
+        if (isset($this->with[$name]) === false) {
             return;
         }
 
-        $this->invokedElements[] = $name;
+        //$this->invokedElements[] = $name;
         $with = $this->with[$name];
 
         if (is_numeric($name) === true) {
@@ -531,7 +536,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
-        //$name = Str::deCamelize($this->rename[$name] ?? $name);
         $name = $this->rename[$name] ?? $name;
         $this->results['rows'][$name] = $output;
     }
