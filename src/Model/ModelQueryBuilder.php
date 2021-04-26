@@ -371,7 +371,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return ModelCollection
+     * @return ModelCollection|static[]
      * @throws Exception
      */
     public function all()
