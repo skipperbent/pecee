@@ -418,15 +418,19 @@ class ModelNode extends ModelData
         return $this->whereIn('id', $ids);
     }
 
+    /**
+     * @param bool $active
+     * @return static
+     */
     public function filterActive($active = true)
     {
         return
             $this->where('active', '=', Boolean::parse($active))
-                ->where(function (QueryBuilderHandler $q) {
+                ->where(static function (QueryBuilderHandler $q) {
                     $q->whereNull('active_from')
                         ->whereNull('active_to')
                         ->orWhere('active_from', '<=', $q->raw('NOW()'))
-                        ->where(function (QueryBuilderHandler $q) {
+                        ->where(static function (QueryBuilderHandler $q) {
 
                             $q->where('active_to', '>=', $q->raw('NOW()'))
                                 ->orWhereNull('active_to');
@@ -442,7 +446,7 @@ class ModelNode extends ModelData
     public function filterParentId($parentId = null)
     {
         if ($parentId === null || (string)$parentId === '0') {
-            return $this->where(function (QueryBuilderHandler $q) {
+            return $this->where(static function (QueryBuilderHandler $q) {
                 $q->whereNull('parent_id')->orWhereNull('path');
             });
         }
@@ -460,12 +464,20 @@ class ModelNode extends ModelData
         return $this->where('path', 'LIKE', $path);
     }
 
-    public function filterType($type)
+    /**
+     * @param string $type
+     * @return static
+     */
+    public function filterType(string $type): self
     {
         return $this->where('type', '=', $type);
     }
 
-    public function filterTypes(array $types)
+    /**
+     * @param array $types
+     * @return static
+     */
+    public function filterTypes(array $types): self
     {
         return $this->whereIn('type', $types);
     }

@@ -8,11 +8,11 @@ interface ITranslationProvider
      * @param string $key
      * @return string
      */
-    public function lookup($key);
+    public function lookup(string $key): string;
 
     /**
      * Init method
      * @param string $locale
      */
-    public function load($locale);
+    public function load(string $locale): void;
 }
