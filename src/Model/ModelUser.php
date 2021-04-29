@@ -200,7 +200,11 @@ class ModelUser extends ModelData implements IUserAuthentication
             ->orWhere($this->getDataPrimary(), '=', $this->raw($userDataQuery));
     }
 
-    public function filterDeleted($deleted = false)
+    /**
+     * @param bool $deleted
+     * @return static
+     */
+    public function filterDeleted(bool $deleted = false)
     {
         return $this->where('deleted', '=', $deleted);
     }
