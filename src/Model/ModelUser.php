@@ -53,7 +53,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         return static::getUserDataClass();
     }
 
-    protected function fetchData()
+    protected function fetchData(): \IteratorAggregate
     {
         $class = static::getUserDataClass();
         return $class::instance()->filterIdentifier($this->id)->all();

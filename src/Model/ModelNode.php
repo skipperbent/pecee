@@ -599,12 +599,12 @@ class ModelNode extends ModelData
         $this->setOrder($order);
     }
 
-    protected function getDataClass()
+    protected function getDataClass(): string
     {
         return NodeData::class;
     }
 
-    protected function fetchData()
+    protected function fetchData(): \IteratorAggregate
     {
         return NodeData::instance()->filerNodeId($this->id)->all();
     }

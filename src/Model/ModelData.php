@@ -34,15 +34,15 @@ abstract class ModelData extends Model
 
     abstract protected function getDataClass();
 
-    abstract protected function fetchData();
+    abstract protected function fetchData(): \IteratorAggregate;
 
-    protected function onNewDataItemCreate(Model $field)
+    protected function onNewDataItemCreate(Model $field): void
     {
         $field->{$this->getDataPrimary()} = $this->{$this->primary};
         $field->save();
     }
 
-    public function onInstanceCreate()
+    public function onInstanceCreate(): void
     {
         $this->data = new CollectionItem();
 
@@ -50,16 +50,53 @@ abstract class ModelData extends Model
             return;
         }
 
-        /* @var $data array */
-        $data = $this->fetchData();
-        foreach ($data as $d) {
-            $this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
+        $collection = [];
+        foreach ($this->fetchData() as $d) {
+
+            // Parse array
+            $key = $d->{$this->dataKeyField};
+
+            $matches = [];
+            if (preg_match('/^([\w]+)\[([\w]+)]$/', $key, $matches) === 1) {
+
+                [, $key, $index] = $matches;
+
+                if (isset($collection[$key]) === false || is_array($collection[$key]) === false) {
+                    $collection[$key] = [];
+                }
+
+                $collection[$key][$index] = $d->{$this->dataValueField};
+            } else {
+                $collection[$key] = $d->{$this->dataValueField};
+            }
         }
+
+        $this->data->setData($collection);
 
         $this->updateIdentifier = $this->generateUpdateIdentifier();
     }
 
-    protected function updateData()
+    protected function setFieldData(Model $model, string $key, $data, \Closure $callback): void
+    {
+        if (is_array($data) === true) {
+            foreach ($data as $k => $v) {
+                if (empty($v)) {
+                    continue;
+                }
+                $field = $this->getDataClass();
+                $field = new $field();
+                $field->{$this->dataKeyField} = $key . '[' . $k . ']';
+                $field->{$this->dataValueField} = $v;
+                $callback($field);
+            }
+        } else {
+            $model->{$this->dataKeyField} = $key;
+            $model->{$this->dataValueField} = $data;
+            $callback($model);
+        }
+    }
+
+    protected function updateData(): void
     {
         if ($this->isNew() === true) {
             return;
@@ -93,18 +130,19 @@ abstract class ModelData extends Model
                             continue;
                         }
 
-                        $cf[$key]->{$this->dataKeyField} = $key;
-                        $cf[$key]->{$this->dataValueField} = $value;
-                        $cf[$key]->save();
+                        $this->setFieldData($cf[$key], $key, $value, function (Model $model) {
+                            $model->save();
+                        });
+
                         unset($cf[$key]);
 
                     } else {
                         $field = $this->getDataClass();
                         $field = new $field();
-                        $field->{$this->dataKeyField} = $key;
-                        $field->{$this->dataValueField} = $value;
 
-                        $this->onNewDataItemCreate($field);
+                        $this->setFieldData($field, $key, $value, function (Model $model) {
+                            $this->onNewDataItemCreate($model);
+                        });
                     }
                 }
             }
@@ -127,7 +165,7 @@ abstract class ModelData extends Model
         $this->updateData();
     }
 
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $keys = array_map('strtolower', array_keys($this->getRows()));
         foreach ($data as $key => $d) {
@@ -137,7 +175,7 @@ abstract class ModelData extends Model
         }
     }
 
-    public function toArray(array $filter = [])
+    public function toArray(array $filter = []): array
     {
         $rows = parent::toArray($filter);
 
@@ -152,7 +190,7 @@ abstract class ModelData extends Model
         return $rows;
     }
 
-    protected function generateUpdateIdentifier()
+    protected function generateUpdateIdentifier(): string
     {
         return md5(serialize($this->data));
     }
@@ -161,7 +199,7 @@ abstract class ModelData extends Model
      * Get unique update identifier based on data
      * @return string
      */
-    public function getUpdateIdentifier()
+    public function getUpdateIdentifier(): string
     {
         return $this->updateIdentifier;
     }

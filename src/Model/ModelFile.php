@@ -58,17 +58,17 @@ class ModelFile extends ModelData
         $this->bytes = $bytes;
     }
 
-    protected function getDataClass()
+    protected function getDataClass(): string
     {
         return FileData::class;
     }
 
-    protected function fetchData()
+    protected function fetchData(): \IteratorAggregate
     {
         return FileData::getByIdentifier($this->id);
     }
 
-    public function getFullPath()
+    public function getFullPath(): string
     {
         return $this->path . $this->Filename;
     }
