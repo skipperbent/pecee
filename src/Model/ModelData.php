@@ -197,9 +197,9 @@ abstract class ModelData extends Model
 
     /**
      * Get unique update identifier based on data
-     * @return string
+     * @return string|null
      */
-    public function getUpdateIdentifier(): string
+    public function getUpdateIdentifier(): ?string
     {
         return $this->updateIdentifier;
     }
