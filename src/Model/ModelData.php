@@ -53,22 +53,35 @@ abstract class ModelData extends Model
         $collection = [];
         foreach ($this->fetchData() as $d) {
 
-            // Parse array
             $key = $d->{$this->dataKeyField};
+            $output = $d->{$this->dataValueField};
 
-            $matches = [];
-            if (preg_match('/^([\w]+)\[([\w]+)]$/', $key, $matches) === 1) {
+            // Add special array types (name[index])
+            if (strpos($key, '[') !== false) {
 
-                [, $key, $index] = $matches;
+                preg_match_all('/\[([\w]+)\]/', $d->{$this->dataKeyField}, $indexes);
+
+                $key = substr($key, 0, strpos($key, '['));
+
+                $reverse = array_reverse($indexes[1]);
+                $max = count($reverse);
+
+                for ($i = 0; $i < $max; $i++) {
+                    $index = $reverse[$i];
+                    $output = [$index => $output];
+                }
 
                 if (isset($collection[$key]) === false || is_array($collection[$key]) === false) {
                     $collection[$key] = [];
                 }
 
-                $collection[$key][$index] = $d->{$this->dataValueField};
-            } else {
-                $collection[$key] = $d->{$this->dataValueField};
+                $collection[$key] = array_merge_recursive($collection[$key], $output);
+
+                continue;
             }
+
+            // Add default type
+            $collection[$key] = $output;
         }
 
         $this->data->setData($collection);
@@ -83,11 +96,19 @@ abstract class ModelData extends Model
                 if (empty($v)) {
                     continue;
                 }
+
+                if (is_array($v) === true) {
+                    $this->setFieldData($model, $key . '[' . $k . ']', $v, $callback);
+                    continue;
+                }
+
                 $field = $this->getDataClass();
                 $field = new $field();
                 $field->{$this->dataKeyField} = $key . '[' . $k . ']';
                 $field->{$this->dataValueField} = $v;
+                $this->onNewDataItemCreate($field);
                 $callback($field);
+
             }
         } else {
             $model->{$this->dataKeyField} = $key;

@@ -31,6 +31,17 @@ class Html
     }
 
     /**
+     * Append to element
+     * @param Html $element
+     * @return static $this
+     */
+    public function appendTo(self $element)
+    {
+        $element->append($this);
+        return $this;
+    }
+
+    /**
      * Prepend element
      * @param Html|string $element
      * @return static $this
@@ -70,6 +81,11 @@ class Html
         $this->innerHtml[] = $html;
 
         return $this;
+    }
+
+    public function text(string $text)
+    {
+        return $this->addInnerHtml($text);
     }
 
     /**

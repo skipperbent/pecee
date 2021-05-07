@@ -398,6 +398,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $this->results['rows'] = array_merge($this->results['rows'], $rows);
     }
 
+    public function mergeData(array $data): void
+    {
+        foreach($data as $key => $value) {
+            $this->{$key} = $value;
+        }
+    }
+
     /**
      * Get rows
      * @return array
