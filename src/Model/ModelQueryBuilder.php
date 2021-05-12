@@ -16,7 +16,7 @@ class ModelQueryBuilder
     protected static $instance;
 
     /**
-     * @var Model
+     * @var static|Model
      */
     protected $model;
     /**
@@ -142,12 +142,7 @@ class ModelQueryBuilder
      */
     public function where($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->where($key, $operator, $value);
+        call_user_func_array([$this->query, 'where'], func_get_args());
 
         return $this->model;
     }
@@ -176,12 +171,7 @@ class ModelQueryBuilder
      */
     public function whereNot($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->whereNot($key, $operator, $value);
+        call_user_func_array([$this->query, 'whereNot'], func_get_args());
 
         return $this->model;
     }
@@ -256,12 +246,7 @@ class ModelQueryBuilder
      */
     public function orWhere($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->orWhere($key, $operator, $value);
+        call_user_func_array([$this->query, 'orWhere'], func_get_args());
 
         return $this->model;
     }
@@ -307,12 +292,7 @@ class ModelQueryBuilder
      */
     public function orWhereNot($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->orWhereNot($key, $operator, $value);
+        call_user_func_array([$this->query, 'orWhereNot'], func_get_args());
 
         return $this->model;
     }
@@ -378,7 +358,6 @@ class ModelQueryBuilder
     {
         $items = $this->query->get();
 
-        /* @var $model Model */
         $models = [];
 
         foreach ($items as $item) {

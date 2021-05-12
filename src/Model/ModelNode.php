@@ -3,14 +3,16 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
-use Fluent\Model\ModelUser;
 use Pecee\Boolean;
 use Pecee\Guid;
+use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Node\NodeData;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelNode extends ModelData
 {
+    public static $operators = ['=', '<>', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
+
     public const SORT_ID = 'id';
     public const SORT_PARENT = 'parent';
     public const SORT_TITLE = 'title';
@@ -83,18 +85,6 @@ class ModelNode extends ModelData
     public function getUserId()
     {
         return $this->user_id;
-    }
-
-    /**
-     * @return ModelUser
-     */
-    public function getUser()
-    {
-        if ($this->user === null) {
-            $this->user = ModelUser::instance()->find($this->getUserId());
-        }
-
-        return $this->user;
     }
 
     public function getId()
@@ -545,15 +535,24 @@ class ModelNode extends ModelData
      * @return static
      * @throws \Pecee\Pixie\Exception
      */
-    public function filterKey(string $key, string $value, string $operator = '=')
+    public function filterKey(string $key, ?string $value = null, string $operator = '=')
     {
+        if(in_array(strtolower($operator), static::$operators, true) === false) {
+            throw new ModelException(sprintf('Invalid operator "%s". Must be one of the following type: %s.', $operator, implode(', ', static::$operators)));
+        }
+
+        if(strtolower($operator) === 'find') {
+            $value = "%$value%";
+            $operator = 'LIKE';
+        }
+        
         $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
         $subQuery = $this->subQuery(NodeData::instance()
             ->select(['data.node_id'])
             ->alias('data')
             ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
             ->where('data.key', '=', $key)
-            ->where('data.value', '=', $value)
+            ->where('data.value', $operator, $value)
             ->limit(1));
 
         return $this->where('id', '=', $subQuery);

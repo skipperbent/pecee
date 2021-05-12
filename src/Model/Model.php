@@ -651,7 +651,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * @param string $method
      * @param array $parameters
-     * @return QueryBuilderHandler|null
+     * @return static|QueryBuilderHandler|null
      */
     public function __call($method, $parameters)
     {
