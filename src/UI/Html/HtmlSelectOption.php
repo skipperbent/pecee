@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class HtmlSelectOption extends Html
@@ -12,11 +13,20 @@ class HtmlSelectOption extends Html
         $this->addAttribute('value', $value);
 
         if ($selected === true) {
-            $this->addAttribute('selected', null);
+            $this->selected('selected', null);
         }
 
         if ($text !== null) {
             $this->addInnerHtml($text);
+        }
+    }
+
+    public function selected(bool $selected = true)
+    {
+        if ($selected === true) {
+            $this->attr('selected');
+        } else {
+            $this->removeAttribute('selected');
         }
     }
 

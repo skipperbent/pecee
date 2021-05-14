@@ -246,6 +246,11 @@ class Html
         return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
     }
 
+    public function getFirstAttribute(string $name, ?string $defaultValue = null): ?string
+    {
+        return $this->getAttribute($name)[0] ?? $defaultValue;
+    }
+
     /**
      * @return array
      */

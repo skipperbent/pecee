@@ -31,7 +31,7 @@ class ModelNode extends ModelData
         self::SORT_ORDER,
     ];
 
-    protected $parent, $next, $prev, $children, $user;
+    protected $parent, $next, $prev, $children;
     protected $defaultType;
 
     protected $dataPrimary = 'node_id';
@@ -75,7 +75,7 @@ class ModelNode extends ModelData
         // Delete children
 
         /* @var $child static */
-        foreach($this->getChildren()->all() as $child) {
+        foreach ($this->getChildren()->all() as $child) {
             $child->delete();
         }
 
@@ -537,21 +537,33 @@ class ModelNode extends ModelData
      */
     public function filterKey(string $key, ?string $value = null, string $operator = '=')
     {
-        if(in_array(strtolower($operator), static::$operators, true) === false) {
+        if (in_array(strtolower($operator), static::$operators, true) === false) {
             throw new ModelException(sprintf('Invalid operator "%s". Must be one of the following type: %s.', $operator, implode(', ', static::$operators)));
         }
 
-        if(strtolower($operator) === 'find') {
+        if (strtolower($operator) === 'find') {
             $value = "%$value%";
             $operator = 'LIKE';
         }
-        
+
+        $keyOperator = '=';
+        if (strpos($key, '[') > -1) {
+
+            // Search all keys on key[]
+            if ($key[strlen($key) - 1] === '[') {
+                $key .= '%';
+                $keyOperator = 'LIKE';
+            } else {
+                $key = $key . ']';
+            }
+        }
+
         $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
         $subQuery = $this->subQuery(NodeData::instance()
             ->select(['data.node_id'])
             ->alias('data')
             ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
-            ->where('data.key', '=', $key)
+            ->where('data.key', $keyOperator, $key)
             ->where('data.value', $operator, $value)
             ->limit(1));
 
@@ -572,7 +584,7 @@ class ModelNode extends ModelData
         $subQuery = $this->subQuery(NodeData::instance()
             ->select(['data.node_id'])
             ->alias('data')
-            ->where('data.node_id', '=', $this->raw( "`$table`.`id`"))
+            ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
             ->where('data.key', '=', $key)
             ->whereIn('data.value', $values));
 
@@ -582,7 +594,7 @@ class ModelNode extends ModelData
     public function updateOrder(): void
     {
         // Ignore if order is already set
-        if($this->order !== null) {
+        if ($this->order !== null) {
             return;
         }
 

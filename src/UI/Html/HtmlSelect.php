@@ -39,7 +39,7 @@ class HtmlSelect extends Html
     }
 
     /**
-     * @return array
+     * @return array|HtmlSelectOption[]
      */
     public function getOptions()
     {
