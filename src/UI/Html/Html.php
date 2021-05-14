@@ -109,7 +109,7 @@ class Html
      * @param string $value
      * @return static
      */
-    public function addAttribute($name, $value = '')
+    public function addAttribute($name, $value = null)
     {
         if (isset($this->attributes[$name]) && in_array($value, $this->attributes[$name], true) === false) {
             $this->attributes[$name][] = $value;
@@ -139,7 +139,7 @@ class Html
      * @param bool $replace
      * @return static
      */
-    public function attr($name, $value = '', $replace = true)
+    public function attr($name, $value = null, $replace = true)
     {
         if ($replace === true) {
             return $this->replaceAttribute($name, $value);

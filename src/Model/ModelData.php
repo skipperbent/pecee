@@ -93,12 +93,18 @@ abstract class ModelData extends Model
     {
         if (is_array($data) === true) {
             foreach ($data as $k => $v) {
-                if (empty($v)) {
+
+                if (is_array($v) === true) {
+
+                    if(count($v) === 0) {
+                        continue;
+                    }
+
+                    $this->setFieldData($model, $key . '[' . $k . ']', $v, $callback);
                     continue;
                 }
 
-                if (is_array($v) === true) {
-                    $this->setFieldData($model, $key . '[' . $k . ']', $v, $callback);
+                if(trim($v) === '') {
                     continue;
                 }
 

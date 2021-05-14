@@ -11,7 +11,7 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelNode extends ModelData
 {
-    public static $operators = ['=', '<>', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
+    public static $operators = ['=', '!=', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
 
     public const SORT_ID = 'id';
     public const SORT_PARENT = 'parent';

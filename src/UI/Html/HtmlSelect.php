@@ -55,6 +55,14 @@ class HtmlSelect extends Html
     }
 
     /**
+     * @return static
+     */
+    public function required()
+    {
+        return $this->addAttribute('required');
+    }
+
+    /**
      * @return string
      */
     public function render()
