@@ -68,8 +68,8 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
      */
     public function each(callable $callback): self
     {
-        foreach($this->getRows() as $row) {
-            $callback($row);
+        foreach($this->getRows() as $key => $row) {
+            $callback($row, $key);
         }
 
         return $this;

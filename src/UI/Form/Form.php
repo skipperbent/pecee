@@ -139,23 +139,20 @@ class Form
      * @throws \InvalidArgumentException
      * @return \Pecee\UI\Html\HtmlSelect
      */
-    public function selectStart($name, $data = null, $value = null, $saveValue = true)
+    public function selectStart(string $name, $data = null, ?string $value = null, bool $saveValue = true): HtmlSelect
     {
         $element = new HtmlSelect($name);
         if ($data !== null) {
+            
             if ($data instanceof Dataset) {
+                $data = $data->toArray();
+            }
 
-                foreach ($data->getData() as $item) {
-                    $val = isset($item['value']) ? $item['value'] : $item['name'];
-                    $selected = ((input($name) !== null && (string)input($name) === (string)$val) || (input()->exists($name) === false && (string)$value === (string)$val) || (isset($item['selected']) && $item['selected']) || ($saveValue === false && (string)$value === (string)$val));
-                    $element->addOption(new HtmlSelectOption($val, $item['name'], $selected));
-                }
+            if (is_array($data) === true) {
 
-            } elseif (is_array($data) === true) {
-
-                foreach ((array)$data as $val => $key) {
+                foreach ((array)$data as $key => $val) {
                     $selected = ((input($name) !== null && (string)input($name) === (string)$val) || (input()->exists($name) === false && (string)$value === (string)$val) || ($saveValue === false && (string)$value === (string)$val));
-                    $element->addOption(new HtmlSelectOption($val, $key, $selected));
+                    $element->addOption(new HtmlSelectOption($key, $val, $selected));
                 }
 
             } else {

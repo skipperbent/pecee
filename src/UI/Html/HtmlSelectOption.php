@@ -6,14 +6,14 @@ class HtmlSelectOption extends Html
 {
     protected $group;
 
-    public function __construct($value, $text = null, $selected = false)
+    public function __construct(?string $text = null, ?string $value = null, bool $selected = false)
     {
         parent::__construct('option');
 
         $this->addAttribute('value', $value);
 
         if ($selected === true) {
-            $this->selected('selected', null);
+            $this->selected();
         }
 
         if ($text !== null) {

@@ -74,7 +74,7 @@ class HtmlInput extends Html
     /**
      * @return static
      */
-    public function autofocus()
+    public function autoFocus()
     {
         return $this->addAttribute('autofocus');
     }

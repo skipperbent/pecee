@@ -16,12 +16,23 @@ class HtmlSelect extends Html
         }
     }
 
+    public function default(string $text): self
+    {
+        array_unshift($this->options, new HtmlSelectOption($text));
+        return $this;
+    }
+
+    public function add(?string $text = null, ?string $value = null, bool $selected = false): self
+    {
+        return $this->addOption(new HtmlSelectOption($text, $value, $selected));
+    }
+
     /**
      * Add option
      * @param HtmlSelectOption $option
      * @return static
      */
-    public function addOption(HtmlSelectOption $option)
+    public function addOption(HtmlSelectOption $option): self
     {
         $group = $option->getGroup();
 
@@ -41,7 +52,7 @@ class HtmlSelect extends Html
     /**
      * @return array|HtmlSelectOption[]
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->options;
     }

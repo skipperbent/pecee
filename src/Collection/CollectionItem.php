@@ -68,6 +68,20 @@ class CollectionItem implements \IteratorAggregate
     }
 
     /**
+     * Perform action on each item
+     * @param callable $callback
+     * @return static
+     */
+    public function each(callable $callback): self
+    {
+        foreach($this->getData() as $key => $row) {
+            $callback($row, $key);
+        }
+
+        return $this;
+    }
+
+    /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
      * @return \Traversable An instance of an object implementing <b>Iterator</b> or
