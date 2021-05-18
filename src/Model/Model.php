@@ -19,7 +19,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 {
     protected $table;
     protected $results = ['rows' => [], 'original_rows' => []];
-    protected $primary = 'id';
+    protected $primaryKey = 'id';
     protected $hidden = [];
     protected $with = [];
     protected $withAutoInvokeColumns = [];
@@ -112,9 +112,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         /* @var $instance Model */
         $instance = new $related();
 
-        $foreignKey = $foreignKey ?: Str::camelize($relation) . '_' . $this->getPrimary();
+        $foreignKey = $foreignKey ?: Str::camelize($relation) . '_' . $this->getPrimaryKey();
 
-        $ownerKey = $ownerKey ?: $instance->getPrimary();
+        $ownerKey = $ownerKey ?: $instance->getPrimaryKey();
 
         return new BelongsTo(
             $instance, $this, $foreignKey, $ownerKey, $relation
@@ -154,8 +154,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         return new BelongsToMany(
             $instance, $this, $table, $foreignPivotKey,
-            $relatedPivotKey, $parentKey ?: $this->getPrimary(),
-            $relatedKey ?: $instance->getPrimary(), $relation
+            $relatedPivotKey, $parentKey ?: $this->getPrimaryKey(),
+            $relatedKey ?: $instance->getPrimaryKey(), $relation
         );
 
     }
@@ -175,7 +175,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $foreignKey = $foreignKey ?: $this->getForeignKey();
 
-        $localKey = $localKey ?: $this->getPrimary();
+        $localKey = $localKey ?: $this->getPrimaryKey();
 
         return new HasOne(
             $instance, $this, $instance->getTable() . '.' . $foreignKey, $localKey
@@ -197,7 +197,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $foreignKey = $foreignKey ?: $this->getForeignKey();
 
-        $localKey = $localKey ?: $this->getPrimary();
+        $localKey = $localKey ?: $this->getPrimaryKey();
 
         return new HasMany(
             $instance, $this, $instance->getTable() . '.' . $foreignKey, $localKey
@@ -242,7 +242,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function getForeignKey()
     {
-        return $this->table . '_' . $this->primary;
+        return $this->table . '_' . $this->primaryKey;
     }
 
     /**
@@ -287,9 +287,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         if ($this->isNew() === false || $this->exists() === true) {
 
-            if (isset($updateData[$this->getPrimary()]) === true) {
+            if (isset($updateData[$this->getPrimaryKey()]) === true) {
                 // Remove primary key
-                unset($updateData[$this->getPrimary()]);
+                unset($updateData[$this->getPrimaryKey()]);
             }
 
             if ($this->timestamps === true) {
@@ -298,7 +298,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
             $this->mergeRows($updateData);
 
-            return static::instance()->where($this->getPrimary(), '=', $this->{$this->getPrimary()})->update($updateData);
+            return static::instance()->where($this->getPrimaryKey(), '=', $this->{$this->getPrimaryKey()})->update($updateData);
         }
 
         $updateData = array_filter($updateData, function ($value) {
@@ -312,12 +312,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $this->mergeRows($updateData);
 
         if ($this->fixedIdentifier === false) {
-            $this->{$this->primary} = static::instance()->getQuery()->insert($updateData);
+            $this->{$this->primaryKey} = static::instance()->getQuery()->insert($updateData);
         } else {
             static::instance()->getQuery()->insert($updateData);
         }
 
-        $this->results['original_rows'][$this->primary] = $this->{$this->primary};
+        $this->results['original_rows'][$this->primaryKey] = $this->{$this->primaryKey};
 
         return $this;
     }
@@ -334,7 +334,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
 
         if ($this->isNew() === false) {
-            $this->queryable->where($this->primary, '=', $this->{$this->primary});
+            $this->queryable->where($this->primaryKey, '=', $this->{$this->primaryKey});
         }
 
         return $this->queryable->getQuery()->delete();
@@ -350,10 +350,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return false;
         }
 
-        $id = static::instance()->select([$this->primary])->where($this->primary, '=', $this->{$this->primary})->first();
+        $id = static::instance()->select([$this->primaryKey])->where($this->primaryKey, '=', $this->{$this->primaryKey})->first();
 
         if ($id !== null) {
-            $this->{$this->primary} = $id->{$this->primary};
+            $this->{$this->primaryKey} = $id->{$this->primaryKey};
 
             return true;
         }
@@ -365,7 +365,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     {
         $originalRows = $this->getOriginalRows();
 
-        return (isset($originalRows[$this->primary]) === false || $originalRows[$this->primary] === null);
+        return (isset($originalRows[$this->primaryKey]) === false || $originalRows[$this->primaryKey] === null);
     }
 
     public function hasRows()
@@ -448,14 +448,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return isset($this->results['rows'][$name]) || in_array($name, $this->columns, true);
     }
 
-    public function getPrimary()
+    public function getPrimaryKey()
     {
-        return $this->primary;
+        return $this->primaryKey;
     }
 
     protected function parseArrayData($data)
     {
-        if ($data instanceof Model || $data instanceof ModelCollection) {
+        if ($data instanceof self || $data instanceof ModelCollection) {
             return $data->toArray();
         }
 
@@ -820,7 +820,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     public function __toString()
     {
-        return (string)$this->{$this->getPrimary()};
+        return (string)$this->{$this->getPrimaryKey()};
     }
 
 }

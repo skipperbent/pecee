@@ -18,11 +18,11 @@ class NodeData extends Model
 
     public function exists()
     {
-        if ($this->{$this->primary} === null || $this->node_id === null) {
+        if ($this->{$this->primaryKey} === null || $this->node_id === null) {
             return false;
         }
 
-        $id = static::instance()->select([$this->primary])->where('key', $this->key)->filerNodeId($this->node_id)->first();
+        $id = static::instance()->select([$this->primaryKey])->where('key', $this->key)->filerNodeId($this->node_id)->first();
 
         return ($id !== null);
     }

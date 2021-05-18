@@ -38,7 +38,7 @@ abstract class ModelData extends Model
 
     protected function onNewDataItemCreate(Model $field): void
     {
-        $field->{$this->getDataPrimary()} = $this->{$this->primary};
+        $field->{$this->getDataPrimary()} = $this->{$this->primaryKey};
         $field->save();
     }
 

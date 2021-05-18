@@ -37,7 +37,7 @@ class ModelQueryBuilder
 
     /**
      * @param \stdClass $item
-     * @return Model
+     * @return static
      */
     protected function createInstance(\stdClass $item)
     {
@@ -342,7 +342,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return ModelCollection
+     * @return ModelCollection|static[]
      * @throws Exception
      */
     public function get()
@@ -373,7 +373,7 @@ class ModelQueryBuilder
      */
     public function find($id)
     {
-        $item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
+        $item = $this->query->where($this->model->getPrimaryKey(), '=', $id)->first();
         if ($item !== null) {
             return $this->createInstance($item);
         }
@@ -577,7 +577,7 @@ class ModelQueryBuilder
         if ($id !== null) {
 
             $this->model->mergeRows($data);
-            $this->model->{$this->model->getPrimary()} = $id;
+            $this->model->{$this->model->getPrimaryKey()} = $id;
 
             return $this->model;
         }

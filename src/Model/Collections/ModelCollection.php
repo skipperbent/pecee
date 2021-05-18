@@ -30,7 +30,7 @@ class ModelCollection extends Collection
     /**
      * Get first or default value
      * @param string $default
-     * @return static|string
+     * @return static|null|mixed
      */
     public function getFirstOrDefault($default = null)
     {

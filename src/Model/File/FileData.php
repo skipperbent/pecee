@@ -27,7 +27,7 @@ class FileData extends Model
 
     public function exists()
     {
-        if ($this->{$this->primary} === null) {
+        if ($this->{$this->primaryKey} === null) {
             return false;
         }
 

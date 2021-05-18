@@ -133,7 +133,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function exist()
     {
-        if ($this->{$this->primary} === null) {
+        if ($this->{$this->primaryKey} === null) {
             $user = static::instance()->filterUsername($this->username)->first();
             if ($user !== null && $user->id !== $this->id) {
                 return true;
@@ -232,7 +232,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
         $subQuery = $userDataClass::instance()->select([$this->getDataPrimary()])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
 
-        return $this->where($this->primary, '=', $this->subQuery($subQuery));
+        return $this->where($this->primaryKey, '=', $this->subQuery($subQuery));
     }
 
     public static function getByUsername($username)

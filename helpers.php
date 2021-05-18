@@ -9,6 +9,8 @@ use Pecee\Http\Request;
 use Pecee\Http\Response;
 use Pecee\Http\Url;
 
+request()->app = new \Pecee\Application\Application();
+
 /**
  * Get url for a route by using either name/alias, class or method name.
  *
