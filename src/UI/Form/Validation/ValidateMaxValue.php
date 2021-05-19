@@ -13,7 +13,7 @@ class ValidateMaxValue extends ValidateInput
         $this->maxValue = $maxValue;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         if (Integer::isInteger($this->input->getValue()) === false) {
             $this->error = lang('%s is not a valid number', $this->input->getName());
@@ -27,7 +27,7 @@ class ValidateMaxValue extends ValidateInput
 
     }
 
-    public function getError()
+    public function getError(): string
     {
         return $this->error;
     }

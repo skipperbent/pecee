@@ -13,7 +13,7 @@ class ValidateRepeation extends ValidateInput
         $this->caseSensitive = $caseSensitive;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         if ($this->caseSensitive === false) {
             return (strtolower($this->compareInput->getValue()) === strtolower($this->input->getValue()));
@@ -22,7 +22,7 @@ class ValidateRepeation extends ValidateInput
         return ($this->compareInput->getValue() === $this->input->getValue());
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is not equal to %s', $this->input->getName(), $this->compareInput->getName());
     }

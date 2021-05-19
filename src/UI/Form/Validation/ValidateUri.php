@@ -16,7 +16,7 @@ class ValidateUri extends ValidateInput
         $this->type = $type;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         if($this->type === self::TYPE_BOTH) {
             return (Url::isValidRelative($this->input->getValue()) && Url::isValid($this->input->getValue()));
@@ -29,7 +29,7 @@ class ValidateUri extends ValidateInput
         return Url::isValid($this->input->getValue());
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is not a valid url', $this->input->getName());
     }

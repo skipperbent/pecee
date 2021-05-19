@@ -7,7 +7,7 @@ class ValidateFileNotNullOrEmpty extends ValidateFile
 {
     protected $allowEmpty = false;
 
-    public function validates()
+    public function validates(): bool
     {
         if (($this->input instanceof InputFile) === false) {
             return false;
@@ -16,7 +16,7 @@ class ValidateFileNotNullOrEmpty extends ValidateFile
         return ($this->input->hasError() === false && trim($this->input->getName()) !== false && $this->input->getSize() > 0 && $this->input->getError() === 0);
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s cannot be empty', [$this->input->getName()]);
     }

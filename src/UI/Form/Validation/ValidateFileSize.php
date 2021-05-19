@@ -21,7 +21,7 @@ class ValidateFileSize extends ValidateFile
         $this->sizeFormat = $sizeFormat;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         if ($this->sizeMin !== null && $this->sizeMin >= $this->getInputSize()) {
             $this->error = lang('%s cannot be less than %sKB', $this->input->getName(), $this->sizeMin);
@@ -38,7 +38,7 @@ class ValidateFileSize extends ValidateFile
         return true;
     }
 
-    protected function getInputSize()
+    protected function getInputSize(): int
     {
         switch ($this->sizeFormat) {
             default:
@@ -54,7 +54,7 @@ class ValidateFileSize extends ValidateFile
 
     }
 
-    public function getError()
+    public function getError(): string
     {
         return $this->error;
     }

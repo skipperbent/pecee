@@ -5,12 +5,12 @@ class ValidateNotNullOrEmpty extends ValidateInput
 {
     protected $allowEmpty = false;
 
-    public function validates()
+    public function validates(): bool
     {
         return (is_string($this->input->getValue()) && trim($this->input->getValue()) !== '');
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is required', $this->input->getName());
     }
