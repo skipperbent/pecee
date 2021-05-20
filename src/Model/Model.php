@@ -524,7 +524,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return;
         }
 
-        //$this->invokedElements[] = $name;
         $with = $this->with[$name];
 
         if (is_numeric($name) === true) {
@@ -537,9 +536,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $output = $with($this);
         } else {
             if (method_exists($this, $name)) {
+                // If method exist call method and remove getter
                 $output = $this->{$name}();
-                // Remove get method-name from key name
                 $name = str_ireplace('get', '', $name);
+            } else if (method_exists($this, $with)) {
+                // If with value contains method name
+                $output = $this->{$with}();
             }
         }
 
