@@ -130,10 +130,8 @@ class ModelCollection extends Collection
                         if (strtolower($rowValue) === (string)$value || stripos($rowValue, $value) !== false) {
                             $out[] = $row;
                         }
-                    } else {
-                        if ($rowValue === $value) {
-                            $out[] = $row;
-                        }
+                    } else if ($rowValue === $value) {
+                        $out[] = $row;
                     }
                 }
             }
@@ -153,7 +151,7 @@ class ModelCollection extends Collection
         if ($this->hasRows() === true) {
             $rows = [];
             foreach ($this->getRows() as $row) {
-                $k = isset($row->fields[$key]) ? $row->fields[$key] : $row->data->{$key};
+                $k = $row->fields[$key] ?? $row->data->{$key};
                 $k = ((string)$k === 'Tjs=') ? Str::base64Decode($k) : $k;
                 $rows[$k] = $row;
             }

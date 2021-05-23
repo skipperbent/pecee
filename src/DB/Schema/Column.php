@@ -427,7 +427,7 @@ class Column
 
     public function getIncrement(): bool
     {
-        return (bool)$this->increment;
+        return $this->increment;
     }
 
     public function setComment(string $comment): self
@@ -466,11 +466,6 @@ class Column
     public function getRemoveRelation(): bool
     {
         return $this->removeRelation;
-    }
-
-    public function getRelationName(): ?string
-    {
-        return $this->relationName;
     }
 
     public function getRelationTable(): ?string

@@ -62,10 +62,8 @@ abstract class Asset implements IAsset
     public function build()
     {
 
-        if (is_dir($this->destinationPath) === false) {
-            if(mkdir($this->destinationPath, 0755) === false) {
-                throw new \ErrorException('Failed to created directory');
-            }
+        if ((is_dir($this->destinationPath) === false) && !mkdir($concurrentDirectory = $this->destinationPath, 0755) && !is_dir($concurrentDirectory)) {
+            throw new \ErrorException('Failed to created directory');
         }
 
         $handle = fopen($this->destinationPath . '/' . $this->filename, 'w+b+');

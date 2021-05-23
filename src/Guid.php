@@ -79,9 +79,7 @@ class Guid
             return false;
         }
 
-        $data = openssl_decrypt($data, $method, $key, 0, $binary);
-
-        return $data;
+        return openssl_decrypt($data, $method, $key, 0, $binary);
     }
 
     /**

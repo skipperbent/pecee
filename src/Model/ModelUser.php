@@ -22,7 +22,7 @@ class ModelUser extends ModelData implements IUserAuthentication
     /**
      * @var self
      */
-    protected static $instance;
+    protected static ?self $instance = null;
     protected static int $ticketExpireMinutes = 60;
 
     protected string $dataPrimary = 'user_id';
@@ -272,9 +272,9 @@ class ModelUser extends ModelData implements IUserAuthentication
     }
 
     /**
-     * @return string
+     * @return UserData|string
      */
-    public static function getUserDataClass()
+    public static function getUserDataClass(): string
     {
         return UserData::class;
     }

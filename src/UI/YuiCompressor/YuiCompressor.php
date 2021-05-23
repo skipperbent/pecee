@@ -124,7 +124,7 @@ class YuiCompressor
                 file_put_contents($tmpFile, $item->content);
                 $output = [];
                 exec($this->getCmd($item->options, $item->type, $tmpFile), $output);
-                $item->minified = (isset($output[0]) ? $output[0] : '');
+                $item->minified = ($output[0] ?? '');
                 $item->sizeKB = round(strlen($item->content) / 1024, 2);
                 $item->minifiedKB = $item->sizeKB - round(strlen($item->minified) / 1024, 2);
                 $item->minifiedRatio = round(($item->minifiedKB / $item->sizeKB) * 100);
@@ -153,13 +153,13 @@ class YuiCompressor
             'disable-optimizations' => true,
         ], $userOptions);
 
-        $cmd = $this->javaExecutable . ' -jar ' . escapeshellarg($this->jarFile) . " --type {$type}"
+        $cmd = $this->javaExecutable . ' -jar ' . escapeshellarg($this->jarFile) . " --type $type"
             . (isset($options['charset']) ? " --charset {$options['charset']}" : '')
             . (isset($options['line-break']) && $options['line-break'] >= 0 ? ' --line-break ' . (int)$options['line-break'] : '');
 
         if ($type === static::TYPE_JAVASCRIPT) {
             foreach (['nomunge', 'preserve-semi', 'disable-optimizations'] as $opt) {
-                $cmd .= $options[$opt] ? " --{$opt}" : '';
+                $cmd .= $options[$opt] ? " --$opt" : '';
             }
         }
 

@@ -9,10 +9,8 @@ class Directory
     {
         $dir = opendir($source);
 
-        if (!is_dir($destination)) {
-            if (mkdir($destination, 0755, true) === false) {
-                throw new \ErrorException('Failed to create directory: ' . $destination);
-            }
+        if (!is_dir($destination) && !mkdir($destination, 0755, true) && !is_dir($destination)) {
+            throw new \ErrorException('Failed to create directory: ' . $destination);
         }
 
         while (($file = readdir($dir)) !== false) {
@@ -43,11 +41,11 @@ class Directory
 
     public static function isEmpty($directory): bool
     {
-        if (!is_dir($dir)) {
+        if (!is_dir($directory)) {
             return true;
         }
 
-        return (count(scandir($dir)) === 2);
+        return (count(scandir($directory)) === 2);
     }
 
 }

@@ -244,10 +244,8 @@ class Menu
                     if (in_array($value, $attributes[$name], true) === true) {
                         return $item;
                     }
-                } else {
-                    if (stripos($attributes[$name], $value) !== false) {
-                        return $item;
-                    }
+                } else if (stripos($attributes[$name], $value) !== false) {
+                    return $item;
                 }
 
             }

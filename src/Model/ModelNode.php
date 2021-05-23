@@ -267,31 +267,7 @@ class ModelNode extends ModelData
 
     public function calculatePath()
     {
-        /*$path = ['0'];
-        $fetchingPath = true;
-        if ($this->parent_id) {
-            $parent = static::instance()->find($this->parent_id);
-            $i = 0;
-            while ($fetchingPath === true) {
-                if ($parent !== null) {
-                    $path[] = $parent->id;
-                    $p = $parent->parent_id;
-                    if (!empty($p)) {
-                        $parent = static::instance()->find($parent->parent_id);
-                    } else {
-                        $fetchingPath = false;
-                    }
-                    $i++;
-                } else {
-                    $fetchingPath = false;
-                }
-            }
-            if ($i === 0) {
-                $path[] = $this->parent_id;
-            }
-        }*/
-
-        $parent = static::instance()->find($this->parent_id)->first();
+        $parent = static::instance()->find($this->parent_id);
         $this->path = ($parent !== null) ? $parent->getPath() . '>' . $parent->id : '0';
         $this->level = count(explode('>', $this->path));
     }
@@ -562,7 +538,7 @@ class ModelNode extends ModelData
                 $key .= '%';
                 $keyOperator = 'LIKE';
             } else {
-                $key = $key . ']';
+                $key .= ']';
             }
         }
 

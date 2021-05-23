@@ -74,7 +74,7 @@ abstract class Widget extends Base
 
     public function renderValidationFor(string $name): string
     {
-        $validation = parent::getValidationFor($name);
+        $validation = $this->getValidationFor($name);
 
         if ($validation !== null) {
             $span = new Html('div');
@@ -119,7 +119,7 @@ abstract class Widget extends Base
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
-        foreach ((array)$this->getSite()->getCss($section) as $css) {
+        foreach ($this->getSite()->getCss($section) as $css) {
             $output .= (new Html('link'))
                 ->setClosingType(Html::CLOSE_TYPE_NONE)
                 ->attr('href', $css)
@@ -138,7 +138,7 @@ abstract class Widget extends Base
             $output .= (new Html('script'))->attr('src', $js);
         }
 
-        foreach ((array)$this->getSite()->getJs($section) as $js) {
+        foreach ($this->getSite()->getJs($section) as $js) {
             $output .= (new Html('script'))->attr('src', $js);
         }
 

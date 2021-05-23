@@ -23,7 +23,12 @@
     "josegonzalez/dotenv": "3.*",
     "pecee/simple-router": "^4.0",
     "robmorgan/phinx": "^0.5.3",
-    "nesbot/carbon": "1.*"
+    "nesbot/carbon": "1.*",
+    "ext-openssl": "*",
+    "ext-curl": "*",
+    "ext-pdo": "*",
+    "ext-fileinfo": "*",
+    "ext-simplexml": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^6.0",

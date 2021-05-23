@@ -115,7 +115,7 @@ class Str
     public static function deCamelize(string $word, string $separator = '_'): string
     {
         return preg_replace_callback('/(^|[a-z])([A-Z])/',
-            function ($matches) use ($separator) {
+            static function ($matches) use ($separator) {
                 return strtolower('' !== $matches[1] ? $matches[1] . $separator . $matches[2] : $matches[2]);
             },
             $word
@@ -124,7 +124,7 @@ class Str
 
     public static function camelize(string $word, string $separator = '_'): string
     {
-        $words = preg_replace_callback('/(^|' . $separator . ')([a-z])/', function ($matches) {
+        $words = preg_replace_callback('/(^|' . $separator . ')([a-z])/', static function ($matches) {
             return strtoupper($matches[2]);
         }, strtolower($word));
 

@@ -55,7 +55,7 @@ class ArrayUtil
     public static function valueRecursive(array $arr, $key = null): array
     {
         $val = [];
-        array_walk_recursive($arr, function ($v, $k) use ($key, &$val) {
+        array_walk_recursive($arr, static function ($v, $k) use ($key, &$val) {
             if ($k === $key || $key === null) {
                 $val[] = $v;
             }

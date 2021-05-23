@@ -13,16 +13,14 @@ use Pecee\Str;
 
 class ModelQueryBuilder
 {
-    protected static $instance;
-
     /**
      * @var static|Model
      */
-    protected $model;
+    protected Model $model;
     /**
-     * @var QueryBuilderHandler
+     * @var QueryBuilderHandler|null
      */
-    protected $query;
+    protected ?QueryBuilderHandler $query = null;
 
     /**
      * ModelQueryBuilder constructor.
@@ -37,19 +35,19 @@ class ModelQueryBuilder
 
     /**
      * @param \stdClass $item
-     * @return static
+     * @return Model
      */
-    protected function createInstance(\stdClass $item)
+    protected function createInstanceWithData(\stdClass $item): Model
     {
         $model = $this->model->onNewInstance($item);
-        $model->mergeRows((array)$item);
+        $model->mergeData((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
 
         return $model;
     }
 
-    protected function createCollection(array $items)
+    protected function createCollection(array $items): ModelCollection
     {
         $collection = $this->model->onCollectionCreate($items);
         $collection->setType(static::class);
@@ -60,7 +58,7 @@ class ModelQueryBuilder
     /**
      * Sets the table that the query is using
      *
-     * @param string|array $tables Single table or multiple tables as an array or as multiple parameters
+     * @param string|array $table Single table or multiple tables as an array or as multiple parameters
      *
      * @throws Exception
      * @return static
@@ -87,7 +85,7 @@ class ModelQueryBuilder
      * @param string $alias
      * @return static
      */
-    public function alias($alias)
+    public function alias(string $alias)
     {
         $this->query->alias($alias, $this->model->getTable());
 
@@ -98,7 +96,7 @@ class ModelQueryBuilder
      * @param int $limit
      * @return static
      */
-    public function limit($limit)
+    public function limit(int $limit)
     {
         $this->query->limit($limit);
 
@@ -109,7 +107,7 @@ class ModelQueryBuilder
      * @param int $skip
      * @return static
      */
-    public function skip($skip)
+    public function skip(int $skip)
     {
         $this->query->offset($skip);
 
@@ -120,7 +118,7 @@ class ModelQueryBuilder
      * @param int $amount
      * @return static
      */
-    public function take($amount)
+    public function take(int $amount)
     {
         return $this->limit($amount);
     }
@@ -129,7 +127,7 @@ class ModelQueryBuilder
      * @param int $offset
      * @return static
      */
-    public function offset($offset)
+    public function offset(int $offset)
     {
         return $this->skip($offset);
     }
@@ -361,7 +359,7 @@ class ModelQueryBuilder
         $models = [];
 
         foreach ($items as $item) {
-            $models[] = $this->createInstance($item);
+            $models[] = $this->createInstanceWithData($item);
         }
 
         return $this->createCollection($models);
@@ -375,7 +373,7 @@ class ModelQueryBuilder
     {
         $item = $this->query->where($this->model->getPrimaryKey(), '=', $id)->first();
         if ($item !== null) {
-            return $this->createInstance($item);
+            return $this->createInstanceWithData($item);
         }
 
         return null;
@@ -404,7 +402,7 @@ class ModelQueryBuilder
     {
         $item = $this->query->first();
         if ($item !== null) {
-            return $this->createInstance($item);
+            return $this->createInstanceWithData($item);
         }
 
         return null;
@@ -430,7 +428,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function count($field = '*')
+    public function count(string $field = '*')
     {
         return $this->query->count($field);
     }
@@ -440,7 +438,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function min($field)
+    public function min(string $field)
     {
         return $this->query->min($field);
     }
@@ -450,7 +448,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function max($field)
+    public function max(string $field)
     {
         return $this->query->max($field);
     }
@@ -460,7 +458,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function average($field)
+    public function average(string $field)
     {
         return $this->query->average($field);
     }
@@ -470,7 +468,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function sum($field)
+    public function sum(string $field)
     {
         return $this->query->sum($field);
     }
@@ -480,7 +478,7 @@ class ModelQueryBuilder
      * @param array $data
      * @return array
      */
-    protected function getValidData(array $data)
+    protected function getValidData(array $data): array
     {
         $out = [];
 
@@ -502,10 +500,10 @@ class ModelQueryBuilder
     public function update(array $data = [])
     {
         // Update multiple items
-        if (\is_array(current($data)) === true) {
+        if (is_array(current($data)) === true) {
 
             foreach ($data as $key => $item) {
-                if ($this->model->getUpdateTimestamps() === true && isset($item['updated_at']) === false) {
+                if (isset($item['updated_at']) === false && $this->model->getUpdateTimestamps() === true) {
                     $data[$key]['created_at'] = Carbon::now()->toDateTimeString();
                 }
 
@@ -542,12 +540,12 @@ class ModelQueryBuilder
     public function create(array $data = [])
     {
         // Create multiple items
-        if (\is_array(current($data)) === true) {
+        if (is_array(current($data)) === true) {
 
             foreach ($data as $key => $item) {
                 $data[$key] = array_merge($this->model->getRows(), $this->getValidData($item));
 
-                if ($this->model->getUpdateTimestamps() === true && isset($item['created_at']) === false) {
+                if (isset($item['created_at']) === false && $this->model->getUpdateTimestamps() === true) {
                     $data[$key]['created_at'] = Carbon::now()->toDateTimeString();
                 }
 
@@ -562,7 +560,7 @@ class ModelQueryBuilder
         }
 
         // Create single item
-        if ($this->model->getUpdateTimestamps() === true && isset($data['created_at']) === false) {
+        if (isset($data['created_at']) === false && $this->model->getUpdateTimestamps() === true) {
             $data['created_at'] = Carbon::now()->toDateTimeString();
         }
 
@@ -596,9 +594,9 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item === null) {
-            $item = $this->createInstance((object)$data);
+            $item = $this->createInstanceWithData((object)$data);
             $item->setOriginalRows([]);
-            $item->save();
+            $item->save($data);
         }
 
         return $item;
@@ -617,7 +615,7 @@ class ModelQueryBuilder
             return $item;
         }
 
-        $item = $this->createInstance((object)$data);
+        $item = $this->createInstanceWithData((object)$data);
         $item->setOriginalRows([]);
         return $item;
     }
@@ -664,7 +662,7 @@ class ModelQueryBuilder
      *
      * @return static
      */
-    public function orderBy($fields, $defaultDirection = 'ASC')
+    public function orderBy($fields, string $defaultDirection = 'ASC')
     {
         $this->query->orderBy($fields, $defaultDirection);
 
@@ -773,7 +771,7 @@ class ModelQueryBuilder
     /**
      * @return Model
      */
-    public function getModel()
+    public function getModel(): Model
     {
         return $this->model;
     }
@@ -781,7 +779,7 @@ class ModelQueryBuilder
     /**
      * @param Model $model
      */
-    public function setModel(Model $model)
+    public function setModel(Model $model): void
     {
         $this->model = $model;
     }
@@ -789,7 +787,7 @@ class ModelQueryBuilder
     /**
      * @return QueryBuilderHandler
      */
-    public function getQuery()
+    public function getQuery(): QueryBuilderHandler
     {
         return $this->query;
     }
@@ -804,7 +802,7 @@ class ModelQueryBuilder
      * @return string
      * @throws Exception
      */
-    public function getQueryIdentifier()
+    public function getQueryIdentifier(): string
     {
         return md5(static::class . $this->getQuery()->getQuery()->getRawSql());
     }

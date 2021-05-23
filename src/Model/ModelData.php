@@ -241,7 +241,11 @@ abstract class ModelData extends Model
 
     public function __get($name)
     {
-        return $this->data->get($name) ?? parent::__get($name);
+        if (parent::__isset($name) === true) {
+            return parent::__get($name);
+        }
+
+        return $this->data->get($name);
     }
 
     public function __set($name, $value)
@@ -249,17 +253,17 @@ abstract class ModelData extends Model
         if (parent::__isset($name) === true) {
             parent::__set($name, $value);
         } else {
-            $this->data->{$name} = $value;
+            $this->data->set($name, $value);
         }
     }
 
     public function __isset($name)
     {
-        if(($this->data->exist($name) || array_key_exists(strtolower($name), $this->results['rows']))) {
-            return true;
+        if (parent::__isset($name) === false) {
+            return ($this->data->exist($name) || array_key_exists(strtolower($name), $this->results['rows']));
         }
 
-        return parent::__isset($name);
+        return true;
     }
 
 }

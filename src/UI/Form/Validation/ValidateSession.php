@@ -15,7 +15,7 @@ class ValidateSession extends ValidateInput
 
     public function validates(): bool
     {
-        return ((bool)Session::exists($this->sessionName));
+        return Session::exists($this->sessionName);
     }
 
     public function getError(): string

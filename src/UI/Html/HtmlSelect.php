@@ -62,7 +62,7 @@ class HtmlSelect extends Html
      */
     public function multiple()
     {
-        return $this->addAttribute('multiple', null);
+        return $this->addAttribute('multiple');
     }
 
     /**
@@ -85,7 +85,7 @@ class HtmlSelect extends Html
             $html->addAttribute('label', $name);
 
             if ($this->groupsDisabled !== null && in_array(strtolower($name), $this->groupsDisabled) === true) {
-                $html->addAttribute('disabled', null);
+                $html->addAttribute('disabled');
             }
 
             /* @var $option HtmlSelectOption */
@@ -110,7 +110,7 @@ class HtmlSelect extends Html
      */
     public function disabled()
     {
-        return $this->addAttribute('disabled', null);
+        return $this->addAttribute('disabled');
     }
 
     /**

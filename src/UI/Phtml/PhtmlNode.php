@@ -91,13 +91,10 @@ class PhtmlNode extends HtmlElement
             foreach ($this->getAttrs() as $name => $val) {
                 if ($method) {
                     $str .= sprintf('"%s"=>%s,', $name, $this->processAttrValue($val));
+                } else if ($val === null) {
+                    $str .= sprintf('%s ', $name);
                 } else {
-                    if ($val === null) {
-                        $str .= sprintf('%s ', $name);
-                    } else {
-                        $str .= sprintf('%s="%s" ', $name, $val);
-                    }
-
+                    $str .= sprintf('%s="%s" ', $name, $val);
                 }
             }
 
@@ -131,23 +128,21 @@ class PhtmlNode extends HtmlElement
             } else {
                 $str .= sprintf('</%s>', $this->getTag());
             }
-        } else {
-            if ($method) {
-                $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
+        } else if ($method) {
+            $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-                $taglib = $taglibs[$this->getNs()] ?? null;
+            $taglib = $taglibs[$this->getNs()] ?? null;
 
-                if ($taglib instanceof ITaglib) {
-                    $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
-                }
-            } else {
-
-                if (in_array($this->getTag(), Phtml::$VOIDTAGS, false) === false) {
-                    $str .= '/';
-                }
-
-                $str .= '>';
+            if ($taglib instanceof ITaglib) {
+                $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
             }
+        } else {
+
+            if (in_array($this->getTag(), Phtml::$VOIDTAGS, false) === false) {
+                $str .= '/';
+            }
+
+            $str .= '>';
         }
         if ($this->getParent() === null || $this->getParent()->getTag() === 'phtml') {
             $str = static::$prepend . $str . static::$append;

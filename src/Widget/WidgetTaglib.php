@@ -16,36 +16,6 @@ abstract class WidgetTaglib extends Widget
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }
 
-    public function render(): ?string
-    {
-        if ($this->_template === null) {
-            $this->setTemplate('Default.php');
-        }
-
-        if ($this->_contentTemplate === null) {
-            $this->setContentTemplate($this->getTemplatePath());
-        }
-
-        $this->setInputValues();
-
-        // Trigger postback event
-        if (request()->getMethod() === 'post') {
-            $this->onPostBack();
-        }
-
-        // Trigger onLoad event
-        $this->onLoad();
-
-        $this->renderContent();
-        $this->renderTemplate();
-
-        $this->sessionMessage()->clear();
-
-        debug('END WIDGET: ' . static::class);
-
-        return $this->_contentHtml;
-    }
-
     protected function getHtmlParser(): Phtml
     {
         return new Phtml();
@@ -65,7 +35,7 @@ abstract class WidgetTaglib extends Widget
 
         if (is_file($cacheFile) === true) {
             if (app()->getDebugEnabled() === false) {
-                return (string)$this->renderPhp(file_get_contents($cacheFile));
+                return $this->renderPhp(file_get_contents($cacheFile));
             } else {
                 unlink($cacheFile);
             }
@@ -73,10 +43,8 @@ abstract class WidgetTaglib extends Widget
 
         try {
 
-            if (is_dir($this->_pHtmlCacheDir) === false) {
-                if(mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
-                    throw new \ErrorException('Failed to create temp-cache directory');
-                }
+            if ((is_dir($this->_pHtmlCacheDir) === false) && !mkdir($concurrentDirectory = $this->_pHtmlCacheDir, 0755, true) && !is_dir($concurrentDirectory)) {
+                throw new \ErrorException('Failed to create temp-cache directory');
             }
 
             debug('Parsing Phtml template');

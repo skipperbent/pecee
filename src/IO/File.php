@@ -29,7 +29,7 @@ class File
             return $file;
         }
 
-        register_shutdown_function(function () use ($file) {
+        register_shutdown_function(static function () use ($file) {
             if (is_file($file) === true) {
                 unlink($file);
             }
@@ -56,7 +56,7 @@ class File
         curl_exec($handle);
         $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-        return $size ? $size : null;
+        return $size ?: null;
     }
 
     public static function remoteExist($url)

@@ -53,7 +53,7 @@ abstract class Base
         foreach ($names as $key => $name) {
             $item = input()->find($key);
 
-            /* @var $item \Pecee\Http\Input\IInputItem */
+            /* @var $item IInputItem */
             if ($item !== null) {
                 $item->setName($name);
             }

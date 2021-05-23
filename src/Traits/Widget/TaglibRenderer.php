@@ -49,10 +49,8 @@ trait TaglibRenderer
 
         try {
 
-            if (is_dir($this->_pHtmlCacheDir) === false) {
-                if (mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
-                    throw new \ErrorException('Failed to create temp-cache directory');
-                }
+            if ((is_dir($this->_pHtmlCacheDir) === false) && !mkdir($concurrentDirectory = $this->_pHtmlCacheDir, 0755, true) && !is_dir($concurrentDirectory)) {
+                throw new \ErrorException('Failed to create temp-cache directory');
             }
 
             $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));

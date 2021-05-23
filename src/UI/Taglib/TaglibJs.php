@@ -160,8 +160,8 @@ class TaglibJs extends Taglib
             $output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
         }
 
-        $data = isset($attrs->data) ? $attrs->data : 'null';
-        $el = isset($attrs->el) ? $attrs->el : 'div';
+        $data = $attrs->data ?? 'null';
+        $el = $attrs->el ?? 'div';
 
         return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
@@ -175,8 +175,8 @@ class TaglibJs extends Taglib
     protected function tagEach($attrs)
     {
         $this->requireAttributes($attrs, ['in']);
-        $row = (!isset($attrs->as)) ? 'row' : $attrs->as;
-        $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
+        $row = $attrs->as ?? 'row';
+        $index = $attrs->index ?? 'i';
 
         return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>',
             $attrs->in,

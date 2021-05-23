@@ -55,7 +55,7 @@ function request(): Request
  * @param string|null $index Parameter index name
  * @param string|null $defaultValue Default return value
  * @param array ...$methods Default methods
- * @return \Pecee\Http\Input\InputHandler|array|string|null
+ * @return \Pecee\Http\Input\InputHandler|array|string
  */
 function input($index = null, $defaultValue = null, ...$methods)
 {

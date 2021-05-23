@@ -79,7 +79,7 @@ class Phtml
     private $prevChar;
 
     /**
-     * @param phtml $string
+     * @param string $string
      * @throws PhtmlException
      * @return PhtmlNode
      */
@@ -366,7 +366,7 @@ class Phtml
                 break;
             case static::ATTR:
                 if (!$this->attrName) {
-                    $current = preg_replace('/[^A-Z0-9_\-\:]/i', '', $this->getCurrent(false));
+                    $current = preg_replace('/[^A-Z0-9_\-\:]/i', '', $this->getCurrent());
                     if (!$current) {
                         return;
                     }

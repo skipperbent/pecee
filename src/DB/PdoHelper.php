@@ -49,12 +49,10 @@ class PdoHelper
         foreach ($array as $arr) {
             if ($isFields) {
                 $statement[] = sprintf('`%s`', $arr);
+            } else if ($arr === null) {
+                $statement[] = 'NULL';
             } else {
-                if ($arr === null) {
-                    $statement[] = 'NULL';
-                } else {
-                    $statement[] = Pdo::getInstance()->getConnection()->quote($arr);
-                }
+                $statement[] = Pdo::getInstance()->getConnection()->quote($arr);
             }
         }
 

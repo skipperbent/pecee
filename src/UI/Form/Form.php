@@ -23,9 +23,9 @@ class Form
      * @param string $name
      * @param string|null $method
      * @param string|null $action
-     * @return \Pecee\UI\Html\HtmlForm
+     * @return HtmlForm
      */
-    public function start($name, $method = HtmlForm::METHOD_POST, $action = null)
+    public function start($name, string $method = HtmlForm::METHOD_POST, $action = null)
     {
         $form = new HtmlForm($name, $method, $action);
         // Add csrf token
@@ -42,7 +42,7 @@ class Form
      * @param string $type
      * @param string $value
      * @param bool $saveValue
-     * @return \Pecee\UI\Html\HtmlInput
+     * @return HtmlInput
      */
     public function input($name, $type = 'text', $value = null, $saveValue = true)
     {
@@ -80,7 +80,7 @@ class Form
      * @param bool $value
      * @param bool $defaultValue
      * @param bool $saveValue
-     * @return \Pecee\UI\Html\HtmlCheckbox
+     * @return HtmlCheckbox
      */
     public function bool($name, $value = true, $defaultValue = null, $saveValue = true)
     {
@@ -100,10 +100,8 @@ class Form
             if ($checked) {
                 $element->checked(true);
             }
-        } else {
-            if (Boolean::parse($value)) {
-                $element->checked(true);
-            }
+        } else if (Boolean::parse($value)) {
+            $element->checked(true);
         }
 
         return $element;
@@ -113,7 +111,7 @@ class Form
      * Creates new label
      * @param string|null $inner
      * @param string|null $for
-     * @return \Pecee\UI\Html\Html
+     * @return Html
      */
     public function label($inner, $for = null)
     {
@@ -137,7 +135,7 @@ class Form
      * @param string|null $value
      * @param bool $saveValue
      * @throws \InvalidArgumentException
-     * @return \Pecee\UI\Html\HtmlSelect
+     * @return HtmlSelect
      */
     public function selectStart(string $name, $data = null, ?string $value = null, bool $saveValue = true): HtmlSelect
     {
@@ -170,7 +168,7 @@ class Form
      * @param int $cols
      * @param string $value
      * @param bool $saveValue
-     * @return \Pecee\UI\Html\HtmlTextarea
+     * @return HtmlTextarea
      */
     public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
     {
@@ -185,7 +183,7 @@ class Form
      * Creates submit element
      * @param string $name
      * @param string $value
-     * @return \Pecee\UI\Html\HtmlInput
+     * @return HtmlInput
      */
     public function submit($name, $value)
     {

@@ -379,7 +379,7 @@ class Table
      */
     public function rename(string $name): self
     {
-        Pdo::getInstance()->nonQuery("RENAME TABLE `{$this->name}` TO `$name`;");
+        Pdo::getInstance()->nonQuery("RENAME TABLE `$this->name` TO `$name`;");
         $this->name = $name;
 
         return $this;
@@ -393,7 +393,7 @@ class Table
      */
     public function dropIndex(...$indexes): self
     {
-        $indexes = (array)$indexes;
+        $indexes = $indexes;
         foreach ($indexes as $index) {
             try {
                 Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP INDEX `%s`;', $this->name, $index));
@@ -468,7 +468,7 @@ class Table
      */
     public function dropPrimary(): self
     {
-        Pdo::getInstance()->nonQuery("ALTER TABLE `{$this->name}` DROP PRIMARY KEY");
+        Pdo::getInstance()->nonQuery("ALTER TABLE `$this->name` DROP PRIMARY KEY");
 
         return $this;
     }
