@@ -19,12 +19,15 @@ class ModelUser extends ModelData implements IUserAuthentication
     public const ERROR_TYPE_INVALID_LOGIN = 0x2;
     public const ERROR_TYPE_EXISTS = 0x3;
 
+    /**
+     * @var self
+     */
     protected static $instance;
-    protected static $ticketExpireMinutes = 60;
+    protected static int $ticketExpireMinutes = 60;
 
-    protected $dataPrimary = 'user_id';
-    protected $table = 'user';
-    protected $columns = [
+    protected string $dataPrimary = 'user_id';
+    protected string $table = 'user';
+    protected array $columns = [
         'id',
         'username',
         'password',

@@ -2,7 +2,11 @@
 
 namespace Pecee\Model;
 
+use ArrayIterator;
 use Carbon\Carbon;
+use Closure;
+use IteratorAggregate;
+use JsonSerializable;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Relation\BelongsTo;
@@ -15,31 +19,26 @@ use Pecee\Str;
 /**
  * @mixin ModelQueryBuilder
  */
-abstract class Model implements \IteratorAggregate, \JsonSerializable
+abstract class Model implements IteratorAggregate, JsonSerializable
 {
-    protected $table;
-    protected $results = ['rows' => [], 'original_rows' => []];
-    protected $primaryKey = 'id';
-    protected $hidden = [];
-    protected $with = [];
-    protected $withAutoInvokeColumns = [];
-    protected $invokedElements = [];
-    protected $rename = [];
-    protected $columns = [];
-    protected $timestamps = true;
-    protected $fixedIdentifier = false;
-    protected $relations = [];
-    protected $filter = [];
-
-    /**
-     * @var ModelQueryBuilder
-     */
-    protected $queryable;
+    protected string $table = '';
+    protected array $results = ['rows' => [], 'original_rows' => []];
+    protected string $primaryKey = 'id';
+    protected array $hidden = [];
+    protected array $with = [];
+    protected array $withAutoInvokeColumns = [];
+    protected array $invokedElements = [];
+    protected array $rename = [];
+    protected array $columns = [];
+    protected bool $timestamps = true;
+    protected bool $fixedIdentifier = false;
+    protected array $filter = [];
+    protected ModelQueryBuilder $queryable;
 
     public function __construct()
     {
         // Set table name if its not already defined
-        if ($this->table === null) {
+        if ($this->table === '') {
             $this->table = str_ireplace('model', '', class_basename(static::class));
         }
 
@@ -53,7 +52,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
     }
 
-    public function newQuery()
+    public function newQuery(): self
     {
         return new static();
     }
@@ -63,7 +62,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      *
      * @return static
      */
-    public static function instance()
+    public static function instance(): self
     {
         return new static();
     }
@@ -77,7 +76,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return clone $this;
     }
 
-    public function onInstanceCreate()
+    public function onInstanceCreate(): void
     {
         if ($this->isNew() === true) {
             return;
@@ -88,7 +87,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
     }
 
-    public function onCollectionCreate($items)
+    public function onCollectionCreate($items): ModelCollection
     {
         return new ModelCollection($items);
     }
@@ -102,9 +101,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param string|null $relation
      * @return BelongsTo
      */
-    public function belongsTo($related, $foreignKey = null, $ownerKey = null, $relation = null)
+    public function belongsTo(string $related, ?string $foreignKey = null, ?string $ownerKey = null, ?string $relation = null): BelongsTo
     {
-
         if ($relation === null) {
             $relation = $this->guessBelongsToRelation();
         }
@@ -119,7 +117,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return new BelongsTo(
             $instance, $this, $foreignKey, $ownerKey, $relation
         );
-
     }
 
     /**
@@ -134,9 +131,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param string|null $relation
      * @return BelongsToMany
      */
-    public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null)
+    public function belongsToMany(string $related, ?string $table = null, ?string $foreignPivotKey = null, ?string $relatedPivotKey = null, ?string $parentKey = null, ?string $relatedKey = null, ?string $relation = null): BelongsToMany
     {
-
         if ($relation === null) {
             $relation = $this->guessBelongsToRelation();
         }
@@ -157,7 +153,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $relatedPivotKey, $parentKey ?: $this->getPrimaryKey(),
             $relatedKey ?: $instance->getPrimaryKey(), $relation
         );
-
     }
 
     /**
@@ -168,13 +163,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param string|null $localKey
      * @return HasOne
      */
-    public function hasOne($related, $foreignKey = null, $localKey = null)
+    public function hasOne(string $related, ?string $foreignKey = null, ?string $localKey = null): HasOne
     {
         /* @var $instance Model */
         $instance = new $related();
 
         $foreignKey = $foreignKey ?: $this->getForeignKey();
-
         $localKey = $localKey ?: $this->getPrimaryKey();
 
         return new HasOne(
@@ -190,7 +184,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param string|null $localKey
      * @return HasMany
      */
-    public function hasMany($related, $foreignKey = null, $localKey = null)
+    public function hasMany(string $related, ?string $foreignKey = null, ?string $localKey = null): HasMany
     {
         /* @var $instance Model */
         $instance = new $related();
@@ -209,7 +203,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      *
      * @return string
      */
-    protected function guessBelongsToRelation()
+    protected function guessBelongsToRelation(): string
     {
         $caller = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
 
@@ -222,7 +216,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param string $related
      * @return string
      */
-    public function joiningTable($related)
+    public function joiningTable(string $related): string
     {
         // The joining table name, by convention, is simply the snake cased models
         // sorted alphabetically and concatenated with an underscore, so we can
@@ -240,7 +234,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return strtolower(implode('_', $models));
     }
 
-    public function getForeignKey()
+    public function getForeignKey(): string
     {
         return $this->table . '_' . $this->primaryKey;
     }
@@ -252,7 +246,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @throws ModelException|\Pecee\Pixie\Exception
      * @see \Pecee\Model\Model::save()
      */
-    public function save(array $data = null)
+    public function save(array $data = []): self
     {
         if (is_array($this->columns) === false) {
             throw new ModelException('Columns property not defined.');
@@ -265,15 +259,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $originalRows = $this->getOriginalRows();
 
-        if ($data !== null) {
+        /* Only save valid columns */
+        $columns = $this->columns;
+        $data = array_filter($data, static function ($key) use ($columns) {
+            return (in_array($key, $columns, true) === true);
+        }, ARRAY_FILTER_USE_KEY);
 
-            /* Only save valid columns */
-            $data = array_filter($data, function ($key) {
-                return (in_array($key, $this->columns, true) === true);
-            }, ARRAY_FILTER_USE_KEY);
-
-            $updateData = array_merge($updateData, $data);
-        }
+        $updateData = array_merge($updateData, $data);
 
         foreach ($updateData as $key => $value) {
             if (array_key_exists($key, $originalRows) === true && $originalRows[$key] === $value) {
@@ -301,7 +293,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return static::instance()->where($this->getPrimaryKey(), '=', $this->{$this->getPrimaryKey()})->update($updateData);
         }
 
-        $updateData = array_filter($updateData, function ($value) {
+        $updateData = array_filter($updateData, static function ($value) {
             return $value !== null;
         }, ARRAY_FILTER_USE_BOTH);
 
@@ -344,7 +336,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @return bool
      * @throws \Pecee\Pixie\Exception
      */
-    public function exists()
+    public function exists(): bool
     {
         if ($this->isNew() === true) {
             return false;
@@ -361,14 +353,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return false;
     }
 
-    public function isNew()
+    public function isNew(): bool
     {
         $originalRows = $this->getOriginalRows();
 
         return (isset($originalRows[$this->primaryKey]) === false || $originalRows[$this->primaryKey] === null);
     }
 
-    public function hasRows()
+    public function hasRows(): bool
     {
         return (isset($this->results['rows']) && count($this->results['rows']) > 0);
     }
@@ -376,31 +368,31 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Get row
      * @param int $key
-     * @return static
+     * @return mixed
      */
-    public function getRow($key)
+    public function getRow(int $key)
     {
         return ($this->hasRows() === true && isset($this->results['rows'][$key])) ? $this->results['rows'][$key] : null;
     }
 
-    public function setRow($key, $value)
+    public function setRow(string $key, $value): void
     {
         $this->results['rows'][$key] = $value;
     }
 
-    public function setRows(array $rows)
+    public function setRows(array $rows): void
     {
         $this->results['rows'] = $rows;
     }
 
-    public function mergeRows(array $rows)
+    public function mergeRows(array $rows): void
     {
         $this->results['rows'] = array_merge($this->results['rows'], $rows);
     }
 
     public function mergeData(array $data): void
     {
-        foreach($data as $key => $value) {
+        foreach ($data as $key => $value) {
             $this->{$key} = $value;
         }
     }
@@ -409,17 +401,17 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * Get rows
      * @return array
      */
-    public function getRows()
+    public function getRows(): array
     {
-        return isset($this->results['rows']) ? $this->results['rows'] : [];
+        return $this->results['rows'] ?? [];
     }
 
-    public function setResults($results)
+    public function setResults(array $results): void
     {
         $this->results = $results;
     }
 
-    public function getResults()
+    public function getResults(): array
     {
         return $this->results;
     }
@@ -448,7 +440,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return isset($this->results['rows'][$name]) || in_array($name, $this->columns, true);
     }
 
-    public function getPrimaryKey()
+    public function getPrimaryKey(): string
     {
         return $this->primaryKey;
     }
@@ -492,32 +484,41 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $data;
     }
 
-    protected function invokeElement($name): void
+    protected function invokeMethod(string $name, ?string $key = null): bool
     {
-        if(in_array($name, $this->invokedElements, true) === true) {
+        try {
+            $reflection = new \ReflectionClass($this);
+            $method = $reflection->getMethod($name);
+
+            if ($method->getNumberOfParameters() === 0) {
+                $output = $this->{$name}();
+                if ($output instanceof ModelRelation) {
+                    $output = $output->getResults();
+                }
+
+                $key = $key ?? $name;
+                $this->results['rows'][$this->rename[$name] ?? $key] = $output;
+
+                return true;
+            }
+        } catch (\ReflectionException $e) {
+
+        }
+
+        return false;
+    }
+
+    protected function invokeElement(string $name): void
+    {
+        if (isset($this->results['rows'][$name]) === true || in_array($name, $this->columns, true) || in_array($name, $this->invokedElements, true) === true) {
+            $this->invokedElements[] = $name;
             return;
         }
 
         $this->invokedElements[] = $name;
 
-        if (is_string($name) && !isset($this->relations[$name]) && method_exists($this, $name)) {
-
-            $this->relations[$name] = true;
-
-            try {
-                $reflection = new \ReflectionClass($this);
-                $method = $reflection->getMethod($name);
-
-                if ($method->getNumberOfParameters() === 0) {
-                    $output = $this->{$name}();
-                    if ($output instanceof ModelRelation) {
-                        $this->results['rows'][$name] = $output->getResults();
-                        return;
-                    }
-                }
-            } catch (\ReflectionException $e) {
-
-            }
+        if ($this->invokeMethod($name)) {
+            return;
         }
 
         if (isset($this->with[$name]) === false) {
@@ -532,28 +533,30 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $output = $with;
 
-        if ($with instanceof \Closure) {
+        if ($with instanceof Closure) {
             $output = $with($this);
         } else {
-            if (method_exists($this, $name)) {
-                // If method exist call method and remove getter
-                $output = $this->{$name}();
-                $name = str_ireplace('get', '', $name);
-            } else if (method_exists($this, $with)) {
-                // If with value contains method name
-                $output = $this->{$with}();
+            if ($this->invokeMethod($name) === true) {
+                return;
+            }
+
+            if ($this->invokeMethod('get' . ucfirst($name), $name)) {
+                return;
+            }
+
+            if ($this->invokeMethod($with)) {
+                return;
             }
         }
 
-        $name = $this->rename[$name] ?? $name;
-        $this->results['rows'][$name] = $output;
+        $this->results['rows'][$this->rename[$name] ?? $name] = $output;
     }
 
     /**
-     * @param array|string|null $filter
+     * @param array $filter
      * @return array
      */
-    public function toArray(array $filter = [])
+    public function toArray(array $filter = []): array
     {
         $this->filter = array_merge($this->filter, $filter);
 
@@ -569,7 +572,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
 
         foreach ($this->getRows() as $key => $row) {
-            $key = isset($this->rename[$key]) ? $this->rename[$key] : $key;
+            $key = $this->rename[$key] ?? $key;
             if (in_array($key, $this->hidden, true) === false) {
                 $output[Str::deCamelize($key)] = $this->parseArrayData($row);
             }
@@ -594,9 +597,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Add data to output
      * @param string|array $method
-     * @return static $this
+     * @return static
      */
-    public function with($method)
+    public function with($method): self
     {
         foreach ((array)$method as $key => $value) {
             if (is_string($value) === true && is_numeric($key) === true) {
@@ -609,7 +612,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $this;
     }
 
-    public function withAutoInvoke(array $columns)
+    public function withAutoInvoke(array $columns): self
     {
         $this->withAutoInvokeColumns = $columns;
 
@@ -620,9 +623,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * Remove output data
      *
      * @param string|array $method
-     * @return static $this
+     * @return static
      */
-    public function without($method)
+    public function without($method): self
     {
         if (is_array($method) === true) {
             foreach ($method as $with) {
@@ -640,12 +643,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $this;
     }
 
-    public function getWith()
+    public function getWith(): array
     {
         return $this->with;
     }
 
-    public function getColumns()
+    public function getColumns(): array
     {
         return $this->columns;
     }
@@ -655,7 +658,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param array $parameters
      * @return static|QueryBuilderHandler|null
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, $parameters)
     {
         if (method_exists($this->queryable, $method) === true) {
             return $this->queryable->{$method}(...$parameters);
@@ -667,11 +670,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Call static
      * @param string $method
-     * @param array $parameters
+     * @param ... $parameters
      *
      * @return static|QueryBuilderHandler|null
      */
-    public static function __callStatic($method, $parameters)
+    public static function __callStatic(string $method, $parameters)
     {
         return (new static)->$method(...$parameters);
     }
@@ -680,12 +683,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * Set original rows
      * @param array $rows
      */
-    public function setOriginalRows(array $rows)
+    public function setOriginalRows(array $rows): void
     {
         $this->results['original_rows'] = $rows;
     }
 
-    public function getOriginalRows()
+    public function getOriginalRows(): array
     {
         return $this->results['original_rows'];
     }
@@ -694,7 +697,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * Automaticially update timestamps
      * @return bool
      */
-    public function getUpdateTimestamps()
+    public function getUpdateTimestamps(): bool
     {
         return $this->timestamps;
     }
@@ -704,14 +707,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param bool $value
      * @return static $this
      */
-    public function setUpdateTimestamps($value)
+    public function setUpdateTimestamps(bool $value): self
     {
         $this->timestamps = $value;
 
         return $this;
     }
 
-    public function setQuery(ModelQueryBuilder $query)
+    public function setQuery(ModelQueryBuilder $query): void
     {
         $this->queryable = $query;
     }
@@ -719,13 +722,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return \Traversable An instance of an object implementing <b>Iterator</b> or
+     * @return ArrayIterator
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator()
+    public function getIterator(): ArrayIterator
     {
-        return new \ArrayIterator($this->getRows());
+        return new ArrayIterator($this->getRows());
     }
 
     public function __clone()
@@ -739,9 +742,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return $this->{$name};
     }
 
-    public function setAttribute($name, $value)
+    public function setAttribute($name, $value): self
     {
         $this->{$name} = $value;
+
+        return $this;
     }
 
     /**
@@ -749,7 +754,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param array $fields
      * @return $this
      */
-    public function hideFields(array $fields)
+    public function hideFields(array $fields): self
     {
         $this->hidden = array_merge($this->hidden, $fields);
 
@@ -761,7 +766,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      *
      * @return array
      */
-    public function getHiddenFields()
+    public function getHiddenFields(): array
     {
         return $this->hidden;
     }
@@ -772,7 +777,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param array $fields
      * @return static $this
      */
-    public function filter(array $fields)
+    public function filter(array $fields): self
     {
         $this->filter = array_merge($this->filter, $fields);
 
@@ -784,7 +789,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      *
      * @return array
      */
-    public function getFilteredFields()
+    public function getFilteredFields(): array
     {
         return $this->filter;
     }
@@ -795,7 +800,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param array $fields
      * @return static $this
      */
-    public function rename(array $fields)
+    public function rename(array $fields): self
     {
         $this->rename = array_merge($this->rename, $fields);
 
@@ -807,15 +812,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      *
      * @return array
      */
-    public function getRenamedFields()
+    public function getRenamedFields(): array
     {
         return $this->rename;
     }
 
-    /**
-     * @return array|mixed
-     */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

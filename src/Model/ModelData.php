@@ -6,18 +6,18 @@ use Pecee\Collection\CollectionItem;
 
 abstract class ModelData extends Model
 {
-    public $data;
-    protected $dataPrimary;
-    protected $updateIdentifier;
-    protected $dataKeyField = 'key';
-    protected $dataValueField = 'value';
-    protected $mergeData = true;
+    public CollectionItem $data;
+    protected string $dataPrimary = '';
+    protected ?string $updateIdentifier = null;
+    protected string $dataKeyField = 'key';
+    protected string $dataValueField = 'value';
+    protected bool $mergeData = true;
 
     public function __construct()
     {
         parent::__construct();
 
-        if ($this->dataPrimary === null) {
+        if ($this->dataPrimary === '') {
             throw new \ErrorException('Property dataPrimary must be defined');
         }
 
@@ -180,16 +180,19 @@ abstract class ModelData extends Model
         }
     }
 
-    public function save(array $data = null)
+    /**
+     * @param array|null $data
+     * @return static
+     * @throws Exceptions\ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function save(array $data = []): self
     {
-        if ($data !== null && count($data) > 0) {
-            foreach ($data as $key => $value) {
-                $this->{$key} = $value;
-            }
-        }
+        $this->mergeData($data);
 
-        parent::save();
+        $result = parent::save();
         $this->updateData();
+        return $result;
     }
 
     public function setData(array $data): void
@@ -238,18 +241,12 @@ abstract class ModelData extends Model
 
     public function __get($name)
     {
-        if (parent::__isset($name) === true) {
-            return parent::__get($name);
-        }
-
-        return $this->data->{$name};
+        return $this->data->get($name) ?? parent::__get($name);
     }
 
     public function __set($name, $value)
     {
-        $exists = parent::__isset($name);
-
-        if ($exists === true) {
+        if (parent::__isset($name) === true) {
             parent::__set($name, $value);
         } else {
             $this->data->{$name} = $value;
@@ -258,13 +255,11 @@ abstract class ModelData extends Model
 
     public function __isset($name)
     {
-        $exists = parent::__isset($name);
-
-        if ($exists === false) {
-            return array_key_exists(strtolower($name), $this->results['rows']);
+        if(($this->data->exist($name) || array_key_exists(strtolower($name), $this->results['rows']))) {
+            return true;
         }
 
-        return $exists;
+        return parent::__isset($name);
     }
 
 }

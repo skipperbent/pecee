@@ -9,21 +9,21 @@ use Pecee\Model\ModelRelation;
 class BelongsToMany extends ModelRelation
 {
 
-    protected $table;
-    protected $parentKey;
-    protected $relatedKey;
-    protected $relationName;
-    protected $relatedPivotKey;
-    protected $foreignPivotKey;
+    protected string $table;
+    protected string $parentKey;
+    protected string $relatedKey;
+    protected ?string $relationName;
+    protected string $relatedPivotKey;
+    protected string $foreignPivotKey;
 
     public function __construct(Model $related, Model $parent, $table, $foreignPivotKey, $relatedPivotKey, $parentKey, $relatedKey, $relationName = null)
     {
         $this->table = $table;
         $this->parentKey = $parentKey;
         $this->relatedKey = $relatedKey;
-        $this->relationName = $relationName;
         $this->relatedPivotKey = $relatedPivotKey;
         $this->foreignPivotKey = $foreignPivotKey;
+        $this->relationName = $relationName;
 
         parent::__construct($related, $parent);
     }
@@ -31,7 +31,7 @@ class BelongsToMany extends ModelRelation
     /**
      * @throws \Pecee\Pixie\Exception
      */
-    public function addConstraints()
+    public function addConstraints(): void
     {
         $this->performJoin();
 
@@ -41,20 +41,20 @@ class BelongsToMany extends ModelRelation
     }
 
     /**
-     * @return ModelCollection
+     * @return ModelCollection|static[]
      * @throws \Pecee\Pixie\Exception
      */
-    public function getResults()
+    public function getResults(): ModelCollection
     {
         return $this->related->all();
     }
 
     /**
      * @param Model|null $model
-     * @return $this
+     * @return static
      * @throws \Pecee\Pixie\Exception
      */
-    protected function performJoin(Model $model = null)
+    protected function performJoin(Model $model = null): self
     {
         $model = $model ?: $this->related;
 
@@ -73,9 +73,9 @@ class BelongsToMany extends ModelRelation
     /**
      * Set the where clause for the relation query.
      *
-     * @return $this
+     * @return static
      */
-    protected function addWhereConstraints()
+    protected function addWhereConstraints(): self
     {
         $this->related->where(
             $this->getQualifiedForeignPivotKeyName(), '=', $this->parent->{$this->parentKey}
@@ -89,7 +89,7 @@ class BelongsToMany extends ModelRelation
      *
      * @return string
      */
-    public function getQualifiedForeignPivotKeyName()
+    public function getQualifiedForeignPivotKeyName(): string
     {
         return $this->table . '.' . $this->foreignPivotKey;
     }
@@ -99,7 +99,7 @@ class BelongsToMany extends ModelRelation
      *
      * @return string
      */
-    public function getQualifiedRelatedPivotKeyName()
+    public function getQualifiedRelatedPivotKeyName(): string
     {
         return $this->table . '.' . $this->relatedPivotKey;
     }

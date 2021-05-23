@@ -9,8 +9,8 @@ use Pecee\Model\ModelRelation;
 class HasMany extends ModelRelation
 {
 
-    protected $localKey;
-    protected $foreignKey;
+    protected string $localKey;
+    protected string $foreignKey;
 
     public function __construct(Model $related, Model $parent, $foreignKey, $localKey)
     {
@@ -20,7 +20,7 @@ class HasMany extends ModelRelation
         parent::__construct($related, $parent);
     }
 
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (static::$constraints === true) {
             $this->related->where($this->foreignKey, '=', $this->parent->{$this->localKey});
@@ -29,10 +29,10 @@ class HasMany extends ModelRelation
     }
 
     /**
-     * @return Model|ModelCollection
+     * @return ModelCollection|static[]
      * @throws \Pecee\Pixie\Exception
      */
-    public function getResults()
+    public function getResults(): ModelCollection
     {
         return $this->related->all() ?: $this->getDefaultFor($this->related);
     }

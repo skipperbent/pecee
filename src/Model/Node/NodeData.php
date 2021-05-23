@@ -6,17 +6,17 @@ use Pecee\Model\Model;
 
 class NodeData extends Model
 {
-    protected $table = 'node_data';
-    protected $columns = [
+    protected string $table = 'node_data';
+    protected array $columns = [
         'id',
         'node_id',
         'key',
         'value',
     ];
 
-    protected $timestamps = false;
+    protected bool $timestamps = false;
 
-    public function exists()
+    public function exists(): bool
     {
         if ($this->{$this->primaryKey} === null || $this->node_id === null) {
             return false;

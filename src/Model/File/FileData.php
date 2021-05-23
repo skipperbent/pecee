@@ -6,10 +6,10 @@ use Pecee\Model\Model;
 
 class FileData extends Model
 {
-    protected $timestamps = false;
-    protected $table = 'file_data';
+    protected bool $timestamps = false;
+    protected string $table = 'file_data';
 
-    protected $columns = [
+    protected array $columns = [
         'id',
         'file_id',
         'key',
@@ -25,13 +25,13 @@ class FileData extends Model
         $this->value = $value;
     }
 
-    public function exists()
+    public function exists(): bool
     {
         if ($this->{$this->primaryKey} === null) {
             return false;
         }
 
-        return ($this->where('key', '=', $this->key)->where('file_id', '=', $this->file_id)->first() !== null);
+        return ($this->where('key', '=', $this->key)->where('file_id', '=', $this->file_id)->count('id') > 0);
     }
 
     public static function destroyByFileId($fileId)

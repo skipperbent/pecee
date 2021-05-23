@@ -5,9 +5,9 @@ use Pecee\Model\Model;
 
 class Rewrite extends Model
 {
-    protected $table = 'rewrite';
+    protected string $table = 'rewrite';
 
-    protected $columns = [
+    protected array $columns = [
         'id',
         'original_url',
         'rewrite_url',
@@ -16,7 +16,7 @@ class Rewrite extends Model
         'order',
     ];
 
-    public function exists()
+    public function exists(): bool
     {
         return (static::instance()->where('original_path', '=', $this->original_url)->select(['original_path'])->count() > 0);
     }

@@ -8,11 +8,11 @@ use Pecee\Model\ModelRelation;
 class BelongsTo extends ModelRelation
 {
 
-    protected $foreignKey;
-    protected $ownerKey;
-    protected $relation;
+    protected string $foreignKey;
+    protected string $ownerKey;
+    protected string $relation;
 
-    protected $child;
+    protected Model $child;
 
     public function __construct(Model $related, Model $child, $foreignKey, $ownerKey, $relation)
     {
@@ -28,7 +28,7 @@ class BelongsTo extends ModelRelation
         parent::__construct($related, $child);
     }
 
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (static::$constraints === true) {
             // For belongs to relationships, which are essentially the inverse of has one
@@ -44,7 +44,7 @@ class BelongsTo extends ModelRelation
      * @return Model
      * @throws \Pecee\Pixie\Exception
      */
-    public function getResults()
+    public function getResults(): Model
     {
         return $this->related->first() ?: $this->getDefaultFor($this->related);
     }

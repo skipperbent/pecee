@@ -11,7 +11,7 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelNode extends ModelData
 {
-    public static $operators = ['=', '!=', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
+    public static array $operators = ['=', '!=', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
 
     public const SORT_ID = 'id';
     public const SORT_PARENT = 'parent';
@@ -21,7 +21,7 @@ class ModelNode extends ModelData
     public const SORT_ACTIVE_CREATED = 'active_created';
     public const SORT_ORDER = 'order';
 
-    public static $sortTypes = [
+    public static array $sortTypes = [
         self::SORT_ID,
         self::SORT_PARENT,
         self::SORT_TITLE,
@@ -32,11 +32,11 @@ class ModelNode extends ModelData
     ];
 
     protected $parent, $next, $prev, $children;
-    protected $defaultType;
+    protected string $defaultType = '';
 
-    protected $dataPrimary = 'node_id';
-    protected $table = 'node';
-    protected $columns = [
+    protected string $dataPrimary = 'node_id';
+    protected string $table = 'node';
+    protected array $columns = [
         'id',
         'parent_id',
         'user_id',
@@ -53,8 +53,8 @@ class ModelNode extends ModelData
         'updated_at',
         'created_at',
     ];
-    protected $mergeData = false;
-    protected $fixedIdentifier = true;
+    protected bool $mergeData = false;
+    protected bool $fixedIdentifier = true;
 
     public function __construct()
     {
@@ -64,7 +64,7 @@ class ModelNode extends ModelData
         $this->active = false;
         $this->deleted = false;
 
-        if ($this->defaultType !== null) {
+        if ($this->defaultType !== '') {
             $this->type = $this->defaultType;
             $this->where('type', '=', $this->defaultType);
         }
@@ -238,7 +238,7 @@ class ModelNode extends ModelData
 
     public function getCreatedAt()
     {
-        return Carbon::parse($this->created_at);
+        return Carbon::parse($this->created_at, app()->getTimezone());
     }
 
     public function setCreatedAt(Carbon $date): self
@@ -267,10 +267,9 @@ class ModelNode extends ModelData
 
     public function calculatePath()
     {
-        $path = ['0'];
+        /*$path = ['0'];
         $fetchingPath = true;
         if ($this->parent_id) {
-            /* @var $parent self */
             $parent = static::instance()->find($this->parent_id);
             $i = 0;
             while ($fetchingPath === true) {
@@ -290,9 +289,11 @@ class ModelNode extends ModelData
             if ($i === 0) {
                 $path[] = $this->parent_id;
             }
-        }
-        $this->path = join('>', $path);
-        $this->level = count($path);
+        }*/
+
+        $parent = static::instance()->find($this->parent_id)->first();
+        $this->path = ($parent !== null) ? $parent->getPath() . '>' . $parent->id : '0';
+        $this->level = count(explode('>', $this->path));
     }
 
     public function getNext()
@@ -383,8 +384,15 @@ class ModelNode extends ModelData
         return $this->parent;
     }
 
-    public function save(array $data = null)
+    /**
+     * @param array|null $data
+     * @return static
+     * @throws ModelException
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function save(array $data = []): self
     {
+        $this->mergeData($data);
         $this->updateOrder();
 
         if ($this->isNew() === true) {

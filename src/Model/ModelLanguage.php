@@ -4,9 +4,9 @@ namespace Pecee\Model;
 class ModelLanguage extends Model
 {
 
-    protected $table = 'language';
+    protected string $table = 'language';
 
-    protected $columns = [
+    protected array $columns = [
         'id',
         'original',
         'translated',

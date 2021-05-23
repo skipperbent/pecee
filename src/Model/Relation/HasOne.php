@@ -8,8 +8,8 @@ use Pecee\Model\ModelRelation;
 class HasOne extends ModelRelation
 {
 
-    protected $localKey;
-    protected $foreignKey;
+    protected string $localKey;
+    protected string $foreignKey;
 
     public function __construct(Model $related, Model $parent, $foreignKey, $localKey)
     {
@@ -19,7 +19,7 @@ class HasOne extends ModelRelation
         parent::__construct($related, $parent);
     }
 
-    public function addConstraints()
+    public function addConstraints(): void
     {
         if (static::$constraints === true) {
             $this->related
@@ -32,7 +32,7 @@ class HasOne extends ModelRelation
      * @return Model
      * @throws \Pecee\Pixie\Exception
      */
-    public function getResults()
+    public function getResults(): Model
     {
         return $this->related->first() ?: $this->getDefaultFor($this->related);
     }

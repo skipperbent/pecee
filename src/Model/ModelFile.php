@@ -7,10 +7,10 @@ use Pecee\Model\File\FileData;
 
 class ModelFile extends ModelData
 {
-    protected $dataPrimary = 'file_id';
-    protected $table = 'file';
+    protected string $dataPrimary = 'file_id';
+    protected string $table = 'file';
 
-    protected $columns = [
+    protected array $columns = [
         'id',
         'filename',
         'original_filename',

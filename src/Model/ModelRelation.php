@@ -15,18 +15,14 @@ abstract class ModelRelation
      *
      * @var bool
      */
-    protected static $constraints = true;
+    protected static bool $constraints = true;
 
+    protected Model $related;
+    protected Model $parent;
+    protected ?string $alias = null;
     /**
-     * @var Model
+     * @var array|\Closure|Model
      */
-    protected $related;
-
-    /**
-     * @var Model
-     */
-    protected $parent;
-    protected $alias;
     protected $withDefault;
 
     public function __construct(Model $related, Model $parent)
@@ -41,9 +37,9 @@ abstract class ModelRelation
      * Set alias
      *
      * @param string $alias
-     * @return static $this
+     * @return static
      */
-    public function alias($alias)
+    public function alias(string $alias): self
     {
         $this->alias = $alias;
 
@@ -53,31 +49,38 @@ abstract class ModelRelation
     /**
      * @return Model
      */
-    public function getParent()
+    public function getParent(): Model
     {
         return $this->parent;
     }
 
-    protected $defaultModel;
-
     /**
      * Set default model that will be returned if relation is null.
      *
-     * @param array|\Closure $default
-     * @return static $this
+     * @param array|\Closure|Model $default
+     * @return static
      */
-    public function withDefault($default)
+    public function withDefault($default): self
     {
         $this->withDefault = $default;
 
         return $this;
     }
 
-    public function getDefaultFor(Model $parent)
+    /**
+     * @param Model $parent
+     * @return Model|ModelCollection
+     */
+    protected function getDefaultFor(Model $parent)
     {
         $instance = $parent->newQuery();
 
         if ($this->withDefault === null) {
+            return $instance;
+        }
+
+        if($this->withDefault instanceof Model) {
+            $instance->mergeRows($this->withDefault->getRows());
             return $instance;
         }
 
@@ -92,7 +95,7 @@ abstract class ModelRelation
         return $instance;
     }
 
-    abstract public function addConstraints();
+    abstract public function addConstraints(): void;
 
     /**
      * @return Model|ModelCollection
@@ -102,9 +105,9 @@ abstract class ModelRelation
     /**
      * @param string $name
      * @param array $arguments
-     * @return Model
+     * @return static
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments = [])
     {
         $result = $this->related->{$name}(...$arguments);
 

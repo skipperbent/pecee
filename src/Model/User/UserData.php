@@ -7,15 +7,15 @@ use Pecee\Model\ModelUser;
 
 class UserData extends Model
 {
-    protected $timestamps = false;
+    protected bool $timestamps = false;
 
-    protected $columns = [
+    protected array $columns = [
         'id',
         'key',
         'value',
     ];
 
-    protected $table = 'user_data';
+    protected string $table = 'user_data';
 
     public function __construct($userId = null, $key = null, $value = null)
     {
@@ -31,7 +31,7 @@ class UserData extends Model
         $this->value = $value;
     }
 
-    public function exists()
+    public function exists(): bool
     {
         if ($this->{$this->primaryKey} === null) {
             return false;

@@ -3,7 +3,7 @@ namespace Pecee\Collection;
 
 class CollectionItem implements \IteratorAggregate
 {
-    protected $data = [];
+    protected array $data = [];
 
     public function __construct(array $rows = null)
     {
@@ -20,9 +20,9 @@ class CollectionItem implements \IteratorAggregate
         }
     }
 
-    public function get(string $name)
+    public function get(string $name, $defaultValue = null)
     {
-        return $this->data[strtolower($name)];
+        return $this->data[strtolower($name)] ?? $defaultValue;
     }
 
     public function set(string $name, $value): void

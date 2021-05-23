@@ -7,9 +7,9 @@ use Pecee\Model\ModelUser;
 
 class UserReset extends Model
 {
-    protected $table = 'user_reset';
+    protected string $table = 'user_reset';
 
-    protected $columns = [
+    protected array $columns = [
         'id',
         'key',
     ];
@@ -32,10 +32,10 @@ class UserReset extends Model
         $this->where($dataPrimaryKey, '=', $this->{$dataPrimaryKey})->delete();
     }
 
-    public function save(array $data = null)
+    public function save(array $data = []): self
     {
         $this->clean();
-        parent::save($data);
+        return parent::save($data);
     }
 
     public static function getByKey($key)
