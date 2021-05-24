@@ -511,7 +511,6 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     protected function invokeElement(string $name): void
     {
         if (isset($this->results['rows'][$name]) === true || in_array($name, $this->columns, true) || in_array($name, $this->invokedElements, true) === true) {
-            $this->invokedElements[] = $name;
             return;
         }
 

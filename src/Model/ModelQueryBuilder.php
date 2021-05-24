@@ -40,7 +40,7 @@ class ModelQueryBuilder
     protected function createInstanceWithData(\stdClass $item): Model
     {
         $model = $this->model->onNewInstance($item);
-        $model->mergeData((array)$item);
+        $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
 
