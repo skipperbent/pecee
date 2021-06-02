@@ -22,22 +22,22 @@ class NodeData extends Model
             return false;
         }
 
-        $id = static::instance()->select([$this->primaryKey])->where('key', $this->key)->filerNodeId($this->node_id)->first();
+        $id = static::instance()->select([$this->primaryKey])->where('key', $this->key)->filterNodeId($this->node_id)->first();
 
         return ($id !== null);
     }
 
-    public function clear($nodeId)
+    public function clear(string $nodeId)
     {
         return $this->where('node_id', $nodeId)->delete();
     }
 
-    public function filerNodeId($nodeId)
+    public function filterNodeId(string $nodeId): self
     {
         return $this->where('node_id', '=', $nodeId);
     }
 
-    public function filterNodeIds(array $nodeIds)
+    public function filterNodeIds(array $nodeIds): self
     {
         return $this->whereIn('node_id', $nodeIds);
     }

@@ -73,7 +73,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
      */
     public function onNewInstance(\stdClass $data): self
     {
-        return new static;
+        return clone $this;
     }
 
     public function onInstanceCreate(): void

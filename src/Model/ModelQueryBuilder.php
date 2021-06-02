@@ -594,8 +594,7 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item === null) {
-            $item = $this->createInstanceWithData((object)$data);
-            $item->setOriginalRows([]);
+            $item = $this->model->onNewInstance();
             $item->save($data);
         }
 

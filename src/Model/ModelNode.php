@@ -601,7 +601,7 @@ class ModelNode extends ModelData
 
     protected function fetchData(): \IteratorAggregate
     {
-        return NodeData::instance()->filerNodeId($this->id)->all();
+        return NodeData::instance()->filterNodeId($this->id)->all();
     }
 
 }
