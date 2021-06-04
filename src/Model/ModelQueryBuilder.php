@@ -594,7 +594,7 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item === null) {
-            $item = $this->model->onNewInstance();
+            $item = $this->model->onNewInstance((object)$data);
             $item->save($data);
         }
 

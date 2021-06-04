@@ -2,9 +2,14 @@
 
 namespace Pecee\Collection;
 
-class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
+use ArrayAccess;
+use Countable;
+use IteratorAggregate;
+use JsonSerializable;
+
+class Collection implements ArrayAccess, IteratorAggregate, Countable, JsonSerializable
 {
-    protected $rows = [];
+    protected array $rows = [];
 
     public function __construct(array $rows = null)
     {
@@ -31,7 +36,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
 
     public function hasRows(): bool
     {
-        return (\count($this->rows) > 0);
+        return (count($this->rows) > 0);
     }
 
     public function add($item): void
@@ -102,7 +107,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
         return new \ArrayIterator($this->rows);
     }
 
-    public function count()
+    public function count(): int
     {
         return \count($this->getRows());
     }
@@ -119,4 +124,23 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
         return $this->getRows();
     }
 
+    public function offsetExists($offset): bool
+    {
+        return $this->exist($offset);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    public function offsetSet($offset, $value): void
+    {
+        $this->rows[$offset] = $value;
+    }
+
+    public function offsetUnset($offset): void
+    {
+        unset($this->rows[$offset]);
+    }
 }

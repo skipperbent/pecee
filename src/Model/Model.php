@@ -26,6 +26,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     protected string $primaryKey = 'id';
     protected array $hidden = [];
     protected array $with = [];
+    protected array $without = [];
     protected array $withAutoInvokeColumns = [];
     protected array $invokedElements = [];
     protected array $rename = [];
@@ -490,7 +491,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
             $reflection = new \ReflectionClass($this);
             $method = $reflection->getMethod($name);
 
-            if ($method->getNumberOfParameters() === 0) {
+            if ($method->getNumberOfRequiredParameters() === 0) {
                 $output = $this->{$name}();
                 if ($output instanceof ModelRelation) {
                     $output = $output->getResults();
@@ -510,7 +511,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
     protected function invokeElement(string $name): void
     {
-        if (isset($this->results['rows'][$name]) === true || in_array($name, $this->columns, true) || in_array($name, $this->invokedElements, true) === true) {
+        if (in_array($name, $this->invokedElements, true) === true) {
             return;
         }
 
@@ -571,9 +572,15 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         }
 
         foreach ($this->getRows() as $key => $row) {
+
+            $keyFormatted = Str::deCamelize($key);
+            if (in_array($key, $this->without, true) === true || in_array($keyFormatted, $this->without, true) === true) {
+                continue;
+            }
+
             $key = $this->rename[$key] ?? $key;
             if (in_array($key, $this->hidden, true) === false) {
-                $output[Str::deCamelize($key)] = $this->parseArrayData($row);
+                $output[$keyFormatted] = $this->parseArrayData($row);
             }
         }
 
@@ -603,8 +610,18 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         foreach ((array)$method as $key => $value) {
             if (is_string($value) === true && is_numeric($key) === true) {
                 $this->with[$value] = $value;
+
+                // Remove without
+                if (isset($this->without[$value])) {
+                    unset($this->without[$value]);
+                }
             } else {
                 $this->with[$key] = $value;
+
+                // Remove without
+                if (isset($this->without[$key])) {
+                    unset($this->without[$key]);
+                }
             }
         }
 
@@ -628,6 +645,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     {
         if (is_array($method) === true) {
             foreach ($method as $with) {
+                $this->without[] = $with;
                 $key = array_search($with, $this->with, true);
                 if ($key !== false) {
                     unset($this->with[$key]);
@@ -637,6 +655,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
             return $this;
         }
 
+        $this->without[] = $method;
         unset($this->with[array_search($method, $this->with, true)]);
 
         return $this;
@@ -645,6 +664,18 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     public function getWith(): array
     {
         return $this->with;
+    }
+
+    public function getWithout(): array
+    {
+        return $this->without;
+    }
+
+    public function setWithout(array $without): self
+    {
+        $this->without = $without;
+
+        return $this;
     }
 
     public function getColumns(): array

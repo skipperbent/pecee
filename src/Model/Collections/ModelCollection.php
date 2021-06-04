@@ -9,12 +9,12 @@ use Pecee\Str;
 class ModelCollection extends Collection
 {
 
-    protected $type;
+    protected string $type = '';
 
     /**
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -22,17 +22,17 @@ class ModelCollection extends Collection
     /**
      * @param string $type
      */
-    public function setType($type)
+    public function setType(string $type): void
     {
         $this->type = $type;
     }
 
     /**
      * Get first or default value
-     * @param string $default
+     * @param string|null $default
      * @return static|null|mixed
      */
-    public function getFirstOrDefault($default = null)
+    public function getFirstOrDefault(?string $default = null)
     {
         return $this->get(0, $default);
     }
@@ -42,7 +42,7 @@ class ModelCollection extends Collection
      * @param int $number
      * @return static
      */
-    public function skip($number)
+    public function skip(int $number): self
     {
         if ($number > 0 && $this->hasRows() === true) {
             $rows = $this->getRows();
@@ -57,7 +57,7 @@ class ModelCollection extends Collection
      * @param int $limit
      * @return static
      */
-    public function limit($limit)
+    public function limit(int $limit): self
     {
         $out = [];
         if ($this->hasRows()) {
@@ -78,7 +78,7 @@ class ModelCollection extends Collection
      * @param string $delimiter
      * @return static
      */
-    public function filter($key, $value, $delimiter = '=')
+    public function filter(string $key, string $value, string $delimiter = '='): self
     {
         $out = [];
         if ($this->hasRows()) {
@@ -146,7 +146,7 @@ class ModelCollection extends Collection
      * @param string $direction
      * @return static
      */
-    public function order($key, $direction = 'desc')
+    public function order(string $key, string $direction = 'desc'): self
     {
         if ($this->hasRows() === true) {
             $rows = [];
@@ -174,7 +174,7 @@ class ModelCollection extends Collection
      * @param array|string|null $filterKeys
      * @return array
      */
-    public function toArray($filterKeys = null)
+    public function toArray($filterKeys = null): array
     {
         $filterKeys = ($filterKeys !== null && is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
 
@@ -213,7 +213,7 @@ class ModelCollection extends Collection
      * @param string $displayRow
      * @return array
      */
-    public function toDataSet($valueRow = 'id', $displayRow = 'id')
+    public function toDataSet(string $valueRow = 'id', string $displayRow = 'id'): array
     {
         $output = [];
         /* @var $row \Pecee\Model\Model */
@@ -236,5 +236,4 @@ class ModelCollection extends Collection
     {
         return $this->toArray();
     }
-
 }
