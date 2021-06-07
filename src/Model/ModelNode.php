@@ -3,12 +3,32 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use InvalidArgumentException;
 use Pecee\Boolean;
 use Pecee\Guid;
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Node\NodeData;
+use Pecee\Model\Relation\HasOne;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
+/**
+ * @property string $id
+ * @property string $parent_id
+ * @property int|null $user_id
+ * @property string $path
+ * @property string $type
+ * @property string $title
+ * @property string $content
+ * @property Carbon|null $active_from
+ * @property Carbon|null $active_to
+ * @property int $level
+ * @property int $order
+ * @property bool $active
+ * @property bool $deleted
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ */
 class ModelNode extends ModelData
 {
     public static array $operators = ['=', '!=', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
@@ -31,9 +51,8 @@ class ModelNode extends ModelData
         self::SORT_ORDER,
     ];
 
-    protected $parent, $next, $prev, $children;
+    protected ModelCollection $children;
     protected string $defaultType = '';
-
     protected string $dataPrimary = 'node_id';
     protected string $table = 'node';
     protected array $columns = [
@@ -60,7 +79,7 @@ class ModelNode extends ModelData
     {
         parent::__construct();
         $this->id = Guid::create();
-        $this->path = 0;
+        $this->path = '0';
         $this->active = false;
         $this->deleted = false;
 
@@ -82,77 +101,77 @@ class ModelNode extends ModelData
         return parent::delete();
     }
 
-    public function getUserId()
+    public function getUserId(): ?string
     {
         return $this->user_id;
     }
 
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    public function getParentId()
+    public function getParentId(): ?string
     {
         return $this->parent_id;
     }
 
-    public function setParentId($id): self
+    public function setParentId(string $parentId): self
     {
-        $this->parent_id = $id;
+        $this->parent_id = $parentId;
 
         return $this;
     }
 
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
 
-    public function setPath($path): self
+    public function setPath(string $path): self
     {
         $this->path = $path;
 
         return $this;
     }
 
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function setType($type): self
+    public function setType(string $type): self
     {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getTitle()
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
-    public function setTitle($title): self
+    public function setTitle(string $title): self
     {
         $this->title = $title;
 
         return $this;
     }
 
-    public function getContent()
+    public function getContent(): ?string
     {
         return $this->content;
     }
 
-    public function setContent($content): self
+    public function setContent(string $content): self
     {
         $this->content = $content;
 
         return $this;
     }
 
-    public function getActiveFrom()
+    public function getActiveFrom(): ?Carbon
     {
         if ($this->active_from !== null) {
             return Carbon::parse($this->active_from);
@@ -168,7 +187,7 @@ class ModelNode extends ModelData
         return $this;
     }
 
-    public function getActiveTo()
+    public function getActiveTo(): ?Carbon
     {
         if ($this->active_to !== null) {
             return Carbon::parse($this->active_to);
@@ -196,19 +215,19 @@ class ModelNode extends ModelData
         return $this;
     }
 
-    public function getLevel()
+    public function getLevel(): int
     {
         return $this->level;
     }
 
-    public function setLevel($level): self
+    public function setLevel(int $level): self
     {
         $this->level = $level;
 
         return $this;
     }
 
-    public function getOrder()
+    public function getOrder(): int
     {
         return (int)$this->order;
     }
@@ -220,7 +239,7 @@ class ModelNode extends ModelData
         return $this;
     }
 
-    public function getUpdatedAt()
+    public function getUpdatedAt(): ?Carbon
     {
         if ($this->updated_at !== null) {
             return Carbon::parse($this->updated_at);
@@ -229,6 +248,10 @@ class ModelNode extends ModelData
         return null;
     }
 
+    /**
+     * @param Carbon $date
+     * @return static
+     */
     public function setUpdatedAt(Carbon $date): self
     {
         $this->updated_at = $date->toDateTimeString();
@@ -236,11 +259,15 @@ class ModelNode extends ModelData
         return $this;
     }
 
-    public function getCreatedAt()
+    public function getCreatedAt(): Carbon
     {
         return Carbon::parse($this->created_at, app()->getTimezone());
     }
 
+    /**
+     * @param Carbon $date
+     * @return static
+     */
     public function setCreatedAt(Carbon $date): self
     {
         $this->created_at = $date->toDateTimeString();
@@ -248,7 +275,7 @@ class ModelNode extends ModelData
         return $this;
     }
 
-    public function isActive()
+    public function isActive(): bool
     {
         if ($this->getActive() === false) {
             return false;
@@ -265,47 +292,11 @@ class ModelNode extends ModelData
         return true;
     }
 
-    public function calculatePath()
+    public function calculatePath(): void
     {
-        $parent = static::instance()->find($this->parent_id);
+        $parent = ModelNode::instance()->select(['id', 'path'])->find($this->parent_id);
         $this->path = ($parent !== null) ? $parent->getPath() . '>' . $parent->id : '0';
         $this->level = count(explode('>', $this->path));
-    }
-
-    public function getNext()
-    {
-        if ($this->next === false) {
-            $parentId = 0;
-            if ($this->parent_id !== null) {
-                /* @var $parent self */
-                $parent = static::instance()->find($this->parent_id);
-                if ($parent->hasRows() === true) {
-                    $parentId = $parent->id;
-                }
-            }
-
-            $this->next = static::instance()->filterActive()->filterParentId($parentId)->where('order', '>', $this->order)->first();
-        }
-
-        return $this->next;
-    }
-
-    public function getPrev()
-    {
-        if ($this->prev === false) {
-            $parentId = 0;
-            if ($this->parent_id) {
-                /* @var $parent self */
-                $parent = static::instance()->find($this->parent_id);
-                if ($parent->hasRows() === true) {
-                    $parentId = $parent->id;
-                }
-            }
-
-            $this->prev = static::instance()->filterActive()->filterParentId($parentId)->where('order', '<', $this->order)->first();
-        }
-
-        return $this->prev;
     }
 
     /**
@@ -313,8 +304,9 @@ class ModelNode extends ModelData
      * @param string $type
      * @param bool $recursive
      * @return static
+     * @throws \Pecee\Pixie\Exception
      */
-    public function getChildrenOfType($type, $recursive = true)
+    public function getChildrenOfType(string $type, bool $recursive = true): self
     {
         $out = [];
         if ($recursive === true) {
@@ -329,7 +321,6 @@ class ModelNode extends ModelData
             }
         }
 
-        /* @var $result static */
         $result = new static();
         $result->setRows($out);
 
@@ -339,24 +330,25 @@ class ModelNode extends ModelData
     /**
      * Get node children
      */
-    public function getChildren()
+    public function getChildren(): self
     {
         return static::instance()->filterParentId($this->id);
     }
 
-    public function getParents()
+    public function getParents(): self
     {
         $parentIds = explode('>', $this->path);
 
-        return static::instance()->filterIds($parentIds)->orderBy('path')->orderBy('order');
+        return static::instance()->filterIds($parentIds)->orderBy(['path', 'order']);
     }
 
-    public function getParent()
+    public function parent(): HasOne
     {
-        if ($this->parent === null && $this->parent_id !== null) {
-            $this->parent = static::instance()->find($this->parent_id);
-        }
+        return $this->hasOne(static::class, 'id', 'parent_id');
+    }
 
+    public function getParent(): ?self
+    {
         return $this->parent;
     }
 
@@ -383,7 +375,7 @@ class ModelNode extends ModelData
      * @param array $ids
      * @return static
      */
-    public function filterIds(array $ids)
+    public function filterIds(array $ids): self
     {
         if (count($ids) === 0) {
             return $this;
@@ -396,7 +388,7 @@ class ModelNode extends ModelData
      * @param bool $active
      * @return static
      */
-    public function filterActive($active = true)
+    public function filterActive(bool $active = true): self
     {
         return
             $this->where('active', '=', Boolean::parse($active))
@@ -417,7 +409,7 @@ class ModelNode extends ModelData
      * @param string|null $parentId
      * @return static
      */
-    public function filterParentId($parentId = null)
+    public function filterParentId(?string $parentId = null): self
     {
         if ($parentId === null || (string)$parentId === '0') {
             return $this->where(static function (QueryBuilderHandler $q) {
@@ -428,12 +420,12 @@ class ModelNode extends ModelData
         return $this->where('parent_id', '=', $parentId);
     }
 
-    public function filterParentIds(array $parentIds)
+    public function filterParentIds(array $parentIds): self
     {
         return $this->whereIn('parent_id', $parentIds);
     }
 
-    public function filterPath($path)
+    public function filterPath($path): self
     {
         return $this->where('path', 'LIKE', $path);
     }
@@ -462,13 +454,13 @@ class ModelNode extends ModelData
      * @param string $type
      * @param string $direction
      * @return static $this
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    public function order($type, $direction = 'ASC')
+    public function order(string $type, string $direction = 'ASC'): self
     {
 
         if (in_array($type, static::$sortTypes, true) === false) {
-            throw new \InvalidArgumentException('Invalid sort type');
+            throw new InvalidArgumentException('Invalid sort type');
         }
 
         switch ($type) {
@@ -500,7 +492,7 @@ class ModelNode extends ModelData
         return $this->orderBy($type, $direction);
     }
 
-    public function filterQuery($query)
+    public function filterQuery($query): self
     {
         return $this->where(function (QueryBuilderHandler $q) use ($query) {
 
@@ -514,12 +506,12 @@ class ModelNode extends ModelData
      * Filter by key
      *
      * @param string $key
-     * @param string $value
+     * @param string|null $value
      * @param string $operator
      * @return static
      * @throws \Pecee\Pixie\Exception
      */
-    public function filterKey(string $key, ?string $value = null, string $operator = '=')
+    public function filterKey(string $key, ?string $value = null, string $operator = '='): self
     {
         if (in_array(strtolower($operator), static::$operators, true) === false) {
             throw new ModelException(sprintf('Invalid operator "%s". Must be one of the following type: %s.', $operator, implode(', ', static::$operators)));
@@ -562,7 +554,7 @@ class ModelNode extends ModelData
      * @return static
      * @throws \Pecee\Pixie\Exception
      */
-    public function filterKeys(string $key, array $values)
+    public function filterKeys(string $key, array $values): self
     {
         $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
         $subQuery = $this->subQuery(NodeData::instance()

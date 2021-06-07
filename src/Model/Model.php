@@ -74,7 +74,10 @@ abstract class Model implements IteratorAggregate, JsonSerializable
      */
     public function onNewInstance(\stdClass $data): self
     {
-        return clone $this;
+        // Clone properties but reset query-builder
+        $instance = clone $this;
+        $instance->setQuery(new ModelQueryBuilder($instance));
+        return $instance;
     }
 
     public function onInstanceCreate(): void
@@ -316,7 +319,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     }
 
     /**
-     * @return \PDOStatement
+     * @return \PDOStatement|static|null
      * @throws ModelException
      * @throws \Pecee\Pixie\Exception
      */

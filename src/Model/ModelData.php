@@ -23,11 +23,13 @@ abstract class ModelData extends Model
 
         $this->data = new CollectionItem();
 
-        $this->with(['data' => function (self $object) {
+        $hidden = $this->hidden;
+
+        $this->with(['data' => static function (self $object) use($hidden) {
             $rows = $object->data->getData();
 
-            return array_filter($rows, function ($key) {
-                return (in_array($key, $this->hidden, true) === false);
+            return array_filter($rows, static function ($key) use($hidden) {
+                return (in_array($key, $hidden, true) === false);
             }, ARRAY_FILTER_USE_KEY);
         }]);
     }
@@ -37,6 +39,12 @@ abstract class ModelData extends Model
     abstract protected function fetchData(): \IteratorAggregate;
 
     protected function onNewDataItemCreate(Model $field): void
+    {
+        $field->{$this->getDataPrimary()} = $this->{$this->primaryKey};
+        $field->save();
+    }
+
+    protected function onNewDataItemUpdate(Model $field): void
     {
         $field->{$this->getDataPrimary()} = $this->{$this->primaryKey};
         $field->save();
@@ -112,7 +120,6 @@ abstract class ModelData extends Model
                 $field = new $field();
                 $field->{$this->dataKeyField} = $key . '[' . $k . ']';
                 $field->{$this->dataValueField} = $v;
-                $this->onNewDataItemCreate($field);
                 $callback($field);
 
             }
@@ -157,7 +164,7 @@ abstract class ModelData extends Model
                             continue;
                         }
 
-                        $this->setFieldData($cf[$key], $key, $value, function (Model $model) {
+                        $this->setFieldData($cf[$key], $key, $value, static function (Model $model) {
                             $model->save();
                         });
 
@@ -234,7 +241,7 @@ abstract class ModelData extends Model
         return $this->updateIdentifier;
     }
 
-    public function getDataPrimary()
+    public function getDataPrimary(): string
     {
         return $this->dataPrimary;
     }

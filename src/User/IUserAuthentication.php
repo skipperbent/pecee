@@ -5,18 +5,26 @@ namespace Pecee\User;
 interface IUserAuthentication
 {
 
-    public static function isLoggedIn();
+    public static function isLoggedIn(): bool;
 
-    public static function createTicket($userId);
+    public static function createTicket(string $userId): void;
 
-    public static function getTicket();
+    public static function getTicket(): ?array;
 
-    public function signIn();
+    public function signIn(): void;
 
-    public function signOut();
+    public function signOut(): void;
 
-    public static function current();
+    /**
+     * @return static|null
+     */
+    public static function current(): ?self;
 
-    public static function authenticate($username, $password);
+    /**
+     * @param string $username
+     * @param string $password
+     * @return static
+     */
+    public static function authenticate(string $username, string $password): self;
 
 }

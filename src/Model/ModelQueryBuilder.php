@@ -366,7 +366,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return static
+     * @return static|null
      * @throws Exception
      */
     public function find($id)

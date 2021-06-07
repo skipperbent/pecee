@@ -43,7 +43,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         $this->username = $username;
 
         if ($password !== null) {
-            $this->password = $this->setPassword($password);
+            $this->setPassword($password);
         }
 
         $this->admin_level = 0;
@@ -71,9 +71,9 @@ class ModelUser extends ModelData implements IUserAuthentication
     /**
      * Validates cookie-ticket and returns bool if the ticket is valid.
      *
-     * @return self|bool
+     * @return bool
      */
-    public static function isLoggedIn()
+    public static function isLoggedIn(): bool
     {
         $ticket = static::getTicket();
 
@@ -81,7 +81,6 @@ class ModelUser extends ModelData implements IUserAuthentication
 
             if ($ticket === null || Carbon::parse($ticket[1])->diffInMinutes(Carbon::now()) > static::$ticketExpireMinutes) {
                 Cookie::delete(static::COOKIE_NAME);
-
                 return false;
             }
 
@@ -89,17 +88,16 @@ class ModelUser extends ModelData implements IUserAuthentication
 
         } catch (\Exception $e) {
             Cookie::delete(static::COOKIE_NAME);
-
             return false;
         }
     }
 
-    public static function createTicket($userId)
+    public static function createTicket(string $userId): void
     {
         /* Remove existing ticket */
         Cookie::delete(static::COOKIE_NAME);
 
-        $ticket = Guid::encrypt(static::getSalt(), join('|', [
+        $ticket = Guid::encrypt(static::getSalt(), implode('|', [
             $userId,
             Carbon::now()->addMinutes(static::$ticketExpireMinutes)->toW3cString(),
         ]));
@@ -107,7 +105,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         Cookie::create(static::COOKIE_NAME, $ticket);
     }
 
-    public static function getTicket()
+    public static function getTicket(): ?array
     {
         if (Cookie::exists(static::COOKIE_NAME) === false) {
             return null;
@@ -124,20 +122,20 @@ class ModelUser extends ModelData implements IUserAuthentication
         return null;
     }
 
-    public function signIn()
+    public function signIn(): void
     {
         static::createTicket($this->id);
     }
 
-    public function signOut()
+    public function signOut(): void
     {
         Cookie::delete(static::COOKIE_NAME);
     }
 
-    public function exist()
+    public function exist(): bool
     {
         if ($this->{$this->primaryKey} === null) {
-            $user = static::instance()->filterUsername($this->username)->first();
+            $user = static::instance()->select(['id'])->filterUsername($this->username)->first();
             if ($user !== null && $user->id !== $this->id) {
                 return true;
             }
@@ -146,7 +144,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         return false;
     }
 
-    public function registerActivity()
+    public function registerActivity(): void
     {
         $this->last_activity = Carbon::now()->toDateTimeString();
         $this->save();
@@ -156,12 +154,12 @@ class ModelUser extends ModelData implements IUserAuthentication
      * Sets users password and encrypts it.
      * @param string $password
      */
-    public function setPassword($password)
+    public function setPassword(string $password): void
     {
         $this->password = password_hash($password, PASSWORD_DEFAULT);
     }
 
-    public static function getSalt()
+    public static function getSalt(): string
     {
         return md5(env('APP_SECRET', 'NoApplicationSecretDefined'));
     }
@@ -169,9 +167,9 @@ class ModelUser extends ModelData implements IUserAuthentication
     /**
      * Get current user
      *
-     * @return static
+     * @return static|null
      */
-    public static function current()
+    public static function current(): ?self
     {
         if (static::$instance === null && static::isLoggedIn() === true) {
 
@@ -189,7 +187,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         return static::$instance;
     }
 
-    public function filterQuery($query)
+    public function filterQuery(string $query): self
     {
         $userDataQuery = static::instance()
             ->getQuery()
@@ -207,27 +205,27 @@ class ModelUser extends ModelData implements IUserAuthentication
      * @param bool $deleted
      * @return static
      */
-    public function filterDeleted(bool $deleted = false)
+    public function filterDeleted(bool $deleted = false): self
     {
         return $this->where('deleted', '=', $deleted);
     }
 
-    public function filterAdminLevel($level)
+    public function filterAdminLevel(int $level): self
     {
         return $this->where('admin_level', '=', $level);
     }
 
-    public function filterUsername($username)
+    public function filterUsername(string $username): self
     {
         return $this->where('username', '=', $username);
     }
 
-    public function filterPassword($password)
+    public function filterPassword(string $password): self
     {
         return $this->where('password', '=', md5($password));
     }
 
-    public function filterKeyValue($key, $value, $like = false)
+    public function filterKeyValue(string $key, string $value, bool $like = false): self
     {
         $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
@@ -238,12 +236,12 @@ class ModelUser extends ModelData implements IUserAuthentication
         return $this->where($this->primaryKey, '=', $this->subQuery($subQuery));
     }
 
-    public static function getByUsername($username)
+    public static function getByUsername(string $username): self
     {
         return static::instance()->filterDeleted()->filterUsername($username);
     }
 
-    public static function authenticate($username, $password)
+    public static function authenticate(string $username, string $password): self
     {
         static::onLoginStart($username, $password);
 
@@ -266,9 +264,9 @@ class ModelUser extends ModelData implements IUserAuthentication
         return $user;
     }
 
-    public function auth()
+    public function auth(): void
     {
-        return $this->signIn();
+        $this->signIn();
     }
 
     /**
@@ -280,17 +278,17 @@ class ModelUser extends ModelData implements IUserAuthentication
     }
 
     // Events
-    protected static function onLoginFailed(self $user)
+    protected static function onLoginFailed(self $user): void
     {
         UserBadLogin::track($user->username);
     }
 
-    protected static function onLoginSuccess(self $user)
+    protected static function onLoginSuccess(self $user): void
     {
         UserBadLogin::reset($user->username);
     }
 
-    protected static function onLoginStart($username, $password)
+    protected static function onLoginStart(string $username, string $password): void
     {
         if (UserBadLogin::checkBadLogin($username)) {
             throw new UserException('User has been banned', static::ERROR_TYPE_BANNED);

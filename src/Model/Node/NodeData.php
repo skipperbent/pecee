@@ -27,7 +27,7 @@ class NodeData extends Model
         return ($id !== null);
     }
 
-    public function clear(string $nodeId)
+    public function clear(string $nodeId): \PDOStatement
     {
         return $this->where('node_id', $nodeId)->delete();
     }
