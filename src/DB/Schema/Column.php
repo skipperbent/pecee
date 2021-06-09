@@ -137,132 +137,105 @@ class Column
 
     public function primary(): self
     {
-        $this->setIndex(static::INDEX_PRIMARY);
-
-        return $this;
+        return $this->setIndex(static::INDEX_PRIMARY);
     }
 
     public function increment(): self
     {
-        $this->primary()->setIncrement(true);
-
-        return $this;
+        return $this->primary()->setIncrement(true);
     }
 
     public function index(): self
     {
-        $this->setIndex(static::INDEX_INDEX);
+        return $this->setIndex(static::INDEX_INDEX);
+    }
 
-        return $this;
+    public function fullText(): self
+    {
+        return $this->setIndex(static::INDEX_FULLTEXT);
+    }
+
+    public function default(string $defaultValue): self
+    {
+        return $this->setDefaultValue($defaultValue);
     }
 
     public function nullable(): self
     {
-        $this->setNullable(true);
-
-        return $this;
+        return $this->setNullable(true);
     }
 
     public function string(int $length = 255): self
     {
-        $this->setType(static::TYPE_VARCHAR);
-        $this->setLength($length);
-
-        return $this;
+        return $this->setType(static::TYPE_VARCHAR)->setLength($length);
     }
 
     public function integer(?int $length = null): self
     {
-        $this->setType(static::TYPE_INT);
-        $this->setLength($length);
-
-        return $this;
+        return $this->setType(static::TYPE_INT)->setLength($length);
     }
 
     public function bigint(): self
     {
-        $this->setType(static::TYPE_BIGINT);
-
-        return $this;
+        return $this->setType(static::TYPE_BIGINT);
     }
 
     public function bool(): self
     {
-        $this->setType(static::TYPE_TINYINT);
-        $this->setNullable(true);
-        $this->setLength(1);
-
-        return $this;
+        return $this
+            ->setType(static::TYPE_TINYINT)
+            ->setNullable(true)
+            ->setLength(1);
     }
 
     public function text(): self
     {
-        $this->setType(static::TYPE_TEXT);
-
-        return $this;
+        return $this->setType(static::TYPE_TEXT);
     }
 
     public function longtext(): self
     {
-        $this->setType(static::TYPE_LONGTEXT);
-
-        return $this;
+        return $this->setType(static::TYPE_LONGTEXT);
     }
 
     public function datetime(): self
     {
-        $this->setType(static::TYPE_DATETIME);
-
-        return $this;
+        return $this->setType(static::TYPE_DATETIME);
     }
 
     public function date(): self
     {
-        $this->setType(static::TYPE_DATE);
-
-        return $this;
+        return $this->setType(static::TYPE_DATE);
     }
 
     public function blob(): self
     {
-        $this->setType(static::TYPE_LONGBLOB);
-
-        return $this;
+        return $this->setType(static::TYPE_LONGBLOB);
     }
 
     public function float(): self
     {
-        $this->setType(static::TYPE_FLOAT);
-
-        return $this;
+        return $this->setType(static::TYPE_FLOAT);
     }
 
     public function double(): self
     {
-        $this->setType(static::TYPE_DOUBLE);
-
-        return $this;
+        return $this->setType(static::TYPE_DOUBLE);
     }
 
     public function decimal(): self
     {
-        $this->setType(static::TYPE_DECIMAL);
-
-        return $this;
+        return $this->setType(static::TYPE_DECIMAL);
     }
 
     public function timestamp(): self
     {
-        $this->setType(static::TYPE_TIMESTAMP);
-
-        return $this;
+        return $this->setType(static::TYPE_TIMESTAMP);
     }
 
     public function time(): self
     {
-        $this->setType(static::TYPE_TIME);
-
-        return $this;
+        return $this->setType(static::TYPE_TIME);
     }
 
     /**

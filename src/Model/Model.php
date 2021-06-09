@@ -40,7 +40,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     {
         // Set table name if its not already defined
         if ($this->table === '') {
-            $this->table = str_ireplace('model', '', class_basename(static::class));
+            $this->table = str_ireplace('model_', '', class_basename(static::class));
         }
 
         $this->queryable = new ModelQueryBuilder($this);
