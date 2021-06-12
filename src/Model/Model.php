@@ -501,6 +501,11 @@ abstract class Model implements IteratorAggregate, JsonSerializable
                 }
 
                 $key = $key ?? $name;
+
+                if(stripos($key, 'get') === 0) {
+                    $key = trim(substr($key, 3), '_');
+                }
+
                 $this->results['rows'][$this->rename[$name] ?? $key] = $output;
 
                 return true;

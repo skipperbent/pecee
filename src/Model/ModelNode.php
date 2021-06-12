@@ -116,7 +116,7 @@ class ModelNode extends ModelData
         return $this->parent_id;
     }
 
-    public function setParentId(string $parentId): self
+    public function setParentId(?string $parentId): self
     {
         $this->parent_id = $parentId;
 
