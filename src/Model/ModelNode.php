@@ -13,6 +13,7 @@ use Pecee\Model\Relation\HasOne;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 /**
+ * @property static $parent
  * @property string $id
  * @property string $parent_id
  * @property int|null $user_id
