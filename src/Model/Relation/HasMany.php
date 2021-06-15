@@ -20,21 +20,23 @@ class HasMany extends ModelRelation
         parent::__construct($related, $parent);
     }
 
-    public function addConstraints(): void
+    public function addConstraints(): Model
     {
-        if (static::$constraints === true) {
+        if ($this->constraints === true) {
             $this->related->where($this->foreignKey, '=', $this->parent->{$this->localKey});
             $this->related->whereNotNull($this->foreignKey);
         }
+
+        return $this->related;
     }
 
     /**
-     * @return ModelCollection|static[]
+     * @return ModelCollection|static[]|null
      * @throws \Pecee\Pixie\Exception
      */
-    public function getResults(): ModelCollection
+    public function getResults(): ?ModelCollection
     {
-        return $this->related->all() ?: $this->getDefaultFor($this->related);
+        return $this->addConstraints()->all() ?: $this->getDefaultFor($this->related);
     }
 
 }

@@ -31,13 +31,15 @@ class BelongsToMany extends ModelRelation
     /**
      * @throws \Pecee\Pixie\Exception
      */
-    public function addConstraints(): void
+    public function addConstraints(): Model
     {
         $this->performJoin();
 
-        if (static::$constraints === true) {
+        if ($this->constraints === true) {
             $this->addWhereConstraints();
         }
+
+        return $this->related;
     }
 
     /**
@@ -46,7 +48,7 @@ class BelongsToMany extends ModelRelation
      */
     public function getResults(): ModelCollection
     {
-        return $this->related->all();
+        return $this->addConstraints()->all();
     }
 
     /**

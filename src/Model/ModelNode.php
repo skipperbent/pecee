@@ -9,6 +9,7 @@ use Pecee\Guid;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Node\NodeData;
+use Pecee\Model\Node\NodePath;
 use Pecee\Model\Relation\HasOne;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
@@ -16,8 +17,6 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
  * @property static $parent
  * @property string $id
  * @property string $parent_id
- * @property int|null $user_id
- * @property string $path
  * @property string $type
  * @property string $title
  * @property string $content
@@ -42,6 +41,8 @@ class ModelNode extends ModelData
     public const SORT_ACTIVE_CREATED = 'active_created';
     public const SORT_ORDER = 'order';
 
+    public const PATH_SEPARATOR = '>';
+
     public static array $sortTypes = [
         self::SORT_ID,
         self::SORT_PARENT,
@@ -59,8 +60,6 @@ class ModelNode extends ModelData
     protected array $columns = [
         'id',
         'parent_id',
-        'user_id',
-        'path',
         'type',
         'title',
         'content',
@@ -73,14 +72,15 @@ class ModelNode extends ModelData
         'updated_at',
         'created_at',
     ];
+
     protected bool $mergeData = false;
     protected bool $fixedIdentifier = true;
+    protected bool $updatePath = false;
 
     public function __construct()
     {
         parent::__construct();
         $this->id = Guid::create();
-        $this->path = '0';
         $this->active = false;
         $this->deleted = false;
 
@@ -102,11 +102,6 @@ class ModelNode extends ModelData
         return parent::delete();
     }
 
-    public function getUserId(): ?string
-    {
-        return $this->user_id;
-    }
-
     public function getId(): string
     {
         return $this->id;
@@ -124,7 +119,20 @@ class ModelNode extends ModelData
         return $this;
     }
 
-    public function getPath(): string
+    public function path(): ?string
+    {
+        $path = null;
+
+        $dbPath = NodePath::getPath($this->id);
+
+        if(count($dbPath) > 0) {
+            $path .= static::PATH_SEPARATOR . implode(static::PATH_SEPARATOR, $dbPath);
+        }
+
+        return $path;
+    }
+
+    public function getPath(): ?string
     {
         return $this->path;
     }
@@ -293,11 +301,18 @@ class ModelNode extends ModelData
         return true;
     }
 
-    public function calculatePath(): void
+    public function generatePath(): void
     {
-        $parent = ModelNode::instance()->select(['id', 'path'])->find($this->parent_id);
-        $this->path = ($parent !== null) ? $parent->getPath() . '>' . $parent->id : '0';
-        $this->level = count(explode('>', $this->path));
+        $this->updatePath = true;
+
+        if($this->parent_id !== null) {
+            $parentPath = implode(static::PATH_SEPARATOR, NodePath::getPath($this->parent_id));
+            $this->path = $parentPath . static::PATH_SEPARATOR . $this->parent_id;
+        } else {
+            $this->path = null;
+        }
+
+        $this->level = count(explode(static::PATH_SEPARATOR, $this->path));
     }
 
     /**
@@ -311,7 +326,7 @@ class ModelNode extends ModelData
     {
         $out = [];
         if ($recursive === true) {
-            $pages = $this->filterPath($this->id . '%')->all();
+            $pages = $this->filterPath($this->id)->all();
         } else {
             $pages = $this->filterParentId($this->id)->all();
         }
@@ -340,7 +355,7 @@ class ModelNode extends ModelData
     {
         $parentIds = explode('>', $this->path);
 
-        return static::instance()->filterIds($parentIds)->orderBy(['path', 'order']);
+        return static::instance()->filterIds($parentIds)->orderBy(['order']);
     }
 
     public function parent(): HasOne
@@ -365,10 +380,16 @@ class ModelNode extends ModelData
         $this->updateOrder();
 
         if ($this->isNew() === true) {
-            $this->calculatePath();
+            $this->generatePath();
         }
 
-        return parent::save($data);
+        $results = parent::save($data);
+
+        if($this->updatePath === true) {
+            NodePath::store($this->id, explode(static::PATH_SEPARATOR, $this->path));
+        }
+
+        return $results;
     }
 
     /**
@@ -414,7 +435,7 @@ class ModelNode extends ModelData
     {
         if ($parentId === null || (string)$parentId === '0') {
             return $this->where(static function (QueryBuilderHandler $q) {
-                $q->whereNull('parent_id')->orWhereNull('path');
+                $q->whereNull('parent_id');
             });
         }
 
@@ -426,9 +447,13 @@ class ModelNode extends ModelData
         return $this->whereIn('parent_id', $parentIds);
     }
 
-    public function filterPath($path): self
+    public function filterPath(string $path): self
     {
-        return $this->where('path', 'LIKE', $path);
+        return $this->whereIn('id', $this->subQuery(
+            NodePath::instance()
+                ->select(['node_id'])
+                ->where('parent_node_id', '=', $path)
+        ));
     }
 
     /**

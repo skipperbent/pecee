@@ -15,7 +15,7 @@ abstract class ModelRelation
      *
      * @var bool
      */
-    protected static bool $constraints = true;
+    protected bool $constraints = true;
 
     protected Model $related;
     protected Model $parent;
@@ -29,8 +29,6 @@ abstract class ModelRelation
     {
         $this->related = $related;
         $this->parent = $parent;
-
-        $this->addConstraints();
     }
 
     /**
@@ -73,29 +71,27 @@ abstract class ModelRelation
      */
     protected function getDefaultFor(Model $parent)
     {
-        $instance = $parent->newQuery();
-
         if ($this->withDefault === null) {
-            return $instance;
+            return null;
         }
 
         if($this->withDefault instanceof Model) {
-            $instance->mergeRows($this->withDefault->getRows());
-            return $instance;
+            $parent->mergeRows($this->withDefault->getRows());
+            return $parent;
         }
 
         if (is_callable($this->withDefault) === true) {
-            return call_user_func($this->withDefault, $instance) ?: $instance;
+            return call_user_func($this->withDefault, $parent) ?: $parent;
         }
 
         if (is_array($this->withDefault) === true) {
-            $instance->mergeRows($this->withDefault);
+            $parent->mergeRows($this->withDefault);
         }
 
-        return $instance;
+        return $parent;
     }
 
-    abstract public function addConstraints(): void;
+    abstract public function addConstraints(): Model;
 
     /**
      * @return Model|ModelCollection
@@ -116,6 +112,12 @@ abstract class ModelRelation
         }
 
         return $result;
+    }
+
+    public function setConstraints(bool $enabled): self
+    {
+        $this->constraints = $enabled;
+        return $this;
     }
 
 }

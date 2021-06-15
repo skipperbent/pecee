@@ -77,6 +77,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         // Clone properties but reset query-builder
         $instance = clone $this;
         $instance->setQuery(new ModelQueryBuilder($instance));
+
         return $instance;
     }
 
@@ -289,7 +290,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
             }
 
             if ($this->timestamps === true) {
-                $updateData['updated_at'] = Carbon::now()->toDateTimeString();
+                $updateData['updated_at'] = Carbon::now(app()->getTimezone())->toDateTimeString();
             }
 
             $this->mergeRows($updateData);
@@ -302,7 +303,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         }, ARRAY_FILTER_USE_BOTH);
 
         if ($this->timestamps === true && isset($updateData['created_at']) === false) {
-            $updateData['created_at'] = Carbon::now()->toDateTimeString();
+            $updateData['created_at'] = Carbon::now(app()->getTimezone())->toDateTimeString();
         }
 
         $this->mergeRows($updateData);
@@ -502,7 +503,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
                 $key = $key ?? $name;
 
-                if(stripos($key, 'get') === 0) {
+                if (stripos($key, 'get') === 0) {
                     $key = trim(substr($key, 3), '_');
                 }
 
@@ -576,7 +577,9 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
         // Ensure default columns are always present
         foreach ($this->columns as $column) {
-            $output[$column] = $this->{$column};
+            if (in_array($column, $this->hidden, true) === false) {
+                $output[$column] = $this->{$column};
+            }
         }
 
         foreach ($this->getRows() as $key => $row) {
@@ -587,6 +590,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
             }
 
             $key = $this->rename[$key] ?? $key;
+            
             if (in_array($key, $this->hidden, true) === false) {
                 $output[$keyFormatted] = $this->parseArrayData($row);
             }
