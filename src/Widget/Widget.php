@@ -192,7 +192,7 @@ abstract class Widget extends Base
      */
     public function snippet(string $file): void
     {
-        require 'views/snippets/' . $file;
+        include 'views/snippets/' . $file;
     }
 
     /**

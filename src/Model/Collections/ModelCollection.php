@@ -190,15 +190,15 @@ class ModelCollection extends Collection
 
         for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
 
-            $row = $this->rows[$i];
+            $row = $this->rows[$i]->toArray();
 
             if ($filterKeys === null) {
-                $output[] = $row->toArray();
+                $output[] = $row;
                 continue;
             }
 
             foreach ($filterKeys as $key) {
-                $output[$key][] = $row->{$key};
+                $output[$key][] = $row[$key];
             }
 
         }

@@ -395,11 +395,13 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         $this->results['rows'] = array_merge($this->results['rows'], $rows);
     }
 
-    public function mergeData(array $data): void
+    public function mergeData(array $data): self
     {
         foreach ($data as $key => $value) {
             $this->{$key} = $value;
         }
+
+        return $this;
     }
 
     /**
@@ -526,7 +528,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
         $this->invokedElements[] = $name;
 
-        if ($this->invokeMethod($name)) {
+        if ($this->invokeMethod($name) && isset($this->with[$name]) === false) {
             return;
         }
 
@@ -577,8 +579,11 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
         // Ensure default columns are always present
         foreach ($this->columns as $column) {
+
+            $key = $this->rename[$column] ?? $column;
+
             if (in_array($column, $this->hidden, true) === false) {
-                $output[$column] = $this->{$column};
+                $output[$key] = $this->{$column};
             }
         }
 
@@ -589,10 +594,10 @@ abstract class Model implements IteratorAggregate, JsonSerializable
                 continue;
             }
 
-            $key = $this->rename[$key] ?? $key;
+            $key = $this->rename[$key] ?? $keyFormatted;
             
             if (in_array($key, $this->hidden, true) === false) {
-                $output[$keyFormatted] = $this->parseArrayData($row);
+                $output[$key] = $this->parseArrayData($row);
             }
         }
 

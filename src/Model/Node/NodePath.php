@@ -20,7 +20,7 @@ class NodePath extends Model
 
         $pathData = [];
         $order = 0;
-        foreach ($path as $id) {
+        foreach (array_filter($path) as $id) {
             if ($id === '0' || $id === '' || $nodeId === '') {
                 continue;
             }

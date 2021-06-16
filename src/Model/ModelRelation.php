@@ -58,7 +58,7 @@ abstract class ModelRelation
      * @param array|\Closure|Model $default
      * @return static
      */
-    public function withDefault($default): self
+    public function withDefault($default = []): self
     {
         $this->withDefault = $default;
 

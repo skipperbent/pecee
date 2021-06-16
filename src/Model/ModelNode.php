@@ -75,7 +75,6 @@ class ModelNode extends ModelData
 
     protected bool $mergeData = false;
     protected bool $fixedIdentifier = true;
-    protected bool $updatePath = false;
 
     public function __construct()
     {
@@ -115,6 +114,8 @@ class ModelNode extends ModelData
     public function setParentId(?string $parentId): self
     {
         $this->parent_id = $parentId;
+        $this->original_parent_id = null;
+        $this->deleted = false;
 
         return $this;
     }
@@ -303,8 +304,6 @@ class ModelNode extends ModelData
 
     public function generatePath(): void
     {
-        $this->updatePath = true;
-
         if($this->parent_id !== null) {
             $parentPath = implode(static::PATH_SEPARATOR, NodePath::getPath($this->parent_id));
             $this->path = $parentPath . static::PATH_SEPARATOR . $this->parent_id;
@@ -379,15 +378,10 @@ class ModelNode extends ModelData
         $this->mergeData($data);
         $this->updateOrder();
 
-        if ($this->isNew() === true) {
-            $this->generatePath();
-        }
-
         $results = parent::save($data);
 
-        if($this->updatePath === true) {
-            NodePath::store($this->id, explode(static::PATH_SEPARATOR, $this->path));
-        }
+        $this->generatePath();
+        NodePath::store($this->id, explode(static::PATH_SEPARATOR, $this->path));
 
         return $results;
     }
@@ -612,6 +606,49 @@ class ModelNode extends ModelData
         $this->setOrder($order);
     }
 
+    public function restore(?string $parentId = null): void
+    {
+        $this->save([
+            'original_parent_id' => null,
+            'deleted' => false,
+            'parent_id' => $parentId ?? $this->original_parent_id,
+        ]);
+
+        // Update children
+        static::instance()->filterPath($this->getId())->update([
+            'deleted' => false,
+        ]);
+    }
+
+    public function trash(): void
+    {
+        $parentId = $this->parent_id;
+
+        if($this->parent_id === null || $this->getParent()->getDeleted() === false) {
+            $parentId = null;
+        }
+
+        $this->save([
+            'original_parent_id' => $this->parent_id,
+            'parent_id' => $parentId,
+            'deleted' => true,
+        ]);
+
+        // Update children
+        static::instance()->filterPath($this->getId())->update([
+            'deleted' => true,
+        ]);
+    }
+
+    /**
+     * @param bool $deleted
+     * @return static
+     */
+    public function filterDeleted(bool $deleted): self
+    {
+        return $this->where('deleted', '=', (bool)$deleted);
+    }
+
     protected function getDataClass(): string
     {
         return NodeData::class;
@@ -620,6 +657,11 @@ class ModelNode extends ModelData
     protected function fetchData(): \IteratorAggregate
     {
         return NodeData::instance()->filterNodeId($this->id)->all();
+    }
+
+    public function getDeleted(): bool
+    {
+        return (bool)$this->deleted;
     }
 
 }
