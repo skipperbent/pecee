@@ -2,19 +2,48 @@
 
 namespace Pecee\Model\Node;
 
-use Pecee\Model\Model;
+use PDOStatement;
+use Pecee\Guid;
+use Pecee\Model\ModelMeta\ModelMetaField;
 
-class NodeData extends Model
+/**
+ * Class NodeData
+ * @package Pecee\Model\Node
+ * @property int $id
+ * @property string $node_id
+ * @property string $key
+ * @property mixed $value
+ * @property string $value_hash
+ */
+class NodeData extends ModelMetaField
 {
+    protected bool $fixedIdentifier = true;
     protected string $table = 'node_data';
     protected array $columns = [
         'id',
         'node_id',
         'key',
         'value',
+        'value_hash',
     ];
 
     protected bool $timestamps = false;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->id = Guid::create();
+    }
+
+    public function getDataKeyName(): string
+    {
+        return 'key';
+    }
+
+    public function getDataValueName(): string
+    {
+        return 'value';
+    }
 
     public function exists(): bool
     {
@@ -22,12 +51,10 @@ class NodeData extends Model
             return false;
         }
 
-        $id = static::instance()->select([$this->primaryKey])->where('key', $this->key)->filterNodeId($this->node_id)->first();
-
-        return ($id !== null);
+        return (static::instance()->select([$this->primaryKey])->where('key', $this->key)->filterNodeId($this->node_id)->first() !== null);
     }
 
-    public function clear(string $nodeId): \PDOStatement
+    public function clear(string $nodeId): PDOStatement
     {
         return $this->where('node_id', $nodeId)->delete();
     }
@@ -40,5 +67,12 @@ class NodeData extends Model
     public function filterNodeIds(array $nodeIds): self
     {
         return $this->whereIn('node_id', $nodeIds);
+    }
+
+    public function onMapData(string $key, $value): void
+    {
+        $this->value_hash = md5($value);
+
+        parent::onMapData($key, $value);
     }
 }

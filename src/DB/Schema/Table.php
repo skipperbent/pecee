@@ -33,9 +33,9 @@ class Table
     /**
      * @var array
      */
-    protected $columns = [];
-    protected $name;
-    protected $engine;
+    protected array $columns = [];
+    protected ?string $name = null;
+    protected string $engine;
 
     public function __construct(?string $name = null)
     {
@@ -180,13 +180,13 @@ class Table
     }
 
     /**
-     * @param $engine
-     * @throws \InvalidArgumentException
+     * @param string $engine
      * @return static
+     * @throws \InvalidArgumentException
      */
     public function setEngine(string $engine): self
     {
-        if (\in_array($engine, static::$ENGINES, true) === false) {
+        if (in_array($engine, static::$ENGINES, true) === false) {
             throw new \InvalidArgumentException('Invalid or unsupported engine');
         }
 
@@ -277,10 +277,11 @@ class Table
                 ]);
             }
 
-            $query .= sprintf('%1$s %2$s `%3$s`(`%3$s`), ',
+            $query .= sprintf('%1$s %2$s `%3$s`(`%3$s` %4$s), ',
                 (($type === static::TYPE_ALTER) ? 'ADD ' : ''),
                 $column->getIndex(),
-                $column->getName()
+                $column->getName(),
+                ($column->getIndexLength() !== null) ? "({$column->getIndexLength()})" : '',
             );
         }
 
@@ -338,7 +339,7 @@ class Table
             }
         }
 
-        if (\count($queries) > 0) {
+        if (count($queries) > 0) {
             $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, implode(',', $queries), $this->engine);
             Pdo::getInstance()->nonQuery($sql);
         }
@@ -393,7 +394,6 @@ class Table
      */
     public function dropIndex(...$indexes): self
     {
-        $indexes = $indexes;
         foreach ($indexes as $index) {
             try {
                 Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP INDEX `%s`;', $this->name, $index));
@@ -539,7 +539,7 @@ class Table
 
         $foreignTableName = key($first);
 
-        if (\is_string($foreignTableName) === false) {
+        if (is_string($foreignTableName) === false) {
             throw new \InvalidArgumentException('Misformed referenceTable parameter. Failed to parse table.');
         }
 

@@ -8,6 +8,7 @@ use Pecee\Boolean;
 use Pecee\Guid;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
+use Pecee\Model\ModelMeta\IModelMetaField;
 use Pecee\Model\Node\NodeData;
 use Pecee\Model\Node\NodePath;
 use Pecee\Model\Relation\HasOne;
@@ -29,7 +30,7 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
  * @property Carbon|null $updated_at
  * @property Carbon|null $created_at
  */
-class ModelNode extends ModelData
+class ModelNode extends ModelMeta
 {
     public static array $operators = ['=', '!=', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
 
@@ -555,15 +556,20 @@ class ModelNode extends ModelData
         }
 
         $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
-        $subQuery = $this->subQuery(NodeData::instance()
+        $subQuery = NodeData::instance()
             ->select(['data.node_id'])
             ->alias('data')
             ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
             ->where('data.key', $keyOperator, $key)
-            ->where('data.value', $operator, $value)
-            ->limit(1));
+            ->limit(1);
 
-        return $this->where('id', '=', $subQuery);
+        if($operator === '=') {
+            $subQuery->where('data.value_hash', '=', md5($value));
+        } else {
+            $subQuery->where('data.value', $operator, $value);
+        }
+
+        return $this->where('id', '=', $this->subQuery($subQuery));
     }
 
     /**
@@ -649,14 +655,9 @@ class ModelNode extends ModelData
         return $this->where('deleted', '=', (bool)$deleted);
     }
 
-    protected function getDataClass(): string
+    protected function fetchData(): ModelCollection
     {
-        return NodeData::class;
-    }
-
-    protected function fetchData(): \IteratorAggregate
-    {
-        return NodeData::instance()->filterNodeId($this->id)->all();
+        return NodeData::instance()->select(['id', 'key', 'value'])->filterNodeId($this->id)->all();
     }
 
     public function getDeleted(): bool
@@ -664,4 +665,10 @@ class ModelNode extends ModelData
         return (bool)$this->deleted;
     }
 
+    protected function onNewDataItem(): IModelMetaField
+    {
+        $data = new NodeData();
+        $data->node_id = $this->id;
+        return $data;
+    }
 }

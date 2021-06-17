@@ -5,12 +5,24 @@ namespace Pecee\Model;
 use Carbon\Carbon;
 use Pecee\Cookie;
 use Pecee\Guid;
+use Pecee\Model\Collections\ModelCollection;
+use Pecee\Model\ModelMeta\IModelMetaField;
 use Pecee\Model\User\UserBadLogin;
 use Pecee\Model\User\UserData;
 use Pecee\Model\User\UserException;
 use Pecee\User\IUserAuthentication;
 
-class ModelUser extends ModelData implements IUserAuthentication
+/**
+ * Class ModelUser
+ * @package Pecee\Model
+ * @property int $id
+ * @property string $username
+ * @property string $password
+ * @property int $admin_level
+ * @property string $last_activity
+ * @property bool $deleted
+ */
+class ModelUser extends ModelMeta implements IUserAuthentication
 {
     public const COOKIE_NAME = 'ticket';
 
@@ -56,10 +68,9 @@ class ModelUser extends ModelData implements IUserAuthentication
         return static::getUserDataClass();
     }
 
-    protected function fetchData(): \IteratorAggregate
+    protected function fetchData(): ModelCollection
     {
-        $class = static::getUserDataClass();
-        return $class::instance()->filterIdentifier($this->id)->all();
+        return UserData::instance()->filterUserId($this->id)->all();
     }
 
     public function delete()
@@ -189,16 +200,18 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function filterQuery(string $query): self
     {
+        $identifierName = $this->onNewDataItem()->getDataKeyName();
+
         $userDataQuery = static::instance()
             ->getQuery()
-            ->select($this->getDataPrimary())
-            ->where($this->getDataPrimary(), '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $this->getDataPrimary()))
+            ->select($identifierName)
+            ->where($identifierName, '=', static::instance()->getQuery()->raw($this->getTable() . '.' . $identifierName))
             ->where('value', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
             ->limit(1);
 
         return $this
             ->where('username', 'LIKE', '%' . str_replace('%', '%%', $query) . '%')
-            ->orWhere($this->getDataPrimary(), '=', $this->raw($userDataQuery));
+            ->orWhere($identifierName, '=', $this->raw($userDataQuery));
     }
 
     /**
@@ -227,11 +240,10 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function filterKeyValue(string $key, string $value, bool $like = false): self
     {
-        $userDataClassName = static::getUserDataClass();
         /* @var $userDataClass UserData */
-        $userDataClass = new $userDataClassName();
+        $userDataClass = $this->onNewDataItem();
 
-        $subQuery = $userDataClass::instance()->select([$this->getDataPrimary()])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
+        $subQuery = $userDataClass::instance()->select([$userDataClass->getDataKeyName()])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
 
         return $this->where($this->primaryKey, '=', $this->subQuery($subQuery));
     }
@@ -269,14 +281,6 @@ class ModelUser extends ModelData implements IUserAuthentication
         $this->signIn();
     }
 
-    /**
-     * @return UserData|string
-     */
-    public static function getUserDataClass(): string
-    {
-        return UserData::class;
-    }
-
     // Events
     protected static function onLoginFailed(self $user): void
     {
@@ -293,5 +297,12 @@ class ModelUser extends ModelData implements IUserAuthentication
         if (UserBadLogin::checkBadLogin($username)) {
             throw new UserException('User has been banned', static::ERROR_TYPE_BANNED);
         }
+    }
+
+    protected function onNewDataItem(): IModelMetaField
+    {
+        $data = new UserData();
+        $data->user_id = $this->id;
+        return $data;
     }
 }

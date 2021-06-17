@@ -1,14 +1,15 @@
 <?php
 namespace Pecee\Model\User;
 
+use Pecee\Guid;
 use Pecee\Model\Model;
 
 class UserBadLogin extends Model
 {
-
     public const TIMEOUT_MINUTES = 30;
     public const MAX_REQUEST_PER_IP = 10;
 
+    protected bool $fixedIdentifier = true;
     protected string $table = 'user_bad_login';
 
     protected array $columns = [
@@ -20,9 +21,9 @@ class UserBadLogin extends Model
 
     public function __construct()
     {
-
         parent::__construct();
 
+        $this->id = Guid::create();
         $this->ip = request()->getIp();
         $this->active = true;
     }

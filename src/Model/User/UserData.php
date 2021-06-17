@@ -2,15 +2,25 @@
 
 namespace Pecee\Model\User;
 
-use Pecee\Model\Model;
-use Pecee\Model\ModelUser;
+use Pecee\Guid;
+use Pecee\Model\ModelMeta\ModelMetaField;
 
-class UserData extends Model
+/**
+ * Class UserData
+ * @package Pecee\Model\User
+ * @property int $id
+ * @property int $user_id
+ * @property string $key
+ * @property string $value
+ */
+class UserData extends ModelMetaField
 {
+    protected bool $fixedIdentifier = true;
     protected bool $timestamps = false;
 
     protected array $columns = [
         'id',
+        'user_id',
         'key',
         'value',
     ];
@@ -19,16 +29,22 @@ class UserData extends Model
 
     public function __construct($userId = null, $key = null, $value = null)
     {
-
         parent::__construct();
 
-        $this->columns = array_merge($this->columns, [
-            ModelUser::instance()->getDataPrimary(),
-        ]);
-
+        $this->id = Guid::create();
         $this->user_id = $userId;
         $this->key = $key;
         $this->value = $value;
+    }
+
+    public function getDataKeyName(): string
+    {
+        return 'key';
+    }
+
+    public function getDataValueName(): string
+    {
+        return 'value';
     }
 
     public function exists(): bool
@@ -37,28 +53,26 @@ class UserData extends Model
             return false;
         }
 
-        $dataPrimaryKey = ModelUser::instance()->getDataPrimary();
-
-        return ($this->where('key', '=', $this->key)->where($dataPrimaryKey, '=', $this->{$dataPrimaryKey})->first() !== null);
+        return ($this->select(['id'])->where('key', '=', $this->key)->where($this->getDataKeyName(), '=', $this->{$this->getDataKeyName()})->count() > 0);
     }
 
     public static function destroyByIdentifier($identifierId)
     {
-        return static::instance()->where(ModelUser::instance()->getDataPrimary(), '=', $identifierId)->delete();
+        return static::instance()->where(static::instance()->getDataKeyName(), '=', $identifierId)->delete();
     }
 
     public static function getByIdentifier($identifierId)
     {
-        return static::instance()->where(ModelUser::instance()->getDataPrimary(), '=', $identifierId)->all();
+        return static::instance()->where(static::instance()->getDataKeyName(), '=', $identifierId)->all();
     }
 
-    public function filterIdentifier($identifier)
+    public function filterUserId(int $userId)
     {
-        return $this->where(ModelUser::instance()->getDataPrimary(), '=', $identifier);
+        return $this->where('user_id', '=', $userId);
     }
 
     public function filterIdentifiers(array $identifiers)
     {
-        return $this->whereIn(ModelUser::instance()->getDataPrimary(), $identifiers);
+        return $this->whereIn($this->getDataKeyName(), $identifiers);
     }
 }

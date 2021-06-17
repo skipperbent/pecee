@@ -2,9 +2,9 @@
 
 namespace Pecee\Model\File;
 
-use Pecee\Model\Model;
+use Pecee\Model\ModelMeta\ModelMetaField;
 
-class FileData extends Model
+class FileData extends ModelMetaField
 {
     protected bool $timestamps = false;
     protected string $table = 'file_data';
@@ -23,6 +23,16 @@ class FileData extends Model
         $this->file_id = $fileId;
         $this->key = $key;
         $this->value = $value;
+    }
+
+    public function getDataKeyName(): string
+    {
+        return 'key';
+    }
+
+    public function getDataValueName(): string
+    {
+        return 'value';
     }
 
     public function exists(): bool

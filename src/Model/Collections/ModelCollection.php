@@ -3,7 +3,7 @@
 namespace Pecee\Model\Collections;
 
 use Pecee\Collection\Collection;
-use Pecee\Model\ModelData;
+use Pecee\Model\ModelMeta;
 use Pecee\Str;
 
 class ModelCollection extends Collection
@@ -98,7 +98,7 @@ class ModelCollection extends Collection
 
                     if ($rowKey === $key) {
                         $rowValue = $value;
-                    } elseif ($row instanceof ModelData && isset($row->data->{$_key}) === true) {
+                    } elseif ($row instanceof ModelMeta && isset($row->data->{$_key}) === true) {
                         $rowValue = $row->data->{$_key};
                     }
 

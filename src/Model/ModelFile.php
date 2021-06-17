@@ -3,11 +3,12 @@
 namespace Pecee\Model;
 
 use Pecee\Guid;
+use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\File\FileData;
+use Pecee\Model\ModelMeta\IModelMetaField;
 
-class ModelFile extends ModelData
+class ModelFile extends ModelMeta
 {
-    protected string $dataPrimary = 'file_id';
     protected string $table = 'file';
 
     protected array $columns = [
@@ -19,7 +20,7 @@ class ModelFile extends ModelData
         'bytes',
     ];
 
-    public function __construct($file)
+    public function __construct($file = null)
     {
         parent::__construct();
 
@@ -27,50 +28,52 @@ class ModelFile extends ModelData
         $this->filename = basename($file);
         $this->path = dirname($file);
 
-        if (is_file($file)) {
+        if (is_file($file) === true) {
             $this->type = mime_content_type($file);
             $this->bytes = filesize($file);
         }
     }
 
-    public function setFilename($filename)
+    public function setFilename(string $filename): void
     {
         $this->filename = $filename;
     }
 
-    public function setOriginalFilename($filename)
+    public function setOriginalFilename(string $filename): void
     {
         $this->original_filename = $filename;
     }
 
-    public function setPath($path)
+    public function setPath(string $path): void
     {
         $this->path = $path;
     }
 
-    public function setType($type)
+    public function setType(string $type): void
     {
         $this->type = $type;
     }
 
-    public function setBytes($bytes)
+    public function setBytes(int $bytes): void
     {
         $this->bytes = $bytes;
     }
 
-    protected function getDataClass(): string
+    protected function onNewDataItem(): IModelMetaField
     {
-        return FileData::class;
+        $data = new FileData();
+        $data->file_id = $this->id;
     }
 
-    protected function fetchData(): \IteratorAggregate
+    protected function fetchData(): ModelCollection
     {
         return FileData::getByIdentifier($this->id);
     }
 
     public function getFullPath(): string
     {
-        return $this->path . $this->Filename;
+        return $this->path . $this->filename;
     }
+
 
 }

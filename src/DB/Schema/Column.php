@@ -4,25 +4,26 @@ namespace Pecee\DB\Schema;
 
 class Column
 {
-    protected $table;
-    protected $name;
-    protected $type;
-    protected $length;
-    protected $defaultValue;
-    protected $encoding;
-    protected $attributes;
-    protected $nullable;
-    protected $index;
-    protected $increment = false;
-    protected $comment;
-    protected $drop = false;
-    protected $change = false;
-    protected $after;
-    protected $removeRelation = false;
-    protected $relationTable;
-    protected $relationColumn;
-    protected $relationUpdateType;
-    protected $relationDeleteType;
+    protected ?Table $table = null;
+    protected ?string $name = null;
+    protected ?string $type = null;
+    protected ?int $length = null;
+    protected ?string $defaultValue = null;
+    protected ?string $encoding = null;
+    protected ?string $attributes = null;
+    protected bool $nullable = false;
+    protected ?string $index = null;
+    protected ?int $indexLength = null;
+    protected bool $increment = false;
+    protected ?string $comment = null;
+    protected bool $drop = false;
+    protected bool $change = false;
+    protected ?string $after = null;
+    protected bool $removeRelation = false;
+    protected ?string $relationTable = null;
+    protected ?string $relationColumn = null;
+    protected ?string $relationUpdateType = null;
+    protected ?string $relationDeleteType = null;
 
     public const INDEX_PRIMARY = 'PRIMARY KEY';
     public const INDEX_UNIQUE = 'UNIQUE INDEX';
@@ -130,7 +131,7 @@ class Column
         self::RELATION_NULL,
     ];
 
-    public function __construct(string $table)
+    public function __construct(Table $table)
     {
         $this->table = $table;
     }
@@ -145,9 +146,9 @@ class Column
         return $this->primary()->setIncrement(true);
     }
 
-    public function index(): self
+    public function index(?int $length = null): self
     {
-        return $this->setIndex(static::INDEX_INDEX);
+        return $this->setIndex(static::INDEX_INDEX, $length);
     }
 
     public function fullText(): self
@@ -249,11 +250,11 @@ class Column
     public function relation(string $table, string $column, string $delete = self::RELATION_CASCADE, string $update = self::RELATION_RESTRICT): self
     {
 
-        if (\in_array($delete, static::$RELATION_TYPES, true) === false) {
+        if (in_array($delete, static::$RELATION_TYPES, true) === false) {
             throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
-        if (\in_array($update, static::$RELATION_TYPES, true) === false) {
+        if (in_array($update, static::$RELATION_TYPES, true) === false) {
             throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
@@ -377,9 +378,10 @@ class Column
         return (bool)$this->nullable;
     }
 
-    public function setIndex(string $index): self
+    public function setIndex(string $index, ?int $length = null): self
     {
         $this->index = $index;
+        $this->indexLength = $length;
 
         return $this;
     }
@@ -387,6 +389,18 @@ class Column
     public function getIndex(): ?string
     {
         return $this->index;
+    }
+
+    public function getIndexLength(): ?int
+    {
+        return $this->indexLength;
+    }
+
+    public function setIndexLength(?int $length): self
+    {
+        $this->indexLength = $length;
+
+        return $this;
     }
 
     public function setIncrement(bool $increment): self

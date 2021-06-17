@@ -249,7 +249,6 @@ abstract class Model implements IteratorAggregate, JsonSerializable
      * @param array|null $data
      * @return static
      * @throws ModelException|\Pecee\Pixie\Exception
-     * @see \Pecee\Model\Model::save()
      */
     public function save(array $data = []): self
     {

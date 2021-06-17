@@ -3,32 +3,30 @@ namespace Pecee\Model\User;
 
 use Pecee\Guid;
 use Pecee\Model\Model;
-use Pecee\Model\ModelUser;
 
 class UserReset extends Model
 {
+    protected bool $fixedIdentifier = true;
     protected string $table = 'user_reset';
 
     protected array $columns = [
         'id',
+        'user_id',
         'key',
     ];
 
-    public function __construct($userId = null)
+    public function __construct(int $userId = null)
     {
-
         parent::__construct();
 
-        $dataPrimaryKey = ModelUser::instance()->getDataPrimary();
-
-        $this->columns = array_merge($this->columns, [$dataPrimaryKey]);
+        $this->id = Guid::create();
         $this->{$primaryKey} = $userId;
         $this->key = Guid::create();
     }
 
-    public function clean()
+    public function clean(): void
     {
-        $dataPrimaryKey = ModelUser::instance()->getDataPrimary();
+        $dataPrimaryKey = UserData::instance()->getDataKeyName();
         $this->where($dataPrimaryKey, '=', $this->{$dataPrimaryKey})->delete();
     }
 
@@ -38,14 +36,12 @@ class UserReset extends Model
         return parent::save($data);
     }
 
-    public static function getByKey($key)
+    public static function getByKey(string $key): self
     {
-        $model = new static();
-
-        return $model->where('key', '=', $key)->first();
+        return (new static)->where('key', '=', $key)->first();
     }
 
-    public static function confirm($key)
+    public static function confirm(string $key): bool
     {
         $reset = static::getByKey($key);
 
@@ -53,18 +49,18 @@ class UserReset extends Model
             $reset->clean();
             $reset->delete();
 
-            return $reset->{ModelUser::instance()->getDataPrimary()};
+            return $reset->{UserData::instance()->getDataKeyName()};
         }
 
         return false;
     }
 
-    public function getIdentifier()
+    public function getIdentifier(): string
     {
-        return $this->{ModelUser::instance()->getDataPrimary()};
+        return $this->{UserData::instance()->getDataKeyName()};
     }
 
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
