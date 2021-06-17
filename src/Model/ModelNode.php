@@ -76,6 +76,7 @@ class ModelNode extends ModelMeta
 
     protected bool $mergeData = false;
     protected bool $fixedIdentifier = true;
+    protected bool $generatePath = false;
 
     public function __construct()
     {
@@ -93,8 +94,6 @@ class ModelNode extends ModelMeta
     public function delete()
     {
         // Delete children
-
-        /* @var $child static */
         foreach ($this->getChildren()->all() as $child) {
             $child->delete();
         }
@@ -114,6 +113,7 @@ class ModelNode extends ModelMeta
 
     public function setParentId(?string $parentId): self
     {
+        $this->generatePath = true;
         $this->parent_id = $parentId;
         $this->original_parent_id = null;
         $this->deleted = false;
@@ -127,7 +127,7 @@ class ModelNode extends ModelMeta
 
         $dbPath = NodePath::getPath($this->id);
 
-        if(count($dbPath) > 0) {
+        if (count($dbPath) > 0) {
             $path .= static::PATH_SEPARATOR . implode(static::PATH_SEPARATOR, $dbPath);
         }
 
@@ -305,7 +305,7 @@ class ModelNode extends ModelMeta
 
     public function generatePath(): void
     {
-        if($this->parent_id !== null) {
+        if ($this->parent_id !== null) {
             $parentPath = implode(static::PATH_SEPARATOR, NodePath::getPath($this->parent_id));
             $this->path = $parentPath . static::PATH_SEPARATOR . $this->parent_id;
         } else {
@@ -381,7 +381,10 @@ class ModelNode extends ModelMeta
 
         $results = parent::save($data);
 
-        $this->generatePath();
+        if ($this->isNew() === true || $this->generatePath === true) {
+            $this->generatePath();
+        }
+
         NodePath::store($this->id, explode(static::PATH_SEPARATOR, $this->path));
 
         return $results;
@@ -563,7 +566,7 @@ class ModelNode extends ModelMeta
             ->where('data.key', $keyOperator, $key)
             ->limit(1);
 
-        if($operator === '=') {
+        if ($operator === '=') {
             $subQuery->where('data.value_hash', '=', md5($value));
         } else {
             $subQuery->where('data.value', $operator, $value);
@@ -616,8 +619,8 @@ class ModelNode extends ModelMeta
     {
         $this->save([
             'original_parent_id' => null,
-            'deleted' => false,
-            'parent_id' => $parentId ?? $this->original_parent_id,
+            'deleted'            => false,
+            'parent_id'          => $parentId ?? $this->original_parent_id,
         ]);
 
         // Update children
@@ -630,14 +633,14 @@ class ModelNode extends ModelMeta
     {
         $parentId = $this->parent_id;
 
-        if($this->parent_id === null || $this->getParent()->getDeleted() === false) {
+        if ($this->parent_id === null || $this->getParent()->getDeleted() === false) {
             $parentId = null;
         }
 
         $this->save([
             'original_parent_id' => $this->parent_id,
-            'parent_id' => $parentId,
-            'deleted' => true,
+            'parent_id'          => $parentId,
+            'deleted'            => true,
         ]);
 
         // Update children
@@ -669,6 +672,7 @@ class ModelNode extends ModelMeta
     {
         $data = new NodeData();
         $data->node_id = $this->id;
+
         return $data;
     }
 }

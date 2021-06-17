@@ -41,6 +41,8 @@ abstract class ModelMetaField extends Model implements IModelMetaField
             }
 
             $field = clone $this;
+            // Make sure fixed identifiers work
+            $field->{$this->getPrimaryKey()} = (new static())->{$this->getPrimaryKey()};
             $field->onMapData($key . '[' . $k . ']', $v);
             $field->save();
         }
