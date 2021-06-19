@@ -39,7 +39,7 @@ abstract class ModelMetaField extends Model implements IModelMetaField
             if(trim($v) === '') {
                 continue;
             }
-
+            
             $field = clone $this;
             // Make sure fixed identifiers work
             $field->{$this->getPrimaryKey()} = (new static())->{$this->getPrimaryKey()};

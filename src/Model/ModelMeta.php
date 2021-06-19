@@ -2,6 +2,7 @@
 
 namespace Pecee\Model;
 
+use Pecee\ArrayUtil;
 use Pecee\Collection\CollectionItem;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\ModelMeta\IModelMetaField;
@@ -66,8 +67,7 @@ abstract class ModelMeta extends Model
                     $collection[$key] = [];
                 }
 
-                $collection[$key] = array_merge_recursive($collection[$key], $output);
-
+                $collection[$key] = ArrayUtil::mergeRecursive($collection[$key], $output);
                 continue;
             }
 

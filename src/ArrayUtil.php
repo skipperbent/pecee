@@ -14,12 +14,12 @@ class ArrayUtil
      */
     public static function filter(array $array, ?callable $callback = null): array
     {
-        $array = array_map(static function($item) {
+        $array = array_map(static function ($item) {
             return is_array($item) ? static::filter($item) : $item;
         }, $array);
 
-        if($callback === null) {
-            $callback = static function($value) {
+        if ($callback === null) {
+            $callback = static function ($value) {
                 return !empty($value);
             };
         }
@@ -27,9 +27,9 @@ class ArrayUtil
         return array_filter($array, $callback);
     }
 
-    public static function average(array $arr)
+    public static function average(array $arr): int
     {
-        $count = \count($arr); //total numbers in array
+        $count = count($arr); //total numbers in array
         $total = 0;
         foreach ($arr as $value) {
             $total += $value; // total value of array numbers
@@ -38,7 +38,7 @@ class ArrayUtil
         return ($total / $count); // get average value
     }
 
-    public static function toStdClass($array): \stdClass
+    public static function toStdClass(array $array): \stdClass
     {
         if (\is_array($array)) {
             return (object)array_map(__METHOD__, $array);
@@ -62,6 +62,30 @@ class ArrayUtil
         });
 
         return $val;
+    }
+
+    /**
+     * Merge array recursively while preserving keys as array_merge_recursive doesn't preserve integer keys.
+     * @param ...$arrays
+     * @return array
+     */
+    public static function mergeRecursive(...$arrays): array
+    {
+        $base = array_shift($arrays);
+
+        foreach ($arrays as $array) {
+            reset($base);
+            foreach ($array as $key => $value) {
+                if (is_array($value) && @is_array($base[$key])) {
+                    $base[$key] = static::mergeRecursive($base[$key], $value);
+                    continue;
+                }
+
+                $base[$key] = $value;
+            }
+        }
+
+        return $base;
     }
 
     public static function append(array &$array1, array $array2): array

@@ -13,7 +13,6 @@ use Pecee\Model\ModelMeta\ModelMetaField;
  * @property string $node_id
  * @property string $key
  * @property mixed $value
- * @property string $value_hash
  */
 class NodeData extends ModelMetaField
 {
@@ -24,7 +23,6 @@ class NodeData extends ModelMetaField
         'node_id',
         'key',
         'value',
-        'value_hash',
     ];
 
     protected bool $timestamps = false;
@@ -69,10 +67,4 @@ class NodeData extends ModelMetaField
         return $this->whereIn('node_id', $nodeIds);
     }
 
-    public function onMapData(string $key, $value): void
-    {
-        $this->value_hash = md5($value);
-
-        parent::onMapData($key, $value);
-    }
 }

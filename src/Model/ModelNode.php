@@ -564,13 +564,8 @@ class ModelNode extends ModelMeta
             ->alias('data')
             ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
             ->where('data.key', $keyOperator, $key)
+            ->where('data.value', $operator, $value)
             ->limit(1);
-
-        if ($operator === '=') {
-            $subQuery->where('data.value_hash', '=', md5($value));
-        } else {
-            $subQuery->where('data.value', $operator, $value);
-        }
 
         return $this->where('id', '=', $this->subQuery($subQuery));
     }
@@ -660,7 +655,7 @@ class ModelNode extends ModelMeta
 
     protected function fetchData(): ModelCollection
     {
-        return NodeData::instance()->select(['id', 'key', 'value'])->filterNodeId($this->id)->all();
+        return NodeData::instance()->filterNodeId($this->id)->all();
     }
 
     public function getDeleted(): bool
