@@ -11,10 +11,10 @@ use Pecee\UI\Site;
 
 abstract class Base
 {
-    protected $errorType = 'danger';
-    protected $defaultMessagePlacement = 'default';
-    protected $_inputSessionKey = 'InputValues';
-    protected $_validations = [];
+    protected string $errorType = 'danger';
+    protected string $defaultMessagePlacement = 'default';
+    protected string $_inputSessionKey = 'InputValues';
+    protected array $_validations = [];
 
     protected function onInputError(IInputItem $input, string $error): void
     {

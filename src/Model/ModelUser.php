@@ -105,9 +105,6 @@ class ModelUser extends ModelMeta implements IUserAuthentication
 
     public static function createTicket(string $userId): void
     {
-        /* Remove existing ticket */
-        Cookie::delete(static::COOKIE_NAME);
-
         $ticket = Guid::encrypt(static::getSalt(), implode('|', [
             $userId,
             Carbon::now()->addMinutes(static::$ticketExpireMinutes)->toW3cString(),
@@ -183,10 +180,7 @@ class ModelUser extends ModelMeta implements IUserAuthentication
     public static function current(): ?self
     {
         if (static::$instance === null && static::isLoggedIn() === true) {
-
             $ticket = static::getTicket();
-
-            /* @var $user static */
             static::$instance = static::instance()->filterDeleted()->find($ticket[0]);
         }
 

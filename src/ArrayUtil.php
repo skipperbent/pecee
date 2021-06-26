@@ -6,6 +6,30 @@ class ArrayUtil
 {
 
     /**
+     * Array diff for multidimensional arrays.
+     *
+     * @param ...$arrays
+     * @return array
+     * @throws \JsonException
+     */
+    public static function diff(...$arrays): array
+    {
+        $args = [];
+
+        // Compare all values by a json_encode
+        foreach ($arrays as $key => $value) {
+            $args[$key] = array_map('json_encode', $value);
+        }
+
+        $diff = array_diff(...$args);
+
+        // Json decode the result
+        return array_map(static function ($value) {
+            return json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+        }, $diff);
+    }
+
+    /**
      * Behaves like array_util but works on multidimensional arrays.
      *
      * @param array $array

@@ -9,9 +9,10 @@ use Pecee\UI\Site;
 
 abstract class Widget extends Base
 {
-    protected $_template;
-    protected $_contentTemplate;
-    protected $_contentHtml;
+    protected ?string $_template = null;
+    protected ?string $_contentTemplate = null;
+    protected ?string $_contentHtml = null;
+    protected bool $clearSession = true;
 
     public function __construct()
     {
@@ -247,7 +248,9 @@ abstract class Widget extends Base
         $this->renderContent();
         $this->renderTemplate();
 
-        $this->sessionMessage()->clear();
+        if($this->clearSession === true) {
+            $this->sessionMessage()->clear();
+        }
 
         debug('END WIDGET: ' . static::class);
 

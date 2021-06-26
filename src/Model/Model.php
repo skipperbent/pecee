@@ -31,10 +31,15 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     protected array $invokedElements = [];
     protected array $rename = [];
     protected array $columns = [];
+    protected array $fieldTypes = [];
     protected bool $timestamps = true;
     protected bool $fixedIdentifier = false;
     protected array $filter = [];
     protected ModelQueryBuilder $queryable;
+
+    public const COLUMN_TYPE_INT = 'int';
+    public const COLUMN_TYPE_BOOL = 'bool';
+    public const COLUMN_TYPE_FLOAT = 'float';
 
     public function __construct()
     {
@@ -246,7 +251,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
     /**
      * Save item
-     * @param array|null $data
+     * @param array $data
      * @return static
      * @throws ModelException|\Pecee\Pixie\Exception
      */
@@ -431,7 +436,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     {
         $this->invokeElement($name);
 
-        return $this->results['rows'][$name] ?? null;
+        return $this->parseFieldType($name, $this->results['rows'][$name] ?? null);
     }
 
     public function __set($name, $value)
@@ -527,7 +532,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
         $this->invokedElements[] = $name;
 
-        if ($this->invokeMethod($name) && isset($this->with[$name]) === false) {
+        if (isset($this->with[$name]) === false && $this->invokeMethod($name)) {
             return;
         }
 
@@ -594,7 +599,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
             }
 
             $key = $this->rename[$key] ?? $keyFormatted;
-            
+
             if (in_array($key, $this->hidden, true) === false) {
                 $output[$key] = $this->parseArrayData($row);
             }
@@ -677,6 +682,34 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         return $this;
     }
 
+    /**
+     * Parse field type
+     *
+     * @param string $name
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function parseFieldType(string $name, $value)
+    {
+        if (isset($this->fieldTypes[$name]) === true) {
+            $type = $this->fieldTypes[$name];
+            if ($type instanceof \Closure) {
+                return $type($value);
+            }
+
+            switch ($type) {
+                case static::COLUMN_TYPE_BOOL:
+                    return (bool)$value;
+                case static::COLUMN_TYPE_FLOAT:
+                    return (float)$value;
+                case static::COLUMN_TYPE_INT:
+                    return (int)$value;
+            }
+        }
+
+        return $value;
+    }
+
     public function getWith(): array
     {
         return $this->with;
@@ -734,8 +767,17 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         $this->results['original_rows'] = $rows;
     }
 
-    public function getOriginalRows(): array
+    public function getOriginalRows(bool $currentData = false): array
     {
+        if ($currentData === true) {
+            $rows = [];
+            foreach ($this->getColumns() as $column) {
+                $rows[$column] = $this->{$column};
+            }
+
+            return $rows;
+        }
+
         return $this->results['original_rows'];
     }
 
@@ -850,6 +892,12 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     {
         $this->rename = array_merge($this->rename, $fields);
 
+        return $this;
+    }
+
+    public function overwriteQuery(bool $enabled): self
+    {
+        $this->getQuery()->setOverwriteEnabled($enabled);
         return $this;
     }
 

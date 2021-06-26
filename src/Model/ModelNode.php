@@ -74,6 +74,13 @@ class ModelNode extends ModelMeta
         'created_at',
     ];
 
+    protected array $fieldTypes = [
+        'level' => self::COLUMN_TYPE_INT,
+        'order' => self::COLUMN_TYPE_INT,
+        'active' => self::COLUMN_TYPE_BOOL,
+        'deleted' => self::COLUMN_TYPE_BOOL,
+    ];
+
     protected bool $mergeData = false;
     protected bool $fixedIdentifier = true;
     protected bool $generatePath = false;
@@ -445,12 +452,12 @@ class ModelNode extends ModelMeta
         return $this->whereIn('parent_id', $parentIds);
     }
 
-    public function filterPath(string $path): self
+    public function filterPath(string $parentNodeId): self
     {
         return $this->whereIn('id', $this->subQuery(
             NodePath::instance()
                 ->select(['node_id'])
-                ->where('parent_node_id', '=', $path)
+                ->where('parent_node_id', '=', $parentNodeId)
         ));
     }
 

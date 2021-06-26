@@ -95,8 +95,19 @@ abstract class ModelMeta extends Model
 
         foreach ($this->data->getData() as $key => $value) {
 
-            if ($value === null) {
-                continue;
+            // Remove empty values from array
+            if(is_array($value) === true) {
+                $value = ArrayUtil::filter($value);
+                if(empty($value) === true) {
+                    $this->data->remove($key);
+                    continue;
+                }
+            } else {
+                // Remove otherwise empty values
+                if ($value === null || trim($value) === '') {
+                    $this->data->remove($key);
+                    continue;
+                }
             }
 
             if (isset($cf[strtolower($key)]) === true) {

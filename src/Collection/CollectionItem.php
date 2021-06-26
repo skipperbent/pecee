@@ -57,14 +57,12 @@ class CollectionItem implements \IteratorAggregate
 
     public function remove(string $key): void
     {
-        if ($this->exist($key)) {
-            unset($this->data[$key]);
-        }
+        unset($this->data[$key]);
     }
 
     public function exist(string $key): bool
     {
-        return isset($this->data[strtolower($key)]);
+        return array_key_exists(strtolower($key), $this->data);
     }
 
     /**

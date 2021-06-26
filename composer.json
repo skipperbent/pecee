@@ -27,6 +27,7 @@
     "ext-openssl": "*",
     "ext-curl": "*",
     "ext-pdo": "*",
+    "ext-json": "*",
     "ext-fileinfo": "*",
     "ext-simplexml": "*"
   },
