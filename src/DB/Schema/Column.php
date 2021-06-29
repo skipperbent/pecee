@@ -2,34 +2,11 @@
 
 namespace Pecee\DB\Schema;
 
+use InvalidArgumentException;
+use Pecee\DB\PdoHelper;
+
 class Column
 {
-    protected ?Table $table = null;
-    protected ?string $name = null;
-    protected ?string $type = null;
-    protected ?int $length = null;
-    protected ?string $defaultValue = null;
-    protected ?string $encoding = null;
-    protected ?string $attributes = null;
-    protected bool $nullable = false;
-    protected ?string $index = null;
-    protected ?int $indexLength = null;
-    protected bool $increment = false;
-    protected ?string $comment = null;
-    protected bool $drop = false;
-    protected bool $change = false;
-    protected ?string $after = null;
-    protected bool $removeRelation = false;
-    protected ?string $relationTable = null;
-    protected ?string $relationColumn = null;
-    protected ?string $relationUpdateType = null;
-    protected ?string $relationDeleteType = null;
-
-    public const INDEX_PRIMARY = 'PRIMARY KEY';
-    public const INDEX_UNIQUE = 'UNIQUE INDEX';
-    public const INDEX_INDEX = 'INDEX';
-    public const INDEX_FULLTEXT = 'FULLTEXT INDEX';
-
     public const RELATION_RESTRICT = 'RESTRICT';
     public const RELATION_CASCADE = 'CASCADE';
     public const RELATION_NULL = 'SET NULL';
@@ -75,14 +52,7 @@ class Column
     public const TYPE_MULTIPOLYGON = 'MULTIPOLYGON';
     public const TYPE_GEOMETRYCOLLECTION = 'GEOMETRYCOLLECTION';
 
-    public static $INDEXES = [
-        self::INDEX_PRIMARY,
-        self::INDEX_UNIQUE,
-        self::INDEX_INDEX,
-        self::INDEX_FULLTEXT,
-    ];
-
-    public static $TYPES = [
+    public static array $TYPES = [
         self::TYPE_VARCHAR,
         self::TYPE_LONGTEXT,
         self::TYPE_TEXT,
@@ -124,12 +94,31 @@ class Column
         self::TYPE_GEOMETRYCOLLECTION,
     ];
 
-    public static $RELATION_TYPES = [
+    public static array $RELATION_TYPES = [
         self::RELATION_CASCADE,
         self::RELATION_NO_ACTION,
         self::RELATION_RESTRICT,
         self::RELATION_NULL,
     ];
+
+    protected Table $table;
+    protected ?string $name = null;
+    protected ?string $type = null;
+    protected ?int $length = null;
+    protected ?string $defaultValue = null;
+    protected ?string $encoding = null;
+    protected ?string $attributes = null;
+    protected bool $nullable = false;
+    protected bool $increment = false;
+    protected ?string $comment = null;
+    protected bool $drop = false;
+    protected bool $change = false;
+    protected ?string $after = null;
+    protected bool $removeRelation = false;
+    protected ?string $relationTable = null;
+    protected ?string $relationColumn = null;
+    protected ?string $relationUpdateType = null;
+    protected ?string $relationDeleteType = null;
 
     public function __construct(Table $table)
     {
@@ -138,7 +127,7 @@ class Column
 
     public function primary(): self
     {
-        return $this->setIndex(static::INDEX_PRIMARY);
+        return $this->setIndex(Index::TYPE_PRIMARY);
     }
 
     public function increment(): self
@@ -148,12 +137,12 @@ class Column
 
     public function index(?int $length = null): self
     {
-        return $this->setIndex(static::INDEX_INDEX, $length);
+        return $this->setIndex(Index::TYPE_INDEX, $length);
     }
 
     public function fullText(): self
     {
-        return $this->setIndex(static::INDEX_FULLTEXT);
+        return $this->setIndex(Index::TYPE_FULLTEXT);
     }
 
     public function default(string $defaultValue): self
@@ -185,7 +174,7 @@ class Column
     {
         return $this
             ->setType(static::TYPE_TINYINT)
-            ->setNullable(true)
+            ->setDefaultValue(0)
             ->setLength(1);
     }
 
@@ -245,17 +234,16 @@ class Column
      * @param string $delete
      * @param string $update
      * @return static
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function relation(string $table, string $column, string $delete = self::RELATION_CASCADE, string $update = self::RELATION_RESTRICT): self
     {
-
         if (in_array($delete, static::$RELATION_TYPES, true) === false) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
+            throw new InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
         if (in_array($update, static::$RELATION_TYPES, true) === false) {
-            throw new \InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
+            throw new InvalidArgumentException('Unknown relation type for delete. Valid types are: ' . implode(', ', static::$RELATION_TYPES));
         }
 
         $this->relationTable = $table;
@@ -378,29 +366,40 @@ class Column
         return (bool)$this->nullable;
     }
 
-    public function setIndex(string $index, ?int $length = null): self
+    public function setIndex(string $type, ?int $length = null): self
     {
-        $this->index = $index;
-        $this->indexLength = $length;
+        $this->table->addIndex(
+            (new Index($this->table, $type))->addColumn($this->getName(), $length)
+        );
 
         return $this;
     }
 
-    public function getIndex(): ?string
+    public function getIndex(): ?Index
     {
-        return $this->index;
-    }
-
-    public function getIndexLength(): ?int
-    {
-        return $this->indexLength;
+        return $this->table->getIndex($this->getName());
     }
 
     public function setIndexLength(?int $length): self
     {
-        $this->indexLength = $length;
+        $index = $this->getIndex();
+
+        if ($index !== null) {
+            $index->setColumnLength($this->getName(), $length);
+        }
 
         return $this;
+    }
+
+    public function getIndexLength(): ?int
+    {
+        $index = $this->getIndex();
+
+        if ($index !== null) {
+            return $index->getColumnLength($this->getName());
+        }
+
+        return null;
     }
 
     public function setIncrement(bool $increment): self
@@ -436,7 +435,7 @@ class Column
         return $this;
     }
 
-    public function getAfter()
+    public function getAfter(): ?string
     {
         return $this->after;
     }
@@ -447,7 +446,7 @@ class Column
      */
     public function getRelationKey(): string
     {
-        return sprintf('%s_%s_fk', $this->table, $this->getName());
+        return sprintf('%s_%s_fk', $this->table->getName(), $this->getName());
     }
 
     public function getRemoveRelation(): bool
@@ -475,12 +474,112 @@ class Column
         return $this->relationDeleteType;
     }
 
-    /**
-     * @return Table|null
-     */
-    public function getTable()
+    public function getTable(): Table
     {
         return $this->table;
+    }
+
+    public function exists(): bool
+    {
+        return ($this->table->getConnection()->value("SHOW COLUMNS FROM `{$this->table->getName()}` LIKE ?", [$this->getName()]) !== false);
+    }
+
+    /**
+     * Generates column query
+     *
+     * @param string $type
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function getQuery(string $type): ?string
+    {
+        if ($this->getDrop() === true) {
+            if ($this->exists() === true) {
+                $this->table->getConnection()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->table->getName(), $this->getName()));
+            }
+
+            return null;
+        }
+
+        $query = '';
+        $alterColumn = '';
+        $modify = false;
+        $columnType = $this->getType();
+
+        if ($columnType !== null) {
+
+            if ($type === Table::TYPE_ALTER) {
+
+                $alterColumn = 'ADD COLUMN';
+
+                if ($this->exists() === true) {
+                    $alterColumn = 'MODIFY';
+                    $modify = true;
+                }
+            }
+
+            $query .= sprintf('%s `%s` %s%s %s%s%s%s%s%s, ',
+                $alterColumn,
+                $this->getName(),
+                $columnType,
+                ($this->getLength() ? " ({$this->getLength()})" : ''),
+                $this->getAttributes(),
+                ($this->getNullable() === false ? ' NOT null' : ' null'),
+                ($this->getDefaultValue() !== null) ? PdoHelper::formatQuery(' DEFAULT %s', [$this->getDefaultValue()]) : '',
+                ($this->getComment() !== null) ? PdoHelper::formatQuery(' COMMENT %s', [$this->getComment()]) : '',
+                ($this->getAfter() !== null) ? " AFTER `{$this->getAfter()}`" : '',
+                ($this->getIncrement() === true ? ' AUTO_INCREMENT' : '')
+            );
+        }
+
+        if ($this->getIndex() !== null) {
+            if ($modify === true) {
+                $index = $this->getIndex();
+                if ($index !== null) {
+                    $index->drop();
+                }
+            }
+
+            $query .= sprintf('%1$s %2$s `%3$s`(`%3$s`%4$s), ',
+                (($type === Table::TYPE_ALTER) ? 'ADD' : ''),
+                $this->getIndex()->getType(),
+                $this->getIndex()->getName(),
+                ($this->getIndexLength() !== null) ? " ({$this->getIndexLength()})" : '',
+            );
+        }
+
+        if ($this->getRelationTable() !== null && $this->getRelationColumn() !== null) {
+
+            if ($this->getRemoveRelation() === true) {
+
+                if ($type !== Table::TYPE_ALTER) {
+                    throw new InvalidArgumentException('You cannot remove a relation when creating a new table.');
+                }
+
+                $query .= sprintf('DROP FOREIGN KEY `%s`, ', $this->getRelationKey());
+
+            } else {
+
+                if ($this->table->foreignExist($this->getRelationKey()) === true) {
+                    $this->table->dropForeign([
+                        $this->getRelationKey(),
+                    ]);
+                }
+
+                $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON DELETE %6$s ON UPDATE %7$s, ',
+                    ($type === Table::TYPE_ALTER) ? 'ADD' : '',
+                    $this->getRelationKey(),
+                    $this->getName(),
+                    $this->getRelationTable(),
+                    $this->getRelationColumn(),
+                    $this->getRelationDeleteType(),
+                    $this->getRelationUpdateType());
+
+            }
+
+        }
+
+        return trim(trim($query, ', '));
     }
 
 }

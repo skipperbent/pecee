@@ -2,9 +2,11 @@
 
 namespace Pecee\DB\Schema;
 
+use InvalidArgumentException;
+use PDOException;
+use Pecee\DB\IDatabase;
 use Pecee\DB\Pdo;
 use Pecee\DB\PdoHelper;
-use Pecee\Exceptions\InvalidArgumentException;
 
 class Table
 {
@@ -20,7 +22,7 @@ class Table
     public const ENGINE_MRG_MYISAM = 'MRG_MYISAM';
     public const ENGINE_MYISAM = 'MyISAM';
 
-    public static $ENGINES = [
+    public static array $ENGINES = [
         self::ENGINE_INNODB,
         self::ENGINE_ARCHIVE,
         self::ENGINE_CSV,
@@ -30,12 +32,19 @@ class Table
         self::ENGINE_MYISAM,
     ];
 
-    /**
-     * @var array
-     */
-    protected array $columns = [];
     protected ?string $name = null;
     protected string $engine;
+
+    /**
+     * @var array|Column[]
+     */
+    protected array $columns = [];
+    /**
+     * @var array|Index[]
+     */
+    protected array $indexes = [];
+
+    protected Pdo $connection;
 
     public function __construct(?string $name = null)
     {
@@ -77,7 +86,7 @@ class Table
      */
     public function column(string $name): Column
     {
-        $column = new Column($this->name);
+        $column = new Column($this);
         $column->setName($name);
 
         $this->columns[] = $column;
@@ -85,11 +94,48 @@ class Table
         return $column;
     }
 
+    public function index(?string $name = null, string $type = Index::TYPE_INDEX): Index
+    {
+        $index = new Index($this, $type);
+
+        if ($name !== null) {
+            $index->setName($name);
+        }
+
+        $this->addIndex($index);
+
+        return $index;
+    }
+
+    public function addIndex(Index $index): self
+    {
+        $this->indexes[$index->getName()] = $index;
+
+        return $this;
+    }
+
+    public function removeIndex(string $name): self
+    {
+        unset($this->indexes[$name]);
+
+        return $this;
+    }
+
+    public function getIndex(string $name): ?Index
+    {
+        return $this->indexes[$name] ?? null;
+    }
+
+    public function getIndexes(): array
+    {
+        return $this->indexes;
+    }
+
     public function getPrimaryColumn(): ?Column
     {
-        /* @var $column Column */
         foreach ($this->columns as $column) {
-            if ($column->getIndex() === Column::INDEX_PRIMARY) {
+            $index = $column->getIndex();
+            if ($index !== null && $index->getType() === Index::TYPE_PRIMARY) {
                 return $column;
             }
         }
@@ -118,9 +164,9 @@ class Table
     public function getColumnNames(bool $lower = false, bool $excludePrimary = false): array
     {
         $names = [];
-        /* @var $column Column */
         foreach ($this->columns as $column) {
-            if ($excludePrimary === true && $column->getIndex() === Column::INDEX_PRIMARY) {
+            $index = $column->getIndex();
+            if ($excludePrimary === true && $index !== null && $index->getType() === Index::TYPE_PRIMARY) {
                 continue;
             }
 
@@ -139,7 +185,6 @@ class Table
      */
     public function getColumn(string $name, bool $strict = false): ?Column
     {
-        /* @var $column Column */
         foreach ($this->columns as $column) {
             if (($strict === true && $column->getName() === $name) || ($strict === false && strtolower($column->getName()) === strtolower($name))) {
                 return $column;
@@ -182,12 +227,12 @@ class Table
     /**
      * @param string $engine
      * @return static
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function setEngine(string $engine): self
     {
         if (in_array($engine, static::$ENGINES, true) === false) {
-            throw new \InvalidArgumentException('Invalid or unsupported engine');
+            throw new InvalidArgumentException('Invalid or unsupported engine');
         }
 
         $this->engine = $engine;
@@ -209,7 +254,7 @@ class Table
      */
     public function exists(): bool
     {
-        return (Pdo::getInstance()->value('SHOW TABLES LIKE ?', [$this->name]) !== false);
+        return ($this->getConnection()->value('SHOW TABLES LIKE ?', [$this->name]) !== false);
     }
 
     /**
@@ -218,110 +263,12 @@ class Table
      */
     public function columnExists(string $name): bool
     {
-        return (Pdo::getInstance()->value('SHOW COLUMNS FROM `' . $this->name . '` LIKE ?', [$name]) !== false);
-    }
-
-    /**
-     * Generates column query
-     *
-     * @param string $type
-     * @param Column $column
-     * @return string
-     * @throws \InvalidArgumentException
-     */
-    protected function generateColumnQuery(string $type, Column $column): ?string
-    {
-        if ($column->getDrop() === true) {
-            if ($this->columnExists($column->getName())) {
-                Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP COLUMN `%s`', $this->name, $column->getName()));
-            }
-
-            return null;
-        }
-
-        $query = '';
-        $alterColumn = '';
-        $modify = false;
-        $columnType = $column->getType();
-
-        if ($columnType !== null) {
-
-            if ($type === static::TYPE_ALTER) {
-
-                $alterColumn = 'ADD COLUMN';
-
-                if ($this->columnExists($column->getName())) {
-                    $alterColumn = 'CHANGE COLUMN';
-                    $modify = true;
-                }
-            }
-
-            $query .= sprintf('%s `%s` %s%s %s%s%s%s%s%s, ',
-                $alterColumn,
-                $column->getName(),
-                $columnType,
-                ($column->getLength() ? " ({$column->getLength()})" : ''),
-                $column->getAttributes(),
-                ($column->getNullable() === false ? ' NOT null' : ' null'),
-                ($column->getDefaultValue() !== null) ? PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]) : '',
-                ($column->getComment() !== null) ? PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]) : '',
-                ($column->getAfter() !== null) ? " AFTER `{$column->getAfter()}`" : '',
-                ($column->getIncrement() === true ? ' AUTO_INCREMENT' : '')
-            );
-        }
-
-        if ($column->getIndex() !== null) {
-            if ($modify === true) {
-                $this->dropIndex([
-                    $column->getName(),
-                ]);
-            }
-
-            $query .= sprintf('%1$s %2$s `%3$s`(`%3$s` %4$s), ',
-                (($type === static::TYPE_ALTER) ? 'ADD ' : ''),
-                $column->getIndex(),
-                $column->getName(),
-                ($column->getIndexLength() !== null) ? "({$column->getIndexLength()})" : '',
-            );
-        }
-
-        if ($column->getRelationTable() !== null && $column->getRelationColumn() !== null) {
-
-            if ($column->getRemoveRelation() === true) {
-
-                if ($type !== static::TYPE_ALTER) {
-                    throw new InvalidArgumentException('You cannot remove a relation when creating a new table.');
-                }
-
-                $query .= sprintf('DROP FOREIGN KEY `%s`, ', $column->getRelationKey());
-
-            } else {
-
-                if ($this->foreignExist($column->getRelationKey()) === true) {
-                    $this->dropForeign([
-                        $column->getRelationKey(),
-                    ]);
-                }
-
-                $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON DELETE %6$s ON UPDATE %7$s, ',
-                    ($type === static::TYPE_ALTER) ? 'ADD' : '',
-                    $column->getRelationKey(),
-                    $column->getName(),
-                    $column->getRelationTable(),
-                    $column->getRelationColumn(),
-                    $column->getRelationDeleteType(),
-                    $column->getRelationUpdateType());
-
-            }
-
-        }
-
-        return trim($query, ', ');
+        return ($this->getConnection()->value("SHOW COLUMNS FROM `{$this->name}` LIKE ?", [$name]) !== false);
     }
 
     /**
      * Create table
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function create(): void
     {
@@ -331,23 +278,28 @@ class Table
 
         $queries = [];
 
-        /* @var $column Column */
         foreach ($this->columns as $column) {
-            $query = $this->generateColumnQuery(static::TYPE_CREATE, $column);
-            if (trim($query) !== '') {
+            $query = $column->getQuery(static::TYPE_CREATE);
+            if ($query !== '') {
                 $queries[] = $query;
             }
+
+            unset($this->indexes[$column->getName()]);
         }
 
         if (count($queries) > 0) {
             $sql = sprintf('CREATE TABLE `%s` (%s) ENGINE = %s;', $this->name, implode(',', $queries), $this->engine);
-            Pdo::getInstance()->nonQuery($sql);
+            $this->getConnection()->nonQuery($sql);
+
+            foreach ($this->indexes as $index) {
+                $index->create();
+            }
         }
     }
 
     /**
      * Modify table
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function alter(): void
     {
@@ -357,17 +309,22 @@ class Table
 
         $queries = [];
 
-        /* @var $column Column */
         foreach ($this->columns as $column) {
-            $query = $this->generateColumnQuery(static::TYPE_ALTER, $column);
-            if (trim($query) !== '') {
+            $query = $column->getQuery(static::TYPE_ALTER);
+            if ($query !== '') {
                 $queries[] = $query;
             }
+
+            unset($this->indexes[$column->getName()]);
         }
 
-        if (\count($queries) > 0) {
+        if (count($queries) > 0) {
             $sql = sprintf('ALTER TABLE `%s` %s', $this->name, implode(',', $queries));
-            Pdo::getInstance()->nonQuery($sql);
+            $this->getConnection()->nonQuery($sql);
+        }
+
+        foreach ($this->indexes as $index) {
+            $index->create();
         }
 
     }
@@ -380,7 +337,7 @@ class Table
      */
     public function rename(string $name): self
     {
-        Pdo::getInstance()->nonQuery("RENAME TABLE `$this->name` TO `$name`;");
+        $this->getConnection()->nonQuery("RENAME TABLE `$this->name` TO `$name`;");
         $this->name = $name;
 
         return $this;
@@ -394,12 +351,18 @@ class Table
      */
     public function dropIndex(...$indexes): self
     {
-        foreach ($indexes as $index) {
-            try {
-                Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP INDEX `%s`;', $this->name, $index));
-            } catch (\PDOException $e) {
+        if (count($indexes) === 0) {
+            return $this;
+        }
 
-            }
+        $drop = implode(', ', array_map(static function ($name) {
+            return "DROP INDEX `$name`";
+        }, $indexes));
+
+        try {
+            $this->getConnection()->nonQuery("ALTER TABLE `{$this->name}` $drop;");
+        } catch (PDOException $e) {
+
         }
 
         return $this;
@@ -413,14 +376,14 @@ class Table
      * @param string|null $name
      * @return static
      */
-    public function createIndex(array $columns = null, string $type = Column::INDEX_INDEX, ?string $name = null): self
+    public function createIndex(array $columns = null, string $type = Index::TYPE_INDEX, ?string $name = null): self
     {
-        $type = ($type === Column::INDEX_INDEX) ? '' : $type;
+        $type = ($type === Index::TYPE_INDEX) ? '' : $type;
         $columns = $columns ?? [$name];
 
         if ($name !== null) {
             $this->dropIndex([$name,]);
-            $name = '`' . $name . '`';
+            $name = "`$name`";
         } else {
             $name = '';
         }
@@ -434,7 +397,7 @@ class Table
             PdoHelper::joinArray($columns, true)
         );
 
-        Pdo::getInstance()->nonQuery($query);
+        $this->getConnection()->nonQuery($query);
 
         return $this;
     }
@@ -446,7 +409,7 @@ class Table
      */
     public function createFulltext(array $columns = null, ?string $name = null): self
     {
-        return $this->createIndex($columns, Column::INDEX_FULLTEXT, $name);
+        return $this->createIndex($columns, Index::TYPE_INDEX, $name);
     }
 
     /**
@@ -468,7 +431,7 @@ class Table
      */
     public function dropPrimary(): self
     {
-        Pdo::getInstance()->nonQuery("ALTER TABLE `$this->name` DROP PRIMARY KEY");
+        $this->getConnection()->nonQuery("ALTER TABLE `$this->name` DROP PRIMARY KEY");
 
         return $this;
     }
@@ -481,7 +444,7 @@ class Table
      */
     public function foreignExist(string $name): bool
     {
-        return ((int)Pdo::getInstance()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name])) > 0;
+        return ((int)$this->getConnection()->value('SELECT COUNT(`TABLE_NAME`) FROM information_schema.`TABLE_CONSTRAINTS` WHERE `CONSTRAINT_NAME` = ? && `TABLE_NAME` = ?', [$name, $this->name])) > 0;
     }
 
     /**
@@ -504,7 +467,7 @@ class Table
         }
 
         // Execute query
-        Pdo::getInstance()->nonQuery(
+        $this->getConnection()->nonQuery(
             sprintf
             (
                 'ALTER TABLE %s %s',
@@ -525,7 +488,7 @@ class Table
      * @param string $onUpdate Relation type constraint on update
      * @param string $onDelete Relation type constraint on delete
      * @return static
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function addForeign(string $keyName, array $referenceColumns, array $foreignTable, string $onUpdate = Column::RELATION_RESTRICT, string $onDelete = Column::RELATION_CASCADE): self
     {
@@ -534,13 +497,13 @@ class Table
         $first = reset($foreignTable);
 
         if ($first === false) {
-            throw new \InvalidArgumentException('Misformed referenceTable parameter.');
+            throw new InvalidArgumentException('Misformed referenceTable parameter.');
         }
 
         $foreignTableName = key($first);
 
         if (is_string($foreignTableName) === false) {
-            throw new \InvalidArgumentException('Misformed referenceTable parameter. Failed to parse table.');
+            throw new InvalidArgumentException('Misformed referenceTable parameter. Failed to parse table.');
         }
 
         $foreignColumns = array_values((array)$first[$foreignTableName]);
@@ -557,7 +520,7 @@ class Table
             $onDelete
         );
 
-        Pdo::getInstance()->nonQuery($query);
+        $this->getConnection()->nonQuery($query);
 
         return $this;
     }
@@ -583,7 +546,7 @@ class Table
      */
     public function truncate(): self
     {
-        Pdo::getInstance()->nonQuery(sprintf('TRUNCATE TABLE `%s`', $this->name));
+        $this->getConnection()->nonQuery(sprintf('TRUNCATE TABLE `%s`', $this->name));
 
         return $this;
     }
@@ -595,7 +558,19 @@ class Table
      */
     public function drop(): self
     {
-        Pdo::getInstance()->nonQuery(sprintf('DROP TABLE `%s`', $this->name));
+        $this->getConnection()->nonQuery(sprintf('DROP TABLE `%s`', $this->name));
+
+        return $this;
+    }
+
+    public function getConnection(): Pdo
+    {
+        return $this->connection ?? Pdo::getInstance();
+    }
+
+    public function setConnection(Pdo $connection): self
+    {
+        $this->connection = $connection;
 
         return $this;
     }

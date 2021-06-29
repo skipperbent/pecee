@@ -75,9 +75,9 @@ class ModelNode extends ModelMeta
     ];
 
     protected array $fieldTypes = [
-        'level' => self::COLUMN_TYPE_INT,
-        'order' => self::COLUMN_TYPE_INT,
-        'active' => self::COLUMN_TYPE_BOOL,
+        'level'   => self::COLUMN_TYPE_INT,
+        'order'   => self::COLUMN_TYPE_INT,
+        'active'  => self::COLUMN_TYPE_BOOL,
         'deleted' => self::COLUMN_TYPE_BOOL,
     ];
 
@@ -295,15 +295,14 @@ class ModelNode extends ModelMeta
 
     public function isActive(): bool
     {
+        $from = $this->getActiveFrom();
+        $to = $this->getActiveTo();
+
+        if ($from !== null && $from->isPast() === true && ($to === null || $to->isFuture())) {
+            return true;
+        }
+
         if ($this->getActive() === false) {
-            return false;
-        }
-
-        if ($this->getActiveFrom() !== null && $this->getActiveFrom()->isFuture() === true) {
-            return false;
-        }
-
-        if ($this->getActiveTo() !== null && $this->getActiveTo()->isPast() === true) {
             return false;
         }
 
@@ -417,19 +416,31 @@ class ModelNode extends ModelMeta
      */
     public function filterActive(bool $active = true): self
     {
-        return
-            $this->where('active', '=', Boolean::parse($active))
-                ->where(static function (QueryBuilderHandler $q) {
-                    $q->whereNull('active_from')
-                        ->whereNull('active_to')
-                        ->orWhere('active_from', '<=', $q->raw('NOW()'))
-                        ->where(static function (QueryBuilderHandler $q) {
+        if ($active === true) {
+            return $this->where(static function (QueryBuilderHandler $q): void {
+                $q
+                    ->where('active', '=', true)
+                    ->orWhere(static function (QueryBuilderHandler $q): void {
+                        $q
+                            ->where('active_from', '<=', $q->raw('NOW()'))
+                            ->whereNull('active_to')
+                            ->orWhere('active_from', '<=', $q->raw('NOW()'))
+                            ->where('active_to', '>=', $q->raw('NOW()'))
+                            ->orWhereNull('active_from')
+                            ->where('active_to', '>=', $q->raw('NOW()'));
+                    });
+            });
+        }
 
-                            $q->where('active_to', '>=', $q->raw('NOW()'))
-                                ->orWhereNull('active_to');
-
-                        });
+        return $this->where(static function (QueryBuilderHandler $q): void {
+            $q
+                ->where('active', '=', false)
+                ->orWhere(static function (QueryBuilderHandler $q): void {
+                    $q
+                        ->where('active_to', '<=', $q->raw('NOW()'))
+                        ->orWhereNull('active_to');
                 });
+        });
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Pecee\DB;
 
+use PDOStatement;
 use Pecee\Collection\CollectionItem;
 
 class Pdo
@@ -10,17 +11,17 @@ class Pdo
     public const SETTINGS_PASSWORD = 'password';
     public const SETTINGS_CONNECTION_STRING = 'driver';
 
-    protected static $instance;
+    protected static ?self $instance = null;
 
-    protected $connection;
-    protected $query;
+    protected ?\PDO $connection = null;
+    protected ?string $query = null;
 
     /**
      * Return new instance
      *
      * @return static
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (static::$instance === null) {
             static::$instance = new static(
@@ -42,7 +43,7 @@ class Pdo
      * Closing connection
      * http://php.net/manual/en/pdo.connections.php
      */
-    public function close()
+    public function close(): void
     {
         $this->connection = null;
         static::$instance = null;
@@ -53,10 +54,10 @@ class Pdo
      *
      * @param string $query
      * @param array|null $parameters
-     * @return \PDOStatement|null
+     * @return PDOStatement|null
      * @throws \PdoException
      */
-    public function query($query, array $parameters = null)
+    public function query(string $query, ?array $parameters = null): ?PDOStatement
     {
         $pdoStatement = $this->connection->prepare($query);
         $inputParameters = null;
@@ -74,7 +75,9 @@ class Pdo
         }
 
         $this->query = $pdoStatement->queryString;
+
         debug('START DB QUERY:' . $this->query);
+
         if ($pdoStatement->execute($inputParameters) === true) {
             debug('END DB QUERY');
 
@@ -84,11 +87,11 @@ class Pdo
         return null;
     }
 
-    public function all($query, array $parameters = null)
+    public function all(string $query, ?array $parameters = null): ?array
     {
-        $query = $this->query($query, $parameters);
-        if ($query instanceof \PDOStatement) {
-            $results = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $statement = $this->query($query, $parameters);
+        if ($statement instanceof PDOStatement) {
+            $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
             $output = [];
 
             foreach ($results as $result) {
@@ -101,7 +104,7 @@ class Pdo
         return null;
     }
 
-    public function single($query, array $parameters = null)
+    public function single(string $query, ?array $parameters = null)
     {
         $result = $this->all($query . ' LIMIT 1', $parameters);
 
@@ -109,26 +112,24 @@ class Pdo
     }
 
     /**
-     * @param $query
+     * @param string $query
      * @param array|null $parameters
      */
-    public function nonQuery($query, array $parameters = null)
+    public function nonQuery(string $query, ?array $parameters = null): void
     {
         $this->query($query, $parameters);
     }
 
-    public function value($query, array $parameters = null)
+    public function value(string $query, ?array $parameters = null)
     {
-        $query = $this->query($query, $parameters);
+        $statement = $this->query($query, $parameters);
 
-        return ($query instanceof \PDOStatement) ? $query->fetchColumn() : null;
+        return ($statement instanceof PDOStatement) ? $statement->fetchColumn() : null;
     }
 
-    public function insert($query, array $parameters = null)
+    public function insert(string $query, array $parameters = null): ?string
     {
-        $query = $this->query($query, $parameters);
-
-        return ($query instanceof \PDOStatement) ? $this->connection->lastInsertId() : null;
+        return ($this->query($query, $parameters) instanceof PDOStatement) ? $this->connection->lastInsertId() : null;
     }
 
     /**
@@ -136,7 +137,7 @@ class Pdo
      *
      * @param string $file
      */
-    public function executeSql($file)
+    public function executeSql(string $file): void
     {
         $fp = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         $query = '';
@@ -154,15 +155,20 @@ class Pdo
     /**
      * @return \PDO
      */
-    public function getConnection()
+    public function getConnection(): \PDO
     {
         return $this->connection;
+    }
+
+    public function setConnection(\PDO $pdo): void
+    {
+        $this->connection = $pdo;
     }
 
     /**
      * @return string
      */
-    public function getQuery()
+    public function getQuery(): ?string
     {
         return $this->query;
     }

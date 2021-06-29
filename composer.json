@@ -32,6 +32,7 @@
     "ext-simplexml": "*"
   },
   "require-dev": {
+    "roave/security-advisories": "dev-latest",
     "phpunit/phpunit": "8.*",
     "mockery/mockery": "^1",
     "pecee/pixie": "^4.0"
@@ -39,6 +40,11 @@
   "suggest": {
     "filp/whoops": "^2.1",
     "pecee/pixie": "^4.0"
+  },
+  "scripts": {
+    "test": [
+      "phpunit tests"
+    ]
   },
   "autoload": {
     "psr-4": {

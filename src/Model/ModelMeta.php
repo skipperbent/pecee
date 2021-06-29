@@ -80,6 +80,25 @@ abstract class ModelMeta extends Model
         $this->updateIdentifier = $this->generateUpdateIdentifier();
     }
 
+    /**
+     * Parse database key-names to array types to for match when updating.
+     *
+     * @param string $startKey
+     * @param array $array
+     * @param array $output
+     */
+    protected function getAllKeys(string $startKey, array $array, array &$output): void
+    {
+        foreach ($array as $key => $value) {
+            $key = sprintf('%s[%s]', $startKey, $key);
+            if (is_array($value) === true) {
+                $this->getAllKeys($key, $value, $output);
+            } else {
+                $output[$key] = $value;
+            }
+        }
+    }
+
     protected function updateData(): void
     {
         if ($this->data === null || $this->isNew() === true || $this->getUpdateIdentifier() === $this->generateUpdateIdentifier()) {
@@ -95,29 +114,53 @@ abstract class ModelMeta extends Model
 
         foreach ($this->data->getData() as $key => $value) {
 
-            // Remove empty values from array
-            if(is_array($value) === true) {
-                $value = ArrayUtil::filter($value);
-                if(empty($value) === true) {
+            if (is_array($value) === true) {
+
+                // Remove empty values from array
+                if (empty($value) === true) {
                     $this->data->remove($key);
                     continue;
                 }
-            } else {
-                // Remove otherwise empty values
-                if ($value === null || trim($value) === '') {
-                    $this->data->remove($key);
-                    continue;
+
+                $keys = [];
+                $this->getAllKeys($key, $value, $keys);
+
+                foreach ($keys as $parsedKey => $val) {
+
+                    if ($value === null || trim($val) === '') {
+                        continue;
+                    }
+
+                    if (isset($cf[strtolower($parsedKey)]) === true) {
+                        $existingField = $cf[strtolower($parsedKey)];
+                        unset($cf[$parsedKey]);
+                        $existingField->value = $val;
+                        $existingField->save();
+                    } else {
+                        $field = $this->onNewDataItem();
+                        $field->parseFieldData($parsedKey, $val);
+                    }
                 }
+
+                continue;
+            }
+
+            // Remove otherwise empty values
+            if ($value === null || trim($value) === '') {
+                $this->data->remove($key);
+                continue;
             }
 
             if (isset($cf[strtolower($key)]) === true) {
-                if ($cf[$key]->value === $value) {
+
+                /* @var $existingField IModelMetaField */
+                $existingField = $cf[$key];
+
+                if ($existingField->value === $value) {
                     unset($cf[$key]);
                     continue;
                 }
 
-                /* @var $existingField IModelMetaField */
-                $existingField = $cf[$key];
                 $existingField->parseFieldData($key, $value);
 
                 unset($cf[$key]);
