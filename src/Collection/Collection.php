@@ -6,6 +6,7 @@ use ArrayAccess;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
+use Pecee\Model\Model;
 
 class Collection implements ArrayAccess, IteratorAggregate, Countable, JsonSerializable
 {

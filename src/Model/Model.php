@@ -562,6 +562,10 @@ abstract class Model implements IteratorAggregate, JsonSerializable
             if ($this->invokeMethod($with)) {
                 return;
             }
+
+            if($this->{$with} !== null) {
+                $output = $this->{$with};
+            }
         }
 
         $this->results['rows'][$this->rename[$name] ?? $name] = $output;

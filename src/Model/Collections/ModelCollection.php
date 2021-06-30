@@ -3,11 +3,17 @@
 namespace Pecee\Model\Collections;
 
 use Pecee\Collection\Collection;
+use Pecee\Model\Model;
 use Pecee\Model\ModelMeta;
 use Pecee\Str;
 
 class ModelCollection extends Collection
 {
+
+    /**
+     * @var array|Model[]
+     */
+    protected array $rows = [];
 
     protected string $type = '';
 
@@ -81,11 +87,10 @@ class ModelCollection extends Collection
     public function filter(string $key, string $value, string $delimiter = '='): self
     {
         $out = [];
-        if ($this->hasRows()) {
+        if ($this->hasRows() === true) {
 
             $keys = (array)$key;
 
-            /* @var $row \Pecee\Model\Model */
             foreach ($this->getRows() as $rowKey => $row) {
 
                 if (in_array($row, $out, true) !== false) {
@@ -96,42 +101,67 @@ class ModelCollection extends Collection
 
                     $rowValue = null;
 
-                    if ($rowKey === $key) {
+                    if ($rowKey === $_key) {
                         $rowValue = $value;
-                    } elseif ($row instanceof ModelMeta && isset($row->data->{$_key}) === true) {
-                        $rowValue = $row->data->{$_key};
+                    } elseif ($row instanceof ModelMeta && isset($row->{$_key}) === true) {
+                        $rowValue = $row->{$_key};
                     }
 
                     if ($rowValue === null) {
                         continue;
                     }
 
-                    if ($delimiter === '>') {
-                        if ($rowValue > $value) {
-                            $out[] = $row;
+                    switch ($delimiter) {
+                        default:
+                        {
+                            if ($rowValue === $value) {
+                                $out[] = $row;
+                            }
+                            break;
                         }
-                    } elseif ($delimiter === '<') {
-                        if ($rowValue < $value) {
-                            $out[] = $row;
+                        case '>':
+                        {
+                            if ($rowValue > $value) {
+                                $out[] = $row;
+                            }
+                            break;
                         }
-                    } elseif ($delimiter === '>=') {
-                        if ($rowValue >= $value) {
-                            $out[] = $row;
+                        case '<':
+                        {
+                            if ($rowValue < $value) {
+                                $out[] = $row;
+                            }
+                            break;
                         }
-                    } elseif ($delimiter === '<=') {
-                        if ($rowValue <= $value) {
-                            $out[] = $row;
+                        case '>=':
+                        {
+                            if ($rowValue >= $value) {
+                                $out[] = $row;
+                            }
+                            break;
                         }
-                    } elseif ($delimiter === '!=') {
-                        if ((string)$rowValue !== (string)$value) {
-                            $out[] = $row;
+                        case '<=':
+                        {
+                            if ($rowValue <= $value) {
+                                $out[] = $row;
+                            }
+                            break;
                         }
-                    } elseif ($delimiter === '*') {
-                        if (strtolower($rowValue) === (string)$value || stripos($rowValue, $value) !== false) {
-                            $out[] = $row;
+                        case '!=':
+                        case '!==':
+                        {
+                            if ((string)$rowValue !== $value) {
+                                $out[] = $row;
+                            }
+                            break;
                         }
-                    } else if ($rowValue === $value) {
-                        $out[] = $row;
+                        case '*':
+                        {
+                            if (strtolower($rowValue) === $value || stripos($rowValue, $value) !== false) {
+                                $out[] = $row;
+                            }
+                            break;
+                        }
                     }
                 }
             }
@@ -186,8 +216,6 @@ class ModelCollection extends Collection
             }
         }
 
-        /* @var $row \Pecee\Model\Model */
-
         for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
 
             $row = $this->rows[$i]->toArray();
@@ -216,9 +244,7 @@ class ModelCollection extends Collection
     public function toDataSet(string $valueRow = 'id', string $displayRow = 'id'): array
     {
         $output = [];
-        /* @var $row \Pecee\Model\Model */
-        for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
-            $row = $this->rows[$i];
+        foreach ($this->rows as $row) {
             $output[$row->{$displayRow}] = $row->{$valueRow};
         }
 
