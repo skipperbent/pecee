@@ -261,7 +261,7 @@ abstract class Widget extends Base
     {
         debug('START: rendering content-template: ' . $this->_contentTemplate);
 
-        if ($this->_contentHtml === null && $this->_contentTemplate !== null) {
+        if ($this->_contentHtml === null && $this->_contentTemplate !== '') {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_clean();
