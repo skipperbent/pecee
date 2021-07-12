@@ -382,12 +382,17 @@ class ModelNode extends ModelMeta
      */
     public function save(array $data = []): self
     {
+        $isNew = $this->isNew();
+
         $this->mergeData($data);
-        $this->updateOrder();
+
+        if($isNew === true) {
+            $this->updateOrder();
+        }
 
         $results = parent::save($data);
 
-        if ($this->isNew() === true || $this->generatePath === true) {
+        if ($isNew === true || $this->generatePath === true) {
             $this->generatePath();
         }
 
@@ -611,21 +616,15 @@ class ModelNode extends ModelMeta
 
     public function updateOrder(): void
     {
-        // Ignore if order is already set
-        if ($this->order !== null) {
-            return;
+        $orderQuery = static::instance()->select(['id']);
+
+        if($this->parent_id === null) {
+            $orderQuery->whereNull('parent_id');
+        } else {
+            $orderQuery->filterParentId($this->parent_id);
         }
 
-        $order = 0;
-        if ($this->isNew() === true && $this->parent_id !== null) {
-            // Starts with 0 so will be automaticially incremented
-            $order = static::instance()
-                ->select(['id'])
-                ->filterParentId($this->parent_id)
-                ->count('id');
-        }
-
-        $this->setOrder($order);
+        $this->setOrder($orderQuery->count('id'));
     }
 
     public function restore(?string $parentId = null): void

@@ -28,18 +28,15 @@ class BelongsTo extends ModelRelation
         parent::__construct($related, $child);
     }
 
-    public function addConstraints(): Model
+    public function addConstraints(): void
     {
         if ($this->constraints === true) {
             // For belongs to relationships, which are essentially the inverse of has one
             // or has many relationships, we need to actually query on the primary key
             // of the related models matching on the foreign key that's on a parent.
-            $table = $this->related->getTable();
 
-            $this->related->where($table . '.' . $this->ownerKey, '=', $this->child->{$this->foreignKey});
+            $this->related->where("{$this->related->getTable()}.$this->ownerKey", '=', $this->child->{$this->foreignKey});
         }
-
-        return $this->related;
     }
 
     /**
@@ -48,7 +45,7 @@ class BelongsTo extends ModelRelation
      */
     public function getResults(): ?Model
     {
-        return $this->addConstraints()->first() ?: $this->getDefaultFor($this->related);
+        return $this->first() ?: $this->getDefaultFor($this->related);
     }
 
 }

@@ -182,7 +182,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         $localKey = $localKey ?: $this->getPrimaryKey();
 
         return new HasOne(
-            $instance, $this, $instance->getTable() . '.' . $foreignKey, $localKey
+            $instance, $this, "{$instance->getTable()}.$foreignKey", $localKey
         );
     }
 

@@ -32,6 +32,26 @@ abstract class ModelRelation
     }
 
     /**
+     * @return static|null
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function first()
+    {
+        $this->addConstraints();
+        return $this->related->first();
+    }
+
+    /**
+     * @return ModelCollection|static[]
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function all()
+    {
+        $this->addConstraints();
+        return $this->related->all();
+    }
+
+    /**
      * Set alias
      *
      * @param string $alias
@@ -91,7 +111,7 @@ abstract class ModelRelation
         return $parent;
     }
 
-    abstract public function addConstraints(): Model;
+    abstract public function addConstraints(): void;
 
     /**
      * @return Model|ModelCollection

@@ -20,14 +20,12 @@ class HasMany extends ModelRelation
         parent::__construct($related, $parent);
     }
 
-    public function addConstraints(): Model
+    public function addConstraints(): void
     {
         if ($this->constraints === true) {
             $this->related->where($this->foreignKey, '=', $this->parent->{$this->localKey});
             $this->related->whereNotNull($this->foreignKey);
         }
-
-        return $this->related;
     }
 
     /**
@@ -36,7 +34,7 @@ class HasMany extends ModelRelation
      */
     public function getResults(): ?ModelCollection
     {
-        return $this->addConstraints()->all() ?: $this->getDefaultFor($this->related);
+        return $this->all() ?: $this->getDefaultFor($this->related);
     }
 
 }

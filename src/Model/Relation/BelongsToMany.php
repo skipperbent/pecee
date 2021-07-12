@@ -31,15 +31,13 @@ class BelongsToMany extends ModelRelation
     /**
      * @throws \Pecee\Pixie\Exception
      */
-    public function addConstraints(): Model
+    public function addConstraints(): void
     {
         $this->performJoin();
 
         if ($this->constraints === true) {
             $this->addWhereConstraints();
         }
-
-        return $this->related;
     }
 
     /**
@@ -48,7 +46,7 @@ class BelongsToMany extends ModelRelation
      */
     public function getResults(): ModelCollection
     {
-        return $this->addConstraints()->all();
+        return $this->all();
     }
 
     /**
@@ -63,11 +61,8 @@ class BelongsToMany extends ModelRelation
         // We need to join to the intermediate table on the related model's primary
         // key column with the intermediate table's foreign key for the related
         // model instance. Then we can set the "where" for the parent models.
-        $baseTable = $this->related->getTable();
 
-        $key = $baseTable . '.' . $this->relatedKey;
-
-        $model->join($this->table, $key, '=', $this->getQualifiedRelatedPivotKeyName());
+        $model->join($this->table, "{$this->related->getTable()}.{$this->relatedKey}", '=', $this->getQualifiedRelatedPivotKeyName());
 
         return $this;
     }
@@ -93,7 +88,7 @@ class BelongsToMany extends ModelRelation
      */
     public function getQualifiedForeignPivotKeyName(): string
     {
-        return $this->table . '.' . $this->foreignPivotKey;
+        return "{$this->table}.{$this->foreignPivotKey}";
     }
 
     /**
@@ -103,7 +98,7 @@ class BelongsToMany extends ModelRelation
      */
     public function getQualifiedRelatedPivotKeyName(): string
     {
-        return $this->table . '.' . $this->relatedPivotKey;
+        return "{$this->table}.{$this->relatedPivotKey}";
     }
 
 }

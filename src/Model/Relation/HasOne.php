@@ -19,15 +19,13 @@ class HasOne extends ModelRelation
         parent::__construct($related, $parent);
     }
 
-    public function addConstraints(): Model
+    public function addConstraints(): void
     {
         if ($this->constraints === true) {
             $this->related
                 ->where($this->foreignKey, '=', $this->parent->{$this->localKey})
                 ->whereNotNull($this->foreignKey);
         }
-
-        return $this->related;
     }
 
     /**
@@ -36,7 +34,7 @@ class HasOne extends ModelRelation
      */
     public function getResults(): ?Model
     {
-        return $this->addConstraints()->first() ?: $this->getDefaultFor($this->related);
+        return $this->first() ?: $this->getDefaultFor($this->related);
     }
 
 }
