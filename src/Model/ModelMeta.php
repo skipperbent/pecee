@@ -109,7 +109,7 @@ abstract class ModelMeta extends Model
 
         $cf = [];
         foreach ($currentFields as $field) {
-            $cf[strtolower($field->{$field->getDataKeyName()})] = $field;
+            $cf[$field->{$field->getDataKeyName()}] = $field;
         }
 
         foreach ($this->data->getData() as $key => $value) {
@@ -131,8 +131,8 @@ abstract class ModelMeta extends Model
                         continue;
                     }
 
-                    if (isset($cf[strtolower($parsedKey)]) === true) {
-                        $existingField = $cf[strtolower($parsedKey)];
+                    if (isset($cf[$parsedKey]) === true) {
+                        $existingField = $cf[$parsedKey];
                         unset($cf[$parsedKey]);
                         $existingField->value = $val;
                         $existingField->save();
@@ -151,7 +151,7 @@ abstract class ModelMeta extends Model
                 continue;
             }
 
-            if (isset($cf[strtolower($key)]) === true) {
+            if (isset($cf[$key]) === true) {
 
                 /* @var $existingField IModelMetaField */
                 $existingField = $cf[$key];

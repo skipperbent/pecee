@@ -101,6 +101,11 @@ class ArrayUtil
 
         foreach ($arrays as $array) {
             reset($base);
+
+            if(is_array($array) === false) {
+                continue;
+            }
+
             foreach ($array as $key => $value) {
                 if (is_array($value) && @is_array($base[$key])) {
                     $base[$key] = static::mergeRecursive($base[$key], $value);
