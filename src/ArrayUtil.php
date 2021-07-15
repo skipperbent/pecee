@@ -71,16 +71,18 @@ class ArrayUtil
         return $array;
     }
 
-    /*
-    * @param $key string
-    * @param $arr array
-    * @return null|string|array
-    */
-    public static function valueRecursive(array $arr, $key = null): array
+    /**
+     * Get recursive value from array
+     *
+     * @param array $arr
+     * @param string|null $key
+     * @return array
+     */
+    public static function valueRecursive(array $arr, ?string $key = null): array
     {
         $val = [];
         array_walk_recursive($arr, static function ($v, $k) use ($key, &$val) {
-            if ($k === $key || $key === null) {
+            if ($key === null || $k === $key) {
                 $val[] = $v;
             }
         });
