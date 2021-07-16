@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Widget;
 
 use Pecee\UI\Phtml\Phtml;
@@ -6,13 +7,17 @@ use Pecee\UI\Phtml\Phtml;
 abstract class WidgetTaglib extends Widget
 {
 
-    protected $_pHtmlCacheDir;
+    protected bool $injectDependencies = true;
+    protected string $_pHtmlCacheDir;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->getSite()->addWrappedJs('pecee-widget.js');
+        if ($this->injectDependencies === true) {
+            $this->getSite()->addWrappedJs('pecee-widget.js');
+        }
+
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }
 
@@ -25,6 +30,7 @@ abstract class WidgetTaglib extends Widget
     {
         ob_start();
         eval('?>' . $content);
+
         return ob_get_clean();
     }
 

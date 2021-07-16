@@ -54,7 +54,7 @@ abstract class ModelMeta extends Model
             // Add special array types (name[index])
             if (strpos($key, '[') !== false) {
 
-                preg_match_all('/\[([\w]+)\]/', $key, $indexes);
+                preg_match_all('/\[([\w\s]+)\]/', $key, $indexes);
 
                 $key = substr($key, 0, strpos($key, '['));
                 $reverse = array_reverse($indexes[1]);

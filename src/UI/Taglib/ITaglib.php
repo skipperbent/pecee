@@ -4,7 +4,5 @@ namespace Pecee\UI\Taglib;
 
 interface ITaglib
 {
-
-    public function callTag($tag, $attrs, $body);
-
+    public function callTag(string $tag, array $attrs, ?string $body = null);
 }

@@ -8,7 +8,7 @@ abstract class ModelMetaField extends Model implements IModelMetaField
 
     public function onMapData(string $key, $value): void
     {
-        $this->{$this->getDataKeyName()} = str_replace(' ', '', $key);
+        $this->{$this->getDataKeyName()} = $key;
         $this->{$this->getDataValueName()} = $value;
     }
 
