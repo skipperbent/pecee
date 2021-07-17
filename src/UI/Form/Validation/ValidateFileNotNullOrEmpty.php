@@ -5,7 +5,7 @@ use Pecee\Http\Input\InputFile;
 
 class ValidateFileNotNullOrEmpty extends ValidateFile
 {
-    protected $allowEmpty = false;
+    protected bool $allowEmpty = false;
 
     public function validates(): bool
     {
@@ -13,7 +13,7 @@ class ValidateFileNotNullOrEmpty extends ValidateFile
             return false;
         }
 
-        return ($this->input->hasError() === false && trim($this->input->getName()) !== false && $this->input->getSize() > 0 && $this->input->getError() === 0);
+        return ($this->input->hasError() === false && trim($this->input->getName()) !== '' && $this->input->getSize() > 0 && $this->input->getError() === 0);
     }
 
     public function getError(): string

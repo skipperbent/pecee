@@ -5,10 +5,10 @@ use Pecee\Session\Session;
 
 class ValidateSession extends ValidateInput
 {
-    protected $allowEmpty = false;
-    protected $sessionName;
+    protected bool $allowEmpty = false;
+    protected string $sessionName;
 
-    public function __construct($sessionName)
+    public function __construct(string $sessionName)
     {
         $this->sessionName = $sessionName;
     }

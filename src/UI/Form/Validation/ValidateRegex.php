@@ -4,23 +4,23 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateRegex extends ValidateInput
 {
-    protected $regex;
-    protected $errorMessage;
+    protected string $regex;
+    protected string $error = '';
 
-    public function __construct($regex, $errorMessage)
+    public function __construct(string $regex, string $error)
     {
         $this->regex = $regex;
-        $this->errorMessage = $errorMessage;
+        $this->error = $error;
     }
 
     public function validates(): bool
     {
-        return (preg_match($this->regex, $this->input->getValue()) !== 0);
+        return (preg_match($this->regex, $this->input->getValue()) === 1);
     }
 
     public function getError(): string
     {
-        return $this->errorMessage;
+        return $this->error;
     }
 
 }

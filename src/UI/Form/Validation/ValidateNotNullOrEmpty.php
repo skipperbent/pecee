@@ -3,7 +3,7 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateNotNullOrEmpty extends ValidateInput
 {
-    protected $allowEmpty = false;
+    protected bool $allowEmpty = false;
 
     public function validates(): bool
     {

@@ -2,10 +2,11 @@
 namespace Pecee\UI\Form\Validation;
 
 use Carbon\Carbon;
+use Exception;
 
 class ValidateDate extends ValidateInput
 {
-    protected $format;
+    protected ?string $format;
 
     public function __construct(?string $format = null)
     {
@@ -20,7 +21,7 @@ class ValidateDate extends ValidateInput
             } else {
                 Carbon::createFromFormat($this->format, $this->input->getValue(), 'UTC');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return false;
         }
 

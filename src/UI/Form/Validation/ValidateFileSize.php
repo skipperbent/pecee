@@ -4,20 +4,20 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateFileSize extends ValidateFile
 {
-    public const FORMAT_KB = 0x1;
-    public const FORMAT_MB = 0x2;
-    public const FORMAT_GB = 0x3;
-    public const FORMAT_TB = 0x4;
+    public const FORMAT_KB = 'format_kb';
+    public const FORMAT_MB = 'format_mb';
+    public const FORMAT_GB = 'format_gb';
+    public const FORMAT_TB = 'format_tb';
 
-    protected $error;
-    protected $sizeMin;
-    protected $sizeMax;
-    protected $sizeFormat;
+    protected string $error = '';
+    protected int $sizeMax;
+    protected ?int $sizeMin;
+    protected string $sizeFormat;
 
-    public function __construct($sizeMax, $sizeMin = null, $sizeFormat = self::FORMAT_KB)
+    public function __construct(int $sizeMax, ?int $sizeMin = null, string $sizeFormat = self::FORMAT_KB)
     {
-        $this->sizeMin = $sizeMin;
         $this->sizeMax = $sizeMax;
+        $this->sizeMin = $sizeMin;
         $this->sizeFormat = $sizeFormat;
     }
 

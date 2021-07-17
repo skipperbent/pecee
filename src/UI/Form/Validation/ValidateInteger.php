@@ -5,7 +5,7 @@ use Pecee\Integer;
 
 class ValidateInteger extends ValidateInput
 {
-    public function validates($strict = true): bool
+    public function validates(bool $strict = true): bool
     {
         if($strict === false) {
             return Integer::isNummeric($this->input->getValue());

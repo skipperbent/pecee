@@ -3,9 +3,9 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateMinLength extends ValidateInput
 {
-    protected $minimumLength;
+    protected int $minimumLength;
 
-    public function __construct($minimumLength = 5)
+    public function __construct(int $minimumLength = 5)
     {
         $this->minimumLength = $minimumLength;
     }

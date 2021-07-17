@@ -5,13 +5,13 @@ use Pecee\Url;
 
 class ValidateUri extends ValidateInput
 {
-    public const TYPE_ABSOLUTE = 0x1;
-    public const TYPE_RELATIVE = 0x2;
-    public const TYPE_BOTH = 0x3;
+    public const TYPE_ABSOLUTE = 'absolute';
+    public const TYPE_RELATIVE = 'relative';
+    public const TYPE_BOTH = 'both';
 
-    protected $type;
+    protected string $type;
 
-    public function __construct($type = self::TYPE_ABSOLUTE)
+    public function __construct(string $type = self::TYPE_ABSOLUTE)
     {
         $this->type = $type;
     }

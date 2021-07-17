@@ -5,10 +5,10 @@ use Pecee\Integer;
 
 class ValidateMaxValue extends ValidateInput
 {
-    protected $maxValue;
-    protected $error;
+    protected int $maxValue;
+    protected string $error = '';
 
-    public function __construct($maxValue)
+    public function __construct(int $maxValue)
     {
         $this->maxValue = $maxValue;
     }
@@ -17,14 +17,15 @@ class ValidateMaxValue extends ValidateInput
     {
         if (Integer::isInteger($this->input->getValue()) === false) {
             $this->error = lang('%s is not a valid number', $this->input->getName());
+            return false;
         }
 
         if ($this->input->getValue() > $this->maxValue) {
             $this->error = lang('%s cannot be greater than %s', $this->input->getName(), $this->maxValue);
+            return false;
         }
 
-        return ($this->error !== null);
-
+        return true;
     }
 
     public function getError(): string

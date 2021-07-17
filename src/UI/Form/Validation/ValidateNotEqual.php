@@ -3,11 +3,11 @@ namespace Pecee\UI\Form\Validation;
 
 class ValidateNotEqual extends ValidateInput
 {
-    protected $value;
-    protected $strict;
-    protected $error;
+    protected string $value;
+    protected bool $strict;
+    protected string $error = '';
 
-    public function __construct($value, $strict = false)
+    public function __construct(string $value, bool $strict = false)
     {
         $this->value = $value;
         $this->strict = $strict;

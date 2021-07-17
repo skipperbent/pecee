@@ -14,13 +14,13 @@ abstract class ValidateInput
      * When set to true empty values will not trigger validation-error unless defined in custom validation-method.
      * @var bool
      */
-    protected $allowEmpty = true;
+    protected bool $allowEmpty = true;
 
     /**
      * @var IInputItem
      */
-    protected $input;
-    protected $placement;
+    protected IInputItem $input;
+    protected ?string $placement = null;
 
     /**
      * Custom validation method

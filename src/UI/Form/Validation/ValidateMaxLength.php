@@ -4,9 +4,9 @@ namespace Pecee\UI\Form\Validation;
 class ValidateMaxLength extends ValidateInput
 {
 
-    protected $maxLength;
+    protected int $maxLength;
 
-    public function __construct($maxLength = 50)
+    public function __construct(int $maxLength = 50)
     {
         $this->maxLength = $maxLength;
     }
