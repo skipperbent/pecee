@@ -398,4 +398,15 @@ class Application
         return $this->urlHandler;
     }
 
+    /**
+     * Returns true if app is running from composer
+     * 
+     * @return bool
+     */
+    public function isComposer(): bool
+    {
+        global $argv;
+        return (PHP_SAPI === 'cli' && isset($argv[0]) && stripos($argv[0], 'composer') !== false);
+    }
+
 }
