@@ -29,7 +29,7 @@ class ControllerWrap
         $this->path = env('JS_PATH', 'public/js/');
     }
 
-    public function js()
+    public function js(): void
     {
         $this->extension = 'js';
         $this->contentType = 'application/javascript';
@@ -38,7 +38,7 @@ class ControllerWrap
         $this->wrap();
     }
 
-    public function css()
+    public function css(): void
     {
         $this->extension = 'css';
         $this->contentType = 'text/css';
@@ -77,7 +77,7 @@ class ControllerWrap
         return $this->path;
     }
 
-    public function wrap()
+    public function wrap(): void
     {
         if (is_dir($this->getCacheDirectory()) === false && mkdir($this->getCacheDirectory(), 0755, true) === false) {
             throw new \ErrorException('Failed to create temp-directory');

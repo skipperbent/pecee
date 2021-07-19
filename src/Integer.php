@@ -9,12 +9,12 @@ class Integer
      * @param string $str
      * @return bool
      */
-    public static function isInteger($str): bool
+    public static function isInteger(string $str): bool
     {
         return (filter_var($str, FILTER_VALIDATE_INT) !== false);
     }
 
-    public static function isNummeric($val): bool
+    public static function isNummeric(string $val): bool
     {
         return self::isInteger($val) || is_numeric($val);
     }

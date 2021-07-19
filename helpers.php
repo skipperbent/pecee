@@ -9,8 +9,6 @@ use Pecee\Http\Request;
 use Pecee\Http\Response;
 use Pecee\Http\Url;
 
-request()->app = new \Pecee\Application\Application();
-
 /**
  * Get url for a route by using either name/alias, class or method name.
  *
@@ -104,7 +102,7 @@ function lang($key, ...$args): string
  * Requires DEBUG=1 to be present in your env file.
  *
  * @param string $text
- * @param array ...$args
+ * @param mixed ...$args
  */
 function debug(string $text, ...$args): void
 {

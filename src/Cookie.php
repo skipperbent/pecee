@@ -28,9 +28,9 @@ class Cookie
         return setcookie($id, $value, $expireTime, $path, $domain, $secure);
     }
 
-    public static function get(string $id, $defaultValue = null): ?string
+    public static function get(string $id, ?string $defaultValue = null): ?string
     {
-        return static::exists($id) ? $_COOKIE[$id] : $defaultValue;
+        return $_COOKIE[$id] ?? $defaultValue;
     }
 
     public static function delete(string $id): void

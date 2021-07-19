@@ -14,7 +14,6 @@ abstract class Base
     protected string $errorType = 'danger';
     protected string $defaultMessagePlacement = 'default';
     protected string $_inputSessionKey = 'InputValues';
-    protected array $_validations = [];
 
     protected function onInputError(IInputItem $input, string $error): void
     {
@@ -69,18 +68,18 @@ abstract class Base
         Session::set($this->_inputSessionKey, $values);
     }
 
-    protected function validate(array $validation): void
+    protected function validate(array $validation, ...$requestMethod): void
     {
-        $this->performValidation($validation);
+        $this->performValidation($validation, ...$requestMethod);
     }
 
-    protected function performValidation(array $validation): void
+    protected function performValidation(array $validation, ...$requestMethod): void
     {
         foreach ($validation as $key => $validations) {
 
-            $input = input()->find($key) ?? new InputItem($key, null);
+            $input = input()->find($key, $requestMethod) ?? new InputItem($key, null);
             $inputs = ($input instanceof IInputItem) ? [$input] : $input;
-            $validations = \is_array($validations) === false ? [$validations] : $validations;
+            $validations = is_array($validations) === false ? [$validations] : $validations;
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
             foreach ($validations as $validateClass) {
@@ -135,7 +134,7 @@ abstract class Base
     {
         $messages = $this->getMessages($type, $placement);
 
-        return \count($messages) > 0 ? $messages[0] : null;
+        return count($messages) > 0 ? $messages[0] : null;
     }
 
     /**
@@ -162,7 +161,7 @@ abstract class Base
 
     public function hasMessages(?string $type = null, ?string $placement = null): bool
     {
-        return (\count($this->getMessages($type, $placement)) > 0);
+        return (count($this->getMessages($type, $placement)) > 0);
     }
 
     /**
@@ -213,7 +212,6 @@ abstract class Base
     {
         $output = [];
 
-        /* @var $error FormMessage */
         foreach ($this->getMessages($this->errorType, $placement) as $error) {
             $output[] = $error->getMessage();
         }
@@ -226,7 +224,6 @@ abstract class Base
         $search = $this->sessionMessage()->get($this->errorType);
 
         if ($search !== null) {
-            /* @var $message FormMessage */
             foreach ($search as $message) {
                 if ($message->getIndex() === $index) {
                     return $message->getMessage();

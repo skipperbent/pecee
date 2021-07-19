@@ -11,7 +11,7 @@ class Boolean
      * @param mixed $defaultValue
      * @return bool
      */
-    public static function parse($str, $defaultValue = false): bool
+    public static function parse(string $str, $defaultValue = false): bool
     {
         $bool = filter_var($str, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 

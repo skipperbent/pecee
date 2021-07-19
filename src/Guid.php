@@ -14,7 +14,7 @@ class Guid
      */
     public static function create(bool $separator = false): string
     {
-        if (\function_exists('com_create_guid')) {
+        if (function_exists('com_create_guid')) {
             $guid = trim(com_create_guid(), '{}');
 
             return ($separator === false) ? str_replace('-', '', $guid) : $guid;
@@ -32,42 +32,42 @@ class Guid
      * Encrypt string
      *
      * @param string $key
-     * @param string $input
-     * @param string|null $method
+     * @param mixed $data
+     * @param string|null $encryptionMethod
      * @return string
      * @throws \RuntimeException
      */
-    public static function encrypt($key, $input, $method = null): string
+    public static function encrypt(string $key, $data, ?string $encryptionMethod = null): string
     {
-        if ($method === null) {
-            $method = app()->getEncryptionMethod();
+        if ($encryptionMethod === null) {
+            $encryptionMethod = app()->getEncryptionMethod();
         }
 
         $key = substr(hash('sha256', $key, true), 0, 16);
 
         try {
-            $iv = \random_bytes(16);
+            $iv = random_bytes(16);
         } catch (\Exception $e) {
             throw new \RuntimeException('IV generation failed ' . $e->getMessage(), $e->getCode());
         }
 
-        $input = openssl_encrypt($input, $method, $key, 0, $iv);
+        $output = openssl_encrypt($data, $encryptionMethod, $key, 0, $iv);
 
-        return base64_encode($input . '|' . bin2hex($iv));
+        return base64_encode($output . '|' . bin2hex($iv));
     }
 
     /**
      * Decrypt key
      *
      * @param string $key
-     * @param string $data
+     * @param mixed $data
      * @param string|null $method
      * @return bool|string
      */
-    public static function decrypt($key, $data, $method = null)
+    public static function decrypt(string $key, $data, ?string $encryptionMethod = null)
     {
-        if ($method === null) {
-            $method = app()->getEncryptionMethod();
+        if ($encryptionMethod === null) {
+            $encryptionMethod = app()->getEncryptionMethod();
         }
 
         $key = (string)substr(hash('sha256', $key, true), 0, 16);
@@ -79,7 +79,7 @@ class Guid
             return false;
         }
 
-        return openssl_decrypt($data, $method, $key, 0, $binary);
+        return openssl_decrypt($data, $encryptionMethod, $key, 0, $binary);
     }
 
     /**

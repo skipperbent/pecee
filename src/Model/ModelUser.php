@@ -32,12 +32,11 @@ class ModelUser extends ModelMeta implements IUserAuthentication
     public const ERROR_TYPE_EXISTS = 0x3;
 
     /**
-     * @var self
+     * @var static
      */
     protected static ?self $instance = null;
     protected static int $ticketExpireMinutes = 60;
 
-    protected string $dataPrimary = 'user_id';
     protected string $table = 'user';
     protected array $columns = [
         'id',

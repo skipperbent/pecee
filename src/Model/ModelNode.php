@@ -4,7 +4,6 @@ namespace Pecee\Model;
 
 use Carbon\Carbon;
 use InvalidArgumentException;
-use Pecee\Boolean;
 use Pecee\Guid;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
@@ -56,7 +55,6 @@ class ModelNode extends ModelMeta
 
     protected ModelCollection $children;
     protected string $defaultType = '';
-    protected string $dataPrimary = 'node_id';
     protected string $table = 'node';
     protected array $columns = [
         'id',

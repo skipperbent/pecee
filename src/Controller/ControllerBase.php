@@ -17,9 +17,9 @@ abstract class ControllerBase extends Base
      * @param array $validation
      * @throws ValidationException
      */
-    protected function validate(array $validation): void
+    protected function validate(array $validation, ...$requestMethod): void
     {
-        parent::validate($validation);
+        parent::validate($validation, $requestMethod);
 
         if ($this->hasErrors() === true) {
             $exception = new ValidationException(implode(', ', $this->getErrorsArray()), 400);

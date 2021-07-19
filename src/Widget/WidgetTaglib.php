@@ -2,6 +2,8 @@
 
 namespace Pecee\Widget;
 
+use ErrorException;
+use Exception;
 use Pecee\UI\Phtml\Phtml;
 
 abstract class WidgetTaglib extends Widget
@@ -37,20 +39,19 @@ abstract class WidgetTaglib extends Widget
     protected function renderFile($file): string
     {
         $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $file);
-        $output = '';
 
         if (is_file($cacheFile) === true) {
             if (app()->getDebugEnabled() === false) {
                 return $this->renderPhp(file_get_contents($cacheFile));
-            } else {
-                unlink($cacheFile);
             }
+
+            unlink($cacheFile);
         }
 
         try {
 
             if ((is_dir($this->_pHtmlCacheDir) === false) && !mkdir($concurrentDirectory = $this->_pHtmlCacheDir, 0755, true) && !is_dir($concurrentDirectory)) {
-                throw new \ErrorException('Failed to create temp-cache directory');
+                throw new ErrorException('Failed to create temp-cache directory');
             }
 
             debug('Parsing Phtml template');
@@ -66,7 +67,7 @@ abstract class WidgetTaglib extends Widget
 
             $output = $this->renderPhp($output);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $output = $e->getMessage();
         }
 

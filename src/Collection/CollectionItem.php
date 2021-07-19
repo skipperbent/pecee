@@ -1,7 +1,11 @@
 <?php
+
 namespace Pecee\Collection;
 
-class CollectionItem implements \IteratorAggregate
+use ArrayIterator;
+use IteratorAggregate;
+
+class CollectionItem implements IteratorAggregate
 {
     protected array $data = [];
 
@@ -72,7 +76,7 @@ class CollectionItem implements \IteratorAggregate
      */
     public function each(callable $callback): self
     {
-        foreach($this->getData() as $key => $row) {
+        foreach ($this->getData() as $key => $row) {
             $callback($row, $key);
         }
 
@@ -88,7 +92,7 @@ class CollectionItem implements \IteratorAggregate
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->data);
+        return new ArrayIterator($this->data);
     }
 
 }

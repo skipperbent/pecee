@@ -2,8 +2,6 @@
 
 namespace Pecee\Application;
 
-use Pecee\Application\UrlHandler\IUrlHandler;
-use Pecee\Application\UrlHandler\UrlHandler;
 use Pecee\Boolean;
 use Pecee\Session\Session;
 use Pecee\Translation\Translation;
@@ -13,46 +11,28 @@ class Application
 {
     public const CHARSET_UTF8 = 'UTF-8';
 
-    protected $debugEnabled = false;
+    protected bool $debugEnabled = false;
+    public ?Debug $debug = null;
+    public Translation $translation;
+    public Site $site;
 
-    /**
-     * @var Debug
-     */
-    public $debug;
-
-    /**
-     * @var Translation
-     */
-    public $translation;
-
-    /**
-     * @var Site
-     */
-    public $site;
-
-    protected $adminIps = [
+    protected array $adminIps = [
         '127.0.0.1',
         '::1',
     ];
 
-    protected $parameters = [];
-    protected $charset;
-    protected $timezone;
-    protected $defaultLocale;
-    protected $locale;
-    protected $modules = [];
-    protected $cssWrapRouteName = 'pecee.css.wrap';
-    protected $jsWrapRouteName = 'pecee.js.wrap';
-    protected $cssWrapRouteUrl = '/css-wrap';
-    protected $jsWrapRouteUrl = '/js-wrap';
-    protected $disableFrameworkRoutes = false;
-    protected $encryptionMethod = 'AES-256-CBC';
-    protected $settings;
-    /**
-     * Callback for handling urls
-     * @var IUrlHandler
-     */
-    protected $urlHandler;
+    protected array $parameters = [];
+    protected string $charset;
+    protected string $timezone;
+    protected string $defaultLocale;
+    protected string $locale;
+    protected array $modules = [];
+    protected string $cssWrapRouteName = 'pecee.css.wrap';
+    protected string $jsWrapRouteName = 'pecee.js.wrap';
+    protected string $cssWrapRouteUrl = '/css-wrap';
+    protected string $jsWrapRouteUrl = '/js-wrap';
+    protected bool $disableFrameworkRoutes = false;
+    protected string $encryptionMethod = 'AES-256-CBC';
 
     public function __construct()
     {
@@ -61,10 +41,10 @@ class Application
         $this->site = new Site();
         $this->translation = new Translation();
         $this->charset = static::CHARSET_UTF8;
-        $this->urlHandler = new UrlHandler();
 
         // Default stuff
-        $this->setTimezone('UTC');
+
+        $this->setTimezone(env('TIMEZONE', 'UTC'));
         $this->setDefaultLocale('en_gb');
         $this->setLocale('en_gb');
         $this->setAdminIps([
@@ -112,10 +92,10 @@ class Application
 
     public function hasAdminIp(string $ip = null): bool
     {
-        $ip = $ip ?? \request()->getIp();
+        $ip = $ip ?? request()->getIp();
 
-        if (\is_array($this->adminIps) === true) {
-            return \in_array($ip, $this->adminIps, true);
+        if (is_array($this->adminIps) === true) {
+            return in_array($ip, $this->adminIps, true);
         }
 
         return false;
@@ -189,7 +169,7 @@ class Application
      * @param string $name
      * @return string|null
      */
-    public function getModule($name): ?string
+    public function getModule(string $name): ?string
     {
         return $this->modules[$name] ?? null;
     }
@@ -205,7 +185,7 @@ class Application
 
     public function hasModules(): bool
     {
-        return (\count($this->modules) > 0);
+        return (count($this->modules) > 0);
     }
 
     public function getCharset(): string
@@ -375,27 +355,6 @@ class Application
     public function getDebugEnabled(): bool
     {
         return $this->debugEnabled;
-    }
-
-    /**
-     * Set url handler callback
-     * @param IUrlHandler $callback
-     * @return $this
-     */
-    public function setUrlHandler(IUrlHandler $callback): self
-    {
-        $this->urlHandler = $callback;
-
-        return $this;
-    }
-
-    /**
-     * Get url handler
-     * @return IUrlHandler
-     */
-    public function getUrlHandler(): IUrlHandler
-    {
-        return $this->urlHandler;
     }
 
     /**

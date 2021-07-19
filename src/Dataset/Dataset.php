@@ -2,14 +2,17 @@
 
 namespace Pecee\Dataset;
 
-abstract class Dataset implements \IteratorAggregate
+use ArrayIterator;
+use IteratorAggregate;
+
+abstract class Dataset implements IteratorAggregate
 {
 
-    protected $data = [];
+    protected array $data = [];
 
     abstract protected function create(): void;
 
-    public function toArray()
+    public function toArray(): array
     {
         $this->create();
 
@@ -78,9 +81,9 @@ abstract class Dataset implements \IteratorAggregate
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator(): \ArrayIterator
+    public function getIterator(): ArrayIterator
     {
-        return new \ArrayIterator($this->toArray());
+        return new ArrayIterator($this->toArray());
     }
 
 }

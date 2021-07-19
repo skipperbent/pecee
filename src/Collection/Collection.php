@@ -3,10 +3,10 @@
 namespace Pecee\Collection;
 
 use ArrayAccess;
+use ArrayIterator;
 use Countable;
 use IteratorAggregate;
 use JsonSerializable;
-use Pecee\Model\Model;
 
 class Collection implements ArrayAccess, IteratorAggregate, Countable, JsonSerializable
 {
@@ -74,7 +74,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, JsonSeria
      */
     public function each(callable $callback): self
     {
-        foreach($this->getRows() as $key => $row) {
+        foreach ($this->getRows() as $key => $row) {
             $callback($row, $key);
         }
 
@@ -89,7 +89,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, JsonSeria
     public function filterArray(callable $callback): array
     {
         $collection = [];
-        foreach($this->getRows() as $row) {
+        foreach ($this->getRows() as $row) {
             $collection[] = $callback($row);
         }
 
@@ -105,12 +105,12 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable, JsonSeria
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->rows);
+        return new ArrayIterator($this->rows);
     }
 
     public function count(): int
     {
-        return \count($this->getRows());
+        return count($this->getRows());
     }
 
     /**

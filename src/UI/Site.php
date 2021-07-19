@@ -7,14 +7,14 @@ class Site
 {
     public const SECTION_DEFAULT = 'default';
 
-    protected $title;
-    protected $description;
-    protected $keywords = [];
-    protected $header = [];
-    protected $js = [];
-    protected $css = [];
-    protected $jsFilesWrapped = [];
-    protected $cssFilesWrapped = [];
+    protected ?string $title = null;
+    protected ?string $description = null;
+    protected array $keywords = [];
+    protected array $header = [];
+    protected array $js = [];
+    protected array $css = [];
+    protected array $jsFilesWrapped = [];
+    protected array $cssFilesWrapped = [];
 
     public function getTitle(): ?string
     {
@@ -42,7 +42,7 @@ class Site
 
     public function addWrappedJs(string $filename, string $section = self::SECTION_DEFAULT): self
     {
-        if (isset($this->jsFilesWrapped[$section]) === false || \in_array($filename, $this->jsFilesWrapped[$section], true) === false) {
+        if (isset($this->jsFilesWrapped[$section]) === false || in_array($filename, $this->jsFilesWrapped[$section], true) === false) {
             $this->jsFilesWrapped[$section][] = $filename;
         }
 
@@ -51,7 +51,7 @@ class Site
 
     public function addWrappedCss(string $filename, string $section = self::SECTION_DEFAULT): self
     {
-        if (isset($this->cssFilesWrapped[$section]) === false || \in_array($filename, $this->cssFilesWrapped[$section], true) === false) {
+        if (isset($this->cssFilesWrapped[$section]) === false || in_array($filename, $this->cssFilesWrapped[$section], true) === false) {
             $this->cssFilesWrapped[$section][] = $filename;
         }
 
@@ -60,7 +60,7 @@ class Site
 
     public function removeWrappedJs(string $filename, string $section = self::SECTION_DEFAULT): self
     {
-        if (isset($this->jsFilesWrapped[$section]) === false || \in_array($filename, $this->jsFilesWrapped[$section], true) === false) {
+        if (isset($this->jsFilesWrapped[$section]) === false || in_array($filename, $this->jsFilesWrapped[$section], true) === false) {
             $key = array_search($filename, $this->jsFilesWrapped, true);
             unset($this->jsFilesWrapped[$section][$key]);
         }
@@ -70,7 +70,7 @@ class Site
 
     public function removeWrappedCss(string $filename, string $section = self::SECTION_DEFAULT): self
     {
-        if (isset($this->cssFilesWrapped[$section]) === false || \in_array($filename, $this->cssFilesWrapped[$section], true) === true) {
+        if (isset($this->cssFilesWrapped[$section]) === false || in_array($filename, $this->cssFilesWrapped[$section], true) === true) {
             $key = array_search($filename, $this->cssFilesWrapped, true);
             unset($this->cssFilesWrapped[$section][$key]);
         }
@@ -80,7 +80,7 @@ class Site
 
     public function addCss(string $path, string $section = self::SECTION_DEFAULT): self
     {
-        if (isset($this->css[$section]) === false || \in_array($path, $this->css[$section], true) === false) {
+        if (isset($this->css[$section]) === false || in_array($path, $this->css[$section], true) === false) {
             $this->css[$section][] = $path;
         }
 
@@ -89,7 +89,7 @@ class Site
 
     public function addJs(string $path, string $section = self::SECTION_DEFAULT): self
     {
-        if (isset($this->js[$section]) === false || \in_array($path, $this->js[$section], true) === false) {
+        if (isset($this->js[$section]) === false || in_array($path, $this->js[$section], true) === false) {
             $this->js[$section][] = $path;
         }
 

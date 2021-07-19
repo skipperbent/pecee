@@ -6,12 +6,13 @@ use Pecee\Guid;
 
 class Session
 {
-    private static $active = false;
+    public static string $sessionName = 'pecee_session';
+    private static bool $active = false;
 
     public static function start(): void
     {
         if (static::$active === false) {
-            session_name('pecee_session');
+            session_name(static::$sessionName);
             session_start();
             static::$active = true;
         }
@@ -38,6 +39,17 @@ class Session
      */
     public static function set(string $id, $value): void
     {
+        $_SESSION[$id] = $value;
+    }
+
+    /**
+     * Encrypt and store session
+     *
+     * @param string $id
+     * @param mixed $value
+     */
+    public function setEncrypted(string $id, $value): void
+    {
         $data = [
             serialize($value),
             app()->getSecret(),
@@ -45,27 +57,35 @@ class Session
 
         $data = Guid::encrypt(app()->getSecret(), implode('|', $data));
 
-        $_SESSION[$id] = $data;
+        static::set($id, $data);
     }
 
-    public static function get($id, $defaultValue = null)
+    public static function get(string $id, $defaultValue = null)
     {
-        if (static::exists($id) === true) {
+        return $_SESSION[$id] ?? $defaultValue;
+    }
 
-            $value = $_SESSION[$id];
+    /**
+     * Get decrypted session data
+     *
+     * @param string $id
+     * @param null $defaultValue
+     * @return mixed|null
+     */
+    public static function getDecrypted(string $id, $defaultValue = null)
+    {
+        $value = static::get($id);
 
-            if (trim($value) !== '') {
+        if ($value !== null && trim($value) !== '') {
+            $value = Guid::decrypt(app()->getSecret(), $value);
+            $data = explode('|', $value);
 
-                $value = Guid::decrypt(app()->getSecret(), $value);
-                $data = explode('|', $value);
-
-                if (\is_array($data) && trim(end($data)) === app()->getSecret()) {
-                    return unserialize($data[0], ['allowed_classes' => true]);
-                }
-
+            if (\is_array($data) && trim(end($data)) === app()->getSecret()) {
+                return unserialize($data[0], ['allowed_classes' => true]);
             }
         }
 
         return $defaultValue;
     }
+
 }

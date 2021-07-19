@@ -11,7 +11,7 @@ class Tablist
         app()->site->addWrappedJs('pecee-tablist.js');
     }
 
-    public function button($id, $value = null)
+    public function button($id, $value = null): Html
     {
         $btn = new Html('a');
         $btn->addAttribute('href', '#');
@@ -22,7 +22,7 @@ class Tablist
         return $btn;
     }
 
-    public function start($id, $visible = false)
+    public function start($id, $visible = false): Html
     {
         $tab = new Html('div');
         $tab->setClosingType(Html::CLOSE_TYPE_NONE);
@@ -33,7 +33,7 @@ class Tablist
         return $tab;
     }
 
-    public function end()
+    public function end(): string
     {
         return '</div>';
     }
