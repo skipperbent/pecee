@@ -15,6 +15,9 @@ use Pecee\Model\Relation\HasMany;
 use Pecee\Model\Relation\HasOne;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
+use ReflectionClass;
+use ReflectionException;
+use stdClass;
 
 /**
  * @mixin ModelQueryBuilder
@@ -31,6 +34,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     protected array $invokedElements = [];
     protected array $rename = [];
     protected array $columns = [];
+    protected array $updateColumns = [];
     protected array $fieldTypes = [];
     protected bool $timestamps = true;
     protected bool $fixedIdentifier = false;
@@ -47,6 +51,8 @@ abstract class Model implements IteratorAggregate, JsonSerializable
         if ($this->table === '') {
             $this->table = str_ireplace('model_', '', class_basename(static::class));
         }
+
+        $this->updateColumns = $this->columns;
 
         $this->queryable = new ModelQueryBuilder($this);
 
@@ -74,10 +80,11 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     }
 
     /**
-     * @param \stdClass $data
+     * @param stdClass $data
      * @return static $this
+     * @throws \Pecee\Pixie\Exception
      */
-    public function onNewInstance(\stdClass $data): self
+    public function onNewInstance(stdClass $data): self
     {
         // Clone properties but reset query-builder
         $instance = clone $this;
@@ -257,12 +264,8 @@ abstract class Model implements IteratorAggregate, JsonSerializable
      */
     public function save(array $data = []): self
     {
-        if (is_array($this->columns) === false) {
-            throw new ModelException('Columns property not defined.');
-        }
-
         $updateData = [];
-        foreach ($this->columns as $column) {
+        foreach ($this->updateColumns as $column) {
             $updateData[$column] = $this->{$column};
         }
 
@@ -498,7 +501,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     protected function invokeMethod(string $name, ?string $key = null): bool
     {
         try {
-            $reflection = new \ReflectionClass($this);
+            $reflection = new ReflectionClass($this);
             $method = $reflection->getMethod($name);
 
             if ($method->getNumberOfRequiredParameters() === 0) {
@@ -517,7 +520,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
 
                 return true;
             }
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
 
         }
 
@@ -563,7 +566,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
                 return;
             }
 
-            if($this->{$with} !== null) {
+            if ($this->{$with} !== null) {
                 $output = $this->{$with};
             }
         }
@@ -697,7 +700,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     {
         if (isset($this->fieldTypes[$name]) === true) {
             $type = $this->fieldTypes[$name];
-            if ($type instanceof \Closure) {
+            if ($type instanceof Closure) {
                 return $type($value);
             }
 
@@ -902,6 +905,7 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     public function overwriteQuery(bool $enabled): self
     {
         $this->getQuery()->setOverwriteEnabled($enabled);
+
         return $this;
     }
 
@@ -918,6 +922,18 @@ abstract class Model implements IteratorAggregate, JsonSerializable
     public function jsonSerialize(): array
     {
         return $this->toArray();
+    }
+
+    public function getUpdateColumns(): array
+    {
+        return $this->updateColumns;
+    }
+
+    public function setUpdateColumns(array $columns): self
+    {
+        $this->updateColumns = $columns;
+
+        return $this;
     }
 
     public function __toString()

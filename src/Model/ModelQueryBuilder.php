@@ -10,6 +10,7 @@ use Pecee\Pixie\Exception;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Pixie\QueryBuilder\Raw;
 use Pecee\Str;
+use stdClass;
 
 class ModelQueryBuilder
 {
@@ -34,14 +35,16 @@ class ModelQueryBuilder
     }
 
     /**
-     * @param \stdClass $item
+     * @param stdClass $item
      * @return Model
+     * @throws Exception
      */
-    protected function createInstanceWithData(\stdClass $item): Model
+    protected function createInstanceWithData(stdClass $item): Model
     {
         $model = $this->model->onNewInstance($item);
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
+        $model->setUpdateColumns(array_keys((array)$item));
         $model->onInstanceCreate();
 
         return $model;
@@ -366,7 +369,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return static|null
+     * @return static|Model|null
      * @throws Exception
      */
     public function find($id)
@@ -395,7 +398,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return static|null
+     * @return static|Model|null
      * @throws Exception
      */
     public function first()
@@ -603,7 +606,7 @@ class ModelQueryBuilder
 
     /**
      * @param array $data
-     * @return static
+     * @return static|Model
      * @throws Exception
      */
     public function firstOrNew(array $data = [])

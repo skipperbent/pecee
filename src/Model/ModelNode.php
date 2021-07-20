@@ -384,7 +384,7 @@ class ModelNode extends ModelMeta
 
         $this->mergeData($data);
 
-        if($isNew === true) {
+        if ($isNew === true) {
             $this->updateOrder();
         }
 
@@ -616,7 +616,7 @@ class ModelNode extends ModelMeta
     {
         $orderQuery = static::instance()->select(['id']);
 
-        if($this->parent_id === null) {
+        if ($this->parent_id === null) {
             $orderQuery->whereNull('parent_id');
         } else {
             $orderQuery->filterParentId($this->parent_id);
