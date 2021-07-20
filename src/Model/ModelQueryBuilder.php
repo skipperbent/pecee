@@ -428,7 +428,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function count(string $field = '*')
+    public function count(string $field = '*'): float
     {
         return $this->query->count($field);
     }

@@ -29,26 +29,7 @@ abstract class ModelRelation
     {
         $this->related = $related;
         $this->parent = $parent;
-    }
-
-    /**
-     * @return static|null
-     * @throws \Pecee\Pixie\Exception
-     */
-    public function first()
-    {
         $this->addConstraints();
-        return $this->related->first();
-    }
-
-    /**
-     * @return ModelCollection|static[]
-     * @throws \Pecee\Pixie\Exception
-     */
-    public function all()
-    {
-        $this->addConstraints();
-        return $this->related->all();
     }
 
     /**
@@ -95,8 +76,9 @@ abstract class ModelRelation
             return null;
         }
 
-        if($this->withDefault instanceof Model) {
+        if ($this->withDefault instanceof Model) {
             $parent->mergeRows($this->withDefault->getRows());
+
             return $parent;
         }
 
@@ -109,6 +91,22 @@ abstract class ModelRelation
         }
 
         return $parent;
+    }
+
+    public function removeConstraints(): self
+    {
+        $this->related = $this->related->newQuery();
+        $this->constraints = false;
+        $this->addConstraints();
+
+        return $this;
+    }
+
+    public function setConstraints(bool $enabled): self
+    {
+        $this->constraints = $enabled;
+
+        return $this;
     }
 
     abstract public function addConstraints(): void;
@@ -132,12 +130,6 @@ abstract class ModelRelation
         }
 
         return $result;
-    }
-
-    public function setConstraints(bool $enabled): self
-    {
-        $this->constraints = $enabled;
-        return $this;
     }
 
 }
