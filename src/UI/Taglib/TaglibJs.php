@@ -106,7 +106,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['id']);
 
-        $output = sprintf('$.%1$s = new %2$s.template(); $.%1$s.view = function(d,g){var self=this; var o="<%4$s>%3$s</%4$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %2$s.template(); $.%1$s.view = function(d,g){var self=this; var w=self.widget; var o="<%4$s>%3$s</%4$s>"; return o;};',
             $attrs->id,
             $this->namespace,
             $this->makeJsString($this->getBody()),
