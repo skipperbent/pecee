@@ -4,7 +4,7 @@ namespace Pecee\UI\Xml;
 interface IXmlNode
 {
 
-    public function __toString();
+    public function __toString(): string;
 
     /**
      * @param XmlElement $parent

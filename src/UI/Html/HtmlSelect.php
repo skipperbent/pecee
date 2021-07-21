@@ -76,7 +76,7 @@ class HtmlSelect extends Html
     /**
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         /* @var $options array */
         foreach ($this->groups as $name => $options) {

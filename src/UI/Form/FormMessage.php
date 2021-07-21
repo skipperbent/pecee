@@ -1,20 +1,20 @@
 <?php
+
 namespace Pecee\UI\Form;
 
 class FormMessage
 {
 
-    protected $form;
-    protected $name;
-    protected $index;
-    protected $message;
-    protected $placement;
+    protected ?string $name = '';
+    protected ?string $index = '';
+    protected ?string $message = '';
+    protected ?string $placement = '';
 
     /**
      * Get name assosiated with the element (if any)
      * @return string $name
      */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -23,7 +23,7 @@ class FormMessage
      * Get the index (if any)
      * @return string $index
      */
-    public function getIndex()
+    public function getIndex(): ?string
     {
         return $this->index;
     }
@@ -32,7 +32,7 @@ class FormMessage
      * Get message
      * @return string $message
      */
-    public function getMessage()
+    public function getMessage(): ?string
     {
         return $this->message;
     }
@@ -40,51 +40,56 @@ class FormMessage
     /**
      * Get name (if any)
      * @param string $name
+     * @return static
      */
-    public function setName($name)
+    public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
      * Set index
      * @param string $index
+     * @return static
      */
-    public function setIndex($index)
+    public function setIndex(string $index): self
     {
         $this->index = $index;
+
+        return $this;
     }
 
     /**
      * Set message
      * @param string $message
+     * @return static
      */
-    public function setMessage($message)
+    public function setMessage(string $message): self
     {
         $this->message = $message;
+
+        return $this;
     }
 
     /**
      * @return string $placement
      */
-    public function getPlacement()
+    public function getPlacement(): string
     {
         return $this->placement;
     }
 
     /**
      * @param string $placement
+     * return static
      */
-    public function setPlacement($placement)
+    public function setPlacement(string $placement): self
     {
         $this->placement = $placement;
+
+        return $this;
     }
 
-    /**
-     * @param string $form
-     */
-    public function setForm($form)
-    {
-        $this->form = $form;
-    }
 }

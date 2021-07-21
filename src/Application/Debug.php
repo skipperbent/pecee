@@ -6,15 +6,14 @@ use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug
 {
-    protected $lastTime;
-    protected $stack;
-    protected $startTime;
-    protected $backLevel = 3;
+    protected float $lastTime = 0;
+    protected array $stack = [];
+    protected float $startTime = 0;
+    protected int $backLevel = 3;
 
     public function __construct()
     {
         $this->startTime = microtime(true);
-        $this->stack = [];
         $this->add('Debugger initialized.');
     }
 
@@ -23,12 +22,12 @@ class Debug
         $this->add('Debugger destructed.');
     }
 
-    protected function getTime()
+    protected function getTime(): float
     {
         return number_format(microtime(true) - $this->startTime, 10);
     }
 
-    protected function addObject($text)
+    protected function addObject($text): void
     {
         $backtrace = debug_backtrace();
 
@@ -81,7 +80,7 @@ class Debug
      * @param string $text
      * @param array ...$args
      */
-    public function add($text, ...$args)
+    public function add(string $text, ...$args): void
     {
         $this->addObject(vsprintf(str_replace('%', '%%', $text), $args));
     }

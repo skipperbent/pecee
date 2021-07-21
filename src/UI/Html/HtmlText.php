@@ -6,7 +6,7 @@ use Pecee\UI\Xml\XmlText;
 class HtmlText extends XmlText implements IHtmlNode
 {
 
-    public function toHtml()
+    public function toHtml(): string
     {
         return $this->toXml();
     }

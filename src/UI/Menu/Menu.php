@@ -5,13 +5,13 @@ use Pecee\UI\Html\Html;
 
 class Menu
 {
-    protected $items = [];
-    protected $attributes = [];
-    protected $content = [];
+    protected array $items = [];
+    protected array $attributes = [];
+    protected array $content = [];
     protected $class;
     protected $parent;
 
-    public function getItems()
+    public function getItems(): array
     {
         return $this->items;
     }

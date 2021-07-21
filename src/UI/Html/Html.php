@@ -169,7 +169,7 @@ class Html
     /**
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $output = '<' . $this->tag;
 
@@ -224,7 +224,7 @@ class Html
         return $this;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->render();
     }

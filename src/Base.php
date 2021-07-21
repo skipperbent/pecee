@@ -32,7 +32,6 @@ abstract class Base
     {
         $values = Session::get($this->_inputSessionKey, []);
 
-        /* @var array $values */
         foreach ($values as $key => $value) {
             $item = input()->find($key, ['get', 'post']) ?? new InputItem($key);
             $item->setValue((string)$value);
@@ -79,10 +78,9 @@ abstract class Base
 
             $input = input()->find($key, $requestMethod) ?? new InputItem($key, null);
             $inputs = ($input instanceof IInputItem) ? [$input] : $input;
-            $validations = is_array($validations) === false ? [$validations] : $validations;
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
-            foreach ($validations as $validateClass) {
+            foreach ((array)$validations as $validateClass) {
                 foreach ($inputs as $input) {
                     $validateClass->setInput($input);
                     if ($validateClass->runValidation() === false) {
@@ -134,7 +132,7 @@ abstract class Base
     {
         $messages = $this->getMessages($type, $placement);
 
-        return count($messages) > 0 ? $messages[0] : null;
+        return $messages[0] ?? null;
     }
 
     /**
@@ -173,11 +171,11 @@ abstract class Base
      */
     protected function setMessage(string $message, string $type, ?string $placement = null, ?string $index = null): void
     {
-        $msg = new FormMessage();
-        $msg->setMessage($message);
-        $msg->setPlacement($placement ?? $this->defaultMessagePlacement);
-        $msg->setIndex($index);
-        $this->sessionMessage()->set($msg, $type);
+        $this->sessionMessage()->set
+        (
+            (new FormMessage())->setName($message)->setPlacement($placement ?? $this->defaultMessagePlacement)->setIndex($index),
+            $type
+        );
     }
 
     public function hasErrors(?string $placement = null, ?string $errorType = null): bool

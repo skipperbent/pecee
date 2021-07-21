@@ -3,6 +3,7 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use Exception;
 use Pecee\Cookie;
 use Pecee\Guid;
 use Pecee\Model\Collections\ModelCollection;
@@ -96,7 +97,7 @@ class ModelUser extends ModelMeta implements IUserAuthentication
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Cookie::delete(static::COOKIE_NAME);
             return false;
         }

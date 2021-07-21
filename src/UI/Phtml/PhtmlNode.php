@@ -9,12 +9,12 @@ use Pecee\UI\Taglib\ITaglib;
 class PhtmlNode extends HtmlElement
 {
 
-    private static $closureCount = 0;
-    private static $append = '';
-    private static $prepend = '';
-    private $container = false;
+    private static int $closureCount = 0;
+    private static string $append = '';
+    private static string $prepend = '';
+    private bool $container = false;
 
-    public static function getNextClosure()
+    public static function getNextClosure(): string
     {
         static::$closureCount++;
         $basis = static::$closureCount . Guid::create();
@@ -22,7 +22,7 @@ class PhtmlNode extends HtmlElement
         return 'closure' . md5($basis);
     }
 
-    public function isContainer()
+    public function isContainer(): bool
     {
         return $this->container;
     }
@@ -32,7 +32,7 @@ class PhtmlNode extends HtmlElement
         $this->container = $container;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->getTag() === 'phtml') {
             return $this->getInnerString();
@@ -41,7 +41,7 @@ class PhtmlNode extends HtmlElement
         return parent::__toString();
     }
 
-    public function getInnerString()
+    public function getInnerString(): string
     {
         $str = '';
         /* @var $child \Pecee\UI\Xml\IXmlNode */
@@ -52,7 +52,7 @@ class PhtmlNode extends HtmlElement
         return $str;
     }
 
-    public function getInnerPHP()
+    public function getInnerPHP(): string
     {
         $str = '';
         /* @var $child \Pecee\UI\Phtml\PhtmlNode */
@@ -63,7 +63,7 @@ class PhtmlNode extends HtmlElement
         return $str;
     }
 
-    public function toPHP($filename = null)
+    public function toPHP($filename = null): string
     {
         if ($this->getTag() === 'phtml') {
             $result = $this->getInnerPHP();
@@ -91,17 +91,21 @@ class PhtmlNode extends HtmlElement
             foreach ($this->getAttrs() as $name => $val) {
                 if ($method) {
                     $str .= sprintf('"%s"=>%s,', $name, $this->processAttrValue($val));
-                } else if ($val === null) {
-                    $str .= sprintf('%s ', $name);
                 } else {
-                    $str .= sprintf('%s="%s" ', $name, $val);
+                    if ($val === null) {
+                        $str .= sprintf('%s ', $name);
+                    } else {
+                        $str .= sprintf('%s="%s" ', $name, $val);
+                    }
                 }
             }
 
             $str = ($method) ? trim($str, ',') . '),' : trim($str);
 
-        } else if ($method) {
-            $str .= 'array(),';
+        } else {
+            if ($method) {
+                $str .= 'array(),';
+            }
         }
 
         if ($this->isContainer()) {
@@ -128,21 +132,23 @@ class PhtmlNode extends HtmlElement
             } else {
                 $str .= sprintf('</%s>', $this->getTag());
             }
-        } else if ($method) {
-            $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
-
-            $taglib = $taglibs[$this->getNs()] ?? null;
-
-            if ($taglib instanceof ITaglib) {
-                $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
-            }
         } else {
+            if ($method) {
+                $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-            if (in_array($this->getTag(), Phtml::$VOIDTAGS, false) === false) {
-                $str .= '/';
+                $taglib = $taglibs[$this->getNs()] ?? null;
+
+                if ($taglib instanceof ITaglib) {
+                    $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
+                }
+            } else {
+
+                if (in_array($this->getTag(), Phtml::$VOIDTAGS, false) === false) {
+                    $str .= '/';
+                }
+
+                $str .= '>';
             }
-
-            $str .= '>';
         }
         if ($this->getParent() === null || $this->getParent()->getTag() === 'phtml') {
             $str = static::$prepend . $str . static::$append;
@@ -158,12 +164,12 @@ class PhtmlNode extends HtmlElement
         return $str;
     }
 
-    private function processEvals($phtml)
+    private function processEvals(string $phtml): string
     {
         return preg_replace('/%\{([^\}]*)\}/', '<?=$1?>', $phtml);
     }
 
-    private function processAttrValue($val)
+    private function processAttrValue(string $val): string
     {
         if (preg_match('/<\?\=(.*)\?>/', $val)) {
             //Remove php start/end tags that might have gotten here from %{} evaluations

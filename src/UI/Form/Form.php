@@ -16,7 +16,7 @@ use Pecee\UI\Html\HtmlTextarea;
 class Form
 {
 
-    protected $enableCsrfToken = true;
+    protected bool $enableCsrfToken = true;
 
     /**
      * Starts new form
@@ -221,17 +221,17 @@ class Form
      * Ends open form
      * @return string
      */
-    public function end()
+    public function end(): string
     {
         return '</form>';
     }
 
-    public function setEnableCsrfToken($value)
+    public function setEnableCsrfToken(bool $value): void
     {
         $this->enableCsrfToken = $value;
     }
 
-    public function isCsrfTokenEnabled()
+    public function isCsrfTokenEnabled(): bool
     {
         return $this->enableCsrfToken;
     }

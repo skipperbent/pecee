@@ -3,10 +3,10 @@ namespace Pecee\UI\Xml;
 
 class Xml
 {
-    public static function toXml($data, $parent = 'root')
+    public static function toXml($data, ?XmlElement $parent = null)
     {
 
-        if (!($parent instanceof IXmlNode)) {
+        if ($parent === null) {
             $parent = new XmlElement((string)$parent);
         }
 
@@ -37,10 +37,6 @@ class Xml
                 break;
             case is_float($data):
                 $parent->setAttribute('type', 'float');
-                $parent->addChild(new XmlText($data));
-                break;
-            case is_double($data):
-                $parent->setAttribute('type', 'double');
                 $parent->addChild(new XmlText($data));
                 break;
             case is_null($data):

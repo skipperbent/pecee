@@ -2,17 +2,21 @@
 namespace Pecee\UI\Xml;
 
 use Pecee\ArrayUtil;
+use Pecee\UI\Html\IHtmlNode;
 
 class XmlElement implements IXmlNode
 {
 
     private $tag;
-    private $parent;
-    private $attrs = [];
-    private $children = [];
-    private $ns;
+    private IHtmlNode $parent;
+    private array $attrs = [];
+    /**
+     * @var array|IXmlNode[]
+     */
+    private array $children = [];
+    private string $ns;
 
-    public function __construct($tag = null, $attrs = [], $ns = '')
+    public function __construct($tag = null, array $attrs = [], string $ns = '')
     {
         $this->tag = $tag;
         $this->attrs = $attrs;
@@ -24,7 +28,7 @@ class XmlElement implements IXmlNode
         return $this->attrs;
     }
 
-    public function setAttrs($attrs)
+    public function setAttrs(array $attrs): void
     {
         $this->attrs = $attrs;
     }
@@ -34,7 +38,7 @@ class XmlElement implements IXmlNode
         return $this->tag;
     }
 
-    public function setTag($tag)
+    public function setTag($tag): void
     {
         $this->tag = $tag;
     }
@@ -44,7 +48,7 @@ class XmlElement implements IXmlNode
         return $this->ns;
     }
 
-    public function setNs($ns)
+    public function setNs($ns): void
     {
         $this->ns = $ns;
     }
@@ -57,7 +61,7 @@ class XmlElement implements IXmlNode
         return $this->parent;
     }
 
-    public function setParent($parent)
+    public function setParent($parent): void
     {
         $this->parent = $parent;
     }
@@ -68,18 +72,21 @@ class XmlElement implements IXmlNode
         $node->setParent($this);
     }
 
+    /**
+     * @return array|IXmlNode[]
+     */
     public function getChildren()
     {
         return $this->children;
     }
 
-    public function setChildren($children)
+    public function setChildren($children): void
     {
         $this->clear();
         $this->addChildren($children);
     }
 
-    public function setAttribute($name, $value = null)
+    public function setAttribute($name, $value = null): void
     {
         $this->attrs[$name] = $value;
     }
@@ -89,7 +96,7 @@ class XmlElement implements IXmlNode
         return $this->attrs[$name];
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->toXml();
     }
@@ -105,22 +112,22 @@ class XmlElement implements IXmlNode
 
     public function getChildIndex(IXmlNode $node)
     {
-        return array_search($node, $this->children);
+        return array_search($node, $this->children, true);
     }
 
-    public function setChildAt($i, IXmlNode $node)
+    public function setChildAt(int $i, IXmlNode $node)
     {
         if ($i < 0 || $i > count($this->children)) {
             throw new \Exception ("Child offset out of bounds: $i. Child count : " . count($this->children));
         }
         unset($this->children[$i]);
-        $this->children[intval($i)] = $node;
+        $this->children[$i] = $node;
         ksort($this->children);
 
         return $this;
     }
 
-    public function removeChildAt($i)
+    public function removeChildAt(int $i)
     {
         if ($i < 0 || $i > count($this->children)) {
             throw new \Exception ("Child offset out of bounds: $i. Child count : " . count($this->children));
@@ -136,7 +143,7 @@ class XmlElement implements IXmlNode
         return $this->removeChildAt($this->getChildIndex($node));
     }
 
-    public function addChildAt($offset, IXmlNode $node)
+    public function addChildAt($offset, IXmlNode $node): self
     {
         if ($offset < 0) {
             throw new \Exception ("Child offset must be greater than -1" . count($this->children));
@@ -147,7 +154,7 @@ class XmlElement implements IXmlNode
         if ($offset >= count($this->children)) {
             $this->addChild($node);
 
-            return null;
+            return $this;
         }
 
         $max = count($this->children);
@@ -165,14 +172,14 @@ class XmlElement implements IXmlNode
         return $this;
     }
 
-    public function addChildren($children)
+    public function addChildren($children): void
     {
         foreach ($children as $node) {
             $this->addChild($node);
         }
     }
 
-    public function addChildrenAt($offset, $children)
+    public function addChildrenAt($offset, $children): void
     {
         $i = 0;
         foreach ($children as $node) {
@@ -181,12 +188,12 @@ class XmlElement implements IXmlNode
         }
     }
 
-    public function detach()
+    public function detach(): void
     {
         $this->getParent()->removeChild($this);
     }
 
-    public function replace($otherNode)
+    public function replace($otherNode): void
     {
         $parent = $this->getParent();
         $i = $parent->getChildIndex($this);
@@ -194,7 +201,7 @@ class XmlElement implements IXmlNode
         $parent->addChildAt($i, $otherNode);
     }
 
-    public function clear()
+    public function clear(): void
     {
         foreach ($this->children as $child) {
             $child->setParent(null);
@@ -210,8 +217,8 @@ class XmlElement implements IXmlNode
             if (!($this->children[$i] instanceof static)) {
                 continue;
             }
-            if (strtolower($this->children[$i]->getNs()) == strtolower($ns)
-                && strtolower($this->children[$i]->getTag()) == strtolower($tagName)
+            if (strtolower($this->children[$i]->getNs()) === strtolower($ns)
+                && strtolower($this->children[$i]->getTag()) === strtolower($tagName)
             ) {
                 $result[] = $this->children[$i];
             }
@@ -229,7 +236,7 @@ class XmlElement implements IXmlNode
         }
         $str .= "<";
         $tagName = '';
-        if ($this->getNs() != '') {
+        if ($this->getNs() !== '') {
             $tagName .= $this->getNs() . ':';
         }
         $tagName .= $this->tag;
@@ -243,7 +250,7 @@ class XmlElement implements IXmlNode
         }
         if (count($this->children) > 0) {
             $str .= '>';
-            foreach ($this->children as &$child) {
+            foreach ($this->children as $child) {
                 $str .= $child->__toString();
             }
             $str .= "</$tagName>";

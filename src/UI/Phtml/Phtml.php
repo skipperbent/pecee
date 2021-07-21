@@ -21,29 +21,29 @@ class Phtml
     public const P_EVAL = 'P_EVAL';
     public const COMMENT = 'COMMENT';
 
-    private static $IGNORELIST = [
+    private static array $IGNORELIST = [
         self::PHP,
         self::COMMENT,
         self::STRING,
         self::P_EVAL,
-        self::DOCTYPE
+        self::DOCTYPE,
     ];
 
-    private static $IGNOREALLLIST = [
+    private static array $IGNOREALLLIST = [
         self::PHP,
         self::COMMENT,
         self::STRING,
         self::P_EVAL,
-        self::DOCTYPE
+        self::DOCTYPE,
     ];
 
-    public static $SCRIPTAGS = [
+    public static array $SCRIPTAGS = [
         'script',
         'style',
-        'inline'
+        'inline',
     ];
 
-    public static $VOIDTAGS = [
+    public static array $VOIDTAGS = [
         'area',
         'base',
         'br',
@@ -59,29 +59,29 @@ class Phtml
         'param',
         'source',
         'track',
-        'wbr'
+        'wbr',
     ];
 
-    private $withinStack = [];
-    private $current = '';
-    private $currentIgnore = '';
+    private array $withinStack = [];
+    private string $current = '';
+    private string $currentIgnore = '';
     private $node;
     private $lastChar, $nextChar, $char, $attrName;
-    private $debug = false;
-    private $stringStartChar = '';
-    private $charCount = 0;
-    private $lineCount = 0;
-    private $phtmlRaw = '';
-    private $debugTrace = '';
-    private $ignoreNextChar = false;
-    private $ignoreChars = false;
-    private $conditionalComment = false;
+    private bool $debug = false;
+    private string $stringStartChar = '';
+    private int $charCount = 0;
+    private int $lineCount = 0;
+    private string $phtmlRaw = '';
+    private string $debugTrace = '';
+    private bool $ignoreNextChar = false;
+    private bool $ignoreChars = false;
+    private bool $conditionalComment = false;
     private $prevChar;
 
     /**
      * @param string $string
-     * @throws PhtmlException
      * @return PhtmlNode
+     * @throws PhtmlException
      */
     public function read($string)
     {
@@ -481,7 +481,7 @@ class Phtml
             if (false === stripos($endTag, ':')) {
                 $tag = $endTag;
             } else {
-                list($ns, $tag) = explode(':', $endTag);
+                [$ns, $tag] = explode(':', $endTag);
             }
 
             if (strtolower($this->getNode()->getTag()) != strtolower($tag) ||

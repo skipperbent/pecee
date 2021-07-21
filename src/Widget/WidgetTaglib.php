@@ -5,6 +5,7 @@ namespace Pecee\Widget;
 use ErrorException;
 use Exception;
 use Pecee\UI\Phtml\Phtml;
+use Pecee\UI\Taglib\TaglibJs;
 
 abstract class WidgetTaglib extends Widget
 {
@@ -19,6 +20,12 @@ abstract class WidgetTaglib extends Widget
         if ($this->injectDependencies === true) {
             $this->getSite()->addWrappedJs('pecee-widget.js');
         }
+
+        app()->set(Phtml::SETTINGS_TAGLIB, [
+            'js' => (new TaglibJs())->setNamespace('$fluent')->setRenderCallback(function ($content) {
+                return $this->renderPhp($content);
+            }),
+        ]);
 
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }

@@ -10,7 +10,7 @@ class HtmlEmpty extends Html
         parent::__construct('input');
     }
 
-    public function render()
+    public function render(): string
     {
         return '';
     }

@@ -28,7 +28,7 @@ class TaglibJs extends Taglib
 
         $result = '';
         for ($i = 0, $max = count($parts); $i < $max; $i++) {
-            $result .= ($i == (count($parts) - 1)) ? 'return ' . $parts[$i] . ';' : $parts[$i] . ';';
+            $result .= ($i === (count($parts) - 1)) ? 'return ' . $parts[$i] . ';' : $parts[$i] . ';';
         }
 
         return sprintf('(function(){%s})();', $result);
@@ -46,10 +46,8 @@ class TaglibJs extends Taglib
         $expressions = [];
         $mOffset = 0;
 
-        foreach ($expressionMatches[0] as $match) {
+        foreach ($expressionMatches[0] as [$mText, $offset]) {
 
-            $mText = $match[0];
-            $offset = $match[1];
             $searchOffset = $offset + strlen($mText);
             $curlies = 1;
             $end = 0;
@@ -62,7 +60,7 @@ class TaglibJs extends Taglib
                         $curlies--;
                         break;
                 }
-                if ($curlies == 0) {
+                if ($curlies === 0) {
                     $end = $i;
                     break;
                 }
@@ -100,9 +98,8 @@ class TaglibJs extends Taglib
     {
         $string = preg_replace(static::EXPRESSION_WIDGET, $this->namespace . '.getWidget(\'"+g+"\')$1', $string);
         $string = $this->replaceExpression(static::EXPRESSION_JS, $string);
-        $string = $this->replaceExpression(static::EXPRESSION_RAW, $string);
 
-        return $string;
+        return $this->replaceExpression(static::EXPRESSION_RAW, $string);
     }
 
     protected function tagTemplate(object $attrs)
@@ -237,7 +234,7 @@ class TaglibJs extends Taglib
 
     protected function tagCollect(): string
     {
-        return '<script>' . join((app()->getDebugEnabled() === true) ? chr(10) : '', $this->templates) . '</script>';
+        return '<script>' . implode((app()->getDebugEnabled() === true) ? chr(10) : '', $this->templates) . '</script>';
     }
 
     public function setNamespace(string $namespace): self

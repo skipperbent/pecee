@@ -80,7 +80,7 @@ class Session
             $value = Guid::decrypt(app()->getSecret(), $value);
             $data = explode('|', $value);
 
-            if (\is_array($data) && trim(end($data)) === app()->getSecret()) {
+            if (is_array($data) && trim(end($data)) === app()->getSecret()) {
                 return unserialize($data[0], ['allowed_classes' => true]);
             }
         }

@@ -10,7 +10,7 @@ abstract class Migration extends AbstractMigration
     /**
      * @var Schema
      */
-    public $schema;
+    public Schema $schema;
 
     public function init()
     {
