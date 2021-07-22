@@ -106,10 +106,12 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['id']);
 
+        $body = $this->makeJsString($this->renderPhp($this->getBody()));
+
         $output = sprintf('$.%1$s = new %2$s.template(); $.%1$s.view = function(d,g){var self=this; var w=self.widget; var o="<%4$s>%3$s</%4$s>"; return o;};',
             $attrs->id,
             $this->namespace,
-            $this->makeJsString($this->getBody()),
+            $body,
             static::JS_WRAPPER_TAG
         );
 
@@ -118,7 +120,7 @@ class TaglibJs extends Taglib
         preg_match_all('%<' . static::JS_WRAPPER_TAG . '>(.*?)</' . static::JS_WRAPPER_TAG . '>%', $output, $matches);
         if (isset($matches[1])) {
             foreach ($matches[1] as $m) {
-                $output = str_replace('<' . static::JS_WRAPPER_TAG . '>' . $m . '</' . static::JS_WRAPPER_TAG . '>', addslashes($this->renderPhp($m)), $output);
+                $output = str_replace('<' . static::JS_WRAPPER_TAG . '>' . $m . '</' . static::JS_WRAPPER_TAG . '>', addslashes($m), $output);
             }
         }
 
@@ -172,12 +174,14 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['name']);
 
-        $output = sprintf('<%1$s>' . $this->makeJsString($this->getBody()) . '</%1$s>', static::JS_WRAPPER_TAG);
+        $body = $this->makeJsString($this->renderPhp($this->getBody()));
+
+        $output = sprintf('<%1$s>' . $body . '</%1$s>', static::JS_WRAPPER_TAG);
 
         preg_match_all('%<' . static::JS_WRAPPER_TAG . '>(.*?)</' . static::JS_WRAPPER_TAG . '>%', $output, $matches);
         if (isset($matches[1])) {
             foreach ($matches[1] as $m) {
-                $output = str_replace('<' . static::JS_WRAPPER_TAG . '>' . $m . '</' . static::JS_WRAPPER_TAG . '>', addslashes($this->renderPhp($m)), $output);
+                $output = str_replace('<' . static::JS_WRAPPER_TAG . '>' . $m . '</' . static::JS_WRAPPER_TAG . '>', addslashes($m), $output);
             }
         }
 
