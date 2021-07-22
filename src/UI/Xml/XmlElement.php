@@ -8,7 +8,7 @@ class XmlElement implements IXmlNode
 {
 
     private $tag;
-    private IHtmlNode $parent;
+    private ?IHtmlNode $parent = null;
     private array $attrs = [];
     /**
      * @var array|IXmlNode[]
