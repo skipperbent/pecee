@@ -27,7 +27,7 @@ class PhtmlNode extends HtmlElement
         return $this->container;
     }
 
-    public function setContainer($container)
+    public function setContainer(bool $container): void
     {
         $this->container = $container;
     }
@@ -44,7 +44,6 @@ class PhtmlNode extends HtmlElement
     public function getInnerString(): string
     {
         $str = '';
-        /* @var $child \Pecee\UI\Xml\IXmlNode */
         foreach ($this->getChildren() as $child) {
             $str .= $child->__toString();
         }
@@ -63,7 +62,7 @@ class PhtmlNode extends HtmlElement
         return $str;
     }
 
-    public function toPHP($filename = null): string
+    public function toPHP(string $filename = null): string
     {
         if ($this->getTag() === 'phtml') {
             $result = $this->getInnerPHP();
@@ -109,19 +108,10 @@ class PhtmlNode extends HtmlElement
         }
 
         if ($this->isContainer()) {
-            if (!$method) {
-                $str .= '>';
-            } else {
-                $body = '';
-            }
 
             if ($method) {
-                $body .= $this->getInnerPHP();
-            } else {
-                $str .= $this->getInnerPHP();
-            }
+                $body = $this->getInnerPHP();
 
-            if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
                 $taglib = $taglibs[$this->getNs()] ?? null;
@@ -129,9 +119,12 @@ class PhtmlNode extends HtmlElement
                 if ($taglib instanceof ITaglib) {
                     $str = $taglib->callTag($this->getTag(), $this->getAttrs(), $body);
                 }
+
             } else {
+                $str .= '>' . $this->getInnerPHP();
                 $str .= sprintf('</%s>', $this->getTag());
             }
+
         } else {
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
@@ -143,7 +136,7 @@ class PhtmlNode extends HtmlElement
                 }
             } else {
 
-                if (in_array($this->getTag(), Phtml::$VOIDTAGS, false) === false) {
+                if (in_array($this->getTag(), Phtml::$VOIDTAGS, true) === false) {
                     $str .= '/';
                 }
 

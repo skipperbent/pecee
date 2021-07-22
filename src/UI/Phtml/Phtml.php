@@ -109,20 +109,20 @@ class Phtml
 
             switch ($chr) {
                 case '<':
-                    if (mb_substr($string, $i + 1, 3) == '!--') {
+                    if (mb_substr($string, $i + 1, 3) === '!--') {
                         $this->pushWithin(static::COMMENT);
                         break;
                     }
-                    if ($this->nextChar == '?') {
+                    if ($this->nextChar === '?') {
                         $this->pushWithin(static::PHP);
                         break;
                     }
-                    if ($this->nextChar == '/' && !$this->ignoreAll()) {
+                    if ($this->nextChar === '/' && !$this->ignoreAll()) {
                         $this->ignoreChars = true;
                         $this->pushWithin(static::TAGEND);
                         $this->getNode()->setContainer(true);
 
-                    } elseif ($this->nextChar == '!') {
+                    } elseif ($this->nextChar === '!') {
                         $this->pushWithin(static::DOCTYPE);
                     } elseif (preg_match('/[A-Z0-9]/i', $this->nextChar)) {
                         $this->onTagStart();
@@ -131,18 +131,19 @@ class Phtml
                     break;
                 case '>':
 
-                    if (mb_substr($string, $i - 2, 2) == '--' && $this->isWithin(static::COMMENT)) {
+                    if (mb_substr($string, $i - 2, 2) === '--' && $this->isWithin(static::COMMENT)) {
                         $this->popWithin();
                         break;
                     }
 
                     //Handle conditional comments
-                    if (($this->conditionalComment && $this->lastChar == ']') && $this->isWithin(static::COMMENT)) {
+                    if (($this->conditionalComment && $this->lastChar === ']') && $this->isWithin(static::COMMENT)) {
                         $this->conditionalComment = false;
                         $this->popWithin();
                         break;
                     }
-                    if ($this->lastChar == '?' && $this->isWithin(static::PHP)) {
+                    
+                    if ($this->lastChar === '?' && $this->isWithin(static::PHP)) {
                         $this->popWithin();
                     } elseif ($this->isWithin(static::TAGEND)) {
 
@@ -172,12 +173,12 @@ class Phtml
                     if ($this->ignoreTags()) {
                         break;
                     }
-                    if ($this->nextChar == '{') {
+                    if ($this->nextChar === '{') {
                         $this->pushWithin(static::P_EVAL);
                         break;
                     }
                 case '}':
-                    if ($this->lastChar != '\\' && $this->isWithin(static::P_EVAL)) {
+                    if ($this->lastChar !== '\\' && $this->isWithin(static::P_EVAL)) {
                         $this->popWithin();
                         break;
                     }
@@ -198,6 +199,7 @@ class Phtml
                     if (!$this->isWithin(static::TAG, true)) {
                         break;
                     }
+
                     if ($this->isWithin(static::STRING)) {
                         $this->onStringEnd();
                     } else {
@@ -205,23 +207,25 @@ class Phtml
                     }
                     break;
                 case '[':
-                    if (mb_substr($string, $i - 4, 4) == '<!--' && $this->isWithin(static::COMMENT)) {
+                    if (mb_substr($string, $i - 4, 4) === '<!--' && $this->isWithin(static::COMMENT)) {
                         $this->conditionalComment = true;
                     }
                 default:
                     $this->onWordStart();
-
                     break;
             }
+
             $ascii = ord($this->char);
-            if (in_array($ascii, $ignoredAscii)) {
+            if (in_array($ascii, $ignoredAscii, true)) {
                 $this->debug("CHR:chr($ascii)");
             } else {
                 $this->debug("CHR:$this->char");
             }
+
             $this->addChar($this->char);
             $this->lastChar = $this->char;
         }
+
         $text = $this->getCurrent();
         if ($text) {
             $this->getNode()->addChild(new PhtmlNodeText($text));
@@ -233,23 +237,23 @@ class Phtml
         return $node;
     }
 
-    protected function ignoreAll()
+    protected function ignoreAll(): bool
     {
-        return in_array($this->within(), static::$IGNOREALLLIST);
+        return in_array($this->within(), static::$IGNOREALLLIST, true);
     }
 
-    protected function ignoreTags()
+    protected function ignoreTags(): bool
     {
-        return in_array($this->within(), static::$IGNORELIST);
+        return in_array($this->within(), static::$IGNORELIST, true);
     }
 
-    protected function ignoreNextChar($debugKey)
+    protected function ignoreNextChar($debugKey): void
     {
         $this->debug('IGNORING NEXT CHR (' . $debugKey . '): ' . $this->char);
-        $this->ignoreNextChar = true;//Used because the tag is marked ended before the char is added
+        $this->ignoreNextChar = true; //Used because the tag is marked ended before the char is added
     }
 
-    protected function clear()
+    protected function clear(): void
     {
         $this->node = null;
         $this->withinStack = [];
@@ -261,7 +265,7 @@ class Phtml
         $this->attrName = '';
     }
 
-    protected function addChar($chr)
+    protected function addChar($chr): void
     {
         if (!$this->ignoreNextChar && !$this->ignoreChars) {
             $this->current .= $chr;
@@ -270,9 +274,9 @@ class Phtml
         $this->currentIgnore .= $chr;
     }
 
-    protected function onStringStart()
+    protected function onStringStart(): void
     {
-        if ($this->stringStartChar && $this->stringStartChar != $this->char) {
+        if ($this->stringStartChar && $this->stringStartChar !== $this->char) {
             return;
         }
         $this->stringStartChar = $this->char;
@@ -282,9 +286,9 @@ class Phtml
         $this->current = substr($this->current, 1);
     }
 
-    protected function onStringEnd()
+    protected function onStringEnd(): void
     {
-        if ($this->stringStartChar != $this->char || $this->lastChar == '\\') {
+        if ($this->stringStartChar !== $this->char || $this->lastChar === '\\') {
             return;
         }
         $this->stringStartChar = '';
@@ -295,9 +299,11 @@ class Phtml
     protected function getCurrent($alphanum = false, $erase = true)
     {
         $result = $this->current;
+
         if ($alphanum) {
             $result = preg_replace('/[^A-Z0-9_\-]/i', '', $result);
         }
+
         if ($erase) {
             $this->clearCurrent();
         }
@@ -305,7 +311,7 @@ class Phtml
         return $result;
     }
 
-    protected function clearCurrent()
+    protected function clearCurrent(): void
     {
         $this->current = '';
         $this->currentIgnore = '';
@@ -314,11 +320,12 @@ class Phtml
     /**
      * @throws PhtmlException
      */
-    protected function onWordStart()
+    protected function onWordStart(): void
     {
         if ($this->isWithin(static::STRING)) {
             return;
-        }//ignore
+        } //ignore
+
         switch ($this->within()) {
             case static::TAG:
                 if ($this->getNode()->getTag()) {
@@ -328,33 +335,37 @@ class Phtml
         }
     }
 
-    protected function hasCurrent()
+    protected function hasCurrent(): bool
     {
-        return trim($this->current) != '';
+        return trim($this->current) !== '';
     }
 
     /**
      * @throws PhtmlException
      */
-    protected function onWordEnd()
+    protected function onWordEnd(): void
     {
-        if ($this->char != ':') {
+        if ($this->char !== ':') {
             $this->currentIgnore = '';
         }
+
         if (!$this->hasCurrent()) {
             return;
         } //ignore
 
         switch ($this->within()) {
             case static::TAG:
+
                 if ($this->ignoreTags()) {
                     return;
                 }
+
                 $current = $this->getCurrent(true);
                 if (!$current) {
                     return;
                 }
-                if ($this->char == ':') {
+
+                if ($this->char === ':') {
                     $this->getNode()->setNs($current);
                 } else {
                     $this->getNode()->setTag($current);
@@ -367,7 +378,7 @@ class Phtml
             case static::ATTR:
                 if (!$this->attrName) {
                     $current = preg_replace('/[^A-Z0-9_\-\:]/i', '', $this->getCurrent());
-                    if (!$current) {
+                    if ($current === false) {
                         return;
                     }
                     $this->attrName = $current;
@@ -378,30 +389,30 @@ class Phtml
                         $this->attrName = '';
                         $this->popWithin();
                     }
-                } else {
-                    $val = $this->getCurrent();
-                    $val = substr($val, 1, -1);
-                    $this->debug("ATTR VAL FOUND FOR: $this->attrName ($val)");
-                    $this->getNode()->setAttribute($this->attrName, $val);
-                    $this->attrName = '';
-                    $this->popWithin();
+                    break;
                 }
 
+                $val = $this->getCurrent();
+                $val = substr($val, 1, -1);
+                $this->debug("ATTR VAL FOUND FOR: $this->attrName ($val)");
+                $this->getNode()->setAttribute($this->attrName, $val);
+                $this->attrName = '';
+                $this->popWithin();
                 break;
         }
     }
 
-    protected function isScriptTag($tag)
+    protected function isScriptTag($tag): bool
     {
-        return in_array(strtolower($tag), static::$SCRIPTAGS);
+        return in_array(strtolower($tag), static::$SCRIPTAGS, true);
     }
 
-    protected function pushWithin($within)
+    protected function pushWithin($within): void
     {
         $this->withinStack[] = $within;
     }
 
-    protected function pushBefore($within)
+    protected function pushBefore($within): void
     {
         $oldWithin = $this->popWithin();
         $this->pushWithin($within);
@@ -418,52 +429,57 @@ class Phtml
         return $this->withinStack[count($this->withinStack) - 1];
     }
 
-    protected function isWithin($within, $deep = false)
+    protected function isWithin($within, bool $deep = false): bool
     {
         if ($deep) {
-            return in_array($within, $this->withinStack);
-        } else {
-            return $this->within() == $within;
+            return in_array($within, $this->withinStack, true);
         }
+
+        return $this->within() == $within;
     }
 
     /**
      * @throws PhtmlException
      */
-    protected function onTagStart()
+    protected function onTagStart(): void
     {
         if ($this->ignoreTags()) {
             return;
         }
+
         $node = new PhtmlNode();
         $text = $this->getCurrent();
         $this->pushWithin(static::TAG);
+
         if ($text) {
             $this->getNode()->addChild(new PhtmlNodeText($text));
         }
+
         $this->getNode()->addChild($node);
         $this->node = $node;
     }
 
-    protected function isVoidTag($tag)
+    protected function isVoidTag($tag): bool
     {
-        return in_array($tag, static::$VOIDTAGS);
+        return in_array($tag, static::$VOIDTAGS, true);
     }
 
     /**
      * @throws PhtmlException
      */
-    protected function onTagEnd()
+    protected function onTagEnd(): void
     {
         if (!$this->isWithin(static::TAG)) {
             return;
         }
+
         if ($this->ignoreTags()) {
             return;
         }
+
         $this->debug("ENDING TAG: " . $this->getNode()->getTag());
 
-        if ($this->lastChar == '/' || $this->isVoidTag($this->getNode()->getTag())) {
+        if ($this->lastChar === '/' || $this->isVoidTag($this->getNode()->getTag())) {
             $this->onNodeEnd();
         }
 
@@ -473,9 +489,14 @@ class Phtml
     /**
      * @throws PhtmlException
      */
-    protected function checkEndTag()
+    protected function checkEndTag(): void
     {
+        if ($this->debug === false) {
+            return;
+        }
+
         $endTag = trim($this->currentIgnore, "</> \t\n\r");
+
         if ($endTag) {
             $ns = '';
             if (false === stripos($endTag, ':')) {
@@ -484,9 +505,7 @@ class Phtml
                 [$ns, $tag] = explode(':', $endTag);
             }
 
-            if (strtolower($this->getNode()->getTag()) != strtolower($tag) ||
-                strtolower($this->getNode()->getNs()) != strtolower($ns)
-            ) {
+            if (strtolower($this->getNode()->getTag()) !== strtolower($tag) || strtolower($this->getNode()->getNs()) !== strtolower($ns)) {
                 $this->debug("ERROR WRONG END TAG: $endTag ($ns:$tag) for " . $this->getNode()->getTag());
             }
         }
@@ -495,22 +514,25 @@ class Phtml
     /**
      * @throws PhtmlException
      */
-    protected function onNodeEnd()
+    protected function onNodeEnd(): void
     {
         if ($this->ignoreAll()) {
             return;
         }
+
         $parent = $this->getNode()->getParent();
 
         $text = $this->getCurrent();
         if ($text) {
             $this->getNode()->addChild(new PhtmlNodeText($text));
         }
+
         $this->debug("ENDING NODE: " . $this->getNode()->getTag());
 
         if ($this->isScriptTag($this->getNode()->getTag())) {
             $this->popWithin(); //Pop an extra time for the SCRIPT
         }
+
         $this->node = $parent;
     }
 
@@ -527,17 +549,19 @@ class Phtml
         return $this->node;
     }
 
-    protected function debug($msg)
+    protected function debug(string $msg): void
     {
-        $msg = htmlentities("[" . implode(',', $this->withinStack) . "] " . $msg);
-        if ($this->debug) {
-            echo "\n$msg";
-        } else {
-            $this->debugTrace .= "\n$msg";
+        if ($this->debug === false) {
+            return;
         }
+
+        $msg = htmlentities("[" . implode(',', $this->withinStack) . "] " . $msg);
+
+        $this->debugTrace .= "\n$msg";
+        echo "\n$msg";
     }
 
-    public function setDebug($debug)
+    public function setDebug(bool $debug): void
     {
         $this->debug = $debug;
     }
