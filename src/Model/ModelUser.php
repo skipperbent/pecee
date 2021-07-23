@@ -63,6 +63,15 @@ class ModelUser extends ModelMeta implements IUserAuthentication
         $this->last_activity = Carbon::now();
     }
 
+    public function getLastActivity(): ?Carbon
+    {
+        if($this->last_activity !== null) {
+            return Carbon::parse($this->last_activity, app()->getTimezone());
+        }
+
+        return null;
+    }
+
     protected function getDataClass()
     {
         return static::getUserDataClass();
