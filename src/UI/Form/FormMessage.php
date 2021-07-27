@@ -54,7 +54,7 @@ class FormMessage
      * @param string $index
      * @return static
      */
-    public function setIndex(string $index): self
+    public function setIndex(?string $index = null): self
     {
         $this->index = $index;
 

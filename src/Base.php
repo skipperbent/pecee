@@ -81,6 +81,11 @@ abstract class Base
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
             foreach ((array)$validations as $validateClass) {
+
+                if ($validateClass instanceof IInputItem === false) {
+                    continue;
+                }
+
                 foreach ($inputs as $input) {
                     $validateClass->setInput($input);
                     if ($validateClass->runValidation() === false) {
@@ -173,7 +178,7 @@ abstract class Base
     {
         $this->sessionMessage()->set
         (
-            (new FormMessage())->setName($message)->setPlacement($placement ?? $this->defaultMessagePlacement)->setIndex($index),
+            (new FormMessage())->setMessage($message)->setPlacement($placement ?? $this->defaultMessagePlacement)->setIndex($index),
             $type
         );
     }
