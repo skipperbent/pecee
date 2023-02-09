@@ -302,14 +302,14 @@ class Table
                     ]);
                 }
 
-                $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s, ',
+                $query .= sprintf('%1$s CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON DELETE %6$s ON UPDATE %7$s, ',
                     ($type === static::TYPE_ALTER) ? 'ADD' : '',
                     $column->getRelationKey(),
                     $column->getName(),
                     $column->getRelationTable(),
                     $column->getRelationColumn(),
-                    $column->getRelationUpdateType(),
-                    $column->getRelationDeleteType());
+                    $column->getRelationDeleteType(),
+                    $column->getRelationUpdateType());
 
             }
 
@@ -492,6 +492,10 @@ class Table
      */
     public function dropForeign(array $indexes): self
     {
+        if($this->exists() === false) {
+            return $this;
+        }
+
         foreach ($indexes as $key => $index) {
 
             // Skip if the foreign-key is already removed.

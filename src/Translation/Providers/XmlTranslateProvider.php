@@ -15,7 +15,7 @@ class XmlTranslateProvider implements ITranslationProvider
      * @return string|\SimpleXMLIterator
      * @throws TranslationException
      */
-    public function lookup($key)
+    public function lookup(string $key): string
     {
         $xml = new \SimpleXmlElement($this->xml);
         $node = null;
@@ -51,7 +51,7 @@ class XmlTranslateProvider implements ITranslationProvider
      * @param string $locale
      * @throws TranslationException
      */
-    public function load($locale)
+    public function load(string $locale): void
     {
         $this->locale = $locale;
         $path = sprintf('%s/%s.xml', $this->getDirectory(), $locale);

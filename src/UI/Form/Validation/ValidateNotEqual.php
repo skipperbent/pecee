@@ -13,7 +13,7 @@ class ValidateNotEqual extends ValidateInput
         $this->strict = $strict;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         $value = $this->input->getValue();
         if ($this->strict === false) {
@@ -24,7 +24,7 @@ class ValidateNotEqual extends ValidateInput
         return $value !== $this->value;
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is required', $this->input->getName());
     }

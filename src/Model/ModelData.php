@@ -22,31 +22,113 @@ abstract class ModelData extends Model
         }
 
         $this->data = new CollectionItem();
+
+        $this->with(['data' => function (self $object) {
+            $rows = $object->data->getData();
+
+            return array_filter($rows, function ($key) {
+                return (in_array($key, $this->hidden, true) === false);
+            }, ARRAY_FILTER_USE_KEY);
+        }]);
     }
 
     abstract protected function getDataClass();
 
-    abstract protected function fetchData();
+    abstract protected function fetchData(): \IteratorAggregate;
 
-    protected function onNewDataItemCreate(Model $field)
+    protected function onNewDataItemCreate(Model $field): void
     {
-        $field->{$this->getDataPrimary()} = $this->{$this->primary};
+        $field->{$this->getDataPrimary()} = $this->{$this->primaryKey};
         $field->save();
     }
 
-    public function onInstanceCreate()
+    public function onInstanceCreate(): void
     {
-        /* @var $data array */
-        $data = $this->fetchData();
-        foreach ($data as $d) {
-            $this->data->{$d->{$this->dataKeyField}} = $d->{$this->dataValueField};
+        $this->data = new CollectionItem();
+
+        if ($this->isNew() === true) {
+            return;
         }
+
+        $collection = [];
+        foreach ($this->fetchData() as $d) {
+
+            $key = $d->{$this->dataKeyField};
+            $output = $d->{$this->dataValueField};
+
+            // Add special array types (name[index])
+            if (strpos($key, '[') !== false) {
+
+                preg_match_all('/\[([\w]+)\]/', $d->{$this->dataKeyField}, $indexes);
+
+                $key = substr($key, 0, strpos($key, '['));
+
+                $reverse = array_reverse($indexes[1]);
+                $max = count($reverse);
+
+                for ($i = 0; $i < $max; $i++) {
+                    $index = $reverse[$i];
+                    $output = [$index => $output];
+                }
+
+                if (isset($collection[$key]) === false || is_array($collection[$key]) === false) {
+                    $collection[$key] = [];
+                }
+
+                $collection[$key] = array_merge_recursive($collection[$key], $output);
+
+                continue;
+            }
+
+            // Add default type
+            $collection[$key] = $output;
+        }
+
+        $this->data->setData($collection);
 
         $this->updateIdentifier = $this->generateUpdateIdentifier();
     }
 
-    protected function updateData()
+    protected function setFieldData(Model $model, string $key, $data, \Closure $callback): void
     {
+        if (is_array($data) === true) {
+            foreach ($data as $k => $v) {
+
+                if (is_array($v) === true) {
+
+                    if(count($v) === 0) {
+                        continue;
+                    }
+
+                    $this->setFieldData($model, $key . '[' . $k . ']', $v, $callback);
+                    continue;
+                }
+
+                if(trim($v) === '') {
+                    continue;
+                }
+
+                $field = $this->getDataClass();
+                $field = new $field();
+                $field->{$this->dataKeyField} = $key . '[' . $k . ']';
+                $field->{$this->dataValueField} = $v;
+                $this->onNewDataItemCreate($field);
+                $callback($field);
+
+            }
+        } else {
+            $model->{$this->dataKeyField} = $key;
+            $model->{$this->dataValueField} = $data;
+            $callback($model);
+        }
+    }
+
+    protected function updateData(): void
+    {
+        if ($this->isNew() === true) {
+            return;
+        }
+
         if ($this->data !== null && $this->getUpdateIdentifier() !== $this->generateUpdateIdentifier()) {
 
             /* @var $currentFields array|null */
@@ -75,18 +157,19 @@ abstract class ModelData extends Model
                             continue;
                         }
 
-                        $cf[$key]->{$this->dataKeyField} = $key;
-                        $cf[$key]->{$this->dataValueField} = $value;
-                        $cf[$key]->save();
+                        $this->setFieldData($cf[$key], $key, $value, function (Model $model) {
+                            $model->save();
+                        });
+
                         unset($cf[$key]);
 
                     } else {
                         $field = $this->getDataClass();
                         $field = new $field();
-                        $field->{$this->dataKeyField} = $key;
-                        $field->{$this->dataValueField} = $value;
 
-                        $this->onNewDataItemCreate($field);
+                        $this->setFieldData($field, $key, $value, function (Model $model) {
+                            $this->onNewDataItemCreate($model);
+                        });
                     }
                 }
             }
@@ -99,8 +182,8 @@ abstract class ModelData extends Model
 
     public function save(array $data = null)
     {
-        if($data !== null && count($data) > 0) {
-            foreach($data as $key => $value) {
+        if ($data !== null && count($data) > 0) {
+            foreach ($data as $key => $value) {
                 $this->{$key} = $value;
             }
         }
@@ -109,7 +192,7 @@ abstract class ModelData extends Model
         $this->updateData();
     }
 
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $keys = array_map('strtolower', array_keys($this->getRows()));
         foreach ($data as $key => $d) {
@@ -119,31 +202,31 @@ abstract class ModelData extends Model
         }
     }
 
-    public function toArray(array $filter = [])
+    public function toArray(array $filter = []): array
     {
         $rows = parent::toArray($filter);
 
         if ($this->mergeData === true) {
-            $rows += $this->data->getData();
-        } else {
-            $rows['data'] = $this->data->getData();
+            $data = $rows['data'] ?? null;
+            if ($data !== null) {
+                unset($rows['data']);
+                $rows += $data;
+            }
         }
 
-        return array_filter($rows, function ($key) {
-            return (in_array($key, $this->hidden, true) === false);
-        }, ARRAY_FILTER_USE_KEY);
+        return $rows;
     }
 
-    protected function generateUpdateIdentifier()
+    protected function generateUpdateIdentifier(): string
     {
         return md5(serialize($this->data));
     }
 
     /**
      * Get unique update identifier based on data
-     * @return string
+     * @return string|null
      */
-    public function getUpdateIdentifier()
+    public function getUpdateIdentifier(): ?string
     {
         return $this->updateIdentifier;
     }
@@ -155,9 +238,7 @@ abstract class ModelData extends Model
 
     public function __get($name)
     {
-        $exists = parent::__isset($name);
-
-        if ($exists === true) {
+        if (parent::__isset($name) === true) {
             return parent::__get($name);
         }
 

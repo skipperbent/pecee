@@ -42,7 +42,7 @@ class SessionMessage
      * Get messages
      * @param string|null $type
      * @param mixed|null $defaultValue
-     * @return \Pecee\UI\Form\FormMessage|array
+     * @return \Pecee\UI\Form\FormMessage|array|FormMessage[]
      */
     public function get($type = null, $defaultValue = null)
     {

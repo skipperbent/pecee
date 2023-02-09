@@ -33,7 +33,7 @@ class DbTranslateProvider implements ITranslationProvider
         return '';
     }
 
-    public function lookup($key)
+    public function lookup(string $key): string
     {
         if ($this->translations !== null && $this->translations->hasRows()) {
 
@@ -56,7 +56,7 @@ class DbTranslateProvider implements ITranslationProvider
         return $key;
     }
 
-    public function load($locale)
+    public function load(string $locale): void
     {
         $this->translations = $this->model->filterLocale($locale)->filterContext($this->getContext())->all();
     }

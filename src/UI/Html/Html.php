@@ -4,8 +4,8 @@ namespace Pecee\UI\Html;
 
 class Html
 {
-    const CLOSE_TYPE_TAG = 'tag';
-    const CLOSE_TYPE_NONE = 'none';
+    public const CLOSE_TYPE_TAG = 'tag';
+    public const CLOSE_TYPE_NONE = 'none';
 
     protected $tag;
     protected $innerHtml = [];
@@ -27,6 +27,17 @@ class Html
     {
         $this->innerHtml[] = $element;
 
+        return $this;
+    }
+
+    /**
+     * Append to element
+     * @param Html $element
+     * @return static $this
+     */
+    public function appendTo(self $element)
+    {
+        $element->append($this);
         return $this;
     }
 
@@ -72,6 +83,11 @@ class Html
         return $this;
     }
 
+    public function text(string $text)
+    {
+        return $this->addInnerHtml($text);
+    }
+
     /**
      * Replace attribute
      *
@@ -93,7 +109,7 @@ class Html
      * @param string $value
      * @return static
      */
-    public function addAttribute($name, $value = '')
+    public function addAttribute($name, $value = null)
     {
         if (isset($this->attributes[$name]) && in_array($value, $this->attributes[$name], true) === false) {
             $this->attributes[$name][] = $value;
@@ -123,7 +139,7 @@ class Html
      * @param bool $replace
      * @return static
      */
-    public function attr($name, $value = '', $replace = true)
+    public function attr($name, $value = null, $replace = true)
     {
         if ($replace === true) {
             return $this->replaceAttribute($name, $value);
@@ -228,6 +244,11 @@ class Html
     public function getAttribute($name)
     {
         return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+    }
+
+    public function getFirstAttribute(string $name, ?string $defaultValue = null): ?string
+    {
+        return $this->getAttribute($name)[0] ?? $defaultValue;
     }
 
     /**

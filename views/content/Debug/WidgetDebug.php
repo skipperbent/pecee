@@ -1,35 +1,35 @@
-<? /* @var $this \Pecee\Widget\Debug\WidgetDebug */ ?>
+<?php /* @var $this \Pecee\Widget\Debug\WidgetDebug */ ?>
 
 <?= $this->printJs('debug'); ?>
 <?= $this->printCss('debug'); ?>
 
 <div class="pecee-debug">
     <h1>Debug information</h1>
-    <table cellspacing="0" cellpadding="0">
+    <table>
         <thead>
         <tr>
-            <th align="left">
+            <th>
                 Execution time
             </th>
-            <th align="left">
+            <th>
                 Message
             </th>
-            <th align="left">
+            <th>
                 Class
             </th>
-            <th align="left">
+            <th>
                 Method
             </th>
-            <th align="left">
+            <th>
                 File
             </th>
-            <th align="center">
+            <th style="text-align:center;">
                 Line
             </th>
         </tr>
         </thead>
         <tbody>
-        <? foreach($this->stack as $i => $log) : ?>
+        <?php foreach($this->stack as $i => $log) : ?>
             <tr onclick="pecee_show_debug('debug_<?= $i; ?>')">
                 <td>
                     <?= $log['time']; ?>
@@ -41,9 +41,9 @@
                     </div>
                 </td>
                 <td>
-                    <? if(isset($log['debug'][count($log['debug'])-1]['class'])) : ?>
+                    <?php if(isset($log['debug'][count($log['debug'])-1]['class'])) : ?>
                         <?= $log['debug'][count($log['debug'])-1]['class']; ?>
-                    <? endif; ?>
+                    <?php endif; ?>
                 </td>
                 <td>
                     <?= $log['debug'][count($log['debug'])-1]['method']; ?>
@@ -51,11 +51,11 @@
                 <td>
                     <?= $log['debug'][count($log['debug'])-1]['file']; ?>
                 </td>
-                <td align="center">
+                <td style="text-align:center;">
                     <?= !isset($log['debug'][count($log['debug'])-1]['line']) ? '-' : $log['debug'][count($log['debug'])-1]['line']; ?>
                 </td>
             </tr>
-        <? endforeach; ?>
+        <?php endforeach; ?>
         </tbody>
     </table>
 </div>

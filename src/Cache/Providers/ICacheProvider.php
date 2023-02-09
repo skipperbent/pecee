@@ -6,13 +6,13 @@ use Carbon\Carbon;
 interface ICacheProvider
 {
 
-    public function set($key, $value, Carbon $expireDate, array $keywords = []);
+    public function set(string $key, $value, Carbon $expireDate, array $keywords = []);
 
-    public function get($key);
+    public function get(string $key);
 
     public function getByKeyword(array $keywords = []);
 
-    public function remove($key);
+    public function remove(string $key);
 
     public function clear(array $keywords = []);
 

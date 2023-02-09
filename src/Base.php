@@ -2,6 +2,7 @@
 
 namespace Pecee;
 
+use Pecee\Http\Input\IInputItem;
 use Pecee\Http\Input\InputItem;
 use Pecee\Session\Session;
 use Pecee\Session\SessionMessage;
@@ -15,7 +16,7 @@ abstract class Base
     protected $_inputSessionKey = 'InputValues';
     protected $_validations = [];
 
-    protected function onInputError(InputItem $input, string $error): void
+    protected function onInputError(IInputItem $input, string $error): void
     {
 
     }
@@ -78,8 +79,7 @@ abstract class Base
         foreach ($validation as $key => $validations) {
 
             $input = input()->find($key) ?? new InputItem($key, null);
-            $inputs = ($input instanceof InputItem) ? [$input] : $input;
-
+            $inputs = ($input instanceof IInputItem) ? [$input] : $input;
             $validations = \is_array($validations) === false ? [$validations] : $validations;
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
@@ -140,18 +140,16 @@ abstract class Base
 
     /**
      * Get form messages
-     * @param string $type
+     * @param string|null $type
      * @param string|null $placement
-     * @return array
+     * @return array|FormMessage[]
      */
-    public function getMessages(string $type, ?string $placement = null): array
+    public function getMessages(?string $type = null, ?string $placement = null): array
     {
         $messages = [];
         $search = $this->sessionMessage()->get($type);
 
         if ($search !== null && count($search) > 0) {
-            /* @var $search array */
-            /* @var $message FormMessage */
             foreach ($search as $message) {
                 if ($placement === null || $message->getPlacement() === $placement) {
                     $messages[] = $message;
@@ -162,7 +160,7 @@ abstract class Base
         return $messages;
     }
 
-    public function hasMessages(string $type, ?string $placement = null): bool
+    public function hasMessages(?string $type = null, ?string $placement = null): bool
     {
         return (\count($this->getMessages($type, $placement)) > 0);
     }

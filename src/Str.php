@@ -6,6 +6,32 @@ class Str
 {
 
     /**
+     * Returns true if all provided values are not null
+     *
+     * @param ...$args
+     * @return bool
+     */
+    public static function notNull(...$args): bool
+    {
+        return (count(array_filter($args, static function($value) {
+                return $value === null;
+            })) === 0);
+    }
+
+    /**
+     * Returns true if all provided values are not empty
+     *
+     * @param ...$args
+     * @return bool
+     */
+    public static function notEmpty(...$args): bool
+    {
+        return (count(array_filter($args, static function($value) {
+                return empty($value);
+            })) === 0);
+    }
+
+    /**
      * Sanitize/compress html
      * @param string $html
      * @return string

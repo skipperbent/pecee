@@ -10,12 +10,12 @@ class ValidateFileMime extends ValidateFile
         $this->mimeTypes = $mimeTypes;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         return in_array(strtolower($this->input->getType()), $this->mimeTypes, false);
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is not a valid format', [$this->input->getName()]);
     }

@@ -1,2 +1,7 @@
 vendor/
 composer.lock
+<<<<<<< Updated upstream
+.idea/
+=======
+.idea/
+>>>>>>> Stashed changes

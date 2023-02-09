@@ -85,11 +85,9 @@ class PhtmlNode extends HtmlElement
         }
 
         if (count($this->getAttrs()) > 0) {
-            if ($method) {
-                $str .= 'array(';
-            } else {
-                $str .= ' ';
-            }
+
+            $str .= ($method) ? 'array(' : ' ';
+
             foreach ($this->getAttrs() as $name => $val) {
                 if ($method) {
                     $str .= sprintf('"%s"=>%s,', $name, $this->processAttrValue($val));
@@ -102,15 +100,11 @@ class PhtmlNode extends HtmlElement
 
                 }
             }
-            if ($method) {
-                $str = trim($str, ',') . '),';
-            } else {
-                $str = trim($str);
-            }
-        } else {
-            if ($method) {
-                $str .= 'array(),';
-            }
+
+            $str = ($method) ? trim($str, ',') . '),' : trim($str);
+
+        } else if ($method) {
+            $str .= 'array(),';
         }
 
         if ($this->isContainer()) {
@@ -119,17 +113,19 @@ class PhtmlNode extends HtmlElement
             } else {
                 $body = '';
             }
+
             if ($method) {
                 $body .= $this->getInnerPHP();
             } else {
                 $str .= $this->getInnerPHP();
             }
+
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+                $taglib = $taglibs[$this->getNs()] ?? null;
 
-                if ($taglib !== null && $taglib instanceof ITaglib) {
+                if ($taglib instanceof ITaglib) {
                     $str = $taglib->callTag($this->getTag(), $this->getAttrs(), $body);
                 }
             } else {
@@ -139,21 +135,21 @@ class PhtmlNode extends HtmlElement
             if ($method) {
                 $taglibs = app()->get(Phtml::SETTINGS_TAGLIB, []);
 
-                $taglib = isset($taglibs[$this->getNs()]) ? $taglibs[$this->getNs()] : null;
+                $taglib = $taglibs[$this->getNs()] ?? null;
 
-                if ($taglib !== null && $taglib instanceof ITaglib) {
+                if ($taglib instanceof ITaglib) {
                     $str = $taglib->callTag($this->getTag(), $this->getAttrs(), null);
                 }
             } else {
 
-                if (in_array($this->getTag(), Phtml::$VOIDTAGS) === false) {
+                if (in_array($this->getTag(), Phtml::$VOIDTAGS, false) === false) {
                     $str .= '/';
                 }
 
                 $str .= '>';
             }
         }
-        if ($this->getParent() === null || $this->getParent()->getTag() == 'phtml') {
+        if ($this->getParent() === null || $this->getParent()->getTag() === 'phtml') {
             $str = static::$prepend . $str . static::$append;
             static::$prepend = '';
             static::$append = '';

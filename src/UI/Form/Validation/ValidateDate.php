@@ -7,12 +7,12 @@ class ValidateDate extends ValidateInput
 {
     protected $format;
 
-    public function __construct($format = null)
+    public function __construct(?string $format = null)
     {
         $this->format = $format;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         try {
             if ($this->format === null) {
@@ -27,7 +27,7 @@ class ValidateDate extends ValidateInput
         return true;
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is not a valid date', $this->input->getName());
     }

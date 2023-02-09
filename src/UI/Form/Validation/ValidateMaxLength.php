@@ -11,12 +11,12 @@ class ValidateMaxLength extends ValidateInput
         $this->maxLength = $maxLength;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         return !(strlen($this->input->getValue()) > $this->maxLength);
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s can only be %s characters', $this->input->getName(), $this->maxLength);
     }

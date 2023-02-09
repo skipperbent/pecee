@@ -5,15 +5,26 @@ namespace Pecee;
 class ArrayUtil
 {
 
-    public static function filter(array $array, $allowEmpty = true): array
+    /**
+     * Behaves like array_util but works on multidimensional arrays.
+     *
+     * @param array $array
+     * @param callable|null $callback
+     * @return array
+     */
+    public static function filter(array $array, ?callable $callback = null): array
     {
-        foreach ($array as $key => $value) {
-            if ($value === null || ($allowEmpty === false && trim($value) !== '')) {
-                unset($array[$key]);
-            }
+        $array = array_map(static function($item) {
+            return is_array($item) ? static::filter($item) : $item;
+        }, $array);
+
+        if($callback === null) {
+            $callback = static function($value) {
+                return !empty($value);
+            };
         }
 
-        return $array;
+        return array_filter($array, $callback);
     }
 
     public static function average(array $arr)

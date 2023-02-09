@@ -5,18 +5,21 @@ namespace Pecee\Model;
 use Carbon\Carbon;
 use Pecee\Boolean;
 use Pecee\Guid;
+use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Node\NodeData;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 
 class ModelNode extends ModelData
 {
-    const SORT_ID = 'id';
-    const SORT_PARENT = 'parent';
-    const SORT_TITLE = 'title';
-    const SORT_UPDATED = 'updated';
-    const SORT_CREATED = 'created';
-    const SORT_ACTIVE_CREATED = 'active_created';
-    const SORT_ORDER = 'order';
+    public static $operators = ['=', '!=', '<', '>', '<=', '>=', 'between', 'is not', 'is', 'like', 'find'];
+
+    public const SORT_ID = 'id';
+    public const SORT_PARENT = 'parent';
+    public const SORT_TITLE = 'title';
+    public const SORT_UPDATED = 'updated';
+    public const SORT_CREATED = 'created';
+    public const SORT_ACTIVE_CREATED = 'active_created';
+    public const SORT_ORDER = 'order';
 
     public static $sortTypes = [
         self::SORT_ID,
@@ -36,6 +39,7 @@ class ModelNode extends ModelData
     protected $columns = [
         'id',
         'parent_id',
+        'user_id',
         'path',
         'type',
         'title',
@@ -45,6 +49,7 @@ class ModelNode extends ModelData
         'level',
         'order',
         'active',
+        'deleted',
         'updated_at',
         'created_at',
     ];
@@ -56,13 +61,30 @@ class ModelNode extends ModelData
         parent::__construct();
         $this->id = Guid::create();
         $this->path = 0;
-        $this->order = 0;
         $this->active = false;
+        $this->deleted = false;
 
         if ($this->defaultType !== null) {
             $this->type = $this->defaultType;
             $this->where('type', '=', $this->defaultType);
         }
+    }
+
+    public function delete()
+    {
+        // Delete children
+
+        /* @var $child static */
+        foreach ($this->getChildren()->all() as $child) {
+            $child->delete();
+        }
+
+        return parent::delete();
+    }
+
+    public function getUserId()
+    {
+        return $this->user_id;
     }
 
     public function getId()
@@ -75,9 +97,11 @@ class ModelNode extends ModelData
         return $this->parent_id;
     }
 
-    public function setParentId($id)
+    public function setParentId($id): self
     {
         $this->parent_id = $id;
+
+        return $this;
     }
 
     public function getPath()
@@ -85,9 +109,11 @@ class ModelNode extends ModelData
         return $this->path;
     }
 
-    public function setPath($path)
+    public function setPath($path): self
     {
         $this->path = $path;
+
+        return $this;
     }
 
     public function getType()
@@ -95,9 +121,11 @@ class ModelNode extends ModelData
         return $this->type;
     }
 
-    public function setType($type)
+    public function setType($type): self
     {
         $this->type = $type;
+
+        return $this;
     }
 
     public function getTitle()
@@ -105,9 +133,11 @@ class ModelNode extends ModelData
         return $this->title;
     }
 
-    public function setTitle($title)
+    public function setTitle($title): self
     {
         $this->title = $title;
+
+        return $this;
     }
 
     public function getContent()
@@ -115,9 +145,11 @@ class ModelNode extends ModelData
         return $this->content;
     }
 
-    public function setContent($content)
+    public function setContent($content): self
     {
         $this->content = $content;
+
+        return $this;
     }
 
     public function getActiveFrom()
@@ -129,9 +161,11 @@ class ModelNode extends ModelData
         return null;
     }
 
-    public function setActiveFrom(Carbon $date)
+    public function setActiveFrom(Carbon $date): self
     {
         $this->active_from = $date->toDateTimeString();
+
+        return $this;
     }
 
     public function getActiveTo()
@@ -143,19 +177,23 @@ class ModelNode extends ModelData
         return null;
     }
 
-    public function setActiveTo(Carbon $date)
+    public function setActiveTo(Carbon $date): self
     {
         $this->active_to = $date->toDateTimeString();
+
+        return $this;
     }
 
-    public function getActive()
+    public function getActive(): bool
     {
         return ((int)$this->active === 1);
     }
 
-    public function setActive($active)
+    public function setActive(bool $active): self
     {
         $this->active = $active;
+
+        return $this;
     }
 
     public function getLevel()
@@ -163,9 +201,11 @@ class ModelNode extends ModelData
         return $this->level;
     }
 
-    public function setLevel($level)
+    public function setLevel($level): self
     {
         $this->level = $level;
+
+        return $this;
     }
 
     public function getOrder()
@@ -173,9 +213,11 @@ class ModelNode extends ModelData
         return (int)$this->order;
     }
 
-    public function setOrder($order)
+    public function setOrder($order): self
     {
         $this->order = $order;
+
+        return $this;
     }
 
     public function getUpdatedAt()
@@ -187,9 +229,11 @@ class ModelNode extends ModelData
         return null;
     }
 
-    public function setUpdatedAt(Carbon $date)
+    public function setUpdatedAt(Carbon $date): self
     {
         $this->updated_at = $date->toDateTimeString();
+
+        return $this;
     }
 
     public function getCreatedAt()
@@ -197,9 +241,11 @@ class ModelNode extends ModelData
         return Carbon::parse($this->created_at);
     }
 
-    public function setCreatedAt(Carbon $date)
+    public function setCreatedAt(Carbon $date): self
     {
         $this->created_at = $date->toDateTimeString();
+
+        return $this;
     }
 
     public function isActive()
@@ -339,6 +385,8 @@ class ModelNode extends ModelData
 
     public function save(array $data = null)
     {
+        $this->updateOrder();
+
         if ($this->isNew() === true) {
             $this->calculatePath();
         }
@@ -360,15 +408,19 @@ class ModelNode extends ModelData
         return $this->whereIn('id', $ids);
     }
 
+    /**
+     * @param bool $active
+     * @return static
+     */
     public function filterActive($active = true)
     {
         return
             $this->where('active', '=', Boolean::parse($active))
-                ->where(function (QueryBuilderHandler $q) {
+                ->where(static function (QueryBuilderHandler $q) {
                     $q->whereNull('active_from')
                         ->whereNull('active_to')
                         ->orWhere('active_from', '<=', $q->raw('NOW()'))
-                        ->where(function (QueryBuilderHandler $q) {
+                        ->where(static function (QueryBuilderHandler $q) {
 
                             $q->where('active_to', '>=', $q->raw('NOW()'))
                                 ->orWhereNull('active_to');
@@ -377,10 +429,14 @@ class ModelNode extends ModelData
                 });
     }
 
+    /**
+     * @param string|null $parentId
+     * @return static
+     */
     public function filterParentId($parentId = null)
     {
         if ($parentId === null || (string)$parentId === '0') {
-            return $this->where(function (QueryBuilderHandler $q) {
+            return $this->where(static function (QueryBuilderHandler $q) {
                 $q->whereNull('parent_id')->orWhereNull('path');
             });
         }
@@ -398,12 +454,20 @@ class ModelNode extends ModelData
         return $this->where('path', 'LIKE', $path);
     }
 
-    public function filterType($type)
+    /**
+     * @param string $type
+     * @return static
+     */
+    public function filterType(string $type): self
     {
         return $this->where('type', '=', $type);
     }
 
-    public function filterTypes(array $types)
+    /**
+     * @param array $types
+     * @return static
+     */
+    public function filterTypes(array $types): self
     {
         return $this->whereIn('type', $types);
     }
@@ -462,24 +526,96 @@ class ModelNode extends ModelData
         });
     }
 
-    public function filterKey($key, $value, $operator = '=')
+    /**
+     * Filter by key
+     *
+     * @param string $key
+     * @param string $value
+     * @param string $operator
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function filterKey(string $key, ?string $value = null, string $operator = '=')
     {
-        $subQuery = NodeData::instance()
-            ->select(['node_id'])
-            ->where('node_id', '=', $this->raw('node.`id`'))
-            ->where('key', '=', $key)
-            ->where('value', $operator, $value)
-            ->limit(1);
+        if (in_array(strtolower($operator), static::$operators, true) === false) {
+            throw new ModelException(sprintf('Invalid operator "%s". Must be one of the following type: %s.', $operator, implode(', ', static::$operators)));
+        }
 
-        return $this->where('id', '=', $this->subQuery($subQuery));
+        if (strtolower($operator) === 'find') {
+            $value = "%$value%";
+            $operator = 'LIKE';
+        }
+
+        $keyOperator = '=';
+        if (strpos($key, '[') > -1) {
+
+            // Search all keys on key[]
+            if ($key[strlen($key) - 1] === '[') {
+                $key .= '%';
+                $keyOperator = 'LIKE';
+            } else {
+                $key = $key . ']';
+            }
+        }
+
+        $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
+        $subQuery = $this->subQuery(NodeData::instance()
+            ->select(['data.node_id'])
+            ->alias('data')
+            ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
+            ->where('data.key', $keyOperator, $key)
+            ->where('data.value', $operator, $value)
+            ->limit(1));
+
+        return $this->where('id', '=', $subQuery);
     }
 
-    protected function getDataClass()
+    /**
+     * Filter by multiple key values
+     *
+     * @param string $key
+     * @param array $values
+     * @return static
+     * @throws \Pecee\Pixie\Exception
+     */
+    public function filterKeys(string $key, array $values)
+    {
+        $table = $this->getQuery()->getAlias() ?? $this->getQuery()->getTable();
+        $subQuery = $this->subQuery(NodeData::instance()
+            ->select(['data.node_id'])
+            ->alias('data')
+            ->where('data.node_id', '=', $this->raw("`$table`.`id`"))
+            ->where('data.key', '=', $key)
+            ->whereIn('data.value', $values));
+
+        return $this->whereIn('id', $subQuery);
+    }
+
+    public function updateOrder(): void
+    {
+        // Ignore if order is already set
+        if ($this->order !== null) {
+            return;
+        }
+
+        $order = 0;
+        if ($this->isNew() === true && $this->parent_id !== null) {
+            // Starts with 0 so will be automaticially incremented
+            $order = static::instance()
+                ->select(['id'])
+                ->filterParentId($this->parent_id)
+                ->count('id');
+        }
+
+        $this->setOrder($order);
+    }
+
+    protected function getDataClass(): string
     {
         return NodeData::class;
     }
 
-    protected function fetchData()
+    protected function fetchData(): \IteratorAggregate
     {
         return NodeData::instance()->filerNodeId($this->id)->all();
     }

@@ -13,12 +13,12 @@ class ValidateRegex extends ValidateInput
         $this->errorMessage = $errorMessage;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         return (preg_match($this->regex, $this->input->getValue()) !== 0);
     }
 
-    public function getError()
+    public function getError(): string
     {
         return $this->errorMessage;
     }

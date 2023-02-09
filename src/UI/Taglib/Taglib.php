@@ -4,7 +4,7 @@ namespace Pecee\UI\Taglib;
 class Taglib implements ITaglib
 {
 
-    const TAG_PREFIX = 'tag';
+    public const TAG_PREFIX = 'tag';
 
     protected $body = '';
     protected $bodies = [];
