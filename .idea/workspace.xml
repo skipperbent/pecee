@@ -4,11 +4,7 @@
     <list default="true" id="25e055a6-fe98-47bc-a4e8-5a3e0f3a7347" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Collection/Collection.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Collection/Collection.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Collection/CollectionItem.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Collection/CollectionItem.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/Collections/ModelCollection.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/Collections/ModelCollection.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Model/Model.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Model/Model.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Widget/Widget.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Widget/Widget.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Cookie.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Cookie.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -396,7 +392,7 @@
       <workItem from="1522967468292" duration="599000" />
       <workItem from="1522979786442" duration="14000" />
       <workItem from="1523028868376" duration="2696000" />
-      <workItem from="1675901552897" duration="3821000" />
+      <workItem from="1675901552897" duration="4570000" />
     </task>
     <servers />
   </component>
