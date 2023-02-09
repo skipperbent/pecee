@@ -97,12 +97,12 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator()
+    public function getIterator() : \ArrayIterator
     {
         return new \ArrayIterator($this->rows);
     }
 
-    public function count()
+    public function count() : int
     {
         return \count($this->getRows());
     }
@@ -114,7 +114,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
      * which is a value of any type other than a resource.
      * @since 5.4.0
      */
-    public function jsonSerialize()
+    public function jsonSerialize() : mixed
     {
         return $this->getRows();
     }
