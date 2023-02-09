@@ -23,10 +23,10 @@
     "josegonzalez/dotenv": "3.*",
     "pecee/simple-router": "^4.0",
     "robmorgan/phinx": "^0.5.3",
-    "nesbot/carbon": "1.*"
+    "nesbot/carbon": "2.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6.0",
+    "phpunit/phpunit": "^8.0",
     "mockery/mockery": "^1",
     "pecee/pixie": "^4.0"
   },

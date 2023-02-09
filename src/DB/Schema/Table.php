@@ -492,6 +492,10 @@ class Table
      */
     public function dropForeign(array $indexes): self
     {
+        if($this->exists() === false) {
+            return $this;
+        }
+
         foreach ($indexes as $key => $index) {
 
             // Skip if the foreign-key is already removed.
