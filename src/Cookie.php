@@ -12,11 +12,11 @@ class Cookie
      * @param string $value
      * @param int $expireTime
      * @param string|null $domain
-     * @param bool|null $secure
+     * @param bool $secure
      * @param string $path
      * @return bool
      */
-    public static function create($id, $value, $expireTime = null, $domain = null, $secure = null, $path = '/'): bool
+    public static function create($id, $value, $expireTime = null, $domain = null, bool $secure = false, $path = '/'): bool
     {
         $expireTime = $expireTime ?? Carbon::now()->addYear(10)->timestamp;
         $expireTime = ($expireTime > 0) ? $expireTime : null;
