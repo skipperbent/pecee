@@ -50,7 +50,7 @@ class HtmlInput extends Html
      * @param bool $status
      * @return static
      */
-    public function autoComplete($status = true)
+    public function autoComplete($status = false)
     {
         return $this->addAttribute('autocomplete', (($status === true) ? 'on' : 'off'));
     }
@@ -60,7 +60,7 @@ class HtmlInput extends Html
      */
     public function readonly()
     {
-        return $this->addInputAttribute('readonly');
+        return $this->addAttribute('readonly');
     }
 
     /**
@@ -68,15 +68,15 @@ class HtmlInput extends Html
      */
     public function disabled()
     {
-        return $this->addInputAttribute('disabled');
+        return $this->addAttribute('disabled');
     }
 
     /**
      * @return static
      */
-    public function autofocus()
+    public function autoFocus()
     {
-        return $this->addInputAttribute('autofocus');
+        return $this->addAttribute('autofocus');
     }
 
     /**
@@ -84,7 +84,7 @@ class HtmlInput extends Html
      */
     public function required()
     {
-        return $this->addInputAttribute('required');
+        return $this->addAttribute('required');
     }
 
     /**
@@ -92,7 +92,7 @@ class HtmlInput extends Html
      */
     public function multiple()
     {
-        return $this->addInputAttribute('required');
+        return $this->addAttribute('required');
     }
 
     /**
@@ -138,21 +138,10 @@ class HtmlInput extends Html
     public function checked(bool $checked)
     {
         if ($checked === true) {
-            return $this->addInputAttribute('checked');
+            return $this->addAttribute('checked');
         }
 
         return $this->removeAttribute('checked');
-    }
-
-    /**
-     * @param string $name
-     * @return static $this
-     */
-    public function addInputAttribute($name)
-    {
-        $this->addAttribute($name, null);
-
-        return $this;
     }
 
 }

@@ -13,12 +13,12 @@ class ValidateSession extends ValidateInput
         $this->sessionName = $sessionName;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         return ((bool)Session::exists($this->sessionName));
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s does not exist', $this->input->getName());
     }

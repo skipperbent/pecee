@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Form\Validation;
 
 use Pecee\Http\Input\IInputItem;
@@ -25,16 +26,17 @@ abstract class ValidateInput
      * Custom validation method
      * @return bool
      */
-    abstract public function validates();
+    abstract public function validates(): bool;
 
-    abstract public function getError();
+    abstract public function getError(): string;
 
     /**
      * Validate both custom validation and build-in validation (like empty values and framework specific stuff).
+     * @return bool
      */
-    public function runValidation()
+    public function runValidation(): bool
     {
-        if($this->allowEmpty === true && (string)trim($this->input->getValue()) === '') {
+        if ($this->allowEmpty === true && trim($this->input->getValue()) === '') {
             return true;
         }
 
@@ -44,36 +46,42 @@ abstract class ValidateInput
     /**
      * @return string|null
      */
-    public function getPlacement()
+    public function getPlacement(): ?string
     {
         return $this->placement;
     }
 
     /**
      * @param string|null $placement
+     * @return static
      */
-    public function setPlacement($placement)
+    public function setPlacement(?string $placement): self
     {
         $this->placement = $placement;
+
+        return $this;
     }
 
     /**
      * @param IInputItem $input
+     * @return static;
      */
-    public function setInput(IInputItem $input)
+    public function setInput(IInputItem $input): self
     {
         $this->input = $input;
+
+        return $this;
     }
 
     /**
      * @return IInputItem
      */
-    public function getInput()
+    public function getInput(): IInputItem
     {
         return $this->input;
     }
 
-    public function getAllowEmpty()
+    public function getAllowEmpty(): bool
     {
         return $this->allowEmpty;
     }

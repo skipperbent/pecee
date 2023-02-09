@@ -10,12 +10,12 @@ class ValidateFileExtension extends ValidateFile
         $this->extensions = $extensions;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         return in_array($this->input->getExtension(), array_map('strtolower', $this->extensions), false);
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is not a valid format', $this->input->getName());
     }

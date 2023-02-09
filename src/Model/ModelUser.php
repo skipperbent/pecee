@@ -12,12 +12,12 @@ use Pecee\User\IUserAuthentication;
 
 class ModelUser extends ModelData implements IUserAuthentication
 {
-    const COOKIE_NAME = 'ticket';
+    public const COOKIE_NAME = 'ticket';
 
     /* Errors */
-    const ERROR_TYPE_BANNED = 0x1;
-    const ERROR_TYPE_INVALID_LOGIN = 0x2;
-    const ERROR_TYPE_EXISTS = 0x3;
+    public const ERROR_TYPE_BANNED = 0x1;
+    public const ERROR_TYPE_INVALID_LOGIN = 0x2;
+    public const ERROR_TYPE_EXISTS = 0x3;
 
     protected static $instance;
     protected static $ticketExpireMinutes = 60;
@@ -53,7 +53,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         return static::getUserDataClass();
     }
 
-    protected function fetchData()
+    protected function fetchData(): \IteratorAggregate
     {
         $class = static::getUserDataClass();
         return $class::instance()->filterIdentifier($this->id)->all();
@@ -133,7 +133,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function exist()
     {
-        if ($this->{$this->primary} === null) {
+        if ($this->{$this->primaryKey} === null) {
             $user = static::instance()->filterUsername($this->username)->first();
             if ($user !== null && $user->id !== $this->id) {
                 return true;
@@ -200,7 +200,11 @@ class ModelUser extends ModelData implements IUserAuthentication
             ->orWhere($this->getDataPrimary(), '=', $this->raw($userDataQuery));
     }
 
-    public function filterDeleted($deleted = false)
+    /**
+     * @param bool $deleted
+     * @return static
+     */
+    public function filterDeleted(bool $deleted = false)
     {
         return $this->where('deleted', '=', $deleted);
     }
@@ -228,7 +232,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
         $subQuery = $userDataClass::instance()->select([$this->getDataPrimary()])->where('key', '=', $key)->where('value', ($like ? 'LIKE' : '='), (string)$value);
 
-        return $this->where($this->primary, '=', $this->subQuery($subQuery));
+        return $this->where($this->primaryKey, '=', $this->subQuery($subQuery));
     }
 
     public static function getByUsername($username)

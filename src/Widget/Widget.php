@@ -15,7 +15,7 @@ abstract class Widget extends Base
 
     public function __construct()
     {
-
+        // Here for backwards compatibility
     }
 
     public function onLoad(): void
@@ -46,7 +46,7 @@ abstract class Widget extends Base
         $errors = $this->getMessages($type, $placement);
 
         if (\count($errors) > 0) {
-            $o = sprintf('<div class="alert alert-%s">', $type);
+            $output = (new Html('div'))->addClass('alert')->addClass(sprintf('alert-%s', $type));
 
             $msg = [];
             /* @var $error \Pecee\UI\Form\FormMessage */
@@ -54,7 +54,9 @@ abstract class Widget extends Base
                 $msg[] = $error->getMessage();
             }
 
-            return $o . implode('<br>', $msg) . '</div>';
+            $output->addInnerHtml(implode('<br>', $msg));
+
+            return $output;
         }
 
         return '';
@@ -113,7 +115,7 @@ abstract class Widget extends Base
         $output = '';
 
         if (\count($this->getSite()->getCssFilesWrapped($section)) > 0) {
-            $css = url(app()->getCssWrapRouteName(), null, ['files' => implode($this->getSite()->getCssFilesWrapped($section), ',')]);
+            $css = url(app()->getCssWrapRouteName(), null, ['files' => implode(',', $this->getSite()->getCssFilesWrapped($section))]);
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
@@ -132,7 +134,7 @@ abstract class Widget extends Base
         $output = '';
 
         if (\count($this->getSite()->getJsFilesWrapped($section)) > 0) {
-            $js = url(app()->getJsWrapRouteName(), null, ['files' => implode($this->getSite()->getJsFilesWrapped($section), ',')]);
+            $js = url(app()->getJsWrapRouteName(), null, ['files' => implode(',', $this->getSite()->getJsFilesWrapped($section))]);
             $output .= (new Html('script'))->attr('src', $js);
         }
 
@@ -234,13 +236,13 @@ abstract class Widget extends Base
 
         $this->setInputValues();
 
-        // Trigger onLoad event
-        $this->onLoad();
-
         // Trigger postback event
         if (request()->getMethod() === 'post') {
             $this->onPostBack();
         }
+
+        // Trigger onLoad event
+        $this->onLoad();
 
         $this->renderContent();
         $this->renderTemplate();
@@ -259,8 +261,7 @@ abstract class Widget extends Base
         if ($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
             include $this->_contentTemplate;
-            $this->_contentHtml = ob_get_contents();
-            ob_end_clean();
+            $this->_contentHtml = ob_get_clean();
         }
 
         debug('END: rendering content-template: ' . $this->_contentTemplate);
@@ -273,8 +274,7 @@ abstract class Widget extends Base
         if ($this->_template !== '') {
             ob_start();
             include $this->_template;
-            $this->_contentHtml = ob_get_contents();
-            ob_end_clean();
+            $this->_contentHtml = ob_get_clean();
         }
 
         debug('END: rendering template ' . $this->_template);

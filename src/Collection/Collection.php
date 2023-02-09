@@ -62,6 +62,35 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
     }
 
     /**
+     * Perform action on each item
+     * @param callable $callback
+     * @return static
+     */
+    public function each(callable $callback): self
+    {
+        foreach($this->getRows() as $key => $row) {
+            $callback($row, $key);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Filter array with callback
+     * @param callable $callback
+     * @return array
+     */
+    public function filterArray(callable $callback): array
+    {
+        $collection = [];
+        foreach($this->getRows() as $row) {
+            $collection[] = $callback($row);
+        }
+
+        return $collection;
+    }
+
+    /**
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
      * @return \Traversable An instance of an object implementing <b>Iterator</b> or
@@ -89,4 +118,5 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
     {
         return $this->getRows();
     }
+
 }

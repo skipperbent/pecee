@@ -12,5 +12,3 @@ if ($loader instanceof \Composer\Autoload\ClassLoader && env('APP_NAME') !== nul
 }
 
 set_include_path(get_include_path() . PATH_SEPARATOR . __DIR__ . '/resources');
-
-request()->app = new \Pecee\Application\Application();

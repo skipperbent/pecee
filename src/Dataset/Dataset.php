@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\Dataset;
 
 abstract class Dataset implements \IteratorAggregate
@@ -6,20 +7,22 @@ abstract class Dataset implements \IteratorAggregate
 
     protected $data = [];
 
+    abstract protected function create(): void;
+
     public function toArray()
     {
+        $this->create();
+
         $output = [];
 
-        if (count($this->data)) {
-            foreach ($this->data as $data) {
-                $output[$data['name']] = $data['value'];
-            }
+        foreach ($this->data as $data) {
+            $output[$data['name']] = $data['value'];
         }
 
         return $output;
     }
 
-    public function get($index)
+    public function getByValue($index)
     {
         foreach ($this->data as $data) {
             if ($data['value'] === $index) {
@@ -30,16 +33,24 @@ abstract class Dataset implements \IteratorAggregate
         return null;
     }
 
-    protected function add($value = null, $name)
+    protected function formatItem(string $name, ?string $value = null): array
     {
-        $arr = [];
+        return [
+            'name'  => $name,
+            'value' => $value,
+        ];
+    }
 
-        if ($value !== null) {
-            $arr['value'] = htmlspecialchars($value);
-        }
+    protected function first(string $name, ?string $value = null): self
+    {
+        array_unshift($this->data, $this->formatItem($value, $name));
 
-        $arr['name'] = $name;
-        $this->data[] = $arr;
+        return $this;
+    }
+
+    protected function add(string $name, ?string $value = null): self
+    {
+        $this->data[] = $this->formatItem($name, $value);
 
         return $this;
     }
@@ -47,7 +58,7 @@ abstract class Dataset implements \IteratorAggregate
     /**
      * @param array $data
      */
-    public function setData(array $data)
+    public function setData(array $data): void
     {
         $this->data = $data;
     }
@@ -55,7 +66,7 @@ abstract class Dataset implements \IteratorAggregate
     /**
      * @return array
      */
-    public function getData()
+    public function getData(): array
     {
         return $this->data;
     }
@@ -67,7 +78,7 @@ abstract class Dataset implements \IteratorAggregate
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator()
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->toArray());
     }

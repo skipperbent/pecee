@@ -6,9 +6,9 @@ use Pecee\Collection\CollectionItem;
 
 class Pdo
 {
-    const SETTINGS_USERNAME = 'username';
-    const SETTINGS_PASSWORD = 'password';
-    const SETTINGS_CONNECTION_STRING = 'driver';
+    public const SETTINGS_USERNAME = 'username';
+    public const SETTINGS_PASSWORD = 'password';
+    public const SETTINGS_CONNECTION_STRING = 'driver';
 
     protected static $instance;
 

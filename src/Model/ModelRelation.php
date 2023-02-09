@@ -68,16 +68,13 @@ abstract class ModelRelation
      */
     public function withDefault($default)
     {
-
         $this->withDefault = $default;
 
         return $this;
-
     }
 
     public function getDefaultFor(Model $parent)
     {
-
         $instance = $parent->newQuery();
 
         if ($this->withDefault === null) {
@@ -93,7 +90,6 @@ abstract class ModelRelation
         }
 
         return $instance;
-
     }
 
     abstract public function addConstraints();

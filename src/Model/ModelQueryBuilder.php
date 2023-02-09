@@ -16,7 +16,7 @@ class ModelQueryBuilder
     protected static $instance;
 
     /**
-     * @var Model
+     * @var static|Model
      */
     protected $model;
     /**
@@ -37,12 +37,11 @@ class ModelQueryBuilder
 
     /**
      * @param \stdClass $item
-     * @return Model
+     * @return static
      */
     protected function createInstance(\stdClass $item)
     {
-        /* @var $model Model */
-        $model = clone $this->model;
+        $model = $this->model->onNewInstance($item);
         $model->mergeRows((array)$item);
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
@@ -143,12 +142,7 @@ class ModelQueryBuilder
      */
     public function where($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->where($key, $operator, $value);
+        call_user_func_array([$this->query, 'where'], func_get_args());
 
         return $this->model;
     }
@@ -177,12 +171,7 @@ class ModelQueryBuilder
      */
     public function whereNot($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->whereNot($key, $operator, $value);
+        call_user_func_array([$this->query, 'whereNot'], func_get_args());
 
         return $this->model;
     }
@@ -257,12 +246,7 @@ class ModelQueryBuilder
      */
     public function orWhere($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->orWhere($key, $operator, $value);
+        call_user_func_array([$this->query, 'orWhere'], func_get_args());
 
         return $this->model;
     }
@@ -308,12 +292,7 @@ class ModelQueryBuilder
      */
     public function orWhereNot($key, $operator = null, $value = null)
     {
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        $this->query->orWhereNot($key, $operator, $value);
+        call_user_func_array([$this->query, 'orWhereNot'], func_get_args());
 
         return $this->model;
     }
@@ -363,7 +342,7 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return ModelCollection
+     * @return ModelCollection|static[]
      * @throws Exception
      */
     public function get()
@@ -372,14 +351,13 @@ class ModelQueryBuilder
     }
 
     /**
-     * @return ModelCollection
+     * @return ModelCollection|static[]
      * @throws Exception
      */
     public function all()
     {
         $items = $this->query->get();
 
-        /* @var $model Model */
         $models = [];
 
         foreach ($items as $item) {
@@ -395,7 +373,7 @@ class ModelQueryBuilder
      */
     public function find($id)
     {
-        $item = $this->query->where($this->model->getPrimary(), '=', $id)->first();
+        $item = $this->query->where($this->model->getPrimaryKey(), '=', $id)->first();
         if ($item !== null) {
             return $this->createInstance($item);
         }
@@ -599,7 +577,7 @@ class ModelQueryBuilder
         if ($id !== null) {
 
             $this->model->mergeRows($data);
-            $this->model->{$this->model->getPrimary()} = $id;
+            $this->model->{$this->model->getPrimaryKey()} = $id;
 
             return $this->model;
         }
@@ -635,11 +613,12 @@ class ModelQueryBuilder
     {
         $item = $this->first();
 
-        if ($item === null) {
-            $item = $this->createInstance((object)$data);
-            $item->setOriginalRows([]);
+        if ($item !== null) {
+            return $item;
         }
 
+        $item = $this->createInstance((object)$data);
+        $item->setOriginalRows([]);
         return $item;
     }
 

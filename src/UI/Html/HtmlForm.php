@@ -5,12 +5,12 @@ namespace Pecee\UI\Html;
 class HtmlForm extends Html
 {
 
-    const ENCTYPE_APPLICATION_URLENCODED = 'application/x-www-form-urlencoded';
-    const ENCTYPE_FORM_DATA = 'multipart/form-data';
-    const ENCTYPE_TEXT_PLAIN = 'text/plain';
+    public const ENCTYPE_APPLICATION_URLENCODED = 'application/x-www-form-urlencoded';
+    public const ENCTYPE_FORM_DATA = 'multipart/form-data';
+    public const ENCTYPE_TEXT_PLAIN = 'text/plain';
 
-    const METHOD_POST = 'post';
-    const METHOD_GET = 'get';
+    public const METHOD_POST = 'post';
+    public const METHOD_GET = 'get';
 
     public function __construct($name, $method = self::METHOD_POST, $action = null, $encoding = self::ENCTYPE_APPLICATION_URLENCODED)
     {
@@ -21,7 +21,7 @@ class HtmlForm extends Html
         $this->name($name);
         $this->enctype($encoding);
         $this->method($method);
-        $this->action(($action === null) ? url() : $action);
+        $this->action($action ?? url());
     }
 
     /**

@@ -30,7 +30,7 @@ class ModelCollection extends Collection
     /**
      * Get first or default value
      * @param string $default
-     * @return static|string
+     * @return static|null|mixed
      */
     public function getFirstOrDefault($default = null)
     {
@@ -221,7 +221,7 @@ class ModelCollection extends Collection
         /* @var $row \Pecee\Model\Model */
         for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
             $row = $this->rows[$i];
-            $output[$row->{$valueRow}] = $row->{$displayRow};
+            $output[$row->{$displayRow}] = $row->{$valueRow};
         }
 
         return $output;

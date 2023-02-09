@@ -5,9 +5,9 @@ use Pecee\Url;
 
 class ValidateUri extends ValidateInput
 {
-    const TYPE_ABSOLUTE = 0x1;
-    const TYPE_RELATIVE = 0x2;
-    const TYPE_BOTH = 0x3;
+    public const TYPE_ABSOLUTE = 0x1;
+    public const TYPE_RELATIVE = 0x2;
+    public const TYPE_BOTH = 0x3;
 
     protected $type;
 
@@ -16,7 +16,7 @@ class ValidateUri extends ValidateInput
         $this->type = $type;
     }
 
-    public function validates()
+    public function validates(): bool
     {
         if($this->type === self::TYPE_BOTH) {
             return (Url::isValidRelative($this->input->getValue()) && Url::isValid($this->input->getValue()));
@@ -29,7 +29,7 @@ class ValidateUri extends ValidateInput
         return Url::isValid($this->input->getValue());
     }
 
-    public function getError()
+    public function getError(): string
     {
         return lang('%s is not a valid url', $this->input->getName());
     }

@@ -8,18 +8,18 @@ namespace Pecee\UI\Phtml;
 class Phtml
 {
 
-    const SETTINGS_TAGLIB = 'SETTINGS_TAGLIB';
+    public const SETTINGS_TAGLIB = 'SETTINGS_TAGLIB';
 
-    const NOTHING = 'NOTHING';
-    const STRING = 'STRING';
-    const TAG = 'TAG';
-    const TAGEND = 'TAGEND';
-    const DOCTYPE = 'DOCTYPE';
-    const ATTR = 'ATTR';
-    const SCRIPT = 'SCRIPT';
-    const PHP = 'PHP';
-    const P_EVAL = 'P_EVAL';
-    const COMMENT = 'COMMENT';
+    public const NOTHING = 'NOTHING';
+    public const STRING = 'STRING';
+    public const TAG = 'TAG';
+    public const TAGEND = 'TAGEND';
+    public const DOCTYPE = 'DOCTYPE';
+    public const ATTR = 'ATTR';
+    public const SCRIPT = 'SCRIPT';
+    public const PHP = 'PHP';
+    public const P_EVAL = 'P_EVAL';
+    public const COMMENT = 'COMMENT';
 
     private static $IGNORELIST = [
         self::PHP,

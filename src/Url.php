@@ -34,7 +34,8 @@ class Url
      */
     public static function isValidRelative($url): bool
     {
-        return !preg_match('/[^\w.-]/', $url);
+        // PHP filter_var does not support relative urls, so we simulate a full URL
+        return !(filter_var('http://www.example.com/'.ltrim($url,'/'), FILTER_VALIDATE_URL) === false);
     }
 
     public static function isValidHostname($hostname): bool
@@ -45,7 +46,7 @@ class Url
 							/ix', $hostname) === 1);
     }
 
-    public static function urlEncodeString($string, $separator = '-', $maxLength = 50)
+    public static function urlEncodeString($string, $separator = '-', $maxLength = null)
     {
         if ($maxLength !== null && \strlen($string) > $maxLength) {
             $string = substr($string, 0, $maxLength);
@@ -60,7 +61,7 @@ class Url
 
         $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
 
-        return preg_replace('/[^\w\ \+\&' . join('', $searchMap) . ']/i', '', $string);
+        return preg_replace('/[^\w\ \.\+\&' . join('', $searchMap) . ']/i', '', $string);
     }
 
     public static function isSecure(string $url): bool

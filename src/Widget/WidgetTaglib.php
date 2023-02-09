@@ -16,31 +16,56 @@ abstract class WidgetTaglib extends Widget
         $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
     }
 
-    public function render(): string
+    public function render(): ?string
     {
+        if ($this->_template === null) {
+            $this->setTemplate('Default.php');
+        }
+
+        if ($this->_contentTemplate === null) {
+            $this->setContentTemplate($this->getTemplatePath());
+        }
+
+        $this->setInputValues();
+
+        // Trigger postback event
+        if (request()->getMethod() === 'post') {
+            $this->onPostBack();
+        }
+
+        // Trigger onLoad event
+        $this->onLoad();
+
         $this->renderContent();
         $this->renderTemplate();
-        $this->_messages->clear();
+
+        $this->sessionMessage()->clear();
+
+        debug('END WIDGET: ' . static::class);
 
         return $this->_contentHtml;
     }
 
-    protected function renderPhp(string $content)
+    protected function getHtmlParser(): Phtml
+    {
+        return new Phtml();
+    }
+
+    protected function renderPhp(string $content): string
     {
         ob_start();
         eval('?>' . $content);
-        $this->_contentHtml = ob_get_contents();
-        ob_end_clean();
+        return ob_get_clean();
     }
 
-    public function renderContent(): void
+    protected function renderFile($file): string
     {
-        $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $this->_contentTemplate);
+        $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $file);
+        $output = '';
 
         if (is_file($cacheFile) === true) {
             if (app()->getDebugEnabled() === false) {
-                $this->renderPhp(file_get_contents($cacheFile));
-                return;
+                return (string)$this->renderPhp(file_get_contents($cacheFile));
             } else {
                 unlink($cacheFile);
             }
@@ -55,8 +80,8 @@ abstract class WidgetTaglib extends Widget
             }
 
             debug('Parsing Phtml template');
-            $pHtml = new Phtml();
-            $output = $pHtml->read(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH))->toPHP();
+            $pHtml = $this->getHtmlParser();
+            $output = $pHtml->read(file_get_contents($file, FILE_USE_INCLUDE_PATH))->toPHP();
             debug('Finished parsing Phtml template');
 
             debug('Writing Phtml cache file');
@@ -65,11 +90,28 @@ abstract class WidgetTaglib extends Widget
             fclose($handle);
             debug('Finished writing Phtml cache file');
 
-            $this->renderPhp($output);
+            $output = $this->renderPhp($output);
 
         } catch (\Exception $e) {
-            $this->_contentHtml = $e->getMessage();
+            $output = $e->getMessage();
         }
 
+        return $output;
+    }
+
+    protected function renderTemplate(): void
+    {
+        debug('START: rendering template: ' . $this->_template);
+
+        if ($this->_template !== '') {
+            $this->_contentHtml = $this->renderFile($this->_template);
+        }
+
+        debug('END: rendering template ' . $this->_template);
+    }
+
+    protected function renderContent(): void
+    {
+        $this->_contentHtml = $this->renderFile($this->_contentTemplate);
     }
 }
