@@ -152,7 +152,7 @@ abstract class Widget extends Base
 
     protected function setTemplate(?string $path, bool $relative = true): void
     {
-        $this->_template = (($relative === true && trim($path) !== '') ? 'views' . DIRECTORY_SEPARATOR : '') . $path;
+        $this->_template = (($relative === true && trim((string)$path) !== '') ? 'views' . DIRECTORY_SEPARATOR : '') . $path;
     }
 
     protected function setContentTemplate(?string $template): void

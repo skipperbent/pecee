@@ -723,7 +723,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator()
+    public function getIterator() : \ArrayIterator
     {
         return new \ArrayIterator($this->getRows());
     }
@@ -815,7 +815,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * @return array|mixed
      */
-    public function jsonSerialize()
+    public function jsonSerialize() : mixed
     {
         return $this->toArray();
     }
