@@ -125,9 +125,11 @@ function add_module(string $name, string $path): void
  *
  * @return string|null
  */
-function env(string $key, ?string $default = null): ?string
-{
-    return $_ENV[$key] ?? $default;
+if(function_exists('env') === false) {
+    function env(string $key, ?string $default = null): ?string
+    {
+        return $_ENV[$key] ?? $default;
+    }
 }
 
 /**
