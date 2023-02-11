@@ -22,7 +22,7 @@
     "php": ">=7.4",
     "josegonzalez/dotenv": "3.*",
     "pecee/simple-router": "^5.0",
-    "robmorgan/phinx": "^0.5.3",
+    "robmorgan/phinx": "^0.13.4",
     "nesbot/carbon": "2.*",
     "ext-json": "*",
     "ext-mbstring": "*"
