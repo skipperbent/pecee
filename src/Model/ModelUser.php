@@ -145,7 +145,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function registerActivity()
     {
-        $this->last_activity = Carbon::now()->toDateTimeString();
+        $this->last_activity = Carbon::now();
         $this->save();
     }
 
