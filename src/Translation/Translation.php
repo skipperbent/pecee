@@ -28,7 +28,7 @@ class Translation
      */
     public function translate(string $key, ...$args): string
     {
-        return vsprintf($this->lookup($key), ...$args);
+        return vsprintf($this->lookup($key), $args);
     }
 
     protected function lookup(string $key): string
