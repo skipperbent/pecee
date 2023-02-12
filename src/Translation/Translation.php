@@ -6,7 +6,7 @@ use Pecee\Translation\Providers\ITranslationProvider;
 
 class Translation
 {
-    protected $provider;
+    protected ?ITranslationProvider $provider = null;
 
     /**
      * Translate message.
@@ -15,9 +15,9 @@ class Translation
      * @param array ...$args
      * @return string
      */
-    public function _(string $key, ...$args)
+    public function _(string $key, ...$args): string
     {
-        return vsprintf($this->lookup($key), $args);
+        return vsprintf($this->lookup($key), ...$args);
     }
 
     /**
@@ -26,12 +26,12 @@ class Translation
      * @param array ...$args
      * @return string
      */
-    public function translate(string $key, ...$args)
+    public function translate(string $key, ...$args): string
     {
-        return vsprintf($this->lookup($key), $args);
+        return vsprintf($this->lookup($key), ...$args);
     }
 
-    protected function lookup(string $key)
+    protected function lookup(string $key): string
     {
         if ($this->provider instanceof ITranslationProvider) {
             return $this->provider->lookup($key);
@@ -40,7 +40,7 @@ class Translation
         return $key;
     }
 
-    public function setProvider(ITranslationProvider $provider)
+    public function setProvider(ITranslationProvider $provider): void
     {
         $this->provider = $provider;
     }
@@ -48,7 +48,7 @@ class Translation
     /**
      * @return ITranslationProvider
      */
-    public function getProvider()
+    public function getProvider(): ?ITranslationProvider
     {
         return $this->provider;
     }
