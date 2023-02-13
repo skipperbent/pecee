@@ -38,7 +38,7 @@ class ValidateFileSize extends ValidateFile
         return true;
     }
 
-    protected function getInputSize(): int
+    protected function getInputSize(): float
     {
         switch ($this->sizeFormat) {
             default:
