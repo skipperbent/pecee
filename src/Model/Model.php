@@ -9,6 +9,7 @@ use Pecee\Model\Relation\BelongsTo;
 use Pecee\Model\Relation\BelongsToMany;
 use Pecee\Model\Relation\HasMany;
 use Pecee\Model\Relation\HasOne;
+use Pecee\Pixie\Connection;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Str;
 
@@ -36,6 +37,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      */
     protected $queryable;
 
+    protected ?Connection $connection = null;
+
     public function __construct()
     {
         // Set table name if its not already defined
@@ -43,7 +46,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $this->table = str_ireplace('model', '', class_basename(static::class));
         }
 
-        $this->queryable = new ModelQueryBuilder($this);
+        $this->queryable = new ModelQueryBuilder($this, $this->connection);
 
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [

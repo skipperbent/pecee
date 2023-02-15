@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
+use Pecee\Pixie\Connection;
 use Pecee\Pixie\Exception;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Pixie\QueryBuilder\Raw;
@@ -24,15 +25,18 @@ class ModelQueryBuilder
      */
     protected $query;
 
+    protected ?Connection $connection = null;
+
     /**
      * ModelQueryBuilder constructor.
      * @param Model $model
      * @throws Exception
      */
-    public function __construct(Model $model)
+    public function __construct(Model $model, ?Connection $connection = null)
     {
         $this->model = $model;
-        $this->query = (new QueryBuilderHandler())->table($model->getTable());
+        $this->connection = $connection;
+        $this->query = (new QueryBuilderHandler($this->connection))->table($model->getTable());
     }
 
     /**
@@ -819,7 +823,7 @@ class ModelQueryBuilder
      */
     public function __wakeup()
     {
-        $this->query = (new QueryBuilderHandler())->table($this->model->getTable());
+        $this->query = (new QueryBuilderHandler($this->connection))->table($this->model->getTable());
     }
 
     public function __destruct()
