@@ -33,6 +33,8 @@ abstract class ModelRelation
     {
         $this->related = $related;
         $this->parent = $parent;
+        
+        $this->related->getQuery()->setOverwriteEnabled(false);
 
         $this->addConstraints();
     }
