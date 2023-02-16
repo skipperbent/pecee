@@ -66,7 +66,6 @@ class ModelQueryBuilder
      *
      * @param string|array $tables Single table or multiple tables as an array or as multiple parameters
      *
-     * @throws Exception
      * @return static
      *
      * ```
@@ -79,11 +78,18 @@ class ModelQueryBuilder
      * ->table(['table_one' => 'one'])
      * ->table($qb->raw('table_one as one'))
      * ```
+     * @throws Exception
      */
     public function table($table)
     {
         $this->query = $this->getQuery()->table($table);
 
+        return $this->model;
+    }
+
+    public function union(Model $join, ?string $unionType = QueryBuilderHandler::UNION_TYPE_NONE)
+    {
+        $this->query->union($join->getQuery(), $unionType);
         return $this->model;
     }
 
