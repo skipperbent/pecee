@@ -78,7 +78,7 @@ class ModelCollection extends Collection
      * @param string $delimiter
      * @return static
      */
-    public function filter($key, $value, $delimiter = '=')
+    public function filter(string $key, string $value, string $delimiter = '='): self
     {
         $out = [];
         if ($this->hasRows()) {
@@ -96,7 +96,9 @@ class ModelCollection extends Collection
 
                     $rowValue = null;
 
-                    if ($rowKey === $key) {
+                    if ($row->{$_key} !== null) {
+                        $rowValue = $row->{$_key};
+                    } elseif ($rowKey === $key) {
                         $rowValue = $value;
                     } elseif ($row instanceof ModelData && isset($row->data->{$_key}) === true) {
                         $rowValue = $row->data->{$_key};
