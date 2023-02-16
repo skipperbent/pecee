@@ -33,8 +33,8 @@ abstract class ModelRelation
     {
         $this->related = $related;
         $this->parent = $parent;
-        
-        $this->related->getQuery()->setOverwriteEnabled(false);
+
+        $this->related->select([$this->related->getTable() . '.*']);
 
         $this->addConstraints();
     }
@@ -104,7 +104,7 @@ abstract class ModelRelation
     /**
      * @param string $name
      * @param array $arguments
-     * @return Model
+     * @return ModelRelation
      */
     public function __call($name, $arguments)
     {
