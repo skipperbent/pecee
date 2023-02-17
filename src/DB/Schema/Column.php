@@ -149,9 +149,9 @@ class Column
         return $this;
     }
 
-    public function index(): self
+    public function index(string $type = self::INDEX_INDEX): self
     {
-        $this->setIndex(static::INDEX_INDEX);
+        $this->setIndex($type);
 
         return $this;
     }
@@ -406,6 +406,10 @@ class Column
 
     public function setIndex(string $index): self
     {
+        if (in_array($index, static::$INDEXES) === false) {
+            throw new \InvalidArgumentException(sprintf('Unknown or invalid index %s', $type));
+        }
+
         $this->index = $index;
 
         return $this;
@@ -494,9 +498,9 @@ class Column
     }
 
     /**
-     * @return Table|null
+     * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         return $this->table;
     }
