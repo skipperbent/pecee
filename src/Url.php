@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee;
 
 class Url
@@ -35,7 +36,7 @@ class Url
     public static function isValidRelative($url): bool
     {
         // PHP filter_var does not support relative urls, so we simulate a full URL
-        return !(filter_var('http://www.example.com/'.ltrim($url,'/'), FILTER_VALIDATE_URL) === false);
+        return !(filter_var('http://www.example.com/' . ltrim($url, '/'), FILTER_VALIDATE_URL) === false);
     }
 
     public static function isValidHostname($hostname): bool
@@ -53,15 +54,13 @@ class Url
         }
 
         $searchMap = [
-            'æ' => 'ae',
-            'ø' => 'o',
-            'å' => 'a',
             ' ' => $separator,
         ];
 
+        $string = preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities($string));
         $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
 
-        return preg_replace('/[^\w\ \.\+\&' . join('', $searchMap) . ']/i', '', $string);
+        return preg_replace('/[^\w\ \.\+\&' . join('', $searchMap) . ']|(-)\1{1,}/i', '', $string);
     }
 
     public static function isSecure(string $url): bool
