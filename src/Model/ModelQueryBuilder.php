@@ -14,18 +14,16 @@ use Pecee\Str;
 
 class ModelQueryBuilder
 {
-    protected static $instance;
+    protected static self $instance;
 
     /**
      * @var static|Model
      */
-    protected $model;
+    protected Model $model;
     /**
      * @var QueryBuilderHandler
      */
-    protected $query;
-
-    protected ?Connection $connection = null;
+    protected ?QueryBuilderHandler $query = null;
 
     /**
      * ModelQueryBuilder constructor.
@@ -35,8 +33,7 @@ class ModelQueryBuilder
     public function __construct(Model $model, ?Connection $connection = null)
     {
         $this->model = $model;
-        $this->connection = $connection;
-        $this->query = (new QueryBuilderHandler($this->connection))->table($model->getTable());
+        $this->query = (new QueryBuilderHandler($connection))->table($model->getTable());
     }
 
     /**
@@ -829,7 +826,7 @@ class ModelQueryBuilder
      */
     public function __wakeup()
     {
-        $this->query = (new QueryBuilderHandler($this->connection))->table($this->model->getTable());
+        $this->query = (new QueryBuilderHandler($this->getQuery()->getConnection()))->table($this->model->getTable());
     }
 
     public function __destruct()
