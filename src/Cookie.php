@@ -36,7 +36,7 @@ class Cookie
     public static function delete(string $id): void
     {
         if (static::exists($id) === true) {
-            static::create($id, null, time() - 99);
+            static::create($id, '', time() - 99);
         }
     }
 

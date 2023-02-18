@@ -5,6 +5,7 @@ namespace Pecee\Application;
 use Pecee\Application\UrlHandler\IUrlHandler;
 use Pecee\Application\UrlHandler\UrlHandler;
 use Pecee\Boolean;
+use Pecee\Pixie\Connection;
 use Pecee\Session\Session;
 use Pecee\Translation\Translation;
 use Pecee\UI\Site;
@@ -13,46 +14,47 @@ class Application
 {
     public const CHARSET_UTF8 = 'UTF-8';
 
-    protected $debugEnabled = false;
+    protected bool $debugEnabled = false;
 
     /**
-     * @var Debug
+     * @var Debug|null
      */
-    public $debug;
+    public ?Debug $debug = null;
 
     /**
      * @var Translation
      */
-    public $translation;
+    public Translation $translation;
 
     /**
      * @var Site
      */
-    public $site;
+    public Site $site;
 
-    protected $adminIps = [
+    protected array $adminIps = [
         '127.0.0.1',
         '::1',
     ];
 
-    protected $parameters = [];
-    protected $charset;
-    protected $timezone;
-    protected $defaultLocale;
-    protected $locale;
-    protected $modules = [];
-    protected $cssWrapRouteName = 'pecee.css.wrap';
-    protected $jsWrapRouteName = 'pecee.js.wrap';
-    protected $cssWrapRouteUrl = '/css-wrap';
-    protected $jsWrapRouteUrl = '/js-wrap';
-    protected $disableFrameworkRoutes = false;
-    protected $encryptionMethod = 'AES-256-CBC';
-    protected $settings;
+    protected array $parameters = [];
+    protected string $charset;
+    protected string $timezone;
+    protected string $defaultLocale;
+    protected string $locale;
+    protected array $modules = [];
+    protected string $cssWrapRouteName = 'pecee.css.wrap';
+    protected string $jsWrapRouteName = 'pecee.js.wrap';
+    protected string $cssWrapRouteUrl = '/css-wrap';
+    protected string $jsWrapRouteUrl = '/js-wrap';
+    protected bool $disableFrameworkRoutes = false;
+    protected string $encryptionMethod = 'AES-256-CBC';
     /**
      * Callback for handling urls
      * @var IUrlHandler
      */
-    protected $urlHandler;
+    protected IUrlHandler $urlHandler;
+
+    protected ?Connection $connection = null;
 
     public function __construct()
     {
@@ -114,11 +116,7 @@ class Application
     {
         $ip = $ip ?? \request()->getIp();
 
-        if (\is_array($this->adminIps) === true) {
-            return \in_array($ip, $this->adminIps, true);
-        }
-
-        return false;
+        return \in_array($ip, $this->adminIps, true);
     }
 
     /**
@@ -189,7 +187,7 @@ class Application
      * @param string $name
      * @return string|null
      */
-    public function getModule($name): ?string
+    public function getModule(string $name): ?string
     {
         return $this->modules[$name] ?? null;
     }
@@ -396,6 +394,17 @@ class Application
     public function getUrlHandler(): IUrlHandler
     {
         return $this->urlHandler;
+    }
+
+    public function setConnection(Connection $connection): self
+    {
+        $this->connection = $connection;
+        return $this;
+    }
+
+    public function getConnection(): ?Connection
+    {
+        return $this->connection;
     }
 
 }

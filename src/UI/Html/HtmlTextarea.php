@@ -11,7 +11,7 @@ class HtmlTextarea extends Html
 
         $this->closingType = static::CLOSE_TYPE_TAG;
 
-        $this->value = htmlentities($value, ENT_QUOTES, app()->getCharset());
+        $this->value = htmlentities((string)$value, ENT_QUOTES, app()->getCharset());
 
         $this->addAttribute('name', $name);
 

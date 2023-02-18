@@ -35,9 +35,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     /**
      * @var ModelQueryBuilder
      */
-    protected $queryable;
-
-    protected ?Connection $connection = null;
+    protected ModelQueryBuilder $queryable;
 
     public function __construct()
     {
@@ -46,7 +44,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             $this->table = str_ireplace('model', '', class_basename(static::class));
         }
 
-        $this->queryable = new ModelQueryBuilder($this, $this->connection);
+        $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
 
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
@@ -54,6 +52,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
                 'created_at',
             ]);
         }
+    }
+
+    protected function onConnectionCreate(): ?Connection
+    {
+        return app()->getConnection();
     }
 
     public function newQuery()

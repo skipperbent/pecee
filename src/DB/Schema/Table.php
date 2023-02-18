@@ -396,6 +396,9 @@ class Table
         $indexes = (array)$indexes;
         foreach ($indexes as $index) {
             try {
+                if(is_array($index)) {
+                    continue;
+                }
                 Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP INDEX `%s`;', $this->name, $index));
             } catch (\PDOException $e) {
 
