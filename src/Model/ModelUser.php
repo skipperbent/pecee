@@ -40,7 +40,7 @@ class ModelUser extends ModelData implements IUserAuthentication
         $this->username = $username;
 
         if ($password !== null) {
-            $this->password = $this->setPassword($password);
+            $this->setPassword($password);
         }
 
         $this->admin_level = 0;
