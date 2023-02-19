@@ -30,9 +30,11 @@ class Router extends SimpleRouter
      */
     public static function start(): void
     {
-        debug('Router initialised.');
+        debug('router', 'Router start.');
 
         parent::start();
+
+        debug('router', 'Router finished.');
 
         // Output debug info
         if (isset($_GET['__debug']) === true && strtolower($_GET['__debug']) === 'app' && app()->getDebugEnabled() === true) {

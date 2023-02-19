@@ -5,12 +5,10 @@ use Pecee\Widget\Widget;
 
 class WidgetDebug extends Widget
 {
-    protected $stack;
+    protected array $stack;
 
     public function __construct(array $stack)
     {
-        parent::__construct();
-
         $this->getSite()->addWrappedCss('css/pecee-debug.css', 'debug');
         $this->getSite()->addWrappedJs('js/pecee-debug.js', 'debug');
 
@@ -24,6 +22,11 @@ class WidgetDebug extends Widget
         $path = \array_slice($path, 2);
 
         return env('framework_path') . '/views/content/' . implode(DIRECTORY_SEPARATOR, $path) . '.php';
+    }
+
+    protected function formatTime(float $microTime): string
+    {
+        return number_format($microTime, 10);
     }
 
 }

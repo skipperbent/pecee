@@ -74,9 +74,9 @@ class Pdo
         }
 
         $this->query = $pdoStatement->queryString;
-        debug('START DB QUERY:' . $this->query);
+        debug('db', 'START DB QUERY: %s', $this->query);
         if ($pdoStatement->execute($inputParameters) === true) {
-            debug('END DB QUERY');
+            debug('db', 'END DB QUERY');
 
             return $pdoStatement;
         }

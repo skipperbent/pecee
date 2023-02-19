@@ -12,6 +12,15 @@
                 Execution time
             </th>
             <th>
+                Time since last
+            </th>
+            <th>
+                Group
+            </th>
+            <th>
+                Group Time
+            </th>
+            <th>
                 Message
             </th>
             <th>
@@ -32,7 +41,16 @@
         <?php foreach($this->stack as $i => $log) : ?>
             <tr onclick="pecee_show_debug('debug_<?= $i; ?>')">
                 <td>
-                    <?= $log['time']; ?>
+                    <?= $this->formatTime($log['time']); ?>
+                </td>
+                <td>
+                    <?= $this->formatTime($log['time_last']); ?>
+                </td>
+                <td>
+                    <?= $log['group'] ?? ''; ?>
+                </td>
+                <td>
+                    <?= $this->formatTime($log['group_time']) ?? ''; ?>
                 </td>
                 <td>
                     <?= $log['text']; ?>

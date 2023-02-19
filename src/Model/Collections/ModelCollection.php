@@ -180,7 +180,7 @@ class ModelCollection extends Collection
      */
     public function toArray($filterKeys = null)
     {
-        $filterKeys = ($filterKeys !== null && is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
+        $filterKeys = (is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
 
         $output = [];
 

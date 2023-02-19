@@ -114,9 +114,9 @@ class Application
 
     public function hasAdminIp(string $ip = null): bool
     {
-        $ip = $ip ?? \request()->getIp();
+        $ip = $ip ?? request()->getIp();
 
-        return \in_array($ip, $this->adminIps, true);
+        return in_array($ip, $this->adminIps, true);
     }
 
     /**
@@ -203,7 +203,7 @@ class Application
 
     public function hasModules(): bool
     {
-        return (\count($this->modules) > 0);
+        return (count($this->modules) > 0);
     }
 
     public function getCharset(): string

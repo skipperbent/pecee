@@ -243,7 +243,7 @@ class Html
      */
     public function getAttribute($name)
     {
-        return isset($this->attributes[$name]) ? $this->attributes[$name] : null;
+        return $this->attributes[$name] ?? null;
     }
 
     public function getFirstAttribute(string $name, ?string $defaultValue = null): ?string

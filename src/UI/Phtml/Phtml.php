@@ -254,7 +254,6 @@ class Phtml
         $this->node = null;
         $this->withinStack = [];
         $this->current = '';
-        $this->node;
         $this->lastChar = '';
         $this->nextChar = '';
         $this->char = '';

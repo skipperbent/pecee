@@ -103,13 +103,14 @@ function lang($key, ...$args): string
  * Add debug message.
  * Requires DEBUG=1 to be present in your env file.
  *
+ * @param string $group
  * @param string $text
- * @param array ...$args
+ * @param ...$args
  */
-function debug(string $text, ...$args): void
+function debug(string $group, string $text, ...$args): void
 {
     if (app()->getDebugEnabled() === true) {
-        app()->debug->add($text, ...$args);
+        app()->debug->add($group, $text, ...$args);
     }
 }
 

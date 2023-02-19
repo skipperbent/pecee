@@ -9,14 +9,9 @@ use Pecee\UI\Site;
 
 abstract class Widget extends Base
 {
-    protected $_template;
-    protected $_contentTemplate;
-    protected $_contentHtml;
-
-    public function __construct()
-    {
-        // Here for backwards compatibility
-    }
+    protected ?string $_template = null;
+    protected ?string $_contentTemplate = null;
+    protected ?string $_contentHtml = null;
 
     public function onLoad(): void
     {
@@ -49,7 +44,6 @@ abstract class Widget extends Base
             $output = (new Html('div'))->addClass('alert')->addClass(sprintf('alert-%s', $type));
 
             $msg = [];
-            /* @var $error \Pecee\UI\Form\FormMessage */
             foreach ($errors as $error) {
                 $msg[] = $error->getMessage();
             }
@@ -119,7 +113,7 @@ abstract class Widget extends Base
             $output .= (new Html('link'))->setClosingType(Html::CLOSE_TYPE_NONE)->attr('href', $css)->attr('rel', 'stylesheet');
         }
 
-        foreach ((array)$this->getSite()->getCss($section) as $css) {
+        foreach ($this->getSite()->getCss($section) as $css) {
             $output .= (new Html('link'))
                 ->setClosingType(Html::CLOSE_TYPE_NONE)
                 ->attr('href', $css)
@@ -237,11 +231,14 @@ abstract class Widget extends Base
         $this->setInputValues();
 
         // Trigger onLoad event
-        $this->onLoad();
+        $loadedRoute = request()->getLoadedRoute();
+        $parameters = ($loadedRoute !== null) ? $loadedRoute->getParameters() : [];
+
+        call_user_func_array([$this, 'onLoad'], $parameters);
 
         // Trigger postback event
         if (request()->getMethod() === 'post') {
-            $this->onPostBack();
+            call_user_func_array([$this, 'onPostBack'], $parameters);
         }
 
         $this->renderContent();
@@ -249,14 +246,14 @@ abstract class Widget extends Base
 
         $this->sessionMessage()->clear();
 
-        debug('END WIDGET: ' . static::class);
+        debug('widget', 'END %s:', static::class);
 
         return $this->_contentHtml;
     }
 
     protected function renderContent(): void
     {
-        debug('START: rendering content-template: ' . $this->_contentTemplate);
+        debug('widget', 'START: rendering content-template: %s', $this->_contentTemplate);
 
         if ($this->_contentHtml === null && $this->_contentTemplate !== null) {
             ob_start();
@@ -264,12 +261,12 @@ abstract class Widget extends Base
             $this->_contentHtml = ob_get_clean();
         }
 
-        debug('END: rendering content-template: ' . $this->_contentTemplate);
+        debug('widget', 'END: rendering content-template: %s', $this->_contentTemplate);
     }
 
     protected function renderTemplate(): void
     {
-        debug('START: rendering template: ' . $this->_template);
+        debug('widget', 'START: rendering template: %s', $this->_template);
 
         if ($this->_template !== '') {
             ob_start();
@@ -277,7 +274,7 @@ abstract class Widget extends Base
             $this->_contentHtml = ob_get_clean();
         }
 
-        debug('END: rendering template ' . $this->_template);
+        debug('widget', 'END: rendering template %s', $this->_template);
     }
 
 }

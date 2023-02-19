@@ -6,7 +6,7 @@ abstract class Controller
 
     public function __construct()
     {
-        debug('START CONTROLLER ' . static::class);
+        debug('controller', 'Start %s' . static::class);
     }
 
 }

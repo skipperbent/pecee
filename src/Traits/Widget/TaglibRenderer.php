@@ -57,16 +57,16 @@ trait TaglibRenderer
 
             $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
 
-            debug('Parsing Phtml template');
+            debug('phtml', 'Parsing template');
             $pHtml = new Phtml();
             $this->_contentHtml = $pHtml->read($this->_contentHtml)->toPHP();
-            debug('Finished parsing Phtml template');
+            debug('phtml', 'Finished parsing');
 
-            debug('Writing Phtml cache file');
+            debug('phtml', 'Writing cache file');
             $handle = fopen($cacheFile, 'w+b+');
             fwrite($handle, $this->_contentHtml);
             fclose($handle);
-            debug('Finished writing Phtml cache file');
+            debug('phtml', 'Finished writing cache file');
 
         } catch (\Exception $e) {
             $this->_contentHtml = $e->getMessage();

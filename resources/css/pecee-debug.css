@@ -22,6 +22,7 @@
 
 .pecee-debug table th {
     padding: 5px;
+    color: #000!important;
 }
 
 .pecee-debug table tbody {
@@ -37,6 +38,7 @@
 .pecee-debug table td {
     vertical-align: top;
     padding: 5px;
+    color: #000!important;
 }
 
 .pecee-debug table td .debug-info {

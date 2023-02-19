@@ -41,7 +41,7 @@ abstract class WidgetTaglib extends Widget
 
         $this->sessionMessage()->clear();
 
-        debug('END WIDGET: ' . static::class);
+        debug('taglib', 'END WIDGET: %s', static::class);
 
         return $this->_contentHtml;
     }
@@ -79,16 +79,16 @@ abstract class WidgetTaglib extends Widget
                 }
             }
 
-            debug('Parsing Phtml template');
+            debug('taglib', 'Parsing Phtml template');
             $pHtml = $this->getHtmlParser();
             $output = $pHtml->read(file_get_contents($file, FILE_USE_INCLUDE_PATH))->toPHP();
-            debug('Finished parsing Phtml template');
+            debug('taglib', 'Finished parsing Phtml template');
 
-            debug('Writing Phtml cache file');
+            debug('taglib', 'Writing Phtml cache file');
             $handle = fopen($cacheFile, 'w+b+');
             fwrite($handle, $output);
             fclose($handle);
-            debug('Finished writing Phtml cache file');
+            debug('taglib', 'Finished writing Phtml cache file');
 
             $output = $this->renderPhp($output);
 
@@ -101,13 +101,13 @@ abstract class WidgetTaglib extends Widget
 
     protected function renderTemplate(): void
     {
-        debug('START: rendering template: ' . $this->_template);
+        debug('taglib', 'START: rendering template: ' . $this->_template);
 
         if ($this->_template !== '') {
             $this->_contentHtml = $this->renderFile($this->_template);
         }
 
-        debug('END: rendering template ' . $this->_template);
+        debug('taglib', 'END: rendering template ' . $this->_template);
     }
 
     protected function renderContent(): void
