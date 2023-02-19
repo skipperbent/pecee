@@ -96,7 +96,7 @@ class Debug
      */
     public function add(string $group, string $text, ...$args): void
     {
-        $this->addObject(vsprintf(str_replace('%', '%%', $text), $args), $group);
+        $this->addObject(vsprintf($text, $args), $group);
     }
 
     public function __toString(): string
