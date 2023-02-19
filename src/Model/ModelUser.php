@@ -171,10 +171,7 @@ class ModelUser extends ModelData implements IUserAuthentication
     public static function current()
     {
         if (static::$instance === null && static::isLoggedIn() === true) {
-
             $ticket = static::getTicket();
-
-            /* @var $user static */
             static::$instance = static::instance()->filterDeleted()->find($ticket[0]);
         }
 
@@ -265,7 +262,7 @@ class ModelUser extends ModelData implements IUserAuthentication
 
     public function auth()
     {
-        return $this->signIn();
+        $this->signIn();
     }
 
     /**

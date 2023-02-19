@@ -29,7 +29,7 @@ class ArrayUtil
 
     public static function average(array $arr)
     {
-        $count = \count($arr); //total numbers in array
+        $count = count($arr); //total numbers in array
         $total = 0;
         foreach ($arr as $value) {
             $total += $value; // total value of array numbers
@@ -40,7 +40,7 @@ class ArrayUtil
 
     public static function toStdClass($array): \stdClass
     {
-        if (\is_array($array)) {
+        if (is_array($array)) {
             return (object)array_map(__METHOD__, $array);
         }
 

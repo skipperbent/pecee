@@ -11,10 +11,9 @@ use Pecee\UI\Site;
 
 abstract class Base
 {
-    protected $errorType = 'danger';
-    protected $defaultMessagePlacement = 'default';
-    protected $_inputSessionKey = 'InputValues';
-    protected $_validations = [];
+    protected string $errorType = 'danger';
+    protected string $defaultMessagePlacement = 'default';
+    protected string $_inputSessionKey = 'InputValues';
 
     protected function onInputError(IInputItem $input, string $error): void
     {
@@ -53,7 +52,6 @@ abstract class Base
         foreach ($names as $key => $name) {
             $item = input()->find($key);
 
-            /* @var $item \Pecee\Http\Input\IInputItem */
             if ($item !== null) {
                 $item->setName($name);
             }
@@ -80,7 +78,7 @@ abstract class Base
 
             $input = input()->find($key) ?? new InputItem($key, null);
             $inputs = ($input instanceof IInputItem) ? [$input] : $input;
-            $validations = \is_array($validations) === false ? [$validations] : $validations;
+            $validations = is_array($validations) === false ? [$validations] : $validations;
 
             /* @var $validateClass \Pecee\UI\Form\Validation\ValidateInput */
             foreach ($validations as $validateClass) {
@@ -212,7 +210,6 @@ abstract class Base
     {
         $output = [];
 
-        /* @var $error FormMessage */
         foreach ($this->getMessages($this->errorType, $placement) as $error) {
             $output[] = $error->getMessage();
         }
@@ -225,7 +222,6 @@ abstract class Base
         $search = $this->sessionMessage()->get($this->errorType);
 
         if ($search !== null) {
-            /* @var $message FormMessage */
             foreach ($search as $message) {
                 if ($message->getIndex() === $index) {
                     return $message->getMessage();

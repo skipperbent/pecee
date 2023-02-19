@@ -10,7 +10,7 @@ abstract class ControllerBase extends Base
 
     public function __construct()
     {
-        debug('START CONTROLLER %s', static::class);
+        debug('controller', 'Start %s', static::class);
     }
 
     /**

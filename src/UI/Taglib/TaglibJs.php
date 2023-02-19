@@ -160,8 +160,8 @@ class TaglibJs extends Taglib
             $output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
         }
 
-        $data = isset($attrs->data) ? $attrs->data : 'null';
-        $el = isset($attrs->el) ? $attrs->el : 'div';
+        $data = $attrs->data ?? 'null';
+        $el = $attrs->el ?? 'div';
 
         return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
             $attrs->name,

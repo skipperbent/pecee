@@ -16,7 +16,7 @@ abstract class ValidateFile extends ValidateInput
      */
     public function runValidation(): bool
     {
-        if($this->allowEmpty === true && ($this->input instanceof InputFile === false || ($this->input instanceof InputFile && $this->input->getError() === 4))) {
+        if($this->allowEmpty === true && ($this->input instanceof InputFile === false || $this->input->getError() === 4)) {
             return true;
         }
 

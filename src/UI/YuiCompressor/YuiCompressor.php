@@ -124,7 +124,7 @@ class YuiCompressor
                 file_put_contents($tmpFile, $item->content);
                 $output = [];
                 exec($this->getCmd($item->options, $item->type, $tmpFile), $output);
-                $item->minified = (isset($output[0]) ? $output[0] : '');
+                $item->minified = ($output[0] ?? '');
                 $item->sizeKB = round(strlen($item->content) / 1024, 2);
                 $item->minifiedKB = $item->sizeKB - round(strlen($item->minified) / 1024, 2);
                 $item->minifiedRatio = round(($item->minifiedKB / $item->sizeKB) * 100);
@@ -139,7 +139,7 @@ class YuiCompressor
     protected function validateType($type)
     {
         if (!in_array($type, $this->types)) {
-            throw new YuiCompressorException('Unknown type: ' . $type . '. Type must be one of the following: ' . join($this->types, ', '));
+            throw new YuiCompressorException('Unknown type: ' . $type . '. Type must be one of the following: ' . join(', ', $this->types));
         }
     }
 

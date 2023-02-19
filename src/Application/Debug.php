@@ -6,14 +6,16 @@ use Pecee\Widget\Debug\WidgetDebug;
 
 class Debug
 {
-    protected $lastTime;
-    protected $stack;
-    protected $startTime;
-    protected $backLevel = 3;
+    protected array $stack;
+    protected float $lastTime;
+    protected float $startTime;
+    protected int $backLevel = 3;
+    protected array $groups = [];
 
     public function __construct()
     {
         $this->startTime = microtime(true);
+        $this->lastTime = $this->startTime;
         $this->stack = [];
         $this->add('Debugger initialized.');
     }
@@ -23,12 +25,7 @@ class Debug
         $this->add('Debugger destructed.');
     }
 
-    protected function getTime()
-    {
-        return number_format(microtime(true) - $this->startTime, 10);
-    }
-
-    protected function addObject($text)
+    protected function addObject($text, ?string $group = null)
     {
         $backtrace = debug_backtrace();
 
@@ -63,34 +60,48 @@ class Debug
             $debug[] = $tmp;
         }
 
+        $time = microtime(true);
+        $groupTime = 0;
+
+        if ($group !== null) {
+            if (isset($this->groups[$group])) {
+                $groupTime = $time - $this->groups[$group];
+            } else {
+                $this->groups[$group] = $time;
+            }
+        }
+
         $this->stack[] = [
-            'text'   => $text,
-            'time'   => $this->getTime(),
-            'file'   => $file,
-            'line'   => $line,
+            'text' => $text,
+            'group' => $group,
+            'group_time' => $groupTime,
+            'time' => $time - $this->startTime,
+            'time_last' => $time - $this->lastTime,
+            'file' => $file,
+            'line' => $line,
             'method' => $method,
-            'class'  => $class,
-            'debug'  => $debug,
+            'class' => $class,
+            'debug' => $debug,
         ];
 
-        $this->lastTime = microtime(true);
+        $this->lastTime = $time;
     }
 
     /**
-     * Add debug entry
+     * Add debug entry with group
+     * @param string $group
      * @param string $text
-     * @param array ...$args
+     * @param ...$args
+     * @return void
      */
-    public function add($text, ...$args)
+    public function add(string $group, string $text, ...$args): void
     {
-        $this->addObject(vsprintf(str_replace('%', '%%', $text), $args));
+        $this->addObject(vsprintf(str_replace('%', '%%', $text), $args), $group);
     }
 
     public function __toString(): string
     {
-        $widget = new WidgetDebug($this->stack);
-
-        return (string)$widget->render();
+        return (new WidgetDebug($this->stack))->render();
     }
 
 }

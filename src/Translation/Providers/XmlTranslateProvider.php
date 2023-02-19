@@ -24,13 +24,13 @@ class XmlTranslateProvider implements ITranslationProvider
             $children = explode('.', $key);
             foreach ($children as $i => $child) {
                 if ($i === 0) {
-                    $node = isset($xml->$child) ? $xml->$child : null;
+                    $node = $xml->$child ?? null;
                     continue;
                 }
-                $node = isset($node->$child) ? $node->$child : null;
+                $node = $node->$child ?? null;
             }
         } else {
-            $node = isset($xml->$key) ? $xml->$key : null;
+            $node = $xml->$key ?? null;
         }
 
         if ($node !== null) {

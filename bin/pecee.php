@@ -130,8 +130,8 @@ switch (strtolower($argv[1])) {
 			return [
 				'has_match' => isset($matches[1]) && count($matches[1]) > 0 || isset($matches[2]) && count($matches[2]) > 0,
 				'contents'  => $contents,
-				'class'     => isset($matches[2][1]) ? $matches[2][1] : null,
-				'namespace' => isset($matches[1][0]) ? $matches[1][0] : null,
+				'class'     => $matches[2][1] ?? null,
+				'namespace' => $matches[1][0] ?? null,
 				'full'      => isset($matches[1][0]) ? $matches[1][0] . '\\' . $matches[2][1] : null,
 				'matches'   => $matches,
 			];

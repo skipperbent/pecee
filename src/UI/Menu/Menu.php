@@ -197,7 +197,7 @@ class Menu
         foreach ($this->items as $item) {
 
             if ($recursive === true && $item->getMenu() !== null) {
-                $subItem = $item->getMenu()->findItemByUrl($url, $strict, $recursive);
+                $subItem = $item->getMenu()->findItemByUrl($url, $strict);
                 if ($subItem !== null) {
                     return $subItem;
                 }
@@ -230,7 +230,7 @@ class Menu
         foreach ($this->items as $item) {
 
             if ($recursive === true && $item->getMenu() !== null) {
-                $subItem = $item->getMenu()->findItemByAttribute($name, $value, $strict, $recursive);
+                $subItem = $item->getMenu()->findItemByAttribute($name, $value, $strict);
                 if ($subItem !== null) {
                     return $subItem;
                 }
