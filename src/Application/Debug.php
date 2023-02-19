@@ -17,12 +17,12 @@ class Debug
         $this->startTime = microtime(true);
         $this->lastTime = $this->startTime;
         $this->stack = [];
-        $this->add('Debugger initialized.');
+        $this->add('debug','Debugger initialized.');
     }
 
     public function __destruct()
     {
-        $this->add('Debugger destructed.');
+        $this->add('debug', 'Debugger destructed.');
     }
 
     protected function addObject($text, ?string $group = null)
