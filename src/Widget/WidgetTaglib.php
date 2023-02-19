@@ -101,13 +101,13 @@ abstract class WidgetTaglib extends Widget
 
     protected function renderTemplate(): void
     {
-        debug('taglib', 'START: rendering template: ' . $this->_template);
+        debug('taglib', 'START: rendering template: %s', $this->_template);
 
         if ($this->_template !== '') {
             $this->_contentHtml = $this->renderFile($this->_template);
         }
 
-        debug('taglib', 'END: rendering template ' . $this->_template);
+        debug('taglib', 'END: rendering template %s', $this->_template);
     }
 
     protected function renderContent(): void
