@@ -165,7 +165,7 @@ class PhtmlNode extends HtmlElement
 
     private function processEvals($phtml)
     {
-        return preg_replace('/%\{([^\}]*)\}/', '<?=$1?>', $phtml);
+        return preg_replace('/%\{([^\}]*)\}/', '<?=$1?>', (string)$phtml);
     }
 
     private function processAttrValue($val)

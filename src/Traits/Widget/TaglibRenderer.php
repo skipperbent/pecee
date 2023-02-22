@@ -7,41 +7,70 @@ use Pecee\UI\Phtml\Phtml;
 trait TaglibRenderer
 {
 
-    protected $_pHtmlCacheDir;
-
-    public function render()
+    public function setJsDependencies()
     {
-        $this->setTaglibJs();
-        $this->_pHtmlCacheDir = env('base_path') . 'cache/phtml';
+        $this->getSite()->addWrappedJs('js/pecee-widget.js');
+    }
+
+    protected function getPhtmlCacheDir(): string
+    {
+        return env('base_path') . 'cache/phtml';
+    }
+
+    public function render(): ?string
+    {
+        $this->setJsDependencies();
+        $phtmlCacheDir = env('base_path') . 'cache/phtml';
+
+        if ($this->_template === null) {
+            $this->setTemplate('Default.php');
+        }
+
+        if ($this->_contentTemplate === null) {
+            $this->setContentTemplate($this->getTemplatePath());
+        }
+
+        $this->setInputValues();
+
+        // Trigger postback event
+        if (request()->getMethod() === 'post') {
+            $this->onPostBack();
+        }
+
+        // Trigger onLoad event
+        $this->onLoad();
 
         $this->renderContent();
         $this->renderTemplate();
-        $this->_messages->clear();
+
+        $this->sessionMessage()->clear();
+
+        debug('taglib', 'END WIDGET: %s', static::class);
 
         return $this->_contentHtml;
     }
 
-    public function setTaglibJs()
+    protected function getHtmlParser(): Phtml
     {
-        $this->getSite()->addWrappedJs('pecee-widget.js');
+        return new Phtml();
     }
 
-    protected function renderPhp($content)
+    protected function renderPhp(string $content): string
     {
         ob_start();
         eval('?>' . $content);
-        $this->_contentHtml = ob_get_contents();
-        ob_end_clean();
+        return ob_get_clean();
     }
 
-    public function renderContent()
+    protected function renderFile($file): string
     {
-        $cacheFile = $this->_pHtmlCacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $this->_contentTemplate);
+        $cacheDir = $this->getPhtmlCacheDir();
+        $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $file);
+        $output = '';
 
         if (is_file($cacheFile) === true) {
             if (app()->getDebugEnabled() === false) {
-                $this->_contentHtml = file_get_contents($cacheFile);
-                return;
+                return (string)$this->renderPhp(file_get_contents($cacheFile));
             } else {
                 unlink($cacheFile);
             }
@@ -49,28 +78,45 @@ trait TaglibRenderer
 
         try {
 
-            if (is_dir($this->_pHtmlCacheDir) === false) {
-                if (mkdir($this->_pHtmlCacheDir, 0755, true) === false) {
+            if (is_dir($cacheDir) === false) {
+                if (mkdir($cacheDir, 0755, true) === false) {
                     throw new \ErrorException('Failed to create temp-cache directory');
                 }
             }
 
-            $this->renderPhp(file_get_contents($this->_contentTemplate, FILE_USE_INCLUDE_PATH));
+            debug('taglib', 'Parsing Phtml template');
+            $pHtml = $this->getHtmlParser();
+            $output = $pHtml->read(file_get_contents($file, FILE_USE_INCLUDE_PATH))->toPHP();
+            debug('taglib', 'Finished parsing Phtml template');
 
-            debug('phtml', 'Parsing template');
-            $pHtml = new Phtml();
-            $this->_contentHtml = $pHtml->read($this->_contentHtml)->toPHP();
-            debug('phtml', 'Finished parsing');
-
-            debug('phtml', 'Writing cache file');
+            debug('taglib', 'Writing Phtml cache file');
             $handle = fopen($cacheFile, 'w+b+');
-            fwrite($handle, $this->_contentHtml);
+            fwrite($handle, $output);
             fclose($handle);
-            debug('phtml', 'Finished writing cache file');
+            debug('taglib', 'Finished writing Phtml cache file');
+
+            $output = $this->renderPhp($output);
 
         } catch (\Exception $e) {
-            $this->_contentHtml = $e->getMessage();
+            $output = $e->getMessage();
         }
 
+        return $output;
+    }
+
+    protected function renderTemplate(): void
+    {
+        debug('taglib', 'START: rendering template: %s', $this->_template);
+
+        if ($this->_template !== '') {
+            $this->_contentHtml = $this->renderFile($this->_template);
+        }
+
+        debug('taglib', 'END: rendering template %s', $this->_template);
+    }
+
+    protected function renderContent(): void
+    {
+        $this->_contentHtml = $this->renderFile($this->_contentTemplate);
     }
 }
