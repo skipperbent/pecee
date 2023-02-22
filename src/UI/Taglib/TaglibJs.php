@@ -87,7 +87,7 @@ class TaglibJs extends Taglib
         return $string;
     }
 
-    protected function tagContainer($attrs)
+    protected function tagTemplate($attrs)
     {
         $this->requireAttributes($attrs, ['id']);
 

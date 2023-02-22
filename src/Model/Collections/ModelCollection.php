@@ -180,31 +180,14 @@ class ModelCollection extends Collection
      */
     public function toArray($filterKeys = null)
     {
-        $filterKeys = (is_string($filterKeys) === true) ? func_get_args() : $filterKeys;
-
         $output = [];
-
-        if ($filterKeys !== null) {
-            foreach ($filterKeys as $key) {
-                $output[$key] = [];
-            }
-        }
-
-        /* @var $row \Pecee\Model\Model */
-
-        for ($i = 0, $max = count($this->rows); $i < $max; $i++) {
-
-            $row = $this->rows[$i];
-
-            if ($filterKeys === null) {
+        foreach($this->getRows() as $row) {
+            if($filterKeys === null) {
                 $output[] = $row->toArray();
                 continue;
             }
 
-            foreach ($filterKeys as $key) {
-                $output[$key][] = $row->{$key};
-            }
-
+            $output[] = $row->toArray(is_array($filterKeys) ? $filterKeys : [$filterKeys]);
         }
 
         return $output;

@@ -28,9 +28,9 @@ abstract class ControllerBase extends Base
         }
     }
 
-    public function __destruct()
+    /*public function __destruct()
     {
         $this->sessionMessage()->clear();
-    }
+    }*/
 
 }
