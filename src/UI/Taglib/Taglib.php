@@ -6,17 +6,17 @@ class Taglib implements ITaglib
 
     public const TAG_PREFIX = 'tag';
 
-    protected $body = '';
-    protected $bodies = [];
-    protected $preProcess;
-    protected $currentTag;
+    protected ?string $body = '';
+    protected array $bodies = [];
+    protected bool $preProcess;
+    protected string $currentTag;
 
-    public function __construct($preProcess = false)
+    public function __construct(bool $preProcess = false)
     {
         $this->preProcess = $preProcess;
     }
 
-    public function callTag($tag, $attrs, $body)
+    public function callTag(string $tag, array $attrs, ?string $body): ?string
     {
         $this->currentTag = $tag;
         $method = static::TAG_PREFIX . ucfirst($tag);
@@ -31,12 +31,12 @@ class Taglib implements ITaglib
         return $this->$method((object)$attrs);
     }
 
-    public function __call($tag, $args)
+    public function __call($tag, $args): string
     {
-        $this->callTag($tag, $args[0], $args[1]);
+        return $this->callTag($tag, $args[0], $args[1]);
     }
 
-    protected function requireAttributes($attrs, array $name)
+    protected function requireAttributes(\stdClass $attrs, array $name): void
     {
         $errors = [];
         foreach ($name as $n) {
@@ -49,17 +49,17 @@ class Taglib implements ITaglib
         }
     }
 
-    public function getBody()
+    public function getBody(): string
     {
         return $this->body;
     }
 
-    public function setBody($body)
+    public function setBody(string $body): void
     {
         $this->body = $body;
     }
 
-    public function isPreprocess()
+    public function isPreprocess(): bool
     {
         return $this->preProcess;
     }
