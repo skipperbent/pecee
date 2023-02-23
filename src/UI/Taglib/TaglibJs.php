@@ -4,18 +4,20 @@ namespace Pecee\UI\Taglib;
 class TaglibJs extends Taglib
 {
 
-    protected $containers = [];
+    protected array $containers = [];
 
-    protected static $JS_WRAPPER_TAG = '';
-    protected static $JS_EXPRESSION_START = '/js{/';
-    protected static $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
+    protected static string $JS_WRAPPER_TAG = '';
+    protected static string$JS_EXPRESSION_START = '/js{/';
+    protected static string $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
 
-    protected function makeJsString($string)
+    protected int $indexCount = 0;
+
+    protected function makeJsString(string $string): string
     {
         return preg_replace('/[\n\r\t]*|\s\s/', '', trim($string));
     }
 
-    protected function handleInline($string)
+    protected function handleInline(string $string): string
     {
         $string = str_replace(["\\'", '\\"'], array('\'', '"'), $string);
         $parts = preg_split('/[;\n]{1,2}/', $string);
@@ -31,7 +33,7 @@ class TaglibJs extends Taglib
         return sprintf('(function(){%s})()', $result);
     }
 
-    protected function replaceJsExpressions($string)
+    protected function replaceJsExpressions(string $string): string
     {
         $fixedExpressions = [];
         $expressionMatches = [];
@@ -87,7 +89,7 @@ class TaglibJs extends Taglib
         return $string;
     }
 
-    protected function tagTemplate($attrs)
+    protected function tagTemplate(\stdClass $attrs): void
     {
         $this->requireAttributes($attrs, ['id']);
 
@@ -114,33 +116,33 @@ class TaglibJs extends Taglib
         }
     }
 
-    protected function tagIf($attrs)
+    protected function tagIf(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['test']);
 
         return sprintf('</%3$s>";if(%1$s){o+="<%3$s>%2$s</%3$s>"; } o+="<%3$s>', $this->makeJsString($attrs->test), $this->getBody(), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagElse()
+    protected function tagElse(): string
     {
         return sprintf('</%2$s>";}else{o+="<%2$s>%s', $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagElseIf($attrs)
+    protected function tagElseIf(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['test']);
 
         return sprintf('</%3$s>";}else if(%1$s){o+="<%3$s>%2$s', $attrs->test, $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagWhile($attrs)
+    protected function tagWhile(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['test']);
 
         return sprintf('</%3$s>";while(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>', $attrs->test, $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagBind($attrs)
+    protected function tagBind(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['name']);
 
@@ -172,11 +174,17 @@ class TaglibJs extends Taglib
         );
     }
 
-    protected function tagEach($attrs)
+    protected function tagEach(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['in']);
         $row = (!isset($attrs->as)) ? 'row' : $attrs->as;
         $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
+
+        if(isset($attrs->index) === false && $this->indexCount > 0) {
+            $index .= '_' . $this->indexCount;
+        }
+
+        $this->indexCount++;
 
         return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>',
             $attrs->in,
@@ -187,9 +195,9 @@ class TaglibJs extends Taglib
         );
     }
 
-    protected function tagFor($attrs)
+    protected function tagFor(\stdClass $attrs): string
     {
-        $this->requireAttributes($attrs, ['limit', 'start', 'it']);
+        $this->requireAttributes($attrs, ['limit', 'start', 'i']);
 
         return sprintf('</%5$s>";for(var %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>',
             $attrs->it,
@@ -200,12 +208,12 @@ class TaglibJs extends Taglib
         );
     }
 
-    protected function tagBreak()
+    protected function tagBreak(): string
     {
         return sprintf('</%1$s>"; break; o+="<%1$s>', static::$JS_WRAPPER_TAG);
     }
 
-    protected function tagCollect()
+    protected function tagCollect(): string
     {
         $output = array_merge(['<script>'], $this->containers, ['</script>']);
 
