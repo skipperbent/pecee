@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Taglib;
 
 class TaglibJs extends Taglib
@@ -7,7 +8,7 @@ class TaglibJs extends Taglib
     protected array $containers = [];
 
     protected static string $JS_WRAPPER_TAG = '';
-    protected static string$JS_EXPRESSION_START = '/js{/';
+    protected static string $JS_EXPRESSION_START = '/js{/';
     protected static string $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
 
     protected int $indexCount = 0;
@@ -68,7 +69,7 @@ class TaglibJs extends Taglib
             if ($end >= $mOffset) {
                 $expressions[] = [
                     'raw' => substr($string, $offset, $end - $offset + 1),
-                    'js'  => substr($string, $searchOffset, $end - $searchOffset),
+                    'js' => substr($string, $searchOffset, $end - $searchOffset),
                 ];
             }
 
@@ -180,7 +181,7 @@ class TaglibJs extends Taglib
         $row = (!isset($attrs->as)) ? 'row' : $attrs->as;
         $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
 
-        if(isset($attrs->index) === false && $this->indexCount > 0) {
+        if (isset($attrs->index) === false && $this->indexCount > 0) {
             $index .= '_' . $this->indexCount;
         }
 
@@ -203,6 +204,17 @@ class TaglibJs extends Taglib
             $attrs->it,
             $attrs->start,
             $attrs->limit,
+            $this->makeJsString($this->getBody()),
+            static::$JS_WRAPPER_TAG
+        );
+    }
+
+    protected function tagFunction(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['name', 'parameters']);
+        return sprintf('</%4$s>"; function %1$s(%2$s){var o = "<%4$s>%3$s</%4$s>"; return o; } o+="<%4$s>',
+            $attrs->name,
+            $attrs->parameters,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG
         );
