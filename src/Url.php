@@ -57,10 +57,11 @@ class Url
             ' ' => $separator,
         ];
 
-        $string = preg_replace("/&([a-z])[a-z]+;/i", "$1", htmlentities($string));
+        $string = preg_replace("/&([a-z])[a-z]+;/i", "$1", $string);
         $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
 
-        return preg_replace('/[^\w\ \.\+\&' . join('', $searchMap) . ']|(-)\1{1,}/i', '', $string);
+        $string = preg_replace('/[^\w\+' . join('', $searchMap) . ']|(-)\1{1,}/i', '', $string);
+        return htmlentities($string);
     }
 
     public static function isSecure(string $url): bool

@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Taglib;
 
 class TaglibJs extends Taglib
@@ -7,10 +8,16 @@ class TaglibJs extends Taglib
     protected array $containers = [];
 
     protected static string $JS_WRAPPER_TAG = '';
-    protected static string$JS_EXPRESSION_START = '/js{/';
+    protected static string $JS_EXPRESSION_START = '/js{/';
     protected static string $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
 
+    protected string $namespace = '$p';
     protected int $indexCount = 0;
+
+    protected function getJsWrapperMatchRegEx(): string
+    {
+        return '%<' . static::$JS_WRAPPER_TAG . '>(.*?)</' . static::$JS_WRAPPER_TAG . '>%';
+    }
 
     protected function makeJsString(string $string): string
     {
@@ -38,7 +45,7 @@ class TaglibJs extends Taglib
         $fixedExpressions = [];
         $expressionMatches = [];
         // Change all widget expressions
-        $string = preg_replace(static::$JS_WIDGET_EXPRESSION, '$p.getWidget(\'"+g+"\')$1', $string);
+        $string = preg_replace(static::$JS_WIDGET_EXPRESSION, $this->namespace . '.getWidget(\'"+g+"\')$1', $string);
         preg_match_all(static::$JS_EXPRESSION_START, $string, $expressionMatches, PREG_OFFSET_CAPTURE);
 
         $expressions = [];
@@ -68,7 +75,7 @@ class TaglibJs extends Taglib
             if ($end >= $mOffset) {
                 $expressions[] = [
                     'raw' => substr($string, $offset, $end - $offset + 1),
-                    'js'  => substr($string, $searchOffset, $end - $searchOffset),
+                    'js' => substr($string, $searchOffset, $end - $searchOffset),
                 ];
             }
 
@@ -93,15 +100,16 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['id']);
 
-        $output = sprintf('$.%1$s = new $p.template(); $.%1$s.view = function(d,g){var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(d,g){var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
-            static::$JS_WRAPPER_TAG
+            static::$JS_WRAPPER_TAG,
+            $this->namespace
         );
 
         $matches = [];
 
-        preg_match_all('%<' . static::$JS_WRAPPER_TAG . '>(.*?)</' . static::$JS_WRAPPER_TAG . '>%', $output, $matches);
+        preg_match_all($this->getJsWrapperMatchRegEx(), $output, $matches);
         if (isset($matches[1])) {
             foreach ($matches[1] as $m) {
                 $output = str_replace('<' . static::$JS_WRAPPER_TAG . '>' . $m . '</' . static::$JS_WRAPPER_TAG . '>', addslashes($m), $output);
@@ -112,7 +120,7 @@ class TaglibJs extends Taglib
 
         if (app()->getDebugEnabled() === true) {
             $this->containers[$attrs->id] = str_replace('o+=', "\no+=", $this->containers[$attrs->id]);
-            $this->containers[$attrs->id] = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $this->containers[$attrs->id]);
+            $this->containers[$attrs->id] = preg_replace('/";(}else\{|for|if]switch)/i', "\";\n$1", $this->containers[$attrs->id]);
         }
     }
 
@@ -148,7 +156,7 @@ class TaglibJs extends Taglib
 
         $output = sprintf('<%1$s>' . $this->makeJsString($this->getBody()) . '</%1$s>', static::$JS_WRAPPER_TAG);
 
-        preg_match_all('%<' . static::$JS_WRAPPER_TAG . '>(.*?)</' . static::$JS_WRAPPER_TAG . '>%', $output, $matches);
+        preg_match_all($this->getJsWrapperMatchRegEx(), $output, $matches);
         if (isset($matches[1])) {
             foreach ($matches[1] as $m) {
                 $output = str_replace('<' . static::$JS_WRAPPER_TAG . '>' . $m . '</' . static::$JS_WRAPPER_TAG . '>', addslashes($m), $output);
@@ -159,18 +167,19 @@ class TaglibJs extends Taglib
 
         if (app()->getDebugEnabled() === true) {
             $output = str_replace('o+=', "\no+=", $output);
-            $output = preg_replace('/";(\}else\{|for|if]switch)/i', "\";\n$1", $output);
+            $output = preg_replace('/";(}else\{|for|if]switch)/i', "\";\n$1", $output);
         }
 
         $data = $attrs->data ?? 'null';
         $el = $attrs->el ?? 'div';
 
-        return sprintf('</%5$s>"; var guid = $p.utils.generateGuid(); var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
+        return sprintf('</%5$s>"; var guid = %6$s; var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
             $el,
             $data,
             $output,
-            static::$JS_WRAPPER_TAG
+            static::$JS_WRAPPER_TAG,
+            uniqid()
         );
     }
 
@@ -180,7 +189,7 @@ class TaglibJs extends Taglib
         $row = (!isset($attrs->as)) ? 'row' : $attrs->as;
         $index = (!isset($attrs->index)) ? 'i' : $attrs->index;
 
-        if(isset($attrs->index) === false && $this->indexCount > 0) {
+        if (isset($attrs->index) === false && $this->indexCount > 0) {
             $index .= '_' . $this->indexCount;
         }
 
@@ -203,6 +212,24 @@ class TaglibJs extends Taglib
             $attrs->it,
             $attrs->start,
             $attrs->limit,
+            $this->makeJsString($this->getBody()),
+            static::$JS_WRAPPER_TAG
+        );
+    }
+
+    /**
+     * Makes function - makes it possible to render elements multiple times within the template.
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagFunction(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['name', 'parameters']);
+        return sprintf('</%4$s>"; function %1$s(%2$s){var o = "<%4$s>%3$s</%4$s>"; return o; } o+="<%4$s>',
+            $attrs->name,
+            $attrs->parameters,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG
         );
