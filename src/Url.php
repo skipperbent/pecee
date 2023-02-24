@@ -60,7 +60,7 @@ class Url
         $string = preg_replace("/&([a-z])[a-z]+;/i", "$1", $string);
         $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
 
-        $string = preg_replace('/[^\w\ \.\+\&' . join('', $searchMap) . ']|(-)\1{1,}/i', '', $string);
+        $string = preg_replace('/[^\w\+' . join('', $searchMap) . ']|(-)\1{1,}/i', '', $string);
         return htmlentities($string);
     }
 
