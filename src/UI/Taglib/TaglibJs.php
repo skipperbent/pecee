@@ -19,8 +19,35 @@ class TaglibJs extends Taglib
         return '%<' . static::$JS_WRAPPER_TAG . '>(.*?)</' . static::$JS_WRAPPER_TAG . '>%';
     }
 
+    /**
+     * Enables trigger tags within the template, for example:
+     * js-click="d.select(item.id);"
+     * js-[event]="callback"
+     *
+     * d is a variable that will always contain the current widget.
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function parseJsTriggers(string $string): string
+    {
+        // Replace js bindings
+        return preg_replace_callback('/js-(\w+)="?((?:.(?!"?\s+(?:\S+)=|\s*\/?[>"]))+.)"?/is', function ($matches) {
+
+            $event = $matches[1];
+            $callback = $matches[2];
+
+            return sprintf('on%1$s="return trigger_</%2$s>"; let g=w.utils.generateGuid(); let d={item}; window["trigger_" + g]=function() { %3$s }; o += g + "();<%2$s>"</%2$s>"; o+="<%2$s>',
+                $event,
+                static::$JS_WRAPPER_TAG,
+                $callback
+            );
+        }, $string);
+    }
+
     protected function makeJsString(string $string): string
     {
+        $string = $this->parseJsTriggers($string);
         return preg_replace('/[\n\r\t]*|\s\s/', '', trim($string));
     }
 
@@ -100,7 +127,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['id']);
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(d,g){var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(d,g,w){ var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -173,7 +200,7 @@ class TaglibJs extends Taglib
         $data = $attrs->data ?? 'null';
         $el = $attrs->el ?? 'div';
 
-        return sprintf('</%5$s>"; var guid = %6$s; var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid = guid;  self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
+        return sprintf('</%5$s>"; var guid=%6$s; var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid=guid; self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
             $el,
             $data,
@@ -195,7 +222,7 @@ class TaglibJs extends Taglib
 
         $this->indexCount++;
 
-        return sprintf('</%4$s>"; for(var %5$s=0;%5$s<%1$s.length;%5$s++){var %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>',
+        return sprintf('</%4$s>"; for(let %5$s=0;%5$s<%1$s.length;%5$s++){let %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>',
             $attrs->in,
             $row,
             $this->makeJsString($this->getBody()),
@@ -208,7 +235,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['limit', 'start', 'i']);
 
-        return sprintf('</%5$s>";for(var %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>',
+        return sprintf('</%5$s>";for(let %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>',
             $attrs->it,
             $attrs->start,
             $attrs->limit,
@@ -227,7 +254,7 @@ class TaglibJs extends Taglib
     protected function tagFunction(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['name', 'parameters']);
-        return sprintf('</%4$s>"; function %1$s(%2$s){var o = "<%4$s>%3$s</%4$s>"; return o; } o+="<%4$s>',
+        return sprintf('</%4$s>"; function %1$s(%2$s){var o="<%4$s>%3$s</%4$s>"; return o; } o+="<%4$s>',
             $attrs->name,
             $attrs->parameters,
             $this->makeJsString($this->getBody()),

@@ -206,13 +206,7 @@ abstract class Widget extends Base
 
     public function __toString(): string
     {
-        try {
-            return (string)$this->render();
-        } catch (\Exception $e) {
-            $this->setError($e->getMessage());
-        }
-
-        return '';
+        return (string)$this->render();
     }
 
     /**
