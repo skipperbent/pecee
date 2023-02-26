@@ -32,12 +32,12 @@ class TaglibJs extends Taglib
     protected function parseJsTriggers(string $string): string
     {
         // Replace js bindings
-        return preg_replace_callback('/js-(\w+)="?((?:.(?!"?\s+(?:\S+)=|\s*\/?[>"]))+.)"?/is', function ($matches) {
+        return preg_replace_callback('/js-(\w+)="?((?:.(?!"?\s+\S+=|\s*\/?[>"]))+.)"?/is', function ($matches) {
 
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return trigger_</%2$s>"; let g=w.utils.generateGuid(); let d={item}; window["trigger_" + g]=function() { %3$s }; o += g + "();<%2$s>"</%2$s>"; o+="<%2$s>',
+            return sprintf('on%1$s="return trigger_</%2$s>"; let g=w.utils.generateGuid(); window["trigger_" + g]=function() { %3$s }; o += g + "();<%2$s>"</%2$s>"; o+="<%2$s>',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback
@@ -127,7 +127,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['id']);
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(d,g,w){ var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w){ let d=_d; var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,

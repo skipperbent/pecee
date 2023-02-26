@@ -40,7 +40,7 @@ $p.widget.template.class = {
 
 $p.Widget = function (template, container) {
 
-    this.guid = this.generateGuid();
+    this.guid = this.utils.generateGuid();
     this.template = template;
 
     this.container = container;
@@ -173,20 +173,47 @@ $p.Widget.prototype = {
             var typeB = $.type(y);
 
             if(typeA === 'number' && typeB === 'number') {
-                if (direction === 'desc') {
+                if (direction === 'asc') {
                     return x - y;
                 }
                 return y - x;
             }
 
-            if(direction === 'asc') {
+            if(direction === 'desc') {
                 return y.toString().localeCompare(x, 'en', {'sensitivity': 'base'});
             } else {
-                x = (a[column] === null) ? '' : a[column];
-                y = (b[column] === null) ? '' : b[column];
                 return x.toString().localeCompare(y, 'en', {'sensitivity': 'base'});
             }
         });
+    },
+    getDataByPath: function (path, data) {
+        var parts = path.split('/');
+        var d = (data) ? data : this.data;
+        if (!data)
+            return null;
+        var last = false;
+        for (var i = 0; i < parts.length; i++) {
+            if (i == (parts.length - 1))
+                last = true;
+            var p = parts[i];
+            var ix = 0;
+            if (p.indexOf("[") > -1) {
+                var nameIndex = p.split('[');
+                p = nameIndex[0];
+                ix = parseInt(nameIndex);
+            }
+            switch ($.type(d[p])) {
+                default:
+                    d = d[p];
+                    break;
+                case 'array':
+                    if (!last) {
+                        d = d[p][ix];
+                        break;
+                    }
+            }
+        }
+        return d;
     },
     utils: {
         generateGuid: function() {
