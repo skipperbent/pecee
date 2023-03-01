@@ -66,6 +66,7 @@ $p.getWidget = function (g) {
 
 $p.Widget.prototype = {
     windows: [],
+    triggers: [],
     newDate: new Date(),
     guid: null,
     template: null,
@@ -158,12 +159,12 @@ $p.Widget.prototype = {
         this.data = {};
         return this;
     },
-    sortArray: function (column, data, direction, type) {
-        if(column === null || column.trim() === '') {
+    sortArray: function (column, data, direction) {
+        if (column === null || column.trim() === '') {
             return;
         }
 
-        data.sort(function(a, b) {
+        data.sort(function (a, b) {
 
             var x = (a[column] === null) ? '' : a[column];
             var y = (b[column] === null) ? '' : b[column];
@@ -172,14 +173,14 @@ $p.Widget.prototype = {
             var typeA = $.type(x);
             var typeB = $.type(y);
 
-            if(typeA === 'number' && typeB === 'number') {
+            if (typeA === 'number' && typeB === 'number') {
                 if (direction === 'asc') {
                     return x - y;
                 }
                 return y - x;
             }
 
-            if(direction === 'desc') {
+            if (direction === 'desc') {
                 return y.toString().localeCompare(x, 'en', {'sensitivity': 'base'});
             } else {
                 return x.toString().localeCompare(y, 'en', {'sensitivity': 'base'});
@@ -215,9 +216,22 @@ $p.Widget.prototype = {
         }
         return d;
     },
+    t: function (callback) {
+        var name = 't_' + this.utils.generateGuid();
+        this.triggers.push(name);
+        window[name] = callback;
+        return name + '()';
+    },
+    removeTriggers: function () {
+        $.each(this.triggers, function () {
+            delete window[this];
+        });
+
+        this.triggers = [];
+    },
     utils: {
-        generateGuid: function() {
-            return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        generateGuid: function () {
+            return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
