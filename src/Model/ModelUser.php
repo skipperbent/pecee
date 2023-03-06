@@ -104,13 +104,18 @@ class ModelUser extends ModelData implements IUserAuthentication
         Cookie::create(static::COOKIE_NAME, $ticket);
     }
 
-    public static function getTicket()
+    public static function getTicket(): ?array
     {
         if (Cookie::exists(static::COOKIE_NAME) === false) {
             return null;
         }
 
-        $ticket = Guid::decrypt(static::getSalt(), Cookie::get(static::COOKIE_NAME));
+        return static::parseTicket(Cookie::get(static::COOKIE_NAME));
+    }
+
+    public static function parseTicket(string $ticket): ?array
+    {
+        $ticket = Guid::decrypt(static::getSalt(), $ticket);
 
         if ($ticket !== false) {
             $ticket = explode('|', $ticket);
