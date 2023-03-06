@@ -195,10 +195,9 @@ class Column
         return $this;
     }
 
-    public function text(int $length = 255): self
+    public function text(): self
     {
         $this->setType(static::TYPE_TEXT);
-        $this->setLength($length);
 
         return $this;
     }

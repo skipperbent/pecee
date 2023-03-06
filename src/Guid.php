@@ -37,7 +37,7 @@ class Guid
      * @return string
      * @throws \RuntimeException
      */
-    public static function encrypt($key, $input, $method = null): string
+    public static function encrypt(string $key, string $input, ?string $method = null): string
     {
         if ($method === null) {
             $method = app()->getEncryptionMethod();
@@ -57,6 +57,17 @@ class Guid
     }
 
     /**
+     * hex2bin without warnings
+     *
+     * @param string $str
+     * @return false|string
+     */
+    public static function hex2binary(string $str)
+    {
+        return ctype_xdigit(strlen($str) % 2 ? "" : $str) ? hex2bin($str) : false;
+    }
+
+    /**
      * Decrypt key
      *
      * @param string $key
@@ -64,7 +75,7 @@ class Guid
      * @param string|null $method
      * @return bool|string
      */
-    public static function decrypt($key, $data, $method = null)
+    public static function decrypt(string $key, string $data, ?string $method = null)
     {
         if ($method === null) {
             $method = app()->getEncryptionMethod();
@@ -72,16 +83,24 @@ class Guid
 
         $key = (string)substr(hash('sha256', $key, true), 0, 16);
 
-        [$data, $iv] = explode('|', base64_decode($data));
+        $data = base64_decode($data);
 
-        $binary = hex2bin($iv);
+        if (strpos($data, '|') === false) {
+            return false;
+        }
+
+        [$data, $iv] = explode('|', $data);
+
+        if (empty($iv) === true) {
+            return false;
+        }
+
+        $binary = static::hex2binary($iv);
         if ($binary === false) {
             return false;
         }
 
-        $data = openssl_decrypt($data, $method, $key, 0, $binary);
-
-        return $data;
+        return openssl_decrypt($data, $method, $key, 0, $binary);
     }
 
     /**

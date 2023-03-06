@@ -14,6 +14,8 @@ abstract class Base
     protected string $errorType = 'danger';
     protected string $defaultMessagePlacement = 'default';
     protected string $_inputSessionKey = 'InputValues';
+    protected string $_sessionMessagePrefix = '';
+    protected ?SessionMessage $_sessionMessage = null;
 
     protected function onInputError(IInputItem $input, string $error): void
     {
@@ -25,7 +27,11 @@ abstract class Base
      */
     public function sessionMessage(): SessionMessage
     {
-        return new SessionMessage();
+        if ($this->_sessionMessage === null) {
+            $this->_sessionMessage = new SessionMessage($this->_sessionMessagePrefix);
+        }
+
+        return $this->_sessionMessage;
     }
 
     protected function setInputValues(): void

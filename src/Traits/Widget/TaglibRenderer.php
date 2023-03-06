@@ -20,7 +20,6 @@ trait TaglibRenderer
     public function render(): ?string
     {
         $this->setJsDependencies();
-        $phtmlCacheDir = env('base_path') . 'cache/phtml';
 
         if ($this->_template === null) {
             $this->setTemplate('Default.php');
