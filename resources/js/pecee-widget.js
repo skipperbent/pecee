@@ -79,6 +79,7 @@ $p.Widget.prototype = {
     reset: function () {
         this.data = {};
         this.events = [];
+        this.removeTriggers();
     },
     extend: function (object) {
         for (var key in object) {
