@@ -79,6 +79,7 @@ $p.Widget.prototype = {
     reset: function () {
         this.data = {};
         this.events = [];
+        this.removeTriggers();
     },
     extend: function (object) {
         for (var key in object) {
@@ -220,7 +221,7 @@ $p.Widget.prototype = {
         var name = 't_' + this.utils.generateGuid();
         this.triggers.push(name);
         window[name] = callback;
-        return name + '()';
+        return name + '(this);';
     },
     removeTriggers: function () {
         $.each(this.triggers, function () {

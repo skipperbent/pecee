@@ -36,9 +36,8 @@ class TaglibJs extends Taglib
 
             $event = $matches[1];
             $callback = $matches[2];
-            $id = uniqid();
 
-            return sprintf('on%1$s="return </%2$s>"; o+= w.t(function() { %3$s }) + "<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; o+= w.t(function(e) { %3$s }) + "<%2$s>"',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback
