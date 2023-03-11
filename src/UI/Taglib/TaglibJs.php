@@ -177,7 +177,25 @@ class TaglibJs extends Taglib
         return sprintf('</%3$s>";while(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>', $attrs->test, $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
+
+    /**
+     * @param \stdClass $attrs
+     * @return string
+     * @deprecated Use tagView instead
+     */
     protected function tagBind(\stdClass $attrs): string
+    {
+        return $this->tagView($attrs);
+    }
+
+    /**
+     * Render inner-view that can be triggered by using widget.trigger()
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagView(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['name']);
 
@@ -200,7 +218,15 @@ class TaglibJs extends Taglib
         $data = $attrs->data ?? 'null';
         $el = $attrs->el ?? 'div';
 
-        return sprintf('</%5$s>"; var guid=%6$s; var key="%1$s"; self.bindings[key]={}; self.bindings[key].guid=guid; self.bindings[key].callback=function(d){ var id = this.guid; var o = "%4$s"; $("#" + id).html(o); }; self.bindings[key].data = %3$s; o += "<%2$s id=\""+ guid +"\"></%2$s>"; o+="<%5$s>',
+        if (isset($attrs->style)) {
+            $el .= ' style=\"' . $attrs->style . '\"';
+        }
+
+        if (isset($attrs->class)) {
+            $el .= ' class=\"' . $attrs->class . '\"';
+        }
+
+        return sprintf('</%5$s>"; self.bindings["%1$s"]={guid: "%6$s", callback: function(d){ var o="%4$s"; $("#" + this.guid).morphdom($("#" + this.guid).clone(true).html(o)); }, data: %3$s}; o += "<%2$s id=\"%6$s\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
             $el,
             $data,
