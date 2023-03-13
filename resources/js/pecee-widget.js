@@ -218,10 +218,10 @@ $p.Widget.prototype = {
         return d;
     },
     t: function (callback) {
-        var key =" + " + callback  +"";
+        var key = " + " + callback + "";
         var name = 't_' + this.utils.hash(key);
 
-        if(this.triggers.indexOf(key) > -1) {
+        if (this.triggers.indexOf(key) > -1) {
             return name + '(this);';
         }
 
@@ -243,11 +243,11 @@ $p.Widget.prototype = {
                 return v.toString(16);
             });
         },
-        hash: function(str) {
+        hash: function (str) {
             var hash = 0;
             for (var i = 0; i < str.length; i++) {
                 var code = str.toString().charCodeAt(i);
-                hash = ((hash<<5)-hash)+code;
+                hash = ((hash << 5) - hash) + code;
                 hash = hash & hash; // Convert to 32bit integer
             }
             return Math.abs(hash);

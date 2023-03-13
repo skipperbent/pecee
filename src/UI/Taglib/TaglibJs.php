@@ -226,13 +226,12 @@ class TaglibJs extends Taglib
             $el .= ' class=\"' . $attrs->class . '\"';
         }
 
-        return sprintf('</%5$s>"; self.bindings["%1$s"]={guid: "%6$s", callback: function(d){ var o="%4$s"; $("#" + this.guid).morphdom($("#" + this.guid).clone(true).html(o)); }, data: %3$s}; o += "<%2$s id=\"%6$s\"></%2$s>"; o+="<%5$s>',
+        return sprintf('</%5$s>"; self.bindings["%1$s"]={id: "%1$s", callback: function(d){ var o="%4$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); }, data: %3$s}; o += "<%2$s id=\"%1$s\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
             $el,
             $data,
             $output,
             static::$JS_WRAPPER_TAG,
-            uniqid()
         );
     }
 
