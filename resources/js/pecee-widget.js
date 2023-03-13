@@ -9,7 +9,7 @@ $p.widget.template.class = {
     widget: null,
     view: null,
     snippets: null,
-    bindings: {},
+    bindings: [],
     bindingsMap: [],
     init: function (widget) {
         this.widget = widget;
@@ -218,7 +218,13 @@ $p.Widget.prototype = {
         return d;
     },
     t: function (callback) {
-        var name = 't_' + this.utils.generateGuid();
+        var key = " + " + callback + "";
+        var name = 't_' + this.utils.hash(key);
+
+        if (this.triggers.indexOf(key) > -1) {
+            return name + '(this);';
+        }
+
         this.triggers.push(name);
         window[name] = callback;
         return name + '(this);';
@@ -236,6 +242,15 @@ $p.Widget.prototype = {
                 var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
+        },
+        hash: function (str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                var code = str.toString().charCodeAt(i);
+                hash = ((hash << 5) - hash) + code;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash);
         }
     }
 };
