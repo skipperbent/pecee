@@ -199,7 +199,8 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['name']);
 
-        $output = sprintf('<%1$s>' . $this->makeJsString($this->getBody()) . '</%1$s>', static::$JS_WRAPPER_TAG);
+        $tag = static::$JS_WRAPPER_TAG;
+        $output = "<$tag>{$this->makeJsString($this->getBody())}</$tag>";
 
         preg_match_all($this->getJsWrapperMatchRegEx(), $output, $matches);
         if (isset($matches[1])) {
