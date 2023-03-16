@@ -2,6 +2,8 @@
 
 namespace Pecee\UI\Taglib;
 
+use Pecee\UI\Phtml\Phtml;
+
 class TaglibJs extends Taglib
 {
 
@@ -127,7 +129,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['id']);
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w){ let d=_d; var self=this; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w){ let d=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -227,7 +229,7 @@ class TaglibJs extends Taglib
             $el .= ' class=\"' . $attrs->class . '\"';
         }
 
-        return sprintf('</%5$s>"; self.bindings["%1$s"]={id: "%1$s", callback: function(d){ var o="%4$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); }, data: %3$s}; o += "<%2$s id=\"%1$s\"></%2$s>"; o+="<%5$s>',
+        return sprintf('</%5$s>"; this.bindings["%1$s"]={id: "%1$s", callback: function(d){ var o="%4$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); }, data: %3$s}; o += "<%2$s id=\"%1$s\"></%2$s>"; o+="<%5$s>',
             $attrs->name,
             $el,
             $data,
@@ -298,6 +300,22 @@ class TaglibJs extends Taglib
         $output = array_merge(['<script>'], $this->containers, ['</script>']);
 
         return join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+    }
+
+    /**
+     * Includes file in page.
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     * @throws \Pecee\UI\Phtml\PhtmlException
+     */
+    protected function tagSnippet(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['file']);
+
+        $content = file_get_contents('views/snippets/' . $attrs->file, FILE_USE_INCLUDE_PATH);
+        return (new Phtml())->read($content)->toPHP();
     }
 
 }

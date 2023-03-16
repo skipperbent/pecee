@@ -1,14 +1,12 @@
 require('script-loader!jquery-morphdom/jquery.morphdom');
 
 $p.widget.template = function (widget) {
-    this.prototype = $.extend(this, $p.widget.template.class);
-    return this.init(widget);
+    return this.clear().init(widget);
 };
 
-$p.widget.template.class = {
+$p.widget.template.prototype = {
     widget: null,
     view: null,
-    snippets: null,
     bindings: [],
     bindingsMap: [],
     init: function (widget) {
@@ -35,6 +33,10 @@ $p.widget.template.class = {
     },
     clear: function () {
         this.bindingsMap = [];
+        this.widget = null;
+        this.snippets = null;
+        this.bindings = [];
+        return this;
     }
 };
 
@@ -108,17 +110,20 @@ $p.Widget.prototype = {
     },
     render: function () {
         this.template.widget = this;
-        $p.Widget.windows[this.guid] = this;
+        site.Widget.windows[this.guid] = this;
+
+        // Remove old triggers
+        this.removeTriggers();
 
         this.trigger('preRender');
 
         $(this.container).morphdom(
             $(this.container).clone(true).html(this.template.view(this.data, this.guid, this))
         );
-        //$(this.container).html(this.template.view(this.data, this.guid));
+        //$(this.container).html(this.template.view(this.data, this.guid, this));
 
         this.template.triggerAll();
-        this.template.clear();
+        this.template.bindingsMap = [];
 
         this.trigger('render');
     },
@@ -158,6 +163,7 @@ $p.Widget.prototype = {
         $(this.container).html('');
         this.events = [];
         this.data = {};
+        this.removeTriggers();
         return this;
     },
     sortArray: function (column, data, direction) {
@@ -195,7 +201,7 @@ $p.Widget.prototype = {
             return null;
         var last = false;
         for (var i = 0; i < parts.length; i++) {
-            if (i == (parts.length - 1))
+            if (i === (parts.length - 1))
                 last = true;
             var p = parts[i];
             var ix = 0;
@@ -218,16 +224,15 @@ $p.Widget.prototype = {
         return d;
     },
     t: function (callback) {
-        var key = " + " + callback + "";
-        var name = 't_' + this.utils.hash(key);
+        var key = 't_' + this.utils.hash('' + callback, this.triggers.length);
 
         if (this.triggers.indexOf(key) > -1) {
-            return name + '(this);';
+            return key + '(this);';
         }
 
-        this.triggers.push(name);
-        window[name] = callback;
-        return name + '(this);';
+        this.triggers.push(key);
+        window[key] = callback;
+        return key + '(this);';
     },
     removeTriggers: function () {
         $.each(this.triggers, function () {
@@ -243,14 +248,19 @@ $p.Widget.prototype = {
                 return v.toString(16);
             });
         },
-        hash: function (str) {
-            var hash = 0;
-            for (var i = 0; i < str.length; i++) {
-                var code = str.toString().charCodeAt(i);
-                hash = ((hash << 5) - hash) + code;
-                hash = hash & hash; // Convert to 32bit integer
+        hash: (str, seed = 0) => {
+            let h1 = 0xdeadbeef ^ seed,
+                h2 = 0x41c6ce57 ^ seed;
+            for (let i = 0, ch; i < str.length; i++) {
+                ch = str.charCodeAt(i);
+                h1 = Math.imul(h1 ^ ch, 2654435761);
+                h2 = Math.imul(h2 ^ ch, 1597334677);
             }
-            return Math.abs(hash);
+
+            h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+            h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+
+            return 4294967296 * (2097151 & h2) + (h1 >>> 0);
         }
     }
 };
