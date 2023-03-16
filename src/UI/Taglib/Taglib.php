@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Taglib;
 
 class Taglib implements ITaglib
@@ -36,12 +37,12 @@ class Taglib implements ITaglib
         return $this->callTag($tag, $args[0], $args[1]);
     }
 
-    protected function requireAttributes(\stdClass $attrs, array $name): void
+    protected function requireAttributes(\stdClass $attrs, array $names): void
     {
         $errors = [];
-        foreach ($name as $n) {
-            if (isset($attrs->$n) === false) {
-                $errors[] = $n;
+        foreach ($names as $name) {
+            if (isset($attrs->$name) === false) {
+                $errors[] = $name;
             }
         }
         if (count($errors) > 0) {

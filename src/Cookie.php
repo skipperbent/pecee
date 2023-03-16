@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee;
 
 use Carbon\Carbon;
@@ -16,14 +17,10 @@ class Cookie
      * @param string $path
      * @return bool
      */
-    public static function create($id, $value, $expireTime = null, $domain = null, bool $secure = false, $path = '/'): bool
+    public static function create($id, $value, $expireTime = null, $domain = '', bool $secure = false, $path = '/'): bool
     {
         $expireTime = $expireTime ?? Carbon::now()->addYears(10)->timestamp;
         $expireTime = ($expireTime > 0) ? $expireTime : null;
-
-        if ($domain === null) {
-            $domain = ((substr_count(request()->getHost(), '.') + 1) > 2) ? request()->getHost() : '.' . request()->getHost();
-        }
 
         return setcookie($id, $value, $expireTime, $path, $domain, $secure);
     }
