@@ -13,7 +13,7 @@ class ValidateMaxLength extends ValidateInput
 
     public function validates(): bool
     {
-        return !(strlen($this->input->getValue()) > $this->maxLength);
+        return (strlen($this->input->getValue()) <= $this->maxLength);
     }
 
     public function getError(): string
