@@ -1,10 +1,13 @@
 <?php
+
 namespace Pecee\Queue;
+
+use Pheanstalk\Job;
 
 abstract class Queue
 {
 
-    protected $queue;
+    protected string $queue;
 
     public function __construct()
     {
@@ -12,19 +15,16 @@ abstract class Queue
         $this->queue = end($queue);
     }
 
-    abstract public function process($job, $data);
+    abstract public function process(Job $job, array $data): void;
 
-    abstract public function send(array $data = []);
+    abstract public function send(array $data = []): Job;
 
-    /**
-     * @return string
-     */
-    public function getQueue()
+    public function getQueue(): string
     {
         return $this->queue;
     }
 
-    public function setQueue($queue)
+    public function setQueue(string $queue): void
     {
         $this->queue = $queue;
     }
