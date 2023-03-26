@@ -117,6 +117,8 @@ $p.Widget.prototype = {
 
         this.trigger('preRender');
 
+        this.template.bindings = [];
+
         $(this.container).morphdom(
             $(this.container).clone(true).html(this.template.view(this.data, this.guid, this))
         );
