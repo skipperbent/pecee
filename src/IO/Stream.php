@@ -6,6 +6,7 @@ use Carbon\Carbon;
 
 class Stream
 {
+    protected ?\Closure $onStream = null;
     protected string $file;
     protected $stream;
     protected int $bufferSize;
@@ -40,6 +41,11 @@ class Stream
             'Content-Type: ' . $mime,
             'Accept-Ranges: 0-' . $this->end,
         ])->cache(basename($this->file));
+
+        $callback = $this->onStream;
+        if ($callback !== null) {
+            $callback();
+        }
 
         if (isset($_SERVER['HTTP_RANGE']) === true) {
 
@@ -114,6 +120,12 @@ class Stream
     public function setBufferSize(int $size): self
     {
         $this->bufferSize = $size;
+        return $this;
+    }
+
+    public function onStream(\Closure $closure): self
+    {
+        $this->onStream = $closure;
         return $this;
     }
 }
