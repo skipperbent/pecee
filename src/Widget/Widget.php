@@ -232,14 +232,13 @@ abstract class Widget extends Base
             // Trigger onLoad event
             $debug = array_slice(debug_backtrace(), 2, 1);
             $debug = array_pop($debug);
-            $args = $debug['args'] ?? [];
 
-            call_user_func_array([$this, 'onLoad'], $args);
+            call_user_func_array([$this, 'onLoad'], $debug['args'] ?? []);
         }
 
         // Trigger postback event
         if (request()->getMethod() === 'post') {
-            call_user_func_array([$this, 'onPostBack'], $args);
+            call_user_func_array([$this, 'onPostBack'], []);
         }
 
         $this->renderContent();
