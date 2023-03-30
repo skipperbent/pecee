@@ -8,7 +8,7 @@ use Pecee\Exceptions\ValidationException;
 abstract class ControllerBase extends Base
 {
 
-    protected string $_sessionMessagePrefix = 'controller';
+    //protected string $_sessionMessagePrefix = 'controller';
 
     public function __construct()
     {
@@ -26,6 +26,7 @@ abstract class ControllerBase extends Base
         if ($this->hasErrors() === true) {
             $exception = new ValidationException(implode(', ', $this->getErrorsArray()), 400);
             $exception->setErrors($this->getErrorsArray());
+            $this->sessionMessage()->clear();
             throw $exception;
         }
     }

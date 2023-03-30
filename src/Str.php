@@ -13,7 +13,7 @@ class Str
      */
     public static function notNull(...$args): bool
     {
-        return (count(array_filter($args, static function($value) {
+        return (count(array_filter($args, static function ($value) {
                 return $value === null;
             })) === 0);
     }
@@ -26,9 +26,20 @@ class Str
      */
     public static function notEmpty(...$args): bool
     {
-        return (count(array_filter($args, static function($value) {
+        return (count(array_filter($args, static function ($value) {
                 return empty($value);
             })) === 0);
+    }
+
+    /**
+     * Converts double newline into paragraphs.
+     * Example: Word1\n\nWord2 = <p>Word1</p><p>Word2</p>
+     * @param string $text
+     * @return string
+     */
+    public static function nl2p(string $text): string
+    {
+        return preg_replace('/[\r\n]{4}/', '</p><p>', '<p>' . $text . '</p>');
     }
 
     /**

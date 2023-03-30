@@ -46,7 +46,7 @@ trait TaglibRenderer
 
         debug('taglib', 'END WIDGET: %s', static::class);
 
-        return $this->_contentHtml;
+        return $this->onRender($this->_contentHtml);
     }
 
     protected function getHtmlParser(): Phtml
