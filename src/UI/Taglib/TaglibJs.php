@@ -221,7 +221,7 @@ class TaglibJs extends Taglib
         $data = $attrs->data ?? 'null';
         $elStartTag = $attrs->el ?? 'div';
         $elEndTag = $elStartTag;
-
+        $as = $attrs->as ?? 'd';
 
         if (isset($attrs->style)) {
             $elStartTag .= ' style=\"' . $attrs->style . '\"';
@@ -231,13 +231,14 @@ class TaglibJs extends Taglib
             $elStartTag .= ' class=\"' . $attrs->class . '\"';
         }
 
-        return sprintf('</%6$s>"; this.bindings["%1$s"]={id: "%1$s", callback: function(d){ var o="%5$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); }, data: %4$s}; o += "<%2$s id=\"%1$s\"></%3$s>"; this.trigger(\'%1$s\', %4$s); o+="<%6$s>',
+        return sprintf('</%6$s>"; this.bindings["%1$s"]={id: "%1$s", callback: function(%7$s){ var o="%5$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); }, data: %4$s}; o += "<%2$s id=\"%1$s\"></%3$s>"; this.trigger(\'%1$s\', %4$s); o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
             $data,
             $output,
             static::$JS_WRAPPER_TAG,
+            $as
         );
     }
 

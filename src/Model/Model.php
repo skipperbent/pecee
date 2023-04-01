@@ -511,6 +511,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $this->invokedElements[] = $name;
 
+        $output = null;
+        $isInvoked = false;
+
         if (isset($this->with[$name])) {
             $with = $this->with[$name];
 
@@ -522,10 +525,11 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
             if ($with instanceof \Closure) {
                 $output = $with($this);
+                $isInvoked = true;
             }
         }
 
-        if (is_string($name) && !isset($this->relations[$name]) && method_exists($this, $name)) {
+        if ($isInvoked === false && is_string($name) && !isset($this->relations[$name]) && method_exists($this, $name)) {
 
             $this->relations[$name] = true;
 
