@@ -5,12 +5,12 @@ namespace Pecee;
 class Url
 {
 
-    public static function hasParams($url): bool
+    public static function hasParams(string $url): bool
     {
         return (strpos($url, '?') > -1);
     }
 
-    public static function paramsToArray($query): array
+    public static function paramsToArray(string $query): array
     {
         $output = [];
         parse_str(trim($query, '?'), $output);
@@ -18,12 +18,12 @@ class Url
         return $output;
     }
 
-    public static function getParamsSeparator($url): string
+    public static function getParamsSeparator(string $url): string
     {
         return (strpos($url, '?') > -1) ? '&' : '?';
     }
 
-    public static function isValid($url): bool
+    public static function isValid(string $url): bool
     {
         return (preg_match('/^\w+:\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url) === 1);
     }
@@ -33,7 +33,7 @@ class Url
      * @param string $url
      * @return bool
      */
-    public static function isValidRelative($url): bool
+    public static function isValidRelative(string $url): bool
     {
         // PHP filter_var does not support relative urls, so we simulate a full URL
         return !(filter_var('http://www.example.com/' . ltrim($url, '/'), FILTER_VALIDATE_URL) === false);
@@ -47,21 +47,20 @@ class Url
 							/ix', $hostname) === 1);
     }
 
-    public static function urlEncodeString($string, $separator = '-', $maxLength = null)
+    public static function urlEncodeString($string, $separator = '-', $maxLength = null): string
     {
         if ($maxLength !== null && \strlen($string) > $maxLength) {
-            $string = substr($string, 0, $maxLength);
+            $string = mb_substr($string, 0, $maxLength);
         }
 
         $searchMap = [
             ' ' => $separator,
         ];
 
-        $string = preg_replace("/&([a-z])[a-z]+;/i", "$1", $string);
-        $string = str_ireplace(array_keys($searchMap), $searchMap, strtolower($string));
-
-        $string = preg_replace('/[^\w\+' . join('', $searchMap) . ']|(-)\1{1,}/i', '', $string);
-        return htmlentities($string);
+        $string = mb_convert_encoding($string, 'utf-8');
+        $string = str_ireplace(array_keys($searchMap), $searchMap, mb_strtolower($string));
+        $string = preg_replace('/[^\p{L}\w\+' . join('', $searchMap) . ']|(' . $separator . ')\1/ui', '', $string);
+        return preg_replace('/\\'.$separator.'\\'.$separator.'+/', $separator, $string);
     }
 
     public static function isSecure(string $url): bool
