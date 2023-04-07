@@ -434,10 +434,10 @@ class ModelQueryBuilder
 
     /**
      * @param string $field
-     * @return float
+     * @return int
      * @throws Exception
      */
-    public function count($field = '*')
+    public function count(string $field = '*'): int
     {
         return $this->query->count($field);
     }
@@ -447,7 +447,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function min($field)
+    public function min(string $field = '*'): float
     {
         return $this->query->min($field);
     }
@@ -457,7 +457,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function max($field)
+    public function max(string $field = '*'): float
     {
         return $this->query->max($field);
     }
@@ -467,7 +467,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function average($field)
+    public function average(string $field = '*'): float
     {
         return $this->query->average($field);
     }
@@ -477,7 +477,7 @@ class ModelQueryBuilder
      * @return float
      * @throws Exception
      */
-    public function sum($field)
+    public function sum(string $field = '*'): float
     {
         return $this->query->sum($field);
     }
@@ -487,7 +487,7 @@ class ModelQueryBuilder
      * @param array $data
      * @return array
      */
-    protected function getValidData(array $data)
+    protected function getValidData(array $data): array
     {
         $out = [];
 
