@@ -2,6 +2,7 @@
 
 namespace Pecee\Application;
 
+use Pecee\Session\SessionMessage;
 use Pecee\SimpleRouter\SimpleRouter;
 
 class Router extends SimpleRouter
@@ -33,6 +34,8 @@ class Router extends SimpleRouter
         debug('router', 'Router start.');
 
         parent::start();
+
+        (new SessionMessage())->clear();
 
         debug('router', 'Router finished.');
 
