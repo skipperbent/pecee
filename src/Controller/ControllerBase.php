@@ -8,8 +8,6 @@ use Pecee\Exceptions\ValidationException;
 abstract class ControllerBase extends Base
 {
 
-    //protected string $_sessionMessagePrefix = 'controller';
-
     public function __construct()
     {
         debug('controller', 'Start %s', static::class);
@@ -29,11 +27,6 @@ abstract class ControllerBase extends Base
             $this->sessionMessage()->clear();
             throw $exception;
         }
-    }
-
-    public function __destruct()
-    {
-        $this->sessionMessage()->clear();
     }
 
 }

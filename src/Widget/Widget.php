@@ -7,17 +7,18 @@ use Pecee\UI\Form\Form;
 use Pecee\UI\Html\Html;
 use Pecee\UI\Site;
 
-/**
- * Event method triggered on page load
- * @method void onLoad
- */
 abstract class Widget extends Base
 {
     protected ?string $_template = null;
     protected ?string $_contentTemplate = null;
     protected ?string $_contentHtml = null;
 
-    public function onPostBack(): void
+    protected function onLoad(): void
+    {
+
+    }
+
+    protected function onPostBack(): void
     {
 
     }
@@ -218,6 +219,14 @@ abstract class Widget extends Base
      */
     public function render(): ?string
     {
+        // Trigger onLoad event
+        $this->onLoad();
+
+        // Trigger postback event
+        if (request()->getMethod() === 'post') {
+            $this->onPostBack();
+        }
+
         if ($this->_template === null) {
             $this->setTemplate('Default.php');
         }
@@ -228,23 +237,8 @@ abstract class Widget extends Base
 
         $this->setInputValues();
 
-        if (method_exists($this, 'onLoad') === true) {
-            // Trigger onLoad event
-            $debug = array_slice(debug_backtrace(), 2, 1);
-            $debug = array_pop($debug);
-
-            call_user_func_array([$this, 'onLoad'], $debug['args'] ?? []);
-        }
-
-        // Trigger postback event
-        if (request()->getMethod() === 'post') {
-            call_user_func_array([$this, 'onPostBack'], []);
-        }
-
         $this->renderContent();
         $this->renderTemplate();
-
-        $this->sessionMessage()->clear();
 
         debug('widget', 'END %s:', static::class);
 
