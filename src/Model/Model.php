@@ -267,7 +267,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         $updateData = [];
         foreach ($this->columns as $column) {
-            if ($data !== null && $this->{$column} !== null) {
+            if ($data !== null && $this->{$column} !== null || $data === null) {
                 $updateData[$column] = $this->{$column};
             }
         }
