@@ -483,7 +483,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
         if (is_string($data) === true) {
             $encoding = mb_detect_encoding($data, 'UTF-8', true);
-            $data = ($encoding === false || strtolower($encoding) !== 'utf-8') ? mb_convert_encoding($data, 'UTF-8', $encoding) : $data;
+            $data = ($encoding === false || strtolower($encoding) !== 'utf-8') ? mb_convert_encoding($data, 'UTF-8', ($encoding === false) ? null : $encoding) : $data;
         }
 
         if (is_bool($data) === true) {
