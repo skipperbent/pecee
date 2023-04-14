@@ -19,13 +19,16 @@ $p.widget.template.prototype = {
             throw 'Failed to find binding: ' + name;
         }
         data = (typeof data === 'undefined') ? binding.data : data;
-        binding.callback(data);
+        return binding.callback(data);
     },
     triggerAll: function () {
         var self = this;
         for (var name in this.bindings) {
             if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
-                this.trigger(name);
+                if (this.bindings[name].hidden === false) {
+                    this.trigger(name);
+                }
+
                 self.bindingsMap.push(name);
                 this.triggerAll();
             }

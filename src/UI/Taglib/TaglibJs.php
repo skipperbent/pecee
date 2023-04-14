@@ -191,6 +191,22 @@ class TaglibJs extends Taglib
     }
 
     /**
+     * Triggers js callback without returning html.
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagTrigger(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['callback']);
+
+        return sprintf('</%1$s>"; %2$s o+="<%1$s>',
+            static::$JS_WRAPPER_TAG,
+            $attrs->callback,
+        );
+    }
+
+    /**
      * Render inner-view that can be triggered by using widget.trigger()
      *
      * @param \stdClass $attrs
@@ -231,14 +247,18 @@ class TaglibJs extends Taglib
             $elStartTag .= ' class=\"' . $attrs->class . '\"';
         }
 
-        return sprintf('</%6$s>"; this.bindings["%1$s"]={id: "%1$s", callback: function(%7$s){ var o="%5$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); }, data: %4$s}; o += "<%2$s id=\"%1$s\"></%3$s>"; this.trigger(\'%1$s\', %4$s); o+="<%6$s>',
+        $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
+        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"%1$s\"></%3$s>";';
+
+        return sprintf('</%6$s>"; this.bindings["%1$s"]={id: "%1$s", callback: function(%7$s){ var o="%5$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); return o; }, data: %4$s, hidden: %8$s}; ' . $hiddenHtml . '  o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
             $data,
             $output,
             static::$JS_WRAPPER_TAG,
-            $as
+            $as,
+            $hidden,
         );
     }
 
