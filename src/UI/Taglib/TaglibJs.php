@@ -250,7 +250,7 @@ class TaglibJs extends Taglib
         $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
         $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"%1$s\"></%3$s>";';
 
-        return sprintf('</%6$s>"; this.bindings["%1$s"]={id: "%1$s", callback: function(%7$s){ var o="%5$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); return o; }, data: %4$s, hidden: %8$s}; ' . $hiddenHtml . '  o+="<%6$s>',
+        return sprintf('</%6$s>"; w.template.bindings["%1$s"]={id: "%1$s", callback: function(%7$s){ var o="%5$s"; $("#" + this.id).morphdom($("#" + this.id).clone(true).html(o)); return o; }, data: %4$s, hidden: %8$s}; ' . $hiddenHtml . '  o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,

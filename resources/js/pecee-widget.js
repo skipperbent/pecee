@@ -7,6 +7,8 @@ $p.widget.template = function (widget) {
 $p.widget.template.prototype = {
     widget: null,
     view: null,
+    snippets: null,
+    events: [],
     bindings: [],
     bindingsMap: [],
     init: function (widget) {
@@ -19,12 +21,16 @@ $p.widget.template.prototype = {
             throw 'Failed to find binding: ' + name;
         }
         data = (typeof data === 'undefined') ? binding.data : data;
-        return binding.callback(data);
+
+        var output = binding.callback(data);
+        this.triggerEvent(name, data);
+        return output;
     },
     triggerAll: function () {
         var self = this;
         for (var name in this.bindings) {
             if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
+
                 if (this.bindings[name].hidden === false) {
                     this.trigger(name);
                 }
@@ -33,6 +39,32 @@ $p.widget.template.prototype = {
                 this.triggerAll();
             }
         }
+    },
+    triggerEvent: function(name, data) {
+        var shortName = '';
+        if(name.indexOf('.') > -1) {
+            shortName = name.split('.')[0];
+        }
+
+        for(var eventName in this.events) {
+            if(eventName === name || eventName === shortName) {
+                if(typeof this.events[eventName] !== 'undefined' && this.events[eventName].length > 0) {
+                    for(var i = 0; i < this.events[eventName].length; i++) {
+                        this.events[eventName][i](data);
+                    }
+                }
+            }
+        }
+    },
+    on: function(name, callback) {
+        if(typeof this.events[name] === 'undefined') {
+            this.events[name] = [];
+        }
+
+        this.events[name].push(callback);
+    },
+    off: function(name) {
+        delete this.events[name];
     },
     clear: function () {
         this.bindingsMap = [];
