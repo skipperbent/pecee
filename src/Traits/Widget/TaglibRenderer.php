@@ -42,8 +42,6 @@ trait TaglibRenderer
         $this->renderContent();
         $this->renderTemplate();
 
-        $this->sessionMessage()->clear();
-
         debug('taglib', 'END WIDGET: %s', static::class);
 
         return $this->onRender($this->_contentHtml);
