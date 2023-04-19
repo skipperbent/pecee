@@ -22,6 +22,14 @@ $p.widget.template.prototype = {
         }
         data = (typeof data === 'undefined') ? binding.data : data;
 
+        // Remove view triggers
+        for(var key in window.triggers) {
+            var trigger =  window.triggers[key];
+            if(trigger.id === name) {
+                delete window.triggers[key];
+            }
+        }
+
         var output = binding.callback(data);
         this.triggerEvent(name, data);
         return output;
@@ -263,18 +271,29 @@ $p.Widget.prototype = {
     t: function (callback) {
         var key = 't_' + this.utils.hash('' + callback, this.triggers.length);
 
-        if (this.triggers.indexOf(key) > -1) {
-            return key + '(this);';
+        var event = {
+            id: id,
+            key: key,
+            callback: callback
+        };
+
+        if(typeof window.triggers === 'undefined') {
+            window.triggers = [];
         }
 
-        this.triggers.push(key);
-        window[key] = callback;
-        return key + '(this);';
+        var trigger = this.triggers.find((e => e.key === key));
+        if (typeof trigger !== 'undefined') {
+            return 'w.triggers[\''+ key +'\'].callback(this);';
+        }
+
+        this.triggers.push(event);
+        window.triggers[key] = event;
+        return 'window.triggers[\''+ key +'\'].callback(this);';
     },
     removeTriggers: function () {
-        $.each(this.triggers, function () {
-            delete window[this];
-        });
+        for(var key in this.triggers) {
+            delete window.triggers[key];
+        }
 
         this.triggers = [];
     },

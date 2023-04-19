@@ -55,6 +55,7 @@ class Url
 
         $searchMap = [
             ' ' => $separator,
+            '+' => '-',
         ];
 
         $string = mb_convert_encoding($string, 'utf-8');
