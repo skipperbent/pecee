@@ -268,8 +268,9 @@ $p.Widget.prototype = {
         }
         return d;
     },
-    t: function (callback) {
-        var key = 't_' + this.utils.hash('' + callback, this.triggers.length);
+    t: function (id, callback) {
+
+        var key = 't_' + this.utils.hash(callback + '' + this.triggers.length);
 
         var event = {
             id: id,
@@ -277,13 +278,8 @@ $p.Widget.prototype = {
             callback: callback
         };
 
-        if(typeof window.triggers === 'undefined') {
-            window.triggers = [];
-        }
-
-        var trigger = this.triggers.find((e => e.key === key));
-        if (typeof trigger !== 'undefined') {
-            return 'w.triggers[\''+ key +'\'].callback(this);';
+        if (window.triggers.findIndex((t => t.key === key && t.id === id)) > -1) {
+            return 'window.triggers[\''+ key +'\'].callback(this);';
         }
 
         this.triggers.push(event);
@@ -291,7 +287,9 @@ $p.Widget.prototype = {
         return 'window.triggers[\''+ key +'\'].callback(this);';
     },
     removeTriggers: function () {
-        for(var key in this.triggers) {
+
+        for(var index in this.triggers) {
+            var key = this.triggers[index].key;
             delete window.triggers[key];
         }
 
