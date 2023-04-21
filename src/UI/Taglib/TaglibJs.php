@@ -248,7 +248,7 @@ class TaglibJs extends Taglib
         }
 
         $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
-        $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'true') ? 'true' : 'false';
+        $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
         $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"%1$s\"></%3$s>";';
         $morphHtml = ($morph === 'false') ? '$("#" + this.id).html(o);' : '$("#" + this.id).morphdom($("#" + this.id).clone(true).html(o));';
 
