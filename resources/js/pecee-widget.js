@@ -270,7 +270,7 @@ $p.Widget.prototype = {
     },
     t: function (id, callback) {
 
-        var key = 't_' + this.utils.hash(callback + '' + this.triggers.length);
+        var key = 't_' + this.guid + this.triggers.length;
 
         var event = {
             id: id,
