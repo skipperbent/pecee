@@ -17,7 +17,7 @@ class ValidateMinLength extends ValidateInput
 
     public function getError(): string
     {
-        return lang('%s has to minimum %s characters long', $this->input->getName(), $this->minimumLength);
+        return lang('%s has to be minimum %s characters long', $this->input->getName(), $this->minimumLength);
     }
 
 }
