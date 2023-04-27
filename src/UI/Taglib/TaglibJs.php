@@ -323,9 +323,9 @@ class TaglibJs extends Taglib
 
     protected function tagCollect(): string
     {
-        $output = array_merge(['<script>'], $this->containers, ['</script>']);
-
-        return join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+        $container = array_pop($this->containers);
+        $this->containers = [];
+        return '<script>' . $container . '</script>';
     }
 
     /**
