@@ -249,10 +249,10 @@ class TaglibJs extends Taglib
 
         $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
-        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"%1$s\"></%3$s>";';
+        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"" + w.guid + "_%1$s\"></%3$s>";';
         $morphHtml = ($morph === 'false') ? '$("#" + this.id).html(o);' : '$("#" + this.id).morphdom($("#" + this.id).clone(true).html(o));';
 
-        return sprintf('</%6$s>"; w.template.bindings["%1$s"]={id: "%1$s", callback: function(%7$s){ var o="%5$s"; '. $morphHtml .' return o; }, data: %4$s, hidden: %8$s}; ' . $hiddenHtml . '  o+="<%6$s>',
+        return sprintf('</%6$s>"; w.template.bindings[w.guid + "_%1$s"]={id: w.guid + "_%1$s", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}; ' . $hiddenHtml . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
@@ -336,12 +336,29 @@ class TaglibJs extends Taglib
      * @throws \ErrorException
      * @throws \Pecee\UI\Phtml\PhtmlException
      */
-    protected function tagSnippet(\stdClass $attrs): string
+    protected function tagInclude(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['file']);
 
         $content = file_get_contents('views/snippets/' . $attrs->file, FILE_USE_INCLUDE_PATH);
-        return (new Phtml())->read($content)->toPHP();
+        if ($content !== false) {
+            return (new Phtml())->read($content)->toPHP();
+        }
+
+        return '';
+    }
+
+    /**
+     * Alias for include
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     * @throws \Pecee\UI\Phtml\PhtmlException
+     */
+    protected function tagSnippet(\stdClass $attrs): string
+    {
+        return $this->tagInclude($attrs);
     }
 
 }
