@@ -1,10 +1,11 @@
 require('script-loader!jquery-morphdom/jquery.morphdom');
 
 $p.widget.template = function (widget) {
-    return this.clear().init(widget);
+    return this.init(widget);
 };
 
 $p.widget.template.prototype = {
+    guid: null,
     widget: null,
     view: null,
     snippets: null,
@@ -16,16 +17,23 @@ $p.widget.template.prototype = {
         return this;
     },
     trigger: function (name, data) {
+
         var binding = this.bindings[name];
+
+        if(typeof binding === 'undefined') {
+            name = this.guid + '_' + name;
+            binding = this.bindings[name];
+        }
+
         if (typeof binding === 'undefined') {
             throw 'Failed to find binding: ' + name;
         }
         data = (typeof data === 'undefined') ? binding.data : data;
 
         // Remove view triggers
-        for(var key in window.triggers) {
-            var trigger =  window.triggers[key];
-            if(trigger.id === name) {
+        for (var key in window.triggers) {
+            var trigger = window.triggers[key];
+            if (trigger.id === name) {
                 delete window.triggers[key];
             }
         }
@@ -36,6 +44,7 @@ $p.widget.template.prototype = {
     },
     triggerAll: function () {
         var self = this;
+
         for (var name in this.bindings) {
             if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
 
@@ -65,6 +74,8 @@ $p.widget.template.prototype = {
         }
     },
     on: function(name, callback) {
+
+        name = this.guid + '_' + name;
         if(typeof this.events[name] === 'undefined') {
             this.events[name] = [];
         }
@@ -75,6 +86,9 @@ $p.widget.template.prototype = {
         delete this.events[name];
     },
     clear: function () {
+
+        //this.view = null;
+        this.events = [];
         this.bindingsMap = [];
         this.widget = null;
         this.snippets = null;
@@ -85,12 +99,15 @@ $p.widget.template.prototype = {
 
 $p.Widget = function (template, container) {
 
-    this.guid = this.utils.generateGuid();
-    this.template = template;
+    //this.guid = this.utils.generateGuid();
+    this.clear();
+    template.clear();
+    this.template = $.extend({}, template);
+    //this.template.guid = this.guid;
 
     this.container = container;
+    this.template.guid = this.guid;
 
-    this.reset();
     this.init();
     this.template.init(this);
     return this;
@@ -106,7 +123,7 @@ $p.Widget.extend = function (object) {
 };
 
 $p.getWidget = function (g) {
-    return $p.Widget.windows[g];
+    return site.Widget.windows[g];
 };
 
 $p.Widget.prototype = {
@@ -118,10 +135,21 @@ $p.Widget.prototype = {
     container: null,
     data: {},
     events: [],
+    w: null,
     init: function (template, container) {
+        this.w = this;
+        this.template.widget = this;
+        site.Widget.windows[this.guid] = this;
+        if(typeof window.triggers === 'undefined') {
+            window.triggers = [];
+        }
         return this;
     },
-    reset: function () {
+    clear: function () {
+        this.template = null;
+        this.triggers = [];
+        this.guid = this.utils.generateGuid();
+        this.container = null;
         this.data = {};
         this.events = [];
         this.removeTriggers();
@@ -133,7 +161,7 @@ $p.Widget.prototype = {
         return this;
     },
     getWidget: function (g) {
-        return $p.Widget.windows[g];
+        return site.Widget.windows[g];
     },
     setData: function (data) {
         this.data = data;
@@ -152,14 +180,12 @@ $p.Widget.prototype = {
         }, settings));
     },
     render: function () {
-        this.template.widget = this;
-        site.Widget.windows[this.guid] = this;
+
 
         // Remove old triggers
         this.removeTriggers();
 
         this.trigger('preRender');
-
         this.template.bindings = [];
 
         $(this.container).morphdom(
@@ -208,7 +234,6 @@ $p.Widget.prototype = {
         $(this.container).html('');
         this.events = [];
         this.data = {};
-        this.removeTriggers();
         return this;
     },
     sortArray: function (column, data, direction) {

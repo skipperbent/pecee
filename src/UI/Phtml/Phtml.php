@@ -79,11 +79,11 @@ class Phtml
     private $prevChar;
 
     /**
-     * @param phtml $string
+     * @param string $string
      * @throws PhtmlException
      * @return PhtmlNode
      */
-    public function read($string)
+    public function read(string $string)
     {
         $string = trim($string);
         $this->withinStack = [static::NOTHING];
