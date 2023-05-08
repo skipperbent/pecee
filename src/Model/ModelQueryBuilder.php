@@ -826,7 +826,9 @@ class ModelQueryBuilder
      */
     public function __wakeup()
     {
-        $this->query = (new QueryBuilderHandler($this->getQuery()->getConnection()))->table($this->model->getTable());
+        $connection = ($this->getQuery() !== null) ? $this->getQuery()->getConnection() : null;
+
+        $this->query = (new QueryBuilderHandler($connection))->table($this->model->getTable());
     }
 
     public function __destruct()
