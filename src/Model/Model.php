@@ -857,4 +857,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         return (string)$this->{$this->getPrimaryKey()};
     }
 
+    public function __wakeup()
+    {
+        $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
+    }
+
 }
