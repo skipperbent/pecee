@@ -153,6 +153,25 @@ class TaglibJs extends Taglib
         }
     }
 
+    /**
+     * Render template based on id
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagTemplateRender(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['id']);
+
+        $data = $attrs->data ?? 'd';
+        $guid = $attrs->guid ?? 'g';
+        $widget = $attrs->widget ?? 'w';
+
+        $output = "o += $.{$attrs->id}.view($data, $guid, $widget);";
+        return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
+    }
+
     protected function tagIf(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['test']);

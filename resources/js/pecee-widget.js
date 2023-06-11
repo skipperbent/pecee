@@ -214,6 +214,11 @@ $p.Widget.prototype = {
         });
         return null;
     },
+    setTemplate: function(template) {
+        this.template = template;
+        this.template.guid = this.guid;
+        this.template.init(this);
+    },
     bind: function (name, fn) {
         var self = this;
         var exists = false;
