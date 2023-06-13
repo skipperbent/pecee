@@ -15,7 +15,7 @@ abstract class ModelRelation
      *
      * @var bool
      */
-    protected static $constraints = true;
+    protected static bool $constraints = true;
 
     /**
      * @var Model
@@ -28,6 +28,11 @@ abstract class ModelRelation
     protected $parent;
     protected $alias;
     protected $withDefault;
+
+    /**
+     * @var bool
+     */
+    protected bool $returnEmpty = false;
 
     public function __construct(Model $related, Model $parent)
     {
@@ -68,9 +73,22 @@ abstract class ModelRelation
      * @param array|\Closure $default
      * @return static $this
      */
-    public function withDefault($default)
+    public function withDefault($default): self
     {
         $this->withDefault = $default;
+
+        return $this;
+    }
+
+    /**
+     * When enabled the relation will not return a blank instance but allow null and empty values to be returned.
+     *
+     * @param bool $empty
+     * @return static $this
+     */
+    public function withEmpty(bool $empty = true): self
+    {
+        $this->returnEmpty = true;
 
         return $this;
     }
@@ -78,6 +96,10 @@ abstract class ModelRelation
     public function getDefaultFor(Model $parent)
     {
         $instance = $parent->newQuery();
+
+        if ($this->withDefault === null && $this->returnEmpty === true) {
+            return null;
+        }
 
         if ($this->withDefault === null) {
             return $instance;

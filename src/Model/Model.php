@@ -469,7 +469,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         }
 
         if ($data instanceof ModelRelation) {
-            return $data->getResults()->toArray();
+            return ($data->getResults() !== null) ? $data->getResults()->toArray() : null;
         }
 
         if (is_array($data) === true) {
