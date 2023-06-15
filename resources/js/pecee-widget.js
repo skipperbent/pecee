@@ -11,6 +11,8 @@ $p.widget.template.prototype = {
     snippets: null,
     events: [],
     bindings: [],
+    // Bindings waiting to be rendered
+    bindingsQuery: [],
     bindingsMap: [],
     init: function (widget) {
         this.widget = widget;
@@ -20,7 +22,7 @@ $p.widget.template.prototype = {
 
         var binding = this.bindings[name];
 
-        if(typeof binding === 'undefined') {
+        if (typeof binding === 'undefined') {
             name = this.guid + '_' + name;
             binding = this.bindings[name];
         }
@@ -40,6 +42,17 @@ $p.widget.template.prototype = {
 
         var output = binding.callback(data);
         this.triggerEvent(name, data);
+
+        var index = this.bindingsQuery.findIndex((i => i === name));
+        if (index > -1) {
+            this.bindingsQuery.splice(index, 1);
+        }
+
+        // Trigger all children
+        for (var i = 0; i < this.bindingsQuery.length; i++) {
+            this.trigger(this.bindingsQuery[i]);
+        }
+
         return output;
     },
     triggerAll: function () {
@@ -57,32 +70,32 @@ $p.widget.template.prototype = {
             }
         }
     },
-    triggerEvent: function(name, data) {
+    triggerEvent: function (name, data) {
         var shortName = '';
-        if(name.indexOf('.') > -1) {
+        if (name.indexOf('.') > -1) {
             shortName = name.split('.')[0];
         }
 
-        for(var eventName in this.events) {
-            if(eventName === name || eventName === shortName) {
-                if(typeof this.events[eventName] !== 'undefined' && this.events[eventName].length > 0) {
-                    for(var i = 0; i < this.events[eventName].length; i++) {
+        for (var eventName in this.events) {
+            if (eventName === name || eventName === shortName) {
+                if (typeof this.events[eventName] !== 'undefined' && this.events[eventName].length > 0) {
+                    for (var i = 0; i < this.events[eventName].length; i++) {
                         this.events[eventName][i](data);
                     }
                 }
             }
         }
     },
-    on: function(name, callback) {
+    on: function (name, callback) {
 
         name = this.guid + '_' + name;
-        if(typeof this.events[name] === 'undefined') {
+        if (typeof this.events[name] === 'undefined') {
             this.events[name] = [];
         }
 
         this.events[name].push(callback);
     },
-    off: function(name) {
+    off: function (name) {
         delete this.events[name];
     },
     clear: function () {
@@ -93,7 +106,15 @@ $p.widget.template.prototype = {
         this.widget = null;
         this.snippets = null;
         this.bindings = [];
+        this.bindingsQuery = [];
         return this;
+    },
+    binding: function (object) {
+        this.bindingsQuery.push(object.id);
+
+        if (typeof this.bindings[object.id] === 'undefined') {
+            this.bindings[object.id] = object;
+        }
     }
 };
 
@@ -140,7 +161,7 @@ $p.Widget.prototype = {
         this.w = this;
         this.template.widget = this;
         site.Widget.windows[this.guid] = this;
-        if(typeof window.triggers === 'undefined') {
+        if (typeof window.triggers === 'undefined') {
             window.triggers = [];
         }
         return this;
@@ -214,7 +235,7 @@ $p.Widget.prototype = {
         });
         return null;
     },
-    setTemplate: function(template) {
+    setTemplate: function (template) {
         this.template = template;
         this.template.guid = this.guid;
         this.template.init(this);
@@ -309,16 +330,16 @@ $p.Widget.prototype = {
         };
 
         if (window.triggers.findIndex((t => t.key === key && t.id === id)) > -1) {
-            return 'window.triggers[\''+ key +'\'].callback(this);';
+            return 'window.triggers[\'' + key + '\'].callback(this);';
         }
 
         this.triggers.push(event);
         window.triggers[key] = event;
-        return 'window.triggers[\''+ key +'\'].callback(this);';
+        return 'window.triggers[\'' + key + '\'].callback(this);';
     },
     removeTriggers: function () {
 
-        for(var index in this.triggers) {
+        for (var index in this.triggers) {
             var key = this.triggers[index].key;
             delete window.triggers[key];
         }
