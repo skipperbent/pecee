@@ -34,7 +34,7 @@ class TaglibJs extends Taglib
     protected function parseJsTriggers(string $string): string
     {
         // Replace js bindings
-        return preg_replace_callback('/js-(\w+)="?((?:.(?!"?\s+\S+=|\s*\/?[>"]))+.)"?/is', function ($matches) {
+        return preg_replace_callback('/js-(\w+)="?((?:.(?!"\{\}?\s+\S+=|\s*\/?[>"]))+.)"?/is', function ($matches) {
 
             $event = $matches[1];
             $callback = $matches[2];
@@ -172,6 +172,29 @@ class TaglibJs extends Taglib
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
     }
 
+    protected function tagSwitch(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['test']);
+        return sprintf('</%3$s>";switch(%1$s){ %2$s } o+="<%3$s>', $this->makeJsString($attrs->test), $this->getBody(), static::$JS_WRAPPER_TAG);
+    }
+
+    protected function tagCase(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['test']);
+
+        $break = $attrs->break ?? 'true';
+        $break = (strtolower($break) === 'true') ? 'break;' : '';
+        $test = (stripos($attrs->test, ',') !== false) ? explode(',', $attrs->test) : [$attrs->test];
+        $output = '';
+
+        foreach ($test as $t) {
+            $t = trim($t);
+            $output .= (($t === 'default') ? 'default' : 'case ' . $t) . ': ';
+        }
+
+        return sprintf(' %1$s { o+="<%3$s>%2$s</%3$s>"; %4$s }', $this->makeJsString($output), $this->getBody(), static::$JS_WRAPPER_TAG, $break);
+    }
+
     protected function tagIf(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['test']);
@@ -271,7 +294,7 @@ class TaglibJs extends Taglib
         $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"" + w.guid + "_%1$s\"></%3$s>";';
         $morphHtml = ($morph === 'false') ? '$("#" + this.id).html(o);' : '$("#" + this.id).morphdom($("#" + this.id).clone(true).html(o));';
 
-        return sprintf('</%6$s>"; w.template.bindings[w.guid + "_%1$s"]={id: w.guid + "_%1$s", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}; ' . $hiddenHtml . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; w.template.binding({id: w.guid + "_%1$s", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}); ' . $hiddenHtml . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
