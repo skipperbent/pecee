@@ -47,8 +47,6 @@ $p.widget.template.prototype = {
                 }
             }
 
-            //this.bindings[name].slice(_i, 1);
-
             output += binding.callback(eventData);
         }
 
