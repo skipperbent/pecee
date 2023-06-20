@@ -39,11 +39,11 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; o+= w.t(\'%4$s\', function(e) { %3$s }) + "<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; o+= w.t({ id: this.id + "%4$s", event: "%1$s", callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ this.id + "%4$s<%2$s>"',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
-                md5($callback),
+                md5($event . $callback),
             );
         }, $string);
     }
@@ -285,6 +285,14 @@ class TaglibJs extends Taglib
         $elEndTag = $elStartTag;
         $as = $attrs->as ?? 'd';
 
+        $id = 'w.guid + "_%1$s"';
+        $index = '_' . uniqid();
+
+        if (isset($attrs->index)) {
+            $index = '_" + ' . $attrs->index . ' + "';
+            $id = 'w.guid + "_%1$s' . $index . '"';
+        }
+
         if (isset($attrs->style)) {
             $elStartTag .= ' style=\"' . $attrs->style . '\"';
         }
@@ -295,10 +303,10 @@ class TaglibJs extends Taglib
 
         $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
-        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s id=\"" + w.guid + "_%1$s\"></%3$s>";';
-        $morphHtml = ($morph === 'false') ? '$("#" + this.id).html(o);' : '$("#" + this.id).morphdom($("#" + this.id).clone(true).html(o));';
+        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"" + w.guid + "_%1$s' . $index . '\"></%3$s>";';
+        $morphHtml = ($morph === 'false') ? '$("[data-id=" + w.guid + "_%1$s' . $index . ']").html(o);' : '$("[data-id=" + w.guid + "_%1$s' . $index . ']").morphdom($("[data-id=" + w.guid + "_%1$s' . $index . ']").clone(true).html(o));';
 
-        return sprintf('</%6$s>"; w.template.binding({id: w.guid + "_%1$s", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}); ' . $hiddenHtml . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; w.template.binding({id: ' . $id . ', hash: "' . md5($output) . '", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}); ' . $hiddenHtml . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
