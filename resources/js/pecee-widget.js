@@ -6,6 +6,7 @@ $p.widget.template = function (widget) {
 
 $p.widget.template.prototype = {
     guid: null,
+    id: null,
     widget: null,
     view: null,
     snippets: null,
@@ -46,8 +47,6 @@ $p.widget.template.prototype = {
                     delete window.triggers[key];
                 }
             }
-
-            //this.bindings[name].slice(_i, 1);
 
             output += binding.callback(eventData);
         }

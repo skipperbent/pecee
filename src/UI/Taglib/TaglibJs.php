@@ -39,7 +39,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; o+= w.t({ id: this.id + "%4$s", event: "%1$s", callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ this.id + "%4$s<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; var _id = this.id + w.utils.generateGuid(); o+= w.t({ id: _id, event: "%1$s", callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
@@ -132,7 +132,7 @@ class TaglibJs extends Taglib
 
         $as = $attrs->as ?? 'd';
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w){ let %5$s=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w){ this.id=g; let %5$s=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
