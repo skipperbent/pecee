@@ -6,6 +6,7 @@ $p.widget.template = function (widget) {
 
 $p.widget.template.prototype = {
     guid: null,
+    id: null,
     widget: null,
     view: null,
     snippets: null,
