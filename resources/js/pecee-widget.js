@@ -40,22 +40,30 @@ $p.widget.template.prototype = {
 
             // Remove view triggers
 
+            output += binding.callback(eventData);
+
             for (var key in window.triggers) {
                 var trigger = window.triggers[key];
 
-                if (trigger.id === binding.hash || trigger.id === name || $('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0) {
+                if (
+                    trigger.id === binding.id ||
+                    trigger.id === name ||
+                    (output.indexOf('[data-' + trigger.event + '="' + trigger.id + '"]') > -1 && $('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
+                ) {
                     delete window.triggers[key];
                 }
             }
 
-            output += binding.callback(eventData);
-        }
+            //this.bindings[name].slice(_i, 1);
 
-        this.triggerEvent(name, eventData);
+            for (var __i = 0; __i < this.bindingsQuery.length; __i++) {
+                if (this.bindingsQuery[__i] === binding.id) {
+                    this.bindingsQuery.splice(__i, 1);
+                    break;
+                }
+            }
 
-        var index = this.bindingsQuery.findIndex((i => i === name));
-        if (index > -1) {
-            this.bindingsQuery.splice(index, 1);
+            this.triggerEvent(name, eventData);
         }
 
         // Trigger all children
@@ -70,10 +78,13 @@ $p.widget.template.prototype = {
         var self = this;
 
         for (var name in this.bindings) {
+
             if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
 
-                if (this.bindings[name].hidden === false) {
-                    this.trigger(name);
+                for (var binding in this.bindings[name]) {
+                    if (this.bindings[name][binding].hidden === false) {
+                        this.trigger(name);
+                    }
                 }
 
                 self.bindingsMap.push(name);
