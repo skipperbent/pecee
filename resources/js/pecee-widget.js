@@ -40,28 +40,53 @@ $p.widget.template.prototype = {
 
             // Remove view triggers
 
-            for (var key in window.triggers) {
-                var trigger = window.triggers[key];
+            output += binding.callback(eventData);
 
-                if (trigger.id === binding.hash || trigger.id === name || $('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0) {
-                    delete window.triggers[key];
+            // Clean up bindings
+            //this.bindings[name] = this.bindings[name].slice(_i, 1);
+
+            for (var __i = 0; __i < this.bindingsQuery.length; __i++) {
+                if (this.bindingsQuery[__i] === binding.id) {
+                    this.bindingsQuery.splice(__i, 1);
+                    break;
                 }
             }
 
-            output += binding.callback(eventData);
+            this.triggerEvent(name, eventData);
         }
 
-        this.triggerEvent(name, eventData);
+        if(this.bindingsQuery.length === 0) {
 
-        var index = this.bindingsQuery.findIndex((i => i === name));
-        if (index > -1) {
-            this.bindingsQuery.splice(index, 1);
-        }
+            for(name in this.bindings) {
 
-        // Trigger all children
-        for (var i = 0; i < this.bindingsQuery.length; i++) {
-            eventData = (typeof data === 'undefined') ? this.bindingsQuery[i].data : data;
-            output += this.trigger(this.bindingsQuery[i], eventData);
+                for (_i in this.bindings[name]) {
+                    binding = this.bindings[name][_i];
+                    if ($('[data-id=' + binding.el + ']').length === 0) {
+                        this.bindings[name].splice(_i, 1);
+                    }
+                }
+
+            }
+
+        } else {
+
+            // Trigger all children
+            for (var i = 0; i < this.bindingsQuery.length; i++) {
+                eventData = (typeof data === 'undefined') ? this.bindingsQuery[i].data : data;
+                output += this.trigger(this.bindingsQuery[i], eventData);
+            }
+
+            for (var key in window.triggers) {
+                var trigger = window.triggers[key];
+
+                if (
+                    trigger.id === binding.id ||
+                    trigger.id === name ||
+                    ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
+                ) {
+                    delete window.triggers[key];
+                }
+            }
         }
 
         return output;
@@ -70,10 +95,13 @@ $p.widget.template.prototype = {
         var self = this;
 
         for (var name in this.bindings) {
+
             if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
 
-                if (this.bindings[name].hidden === false) {
-                    this.trigger(name);
+                for (var binding in this.bindings[name]) {
+                    if (this.bindings[name][binding].hidden === false) {
+                        this.trigger(name);
+                    }
                 }
 
                 self.bindingsMap.push(name);
@@ -343,7 +371,8 @@ $p.Widget.prototype = {
             var trigger = window.triggers[_i];
 
             if (trigger.id === event.id) {
-                return 'window.triggers[\'' + trigger.key + '\'].callback(this);';
+                window.triggers[_i] = event;
+                return 'window.triggers[\'' + event.key + '\'].callback(this);';
             }
         }
 
