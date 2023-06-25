@@ -42,19 +42,8 @@ $p.widget.template.prototype = {
 
             output += binding.callback(eventData);
 
-            for (var key in window.triggers) {
-                var trigger = window.triggers[key];
-
-                if (
-                    trigger.id === binding.id ||
-                    trigger.id === name ||
-                    (output.indexOf('[data-' + trigger.event + '="' + trigger.id + '"]') > -1 && $('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
-                ) {
-                    delete window.triggers[key];
-                }
-            }
-
-            //this.bindings[name].slice(_i, 1);
+            // Clean up bindings
+            //this.bindings[name] = this.bindings[name].slice(_i, 1);
 
             for (var __i = 0; __i < this.bindingsQuery.length; __i++) {
                 if (this.bindingsQuery[__i] === binding.id) {
@@ -66,10 +55,38 @@ $p.widget.template.prototype = {
             this.triggerEvent(name, eventData);
         }
 
-        // Trigger all children
-        for (var i = 0; i < this.bindingsQuery.length; i++) {
-            eventData = (typeof data === 'undefined') ? this.bindingsQuery[i].data : data;
-            output += this.trigger(this.bindingsQuery[i], eventData);
+        if(this.bindingsQuery.length === 0) {
+
+            for(name in this.bindings) {
+
+                for (_i in this.bindings[name]) {
+                    binding = this.bindings[name][_i];
+                    if ($('[data-id=' + binding.el + ']').length === 0) {
+                        this.bindings[name].splice(_i, 1);
+                    }
+                }
+
+            }
+
+        } else {
+
+            // Trigger all children
+            for (var i = 0; i < this.bindingsQuery.length; i++) {
+                eventData = (typeof data === 'undefined') ? this.bindingsQuery[i].data : data;
+                output += this.trigger(this.bindingsQuery[i], eventData);
+            }
+
+            for (var key in window.triggers) {
+                var trigger = window.triggers[key];
+
+                if (
+                    trigger.id === binding.id ||
+                    trigger.id === name ||
+                    ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
+                ) {
+                    delete window.triggers[key];
+                }
+            }
         }
 
         return output;
@@ -354,7 +371,8 @@ $p.Widget.prototype = {
             var trigger = window.triggers[_i];
 
             if (trigger.id === event.id) {
-                return 'window.triggers[\'' + trigger.key + '\'].callback(this);';
+                window.triggers[_i] = event;
+                return 'window.triggers[\'' + event.key + '\'].callback(this);';
             }
         }
 
