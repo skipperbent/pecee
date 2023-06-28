@@ -36,14 +36,17 @@ $p.widget.template.prototype = {
 
         for (var _i in bindings) {
             var binding = bindings[_i];
-            var eventData = (typeof data === 'undefined') ? binding.data : data;
+
+            var eventData = binding.data;
+
+            // Use custom data and store on binding
+            if(typeof data !== 'undefined') {
+                eventData = data;
+                binding.data = eventData;
+            }
 
             // Remove view triggers
-
             output += binding.callback(eventData);
-
-            // Clean up bindings
-            //this.bindings[name] = this.bindings[name].slice(_i, 1);
 
             for (var __i = 0; __i < this.bindingsQuery.length; __i++) {
                 if (this.bindingsQuery[__i] === binding.id) {
