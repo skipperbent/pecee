@@ -19,6 +19,9 @@ $p.widget.template.prototype = {
         this.widget = widget;
         return this;
     },
+    triggerIndex: function(name, index, data) {
+        return this.trigger(name + '_' + index, data);
+    },
     trigger: function (name, data) {
 
         var bindings = this.bindings[name];
@@ -156,10 +159,12 @@ $p.widget.template.prototype = {
             this.bindings[object.id] = [object];
         } else {
 
-            var exists = this.bindings[object.id].findIndex((b => b.hash === object.hash));
+            var existingIndex = this.bindings[object.id].findIndex((b => b.hash === object.hash));
 
-            if (exists === -1) {
+            if (existingIndex === -1) {
                 this.bindings[object.id].push(object);
+            } else {
+                this.bindings[object.id][existingIndex] = object;
             }
         }
         this.bindingsQuery.push(object.id);
