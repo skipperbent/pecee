@@ -39,7 +39,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; var _id = this.id + w.utils.generateGuid(); o+= w.t({ id: _id, event: "%1$s", callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; var _id = w.utils.generateGuid(); o+= w.t({ id: _id, event: "%1$s", callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
@@ -172,7 +172,28 @@ class TaglibJs extends Taglib
         $guid = $attrs->guid ?? 'g';
         $widget = $attrs->widget ?? 'w';
 
-        $output = "o += $.{$attrs->id}.view($data, $guid, $widget);";
+        $dataOutput = '';
+
+        foreach ($attrs as $key => $value) {
+            if (stripos($key, 'data-') === 0) {
+
+                $dataOutput .= sprintf(
+                    '%1$s.%2$s = %3$s;',
+                    $data,
+                    trim(str_ireplace('data-', '', $key)),
+                    $value,
+                );
+
+            }
+        }
+
+        $output = '';
+
+        if (strlen($dataOutput) > 0) {
+            $output .= "if($data !== null) { $dataOutput }";
+        }
+
+        $output .= "o += $.{$attrs->id}.view($data, $guid, $widget);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
     }
 
@@ -303,10 +324,11 @@ class TaglibJs extends Taglib
 
         $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
-        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\"></%3$s>";';
-        $morphHtml = ($morph === 'false') ? '$("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$("[data-id=%9$s_%1$s' . $index . ']").each(function() { $(this).morphdom($("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o)); });';
+        $hiddenHtml1 = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\">" + ';
+        $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
+        $morphHtml = ($morph === 'false') ? '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").each(function() { $(this).morphdom($(w.container).find("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o)); });';
 
-        return sprintf('</%6$s>"; w.template.binding({id: ' . $id . ', name: "%9$s_%1$s", el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}); ' . $hiddenHtml . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' w.template.binding({id: ' . $id . ', name: "%9$s_%1$s", el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, replace = true){ var o="%5$s"; if(replace) { ' . $morphHtml . ' } return o; }, data: %4$s, hidden: %8$s})'.$hiddenHtml2.' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
