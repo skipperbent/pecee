@@ -114,6 +114,8 @@ trait TaglibRenderer
 
     protected function renderContent(): void
     {
-        $this->_contentHtml = $this->renderFile($this->_contentTemplate);
+        if ($this->_contentHtml === null && $this->_contentTemplate !== null && $this->_contentTemplate !== '') {
+            $this->_contentHtml = $this->renderFile($this->_contentTemplate);
+        }
     }
 }

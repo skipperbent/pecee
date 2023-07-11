@@ -12,17 +12,15 @@ $p.widget.template.prototype = {
     snippets: null,
     events: [],
     bindings: [],
-    // Bindings waiting to be rendered
-    bindingsQuery: [],
     bindingsMap: [],
     init: function (widget) {
         this.widget = widget;
         return this;
     },
-    triggerIndex: function(name, index, data) {
-        return this.trigger(name + '_' + index, data);
+    triggerIndex: function (name, index, data) {
+        return this.trigger(name, data, index);
     },
-    trigger: function (name, data) {
+    trigger: function (name, data, index = null) {
 
         var bindings = this.bindings[name];
 
@@ -35,6 +33,15 @@ $p.widget.template.prototype = {
             throw 'Failed to find binding: ' + name;
         }
 
+        if (index !== null) {
+            var bindingIndex = bindings.findIndex((b => b.index === index));
+            if (bindingIndex === -1) {
+                throw 'Failed to find binding: ' + name;
+            }
+
+            bindings = [this.bindings[name][bindingIndex]];
+        }
+
         var output = '';
 
         for (var _i in bindings) {
@@ -43,7 +50,7 @@ $p.widget.template.prototype = {
             var eventData = binding.data;
 
             // Use custom data and store on binding
-            if(typeof data !== 'undefined') {
+            if (typeof data !== 'undefined') {
                 eventData = data;
                 binding.data = eventData;
             }
@@ -51,47 +58,22 @@ $p.widget.template.prototype = {
             // Remove view triggers
             output += binding.callback(eventData);
 
-            for (var __i = 0; __i < this.bindingsQuery.length; __i++) {
-                if (this.bindingsQuery[__i] === binding.id) {
-                    this.bindingsQuery.splice(__i, 1);
-                    break;
-                }
-            }
-
             this.triggerEvent(name, eventData);
+
+            if (binding.persist === false && $(this.widget.container).find('[data-id=' + binding.el + ']').length === 0) {
+                this.bindings[name].splice(_i, 1);
+            }
         }
 
-        if(this.bindingsQuery.length === 0) {
+        for (var key in window.triggers) {
+            var trigger = window.triggers[key];
 
-            for(name in this.bindings) {
-
-                for (_i in this.bindings[name]) {
-                    binding = this.bindings[name][_i];
-                    if ($('[data-id=' + binding.el + ']').length === 0) {
-                        this.bindings[name].splice(_i, 1);
-                    }
-                }
-
-            }
-
-        } else {
-
-            // Trigger all children
-            for (var i = 0; i < this.bindingsQuery.length; i++) {
-                eventData = (typeof data === 'undefined') ? this.bindingsQuery[i].data : data;
-                output += this.trigger(this.bindingsQuery[i], eventData);
-            }
-
-            for (var key in window.triggers) {
-                var trigger = window.triggers[key];
-
-                if (
-                    trigger.id === binding.id ||
-                    trigger.id === name ||
-                    ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
-                ) {
-                    delete window.triggers[key];
-                }
+            if (
+                (typeof binding !== 'undefined' && trigger.id === binding.id) ||
+                trigger.id === name ||
+                ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
+            ) {
+                delete window.triggers[key];
             }
         }
 
@@ -151,15 +133,15 @@ $p.widget.template.prototype = {
         this.widget = null;
         this.snippets = null;
         this.bindings = [];
-        this.bindingsQuery = [];
         return this;
     },
     binding: function (object) {
+
         if (typeof this.bindings[object.id] === 'undefined') {
             this.bindings[object.id] = [object];
         } else {
 
-            var existingIndex = this.bindings[object.id].findIndex((b => b.hash === object.hash));
+            var existingIndex = this.bindings[object.id].findIndex((b => b.index === object.index && (b.id === object.id && b.hash === object.hash)));
 
             if (existingIndex === -1) {
                 this.bindings[object.id].push(object);
@@ -167,7 +149,8 @@ $p.widget.template.prototype = {
                 this.bindings[object.id][existingIndex] = object;
             }
         }
-        this.bindingsQuery.push(object.id);
+
+        return object.callback(object.data, false);
     }
 };
 
@@ -213,7 +196,7 @@ $p.Widget.prototype = {
     init: function (template, container) {
         this.w = this;
         this.template.widget = this;
-        site.Widget.windows[this.guid] = this;
+        //site.Widget.windows[this.guid] = this;
         if (typeof window.triggers === 'undefined') {
             window.triggers = [];
         }
