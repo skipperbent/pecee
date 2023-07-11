@@ -189,8 +189,12 @@ class TaglibJs extends Taglib
 
         $output = '';
 
+        if ($data === 'd') {
+            $output .= "if(typeof d === 'undefined') { d = {}; }";
+        }
+
         if (strlen($dataOutput) > 0) {
-            $output .= "if($data !== null) { $dataOutput }";
+            $output .= "if($data !== null && true) { $dataOutput }";
         }
 
         $output .= "o += $.{$attrs->id}.view($data, $guid, $widget);";
@@ -368,7 +372,7 @@ class TaglibJs extends Taglib
         $this->requireAttributes($attrs, ['limit', 'start', 'i']);
 
         return sprintf('</%5$s>";for(let %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>',
-            $attrs->it,
+            $attrs->i,
             $attrs->start,
             $attrs->limit,
             $this->makeJsString($this->getBody()),
