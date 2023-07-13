@@ -193,8 +193,10 @@ $p.Widget.prototype = {
         window.trigger = function (key, context) {
             var eventKey = window.triggers.findIndex((e => e.key === key));
             if (eventKey > -1) {
-                window.triggers[eventKey].callback(context);
+                return window.triggers[eventKey].callback(context);
             }
+
+            return false;
         };
 
         var triggerCleanTimer = null;
