@@ -1,4 +1,4 @@
-require('script-loader!jquery-morphdom/jquery.morphdom');
+window.morphdom = require('morphdom').default;
 
 $p.widget.template = function (widget) {
     return this.init(widget);
@@ -20,7 +20,7 @@ $p.widget.template.prototype = {
     triggerIndex: function (name, index, data) {
         return this.trigger(name, data, index);
     },
-    trigger: function (name, data, index = null) {
+    trigger: function (name, data = null, index = null) {
 
         var bindings = this.bindings[name];
 
@@ -43,14 +43,15 @@ $p.widget.template.prototype = {
         }
 
         var output = '';
+        var binding = null;
 
         for (var _i in bindings) {
-            var binding = bindings[_i];
+            binding = bindings[_i];
 
             var eventData = binding.data;
 
             // Use custom data and store on binding
-            if (typeof data !== 'undefined') {
+            if (data !== null) {
                 eventData = data;
                 binding.data = eventData;
             }
@@ -62,18 +63,6 @@ $p.widget.template.prototype = {
 
             if (binding.persist === false && $(this.widget.container).find('[data-id=' + binding.el + ']').length === 0) {
                 this.bindings[name].splice(_i, 1);
-            }
-        }
-
-        for (var key in window.triggers) {
-            var trigger = window.triggers[key];
-
-            if (
-                (typeof binding !== 'undefined' && trigger.id === binding.id) ||
-                trigger.id === name ||
-                ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0)
-            ) {
-                delete window.triggers[key];
             }
         }
 
@@ -97,7 +86,7 @@ $p.widget.template.prototype = {
             }
         }
     },
-    triggerEvent: function (name, data) {
+    triggerEvent: async function (name, data) {
         var shortName = '';
         if (name.indexOf('.') > -1) {
             shortName = name.split('.')[0];
@@ -200,6 +189,28 @@ $p.Widget.prototype = {
         if (typeof window.triggers === 'undefined') {
             window.triggers = [];
         }
+
+        window.trigger = function (key, context) {
+            var eventKey = window.triggers.findIndex((e => e.key === key));
+            if (eventKey > -1) {
+                window.triggers[eventKey].callback(context);
+            }
+        };
+
+        var triggerCleanTimer = null;
+        var self = this;
+
+        this.bind('rendered', function (view) {
+            clearTimeout(triggerCleanTimer);
+            setTimeout(function () {
+                self.utils.arrayAsync(window.triggers, function (trigger, index, array) {
+                    if ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0) {
+                        array.splice(index, 1);
+                    }
+                });
+            }, 100);
+        });
+
         return this;
     },
     clear: function () {
@@ -238,13 +249,14 @@ $p.Widget.prototype = {
     },
     render: function () {
 
+        if ($(this.container).length === 0) {
+            return;
+        }
+
         this.trigger('preRender');
         this.template.bindings = [];
 
-        $(this.container).morphdom(
-            $(this.container).clone(true).html(this.template.view(this.data, this.guid, this))
-        );
-        //$(this.container).html(this.template.view(this.data, this.guid, this));
+        morphdom($(this.container).get(0), $(this.container).clone(true).html(this.template.view(this.data, this.guid, this)).get(0));
 
         this.template.triggerAll();
         this.template.bindingsMap = [];
@@ -353,23 +365,11 @@ $p.Widget.prototype = {
         return d;
     },
     t: function (event) {
+        event.key = 't_' + this.guid + this.triggersCount;
 
-        var key = 't_' + this.guid + this.triggersCount;
-
-        event.key = key;
-
-        for (var _i in window.triggers) {
-            var trigger = window.triggers[_i];
-
-            if (trigger.id === event.id) {
-                window.triggers[_i] = event;
-                return 'window.triggers[\'' + event.key + '\'].callback(this);';
-            }
-        }
-
-        window.triggers[key] = event;
+        window.triggers.push(event);
         this.triggersCount++;
-        return 'window.triggers[\'' + key + '\'].callback(this);';
+        return 'window.trigger(\'' + event.key + '\', this);';
     },
     utils: {
         generateGuid: function () {
@@ -391,6 +391,25 @@ $p.Widget.prototype = {
             h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
 
             return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+        },
+        arrayAsync: function (array, fn, chunk = 100, context) {
+            context = context || window;
+            var index = 0;
+
+            function doChunk() {
+                var cnt = chunk;
+                while (cnt-- && index < array.length) {
+                    // callback called with args (value, index, array)
+                    fn.call(context, array[index], index, array);
+                    ++index;
+                }
+                if (index < array.length) {
+                    // set Timeout for async iteration
+                    setTimeout(doChunk, 1);
+                }
+            }
+
+            doChunk();
         }
     }
 };

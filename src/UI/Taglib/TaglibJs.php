@@ -329,10 +329,10 @@ class TaglibJs extends Taglib
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
         $hiddenHtml1 = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\">" + ';
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
-        $morphHtml = ($morph === 'false') ? '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").each(function() { $(this).morphdom($(w.container).find("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o)); });';
+        $morphHtml = ($morph === 'false') ? '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").each(function() { morphdom($(this).get(0), $(w.container).find("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o).get(0)); });';
         $persist = (isset($attrs->persist) && strtolower($attrs->persist) === 'true') ? 'true' : 'false';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' w.template.binding({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", persist: %10$s, callback: function(%7$s, replace = true){ var o="%5$s"; if(replace) { ' . $morphHtml . ' } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' w.template.binding({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", persist: %10$s, callback: function(%7$s, replace = true){ var o="%5$s"; if(replace) { ' . $morphHtml . ' w.trigger(\'rendered\', this); } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
