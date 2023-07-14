@@ -1,18 +1,56 @@
 window.morphdom = require('morphdom').default;
 
+window.widgets = {
+    getViews: function (guid, viewId) {
+        if (typeof this[guid] === 'undefined') {
+            throw 'Widget not found';
+        }
+
+        var views = this[guid].views[viewId];
+
+        if (typeof views === 'undefined') {
+            throw 'View [' + guid + '][' + viewId + '] not found';
+        }
+
+        return views;
+    },
+    getView: function (guid, viewId, index = null) {
+
+        var views = this.getViews(guid, viewId);
+        var view = views.find((v => v.id === viewId && (v.index === index || index === null)));
+
+        if (typeof view === 'undefined') {
+            throw 'View ' + viewId + ' not found' + index;
+        }
+
+        return view;
+    },
+    removeView(guid, viewId, el) {
+        if (typeof this[guid] === 'undefined') {
+            throw 'Widget not found';
+        }
+
+        var viewIndex = this[guid].views[viewId].findIndex((v => v.el === el));
+        this[guid].views[viewId].splice(viewIndex, 1);
+    },
+    trigger: function (guid, viewId, id, data) {
+        var trigger = this.getView(guid, viewId).triggers.find((t => t.id === id));
+        if (typeof trigger !== 'undefined') {
+            return trigger.callback(data);
+        }
+
+        throw 'Trigger not found';
+    }
+};
+
 $p.widget.template = function (widget) {
     return this.init(widget);
 };
 
 $p.widget.template.prototype = {
     guid: null,
-    id: null,
     widget: null,
-    view: null,
-    snippets: null,
     events: [],
-    bindings: [],
-    bindingsMap: [],
     init: function (widget) {
         this.widget = widget;
         return this;
@@ -22,83 +60,43 @@ $p.widget.template.prototype = {
     },
     trigger: function (name, data = null, index = null) {
 
-        var bindings = this.bindings[name];
-
-        if (typeof bindings === 'undefined') {
-            name = this.guid + '_' + name;
-            bindings = this.bindings[name];
-        }
-
-        if (typeof bindings === 'undefined') {
-            throw 'Failed to find binding: ' + name;
-        }
-
-        if (index !== null) {
-            var bindingIndex = bindings.findIndex((b => b.index === index));
-            if (bindingIndex === -1) {
-                throw 'Failed to find binding: ' + name;
-            }
-
-            bindings = [this.bindings[name][bindingIndex]];
-        }
-
+        var views = window.widgets.getViews(this.guid, name, index);
         var output = '';
-        var binding = null;
 
-        for (var _i in bindings) {
-            binding = bindings[_i];
+        for (var i = 0; i < views.length; i++) {
+            var view = views[i];
 
-            var eventData = binding.data;
+            var eventData = view.data;
 
-            // Use custom data and store on binding
+            // Use custom data and store on view
             if (data !== null) {
                 eventData = data;
-                binding.data = eventData;
+                view.data = eventData;
             }
 
             // Remove view triggers
-            output += binding.callback(eventData);
+            output += view.callback(eventData);
 
             this.triggerEvent(name, eventData);
 
-            if (binding.persist === false && $(this.widget.container).find('[data-id=' + binding.el + ']').length === 0) {
-                this.bindings[name].splice(_i, 1);
+            if (view.persist === false && $(this.widget.container).find('[data-id=' + view.el + ']').length === 0) {
+                window.widgets.removeView(this.guid, view.id, view.el);
             }
         }
 
         return output;
     },
-    triggerAll: function () {
-        var self = this;
-
-        for (var name in this.bindings) {
-
-            if (this.bindings.hasOwnProperty(name) && $.inArray(name, self.bindingsMap) === -1) {
-
-                for (var binding in this.bindings[name]) {
-                    if (this.bindings[name][binding].hidden === false) {
-                        this.trigger(name);
-                    }
-                }
-
-                self.bindingsMap.push(name);
-                this.triggerAll();
-            }
-        }
-    },
-    triggerEvent: async function (name, data) {
+    triggerEvent: function (name, data) {
         var shortName = '';
         if (name.indexOf('.') > -1) {
             shortName = name.split('.')[0];
         }
 
-        for (var eventName in this.events) {
-            if (eventName === name || eventName === shortName) {
-                if (typeof this.events[eventName] !== 'undefined' && this.events[eventName].length > 0) {
-                    for (var i = 0; i < this.events[eventName].length; i++) {
-                        this.events[eventName][i](data);
-                    }
-                }
+        var events = this.events[name] ?? this.events[shortName];
+
+        if (typeof events !== 'undefined' && events.length > 0) {
+            for (var i = 0; i < events.length; i++) {
+                events[i](data);
             }
         }
     },
@@ -116,40 +114,62 @@ $p.widget.template.prototype = {
     },
     clear: function () {
 
-        //this.view = null;
         this.events = [];
-        this.bindingsMap = [];
         this.widget = null;
-        this.snippets = null;
-        this.bindings = [];
+
         return this;
     },
-    binding: function (object) {
-
-        if (typeof this.bindings[object.id] === 'undefined') {
-            this.bindings[object.id] = [object];
-        } else {
-
-            var existingIndex = this.bindings[object.id].findIndex((b => b.index === object.index && (b.id === object.id && b.hash === object.hash)));
-
-            if (existingIndex === -1) {
-                this.bindings[object.id].push(object);
-            } else {
-                this.bindings[object.id][existingIndex] = object;
+    setDefaultView: function () {
+        // Remove widgets with no association
+        for (var guid in window.widgets) {
+            if (window.widgets[guid].container === this.widget.container && guid !== this.guid) {
+                delete window.widgets[guid];
             }
         }
 
-        return object.callback(object.data, false);
-    }
+        window.widgets[this.guid] = {
+            container: this.widget.container,
+            widget: this.widget,
+            views: {}
+        };
+
+        if (typeof window.widgets[this.guid].views[this.guid] === 'undefined') {
+            window.widgets[this.guid].views[this.guid] = [{
+                id: this.guid,
+                index: null,
+                triggers: [],
+            }];
+        }
+    },
+    addView: function (object) {
+
+        object.triggers = [];
+
+        if (typeof window.widgets[this.guid].views[object.id] === 'undefined') {
+            window.widgets[this.guid].views[object.id] = [object];
+        } else {
+            var existingIndex = window.widgets[this.guid].views[object.id].findIndex((b => b.index === object.index && (b.id === object.id && b.hash === object.hash)));
+
+            if (existingIndex === -1) {
+                window.widgets[this.guid].views[object.id].push(object);
+            } else {
+                window.widgets[this.guid].views[object.id][existingIndex] = object;
+            }
+        }
+
+        return object.callback(object.data, object.id, false);
+    },
+    addEvent: function (event) {
+        window.widgets.getView(this.guid, event.viewId).triggers.push(event);
+        return "window.widgets.trigger('" + this.guid + "', '" + event.viewId + "', '" + event.id + "', this);";
+    },
 };
 
 $p.Widget = function (template, container) {
 
-    //this.guid = this.utils.generateGuid();
     this.clear();
     template.clear();
     this.template = $.extend({}, template);
-    //this.template.guid = this.guid;
 
     this.container = container;
     this.template.guid = this.guid;
@@ -159,59 +179,28 @@ $p.Widget = function (template, container) {
     return this;
 };
 
-$p.Widget.windows = [];
+$p.Widget.clean = function () {
+    for (var guid in window.widgets) {
+        var widget = window.widgets[guid];
 
-$p.Widget.extend = function (object) {
-    for (var key in object) {
-        this[key] = object[key];
+        if (typeof widget.widget !== 'undefined' && widget.widget.persist === false && $(widget.widget.container).length === 0) {
+            delete window.widgets[guid];
+        }
     }
-    return this;
-};
-
-$p.getWidget = function (g) {
-    return site.Widget.windows[g];
 };
 
 $p.Widget.prototype = {
-    windows: [],
-    triggersCount: 0,
-    newDate: new Date(),
     guid: null,
     template: null,
     container: null,
+    persist: false,
     data: {},
     events: [],
-    w: null,
     init: function (template, container) {
-        this.w = this;
         this.template.widget = this;
-        //site.Widget.windows[this.guid] = this;
-        if (typeof window.triggers === 'undefined') {
-            window.triggers = [];
-        }
-
-        window.trigger = function (key, context) {
-            var eventKey = window.triggers.findIndex((e => e.key === key));
-            if (eventKey > -1) {
-                return window.triggers[eventKey].callback(context);
-            }
-
-            return false;
-        };
-
-        var triggerCleanTimer = null;
-        var self = this;
-
-        this.bind('rendered', function (view) {
-            clearTimeout(triggerCleanTimer);
-            setTimeout(function () {
-                self.utils.arrayAsync(window.triggers, function (trigger, index, array) {
-                    if ($('[data-' + trigger.event + '="' + trigger.id + '"]').length === 0) {
-                        array.splice(index, 1);
-                    }
-                });
-            }, 100);
-        });
+        this.template.guid = this.guid;
+        this.template.id = this.guid;
+        this.template.setDefaultView();
 
         return this;
     },
@@ -222,16 +211,12 @@ $p.Widget.prototype = {
         this.container = null;
         this.data = {};
         this.events = [];
-        this.triggersCount = 0;
     },
     extend: function (object) {
         for (var key in object) {
             this[key] = object[key];
         }
         return this;
-    },
-    getWidget: function (g) {
-        return site.Widget.windows[g];
     },
     setData: function (data) {
         this.data = data;
@@ -255,13 +240,11 @@ $p.Widget.prototype = {
             return;
         }
 
+        this.template.setDefaultView();
+
         this.trigger('preRender');
-        this.template.bindings = [];
 
-        morphdom($(this.container).get(0), $(this.container).clone(true).html(this.template.view(this.data, this.guid, this)).get(0));
-
-        this.template.triggerAll();
-        this.template.bindingsMap = [];
+        morphdom($(this.container).get(0), $(this.container).clone(true).html(this.template.view(this.data, this.guid, this, this.guid)).get(0));
 
         this.trigger('render');
     },
@@ -365,13 +348,6 @@ $p.Widget.prototype = {
             }
         }
         return d;
-    },
-    t: function (event) {
-        event.key = 't_' + this.guid + this.triggersCount;
-
-        window.triggers.push(event);
-        this.triggersCount++;
-        return 'window.trigger(\'' + event.key + '\', this);';
     },
     utils: {
         generateGuid: function () {
