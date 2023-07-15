@@ -78,10 +78,6 @@ $p.widget.template.prototype = {
             output += view.callback(eventData);
 
             this.triggerEvent(name, eventData);
-
-            if (view.persist === false && $(this.widget.container).find('[data-id=' + view.el + ']').length === 0) {
-                window.widgets.removeView(this.guid, view.id, view.el);
-            }
         }
 
         return output;
