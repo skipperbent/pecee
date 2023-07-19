@@ -98,7 +98,6 @@ $p.widget.template.prototype = {
     },
     on: function (name, callback) {
 
-        name = this.guid + '_' + name;
         if (typeof this.events[name] === 'undefined') {
             this.events[name] = [];
         }
