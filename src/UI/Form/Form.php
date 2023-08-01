@@ -87,7 +87,7 @@ class Form
         $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : (int)$defaultValue);
         if ($saveValue !== false) {
             // On Postback
-            if(request()->getMethod() !== 'get') {
+            if (request()->getMethod() !== 'get') {
                 $checked = Boolean::parse(input($name));
             } else {
                 if ($defaultValue === null) {
@@ -115,7 +115,7 @@ class Form
      * @param string|null $for
      * @return \Pecee\UI\Html\Html
      */
-    public function label($inner, $for = null)
+    public function label(?string $inner = null, ?string $for = null)
     {
         $label = new Html('label');
 
@@ -136,14 +136,14 @@ class Form
      * @param array|Dataset|null $data
      * @param string|null $value
      * @param bool $saveValue
-     * @throws \InvalidArgumentException
      * @return \Pecee\UI\Html\HtmlSelect
+     * @throws \InvalidArgumentException
      */
     public function selectStart(string $name, $data = null, ?string $value = null, bool $saveValue = true): HtmlSelect
     {
         $element = new HtmlSelect($name);
         if ($data !== null) {
-            
+
             if ($data instanceof Dataset) {
                 $data = $data->toArray();
             }

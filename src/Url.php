@@ -47,7 +47,7 @@ class Url
 							/ix', $hostname) === 1);
     }
 
-    public static function urlEncodeString($string, $separator = '-', $maxLength = null): string
+    public static function urlEncodeString(string $string, string $separator = '-', ?int $maxLength = null): string
     {
         if ($maxLength !== null && \strlen($string) > $maxLength) {
             $string = mb_substr($string, 0, $maxLength);
@@ -60,9 +60,11 @@ class Url
         ];
 
         $string = mb_convert_encoding($string, 'utf-8');
+
+        $string = preg_replace('/[^\p{L}\s\w\+' . join('', $searchMap) . ']|(' . $separator . ')\1/ui', '', $string);
         $string = str_ireplace(array_keys($searchMap), $searchMap, mb_strtolower($string));
-        $string = preg_replace('/[^\p{L}\w\+' . join('', $searchMap) . ']|(' . $separator . ')\1/ui', '', $string);
-        return preg_replace('/\\'.$separator.'\\'.$separator.'+/', $separator, $string);
+
+        return preg_replace('/\\' . $separator . '\\' . $separator . '+/', $separator, $string);
     }
 
     public static function isSecure(string $url): bool

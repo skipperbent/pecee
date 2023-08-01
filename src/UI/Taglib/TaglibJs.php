@@ -39,7 +39,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; var _id = this.id + w.utils.generateGuid(); o+= w.t({ id: _id, event: "%1$s", callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; var _id = w.utils.generateGuid(); o+= t.addEvent({ id: _id, event: "%1$s", viewId: viewId, callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
@@ -132,7 +132,7 @@ class TaglibJs extends Taglib
 
         $as = $attrs->as ?? 'd';
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w){ this.id=g; let %5$s=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w,viewId = null){ let t = w.template; let %5$s=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -172,7 +172,32 @@ class TaglibJs extends Taglib
         $guid = $attrs->guid ?? 'g';
         $widget = $attrs->widget ?? 'w';
 
-        $output = "o += $.{$attrs->id}.view($data, $guid, $widget);";
+        $dataOutput = '';
+
+        foreach ($attrs as $key => $value) {
+            if (stripos($key, 'data-') === 0) {
+
+                $dataOutput .= sprintf(
+                    '%1$s.%2$s = %3$s;',
+                    $data,
+                    trim(str_ireplace('data-', '', $key)),
+                    $value,
+                );
+
+            }
+        }
+
+        $output = '';
+
+        if ($data === 'd') {
+            $output .= "if(typeof d === 'undefined') { d = {}; }";
+        }
+
+        if (strlen($dataOutput) > 0) {
+            $output .= "if($data !== null && true) { $dataOutput }";
+        }
+
+        $output .= "o += $.{$attrs->id}.view($data, $guid, $widget, viewId);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
     }
 
@@ -225,17 +250,6 @@ class TaglibJs extends Taglib
         return sprintf('</%3$s>";while(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>', $attrs->test, $this->makeJsString($this->getBody()), static::$JS_WRAPPER_TAG);
     }
 
-
-    /**
-     * @param \stdClass $attrs
-     * @return string
-     * @deprecated Use tagView instead
-     */
-    protected function tagBind(\stdClass $attrs): string
-    {
-        return $this->tagView($attrs);
-    }
-
     /**
      * Triggers js callback without returning html.
      * @param \stdClass $attrs
@@ -285,12 +299,11 @@ class TaglibJs extends Taglib
         $elEndTag = $elStartTag;
         $as = $attrs->as ?? 'd';
 
-        $id = 'w.guid + "_%1$s"';
+        $id = '"%1$s"';
         $index = '_' . uniqid();
 
         if (isset($attrs->index)) {
             $index = '_" + ' . $attrs->index . ' + "';
-            $id = 'w.guid + "_%1$s' . $index . '"';
         }
 
         if (isset($attrs->style)) {
@@ -303,10 +316,11 @@ class TaglibJs extends Taglib
 
         $hidden = (isset($attrs->hidden) && strtolower($attrs->hidden) === 'true') ? 'true' : 'false';
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
-        $hiddenHtml = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\"></%3$s>";';
-        $morphHtml = ($morph === 'false') ? '$("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$("[data-id=%9$s_%1$s' . $index . ']").morphdom($("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o));';
+        $hiddenHtml1 = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\">" + ';
+        $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
+        $morphHtml = ($morph === 'false') ? '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").each(function() { morphdom($(this).get(0), $(w.container).find("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o).get(0)); });';
 
-        return sprintf('</%6$s>"; w.template.binding({id: ' . $id . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s){ var o="%5$s"; ' . $morphHtml . ' return o; }, data: %4$s, hidden: %8$s}); ' . $hiddenHtml . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', replace = true){ var o="%5$s"; if(replace) { ' . $morphHtml . ' } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
@@ -315,7 +329,7 @@ class TaglibJs extends Taglib
             static::$JS_WRAPPER_TAG,
             $as,
             $hidden,
-            md5($output)
+            md5($output),
         );
     }
 
@@ -345,7 +359,7 @@ class TaglibJs extends Taglib
         $this->requireAttributes($attrs, ['limit', 'start', 'i']);
 
         return sprintf('</%5$s>";for(let %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>',
-            $attrs->it,
+            $attrs->i,
             $attrs->start,
             $attrs->limit,
             $this->makeJsString($this->getBody()),

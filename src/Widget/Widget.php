@@ -250,7 +250,7 @@ abstract class Widget extends Base
     {
         debug('widget', 'START: rendering content-template: %s', $this->_contentTemplate);
 
-        if ($this->_contentHtml === null && $this->_contentTemplate !== null) {
+        if ($this->_contentHtml === null && $this->_contentTemplate !== null && $this->_contentTemplate !== '') {
             ob_start();
             include $this->_contentTemplate;
             $this->_contentHtml = ob_get_clean();

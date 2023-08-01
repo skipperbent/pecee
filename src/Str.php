@@ -71,7 +71,7 @@ class Str
         )  # If we made it here, we are not in a blacklist tag.
         %ix';
 
-        return preg_replace($regex, ' ', $html);
+        return preg_replace($regex, '', $html);
     }
 
     public static function getFirstOrDefault(string $value, $default = null)
@@ -89,7 +89,7 @@ class Str
         return ($str === mb_convert_encoding(mb_convert_encoding($str, 'UTF-32', 'UTF-8'), 'UTF-8', 'UTF-32'));
     }
 
-    public static function substr(string $text, string $maxLength, string $end = '...', string $encoding = 'UTF-8'): string
+    public static function substr(string $text, int $maxLength = 150, string $end = '...', string $encoding = 'UTF-8'): string
     {
         if (\strlen($text) > $maxLength) {
             return mb_substr($text, 0, $maxLength, $encoding) . $end;
