@@ -6,6 +6,10 @@ window.widgets = {
             throw 'Widget not found';
         }
 
+        if(viewId === null) {
+            viewId = guid;
+        }
+
         var views = this[guid].views[viewId];
 
         if (typeof views === 'undefined') {
@@ -17,10 +21,11 @@ window.widgets = {
     getView: function (guid, viewId, index = null) {
 
         var views = this.getViews(guid, viewId);
-        var view = views.find((v => v.id === viewId && (v.index === index || index === null)));
+
+        var view = views.find((v => (v.id === viewId || v.id === guid) && (v.index === index || index === null)));
 
         if (typeof view === 'undefined') {
-            throw 'View ' + viewId + ' not found' + index;
+            throw 'View ' + viewId + ' not found ' + index;
         }
 
         return view;
@@ -156,7 +161,14 @@ $p.widget.template.prototype = {
     },
     addEvent: function (event) {
         window.widgets.getView(this.guid, event.viewId).triggers.push(event);
-        return "window.widgets.trigger('" + this.guid + "', '" + event.viewId + "', '" + event.id + "', this);";
+
+        var viewIdArg = "'" + event.viewId + "'";
+
+        if (event.viewId === null) {
+            viewIdArg = "null";
+        }
+
+        return "window.widgets.trigger('" + this.guid + "', " + viewIdArg + ", '" + event.id + "', this);";
     },
 };
 
