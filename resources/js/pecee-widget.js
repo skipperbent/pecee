@@ -1,16 +1,20 @@
 window.morphdom = require('morphdom').default;
 
 window.widgets = {
-    getViews: function (guid, viewId) {
+    getViews: function (guid, viewId, index = null) {
         if (typeof this[guid] === 'undefined') {
             throw 'Widget not found';
         }
 
-        if(viewId === null) {
+        if (viewId === null) {
             viewId = guid;
         }
 
         var views = this[guid].views[viewId];
+
+        if (index !== null) {
+            views = views.filter((v => v.index === index));
+        }
 
         if (typeof views === 'undefined') {
             throw 'View [' + guid + '][' + viewId + '] not found';
@@ -18,7 +22,7 @@ window.widgets = {
 
         return views;
     },
-    getView: function (guid, viewId, index = null) {
+    getView: function (guid, viewId = null, index = null) {
 
         var views = this.getViews(guid, viewId);
 
