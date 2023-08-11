@@ -39,7 +39,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; var _id = w.utils.generateGuid(); o+= t.addEvent({ id: _id, event: "%1$s", viewId: viewId, callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; var _id = w.utils.generateGuid(); o+= t.addEvent({ id: _id, event: "%1$s", viewId: viewId, index: (typeof this.index === \'undefined\') ? null : this.index, callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
@@ -320,7 +320,7 @@ class TaglibJs extends Taglib
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
         $morphHtml = ($morph === 'false') ? '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").html(o);' : '$(w.container).find("[data-id=%9$s_%1$s' . $index . ']").each(function() { morphdom($(this).get(0), $(w.container).find("[data-id=%9$s_%1$s' . $index . ']").clone(true).html(o).get(0)); });';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', replace = true){ var o="%5$s"; if(replace) { ' . $morphHtml . ' } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', replace = true){ var o="%5$s"; if(replace) { ' . $morphHtml . ' } else { window.widgets.getViews(w.guid, this.id, this.index).triggers = []; } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
