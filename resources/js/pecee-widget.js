@@ -1,12 +1,20 @@
 window.morphdom = require('morphdom').default;
 
 window.widgets = {
-    getViews: function (guid, viewId) {
+    getViews: function (guid, viewId, index = null) {
         if (typeof this[guid] === 'undefined') {
             throw 'Widget not found';
         }
 
+        if (viewId === null) {
+            viewId = guid;
+        }
+
         var views = this[guid].views[viewId];
+
+        if (index !== null) {
+            views = views.filter((v => v.index === index));
+        }
 
         if (typeof views === 'undefined') {
             throw 'View [' + guid + '][' + viewId + '] not found';
@@ -14,13 +22,14 @@ window.widgets = {
 
         return views;
     },
-    getView: function (guid, viewId, index = null) {
+    getView: function (guid, viewId = null, index = null) {
 
         var views = this.getViews(guid, viewId);
-        var view = views.find((v => v.id === viewId && (v.index === index || index === null)));
+
+        var view = views.find((v => (v.id === viewId || v.id === guid) && (v.index === index || index === null)));
 
         if (typeof view === 'undefined') {
-            throw 'View ' + viewId + ' not found' + index;
+            throw 'View ' + viewId + ' not found ' + index;
         }
 
         return view;
@@ -61,10 +70,13 @@ $p.widget.template.prototype = {
     trigger: function (name, data = null, index = null) {
 
         var views = window.widgets.getViews(this.guid, name, index);
+
         var output = '';
 
         for (var i = 0; i < views.length; i++) {
             var view = views[i];
+
+            view.triggers = [];
 
             var eventData = view.data;
 
@@ -88,7 +100,7 @@ $p.widget.template.prototype = {
             shortName = name.split('.')[0];
         }
 
-        var events = this.events[name] ?? this.events[shortName];
+        var events = typeof this.events[name] !== 'undefined' ? this.events[name] : this.events[shortName];
 
         if (typeof events !== 'undefined' && events.length > 0) {
             for (var i = 0; i < events.length; i++) {
@@ -97,7 +109,6 @@ $p.widget.template.prototype = {
         }
     },
     on: function (name, callback) {
-
         if (typeof this.events[name] === 'undefined') {
             this.events[name] = [];
         }
@@ -155,8 +166,15 @@ $p.widget.template.prototype = {
         return object.callback(object.data, object.id, false);
     },
     addEvent: function (event) {
-        window.widgets.getView(this.guid, event.viewId).triggers.push(event);
-        return "window.widgets.trigger('" + this.guid + "', '" + event.viewId + "', '" + event.id + "', this);";
+        window.widgets.getView(this.guid, event.viewId, event.index).triggers.push(event);
+
+        var viewIdArg = "'" + event.viewId + "'";
+
+        if (event.viewId === null) {
+            viewIdArg = "null";
+        }
+
+        return "window.widgets.trigger('" + this.guid + "', " + viewIdArg + ", '" + event.id + "', this);";
     },
 };
 
