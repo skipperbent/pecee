@@ -13,7 +13,7 @@ window.widgets = {
         var views = this[guid].views[viewId];
 
         if (index !== null) {
-            views = views.filter((v => v.index === index));
+            views = views.filter((v => v.index !== null && index !== null && v.index.toString() === index.toString()));
         }
 
         if (typeof views === 'undefined') {
@@ -26,7 +26,7 @@ window.widgets = {
 
         var views = this.getViews(guid, viewId);
 
-        var view = views.find((v => (v.id === viewId || v.id === guid) && (v.index === index || index === null)));
+        var view = views.find((v => (v.id === viewId || v.id === guid) && (v.index !== null && index !== null && v.index.toString() === index.toString() || index === null)));
 
         if (typeof view === 'undefined') {
             throw 'View ' + viewId + ' not found ' + index;
@@ -42,8 +42,9 @@ window.widgets = {
         var viewIndex = this[guid].views[viewId].findIndex((v => v.el === el));
         this[guid].views[viewId].splice(viewIndex, 1);
     },
-    trigger: function (guid, viewId, id, data) {
-        var trigger = this.getView(guid, viewId).triggers.find((t => t.id === id));
+    trigger: function (guid, viewId, index, id, data) {
+
+        var trigger = this.getView(guid, viewId, index).triggers.find((t => t.id === id));
         if (typeof trigger !== 'undefined') {
             return trigger.callback(data);
         }
@@ -169,12 +170,16 @@ $p.widget.template.prototype = {
         window.widgets.getView(this.guid, event.viewId, event.index).triggers.push(event);
 
         var viewIdArg = "'" + event.viewId + "'";
-
+        var indexArg = "'" + event.index + "'";
         if (event.viewId === null) {
             viewIdArg = "null";
         }
 
-        return "window.widgets.trigger('" + this.guid + "', " + viewIdArg + ", '" + event.id + "', this);";
+        if (event.index === null) {
+            indexArg = null;
+        }
+
+        return "window.widgets.trigger('" + this.guid + "', " + viewIdArg + ", " + indexArg + ", '" + event.id + "', this);";
     },
 };
 
