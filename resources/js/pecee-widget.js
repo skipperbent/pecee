@@ -44,7 +44,12 @@ window.widgets = {
     },
     trigger: function (guid, viewId, index, id, data) {
 
-        var trigger = this.getView(guid, viewId, index).triggers.find((t => t.id === id));
+        if(index === null) {
+            var trigger = this.getViews(guid, viewId).find((v => v.triggers.find((t => t.id === id)))).triggers.find((t => t.id === id));
+        } else {
+            var trigger = this.getView(guid, viewId, index).triggers.find((t => t.id === id));
+        }
+
         if (typeof trigger !== 'undefined') {
             return trigger.callback(data);
         }
@@ -164,10 +169,15 @@ $p.widget.template.prototype = {
             }
         }
 
-        return object.callback(object.data, object.id, false);
+        return object.callback(object.data, object.id, object, false);
     },
     addEvent: function (event) {
-        window.widgets.getView(this.guid, event.viewId, event.index).triggers.push(event);
+
+        if(event.view !== null) {
+            event.view.triggers.push(event);
+        } else {
+            window.widgets.getView(this.guid, event.viewId, event.index).triggers.push(event);
+        }
 
         var viewIdArg = "'" + event.viewId + "'";
         var indexArg = "'" + event.index + "'";
