@@ -181,8 +181,8 @@ class Table
 
     /**
      * @param $engine
-     * @throws \InvalidArgumentException
      * @return static
+     * @throws \InvalidArgumentException
      */
     public function setEngine(string $engine): self
     {
@@ -256,6 +256,16 @@ class Table
                 }
             }
 
+            // Check for sql-expression
+            $defaultValueQuery = '';
+            if ($column->getDefaultValue() !== null) {
+                if ($column->getDefaultValue()[0] === '`') {
+                    $defaultValueQuery = ' DEFAULT ' . trim($column->getDefaultValue(), '`');
+                } else {
+                    $defaultValueQuery = PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]);
+                }
+            }
+
             $query .= sprintf('%s `%s` %s%s %s%s%s%s%s%s, ',
                 $alterColumn,
                 $column->getName(),
@@ -263,7 +273,7 @@ class Table
                 ($column->getLength() ? " ({$column->getLength()})" : ''),
                 $column->getAttributes(),
                 ($column->getNullable() === false ? ' NOT null' : ' null'),
-                ($column->getDefaultValue() !== null) ? PdoHelper::formatQuery(' DEFAULT %s', [$column->getDefaultValue()]) : '',
+                $defaultValueQuery,
                 ($column->getComment() !== null) ? PdoHelper::formatQuery(' COMMENT %s', [$column->getComment()]) : '',
                 ($column->getAfter() !== null) ? " AFTER `{$column->getAfter()}`" : '',
                 ($column->getIncrement() === true ? ' AUTO_INCREMENT' : '')
@@ -359,7 +369,7 @@ class Table
         /* @var $column Column */
         foreach ($this->columns as $column) {
             $query = $this->generateColumnQuery(static::TYPE_ALTER, $column);
-            if (trim($query) !== '') {
+            if (trim((string)$query) !== '') {
                 $queries[] = $query;
             }
         }
@@ -388,15 +398,15 @@ class Table
     /**
      * Remove indexes
      *
-     * @param array ...$indexes
+     * @param array $indexes
      * @return static
      */
-    public function dropIndex(...$indexes): self
+    public function dropIndex($indexes): self
     {
         $indexes = (array)$indexes;
         foreach ($indexes as $index) {
             try {
-                if(is_array($index)) {
+                if (is_array($index)) {
                     continue;
                 }
                 Pdo::getInstance()->nonQuery(sprintf('ALTER TABLE `%s` DROP INDEX `%s`;', $this->name, $index));
@@ -422,7 +432,7 @@ class Table
         $columns = $columns ?? [$name];
 
         if ($name !== null) {
-            $this->dropIndex([$name,]);
+            $this->dropIndex([$name]);
             $name = '`' . $name . '`';
         } else {
             $name = '';
@@ -495,7 +505,7 @@ class Table
      */
     public function dropForeign(array $indexes): self
     {
-        if($this->exists() === false) {
+        if ($this->exists() === false) {
             return $this;
         }
 

@@ -44,17 +44,18 @@ window.widgets = {
     },
     trigger: function (guid, viewId, index, id, data) {
 
-        if(index === null) {
-            var trigger = this.getViews(guid, viewId).find((v => v.triggers.find((t => t.id === id)))).triggers.find((t => t.id === id));
+        var trigger;
+        if (index === null) {
+            trigger = this.getViews(guid, viewId).find((v => v.triggers.find((t => t.id === id)))).triggers.find((t => t.id === id));
         } else {
-            var trigger = this.getView(guid, viewId, index).triggers.find((t => t.id === id));
+            trigger = this.getView(guid, viewId, index).triggers.find((t => t.id === id));
         }
 
         if (typeof trigger !== 'undefined') {
             return trigger.callback(data);
         }
 
-        throw 'Trigger not found';
+        throw 'Trigger [' + id + '] not found in [g:' + guid + '][v:' + viewId + '][index: ' + index + ']';
     }
 };
 
@@ -173,7 +174,7 @@ $p.widget.template.prototype = {
     },
     addEvent: function (event) {
 
-        if(event.view !== null) {
+        if (event.index === null && event.view !== null) {
             event.view.triggers.push(event);
         } else {
             window.widgets.getView(this.guid, event.viewId, event.index).triggers.push(event);
