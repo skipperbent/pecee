@@ -430,4 +430,13 @@ class TaglibJs extends Taglib
         return $this->tagInclude($attrs);
     }
 
+    /**
+     * Include raw javascript
+     * @return void
+     */
+    public function tagScript(): void
+    {
+        $this->containers[] = $this->getBody();
+    }
+
 }
