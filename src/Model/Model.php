@@ -294,7 +294,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             return $this;
         }
 
-        if ($this->isNew() === false || $this->exists() === true) {
+        if ($this->isNew() === false) {
 
             if (isset($updateData[$this->getPrimaryKey()]) === true) {
                 // Remove primary key
@@ -356,7 +356,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function exists()
     {
         if ($this->isNew() === true) {
-            return false;
+            return ($this->count() > 0);
         }
 
         $id = static::instance()->select([$this->primaryKey])->where($this->primaryKey, '=', $this->{$this->primaryKey})->first();

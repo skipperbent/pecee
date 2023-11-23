@@ -11,8 +11,15 @@ use Pecee\UI\Site;
 
 abstract class Base
 {
-    protected string $errorType = 'danger';
-    protected string $defaultMessagePlacement = 'default';
+    public const DEFAULT_MESSAGE_PLACEMENT = 'default';
+
+    public const ERROR_TYPE_DANGER = 'danger';
+    public const ERROR_TYPE_INFO = 'info';
+    public const ERROR_TYPE_WARNING = 'warning';
+    public const ERROR_TYPE_SUCCESS = 'success';
+
+    protected string $errorType = self::ERROR_TYPE_DANGER;
+    protected string $defaultMessagePlacement = self::DEFAULT_MESSAGE_PLACEMENT;
     protected string $_inputSessionKey = 'InputValues';
     protected string $_sessionMessagePrefix = '';
     protected ?SessionMessage $_sessionMessage = null;
