@@ -5,6 +5,7 @@ namespace Pecee\Widget;
 use Pecee\Base;
 use Pecee\UI\Form\Form;
 use Pecee\UI\Html\Html;
+use Pecee\UI\Html\HtmlEmpty;
 use Pecee\UI\Site;
 
 abstract class Widget extends Base
@@ -71,7 +72,7 @@ abstract class Widget extends Base
         return $o;
     }
 
-    public function renderValidationFor(string $name): string
+    public function renderValidationFor(string $name): Html
     {
         $validation = parent::getValidationFor($name);
 
@@ -83,7 +84,7 @@ abstract class Widget extends Base
             return $span;
         }
 
-        return '';
+        return new HtmlEmpty();
     }
 
     /**
