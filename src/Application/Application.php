@@ -6,7 +6,6 @@ use Pecee\Application\UrlHandler\IUrlHandler;
 use Pecee\Application\UrlHandler\UrlHandler;
 use Pecee\Boolean;
 use Pecee\Pixie\Connection;
-use Pecee\Session\Session;
 use Pecee\Translation\Translation;
 use Pecee\UI\Site;
 
@@ -72,8 +71,6 @@ class Application
         $this->setAdminIps([
             '127.0.0.1',
         ]);
-
-        Session::start();
     }
 
     /**

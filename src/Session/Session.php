@@ -6,12 +6,12 @@ use Pecee\Guid;
 
 class Session
 {
-    private static $active = false;
+    private static bool $active = false;
 
-    public static function start(): void
+    public static function start(string $name = 'pecee_session'): void
     {
         if (static::$active === false) {
-            session_name('pecee_session');
+            session_name($name);
             session_start();
             static::$active = true;
         }
