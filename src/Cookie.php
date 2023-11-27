@@ -17,12 +17,14 @@ class Cookie
      * @param string $path
      * @return bool
      */
-    public static function create($id, $value, $expireTime = null, $domain = '', bool $secure = false, $path = '/'): bool
+    public static function create(string $id, string $value, ?Carbon $expireTime = null, ?string $domain = null, bool $secure = false, string $path = '/'): bool
     {
-        $expireTime = $expireTime ?? Carbon::now()->addYears(10)->timestamp;
+        $expireTime = $expireTime ?? Carbon::now()->addYears(10);
         $expireTime = ($expireTime > 0) ? $expireTime : null;
 
-        return setcookie($id, $value, $expireTime, $path, $domain, $secure);
+        $params = session_get_cookie_params();
+
+        return setcookie($id, $value, $expireTime->time, $path ?? $params['path'], $domain ?? $params['domain'], $secure);
     }
 
     public static function get(string $id, $defaultValue = null): ?string
