@@ -7,6 +7,7 @@ use Pecee\Guid;
 class Session
 {
     private static bool $active = false;
+    public static array $initialData = [];
 
     public static function start(string $name = 'pecee_session'): void
     {
@@ -14,6 +15,7 @@ class Session
             session_name($name);
             session_start();
             static::$active = true;
+            static::$initialData = $_SESSION;
         }
     }
 
