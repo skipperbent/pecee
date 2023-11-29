@@ -251,7 +251,7 @@ class Table
                 $alterColumn = 'ADD COLUMN';
 
                 if ($this->columnExists($column->getName())) {
-                    $alterColumn = 'CHANGE COLUMN';
+                    $alterColumn = 'MODIFY COLUMN';
                     $modify = true;
                 }
             }
