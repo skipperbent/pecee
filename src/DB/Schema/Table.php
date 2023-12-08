@@ -512,7 +512,7 @@ class Table
         foreach ($indexes as $key => $index) {
 
             // Skip if the foreign-key is already removed.
-            if ($this->foreignExist($index) === true) {
+            if ($this->foreignExist($index) === false) {
                 unset($indexes[$key]);
                 continue;
             }
