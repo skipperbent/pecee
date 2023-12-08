@@ -380,7 +380,7 @@ class ModelQueryBuilder
      */
     public function find($id)
     {
-        $item = $this->query->where($this->model->getPrimaryKey(), '=', $id)->first();
+        $item = $this->query->where($this->getModel()->getTable() . '.' . $this->model->getPrimaryKey(), '=', $id)->first();
         if ($item !== null) {
             return $this->createInstance($item);
         }
