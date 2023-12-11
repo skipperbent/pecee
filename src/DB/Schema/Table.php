@@ -536,6 +536,9 @@ class Table
     /**
      * Add foreign key
      *
+     * Example:
+     * $table->addForeign('key_name_fk', ['user_id'], ['user' => ['id']]);
+     *
      * @param string $keyName
      * @param array $referenceColumns
      * @param array $foreignTable ['table' => ['column1', 'column2']
@@ -554,22 +557,22 @@ class Table
             throw new \InvalidArgumentException('Misformed referenceTable parameter.');
         }
 
-        $foreignTableName = key($first);
+        $foreignTableName = key($foreignTable);
 
         if (\is_string($foreignTableName) === false) {
             throw new \InvalidArgumentException('Misformed referenceTable parameter. Failed to parse table.');
         }
 
-        $foreignColumns = array_values((array)$first[$foreignTableName]);
+        $foreignColumns = $first;
 
         $query = sprintf
         (
-            'ALTER TABLE %1$s ADD CONSTRAINT `%2$s` FOREIGN KEY (`%3$s`) REFERENCES `%4$s`(`%5$s`) ON UPDATE %6$s ON DELETE %7$s',
+            'ALTER TABLE %1$s ADD CONSTRAINT `%2$s` FOREIGN KEY (%3$s) REFERENCES `%4$s`(%5$s) ON UPDATE %6$s ON DELETE %7$s',
             $this->name,
             $keyName,
-            PdoHelper::joinArray($referenceColumns),
+            PdoHelper::joinArray($referenceColumns, true),
             $foreignTableName,
-            PdoHelper::joinArray($foreignColumns),
+            PdoHelper::joinArray($foreignColumns, true),
             $onUpdate,
             $onDelete
         );
