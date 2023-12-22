@@ -114,7 +114,8 @@ class TaglibJs extends Taglib
         if (count($expressions) > 0) {
             /* Let's ensure that our js-expression don't get addslashed */
             foreach ($expressions as $expr) {
-                $fixedExpressions[] = '"+' . $this->handleInline($expr['js']) . '+"';
+                $replaceInlineJs = str_replace("\'", "'", $expr['js']);
+                $fixedExpressions[] = '"+' . $this->handleInline($replaceInlineJs) . '+"';
             }
 
             /* Now we replace the expression tags, with the fixed js expression */
