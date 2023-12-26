@@ -7,13 +7,7 @@ use Pheanstalk\Job;
 abstract class Queue
 {
 
-    protected string $queue;
-
-    public function __construct()
-    {
-        $queue = explode('\\', static::class);
-        $this->queue = end($queue);
-    }
+    protected string $queue = self::class;
 
     abstract public function process(Job $job, array $data): void;
 
