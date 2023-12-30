@@ -42,11 +42,11 @@ class ModelCollection extends Collection
      * @param int $number
      * @return static
      */
-    public function skip($number)
+    public function skip(int $number): self
     {
         if ($number > 0 && $this->hasRows() === true) {
             $rows = $this->getRows();
-            $this->setRows(array_splice($rows, $number));
+            return new static(array_splice($rows, $number));
         }
 
         return $this;
@@ -181,8 +181,8 @@ class ModelCollection extends Collection
     public function toArray($filterKeys = null)
     {
         $output = [];
-        foreach($this->getRows() as $row) {
-            if($filterKeys === null) {
+        foreach ($this->getRows() as $row) {
+            if ($filterKeys === null) {
                 $output[] = $row->toArray();
                 continue;
             }
@@ -219,7 +219,7 @@ class ModelCollection extends Collection
      * which is a value of any type other than a resource.
      * @since 5.4.0
      */
-    public function jsonSerialize() : mixed
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }
