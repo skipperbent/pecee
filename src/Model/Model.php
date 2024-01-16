@@ -77,11 +77,18 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
     /**
      * @param \stdClass $data
+     * @param bool $resetQuery
      * @return static $this
+     * @throws \Pecee\Pixie\Exception
      */
-    public function onNewInstance(\stdClass $data): self
+    public function onNewInstance(\stdClass $data, bool $resetQuery = true): self
     {
-        return clone $this;
+        $item = clone $this;
+        if ($resetQuery) {
+            $item->setQuery(new ModelQueryBuilder($this, $this->onConnectionCreate()));
+        }
+
+        return $item;
     }
 
     public function onInstanceCreate()
@@ -574,9 +581,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @param array|string|null $filter
      * @return array
      */
-    public function toArray(array $filter = [])
+    public function toArray(array $filter = []): array
     {
-        $this->filter = array_merge($this->filter, $filter);
+        $filter = (count($filter) > 0) ? $filter : $this->filter;
 
         foreach (array_keys($this->with) as $key) {
             $this->invokeElement($key);
@@ -604,14 +611,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
-        if (count($this->filter) > 0) {
+        if (count($filter) > 0) {
 
             $filtered = [];
 
-            foreach ($this->filter as $key) {
-                if (array_key_exists($key, $output) === true) {
-                    $filtered[$key] = $output[$key];
-                }
+            foreach ($filter as $key) {
+                $filtered[$key] = $output[$key] ?? null;
             }
 
             $output = $filtered;
@@ -802,11 +807,16 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * Filter fields
      *
      * @param array $fields
+     * @param bool $merge
      * @return static $this
      */
-    public function filter(array $fields)
+    public function filter(array $fields, bool $merge = false): self
     {
-        $this->filter = array_merge($this->filter, $fields);
+        if ($merge === true) {
+            $this->filter = array_merge($this->filter, $fields);
+        } else {
+            $this->filter = $fields;
+        }
 
         return $this;
     }
