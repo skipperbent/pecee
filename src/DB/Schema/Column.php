@@ -189,7 +189,7 @@ class Column
     public function bool(): self
     {
         $this->setType(static::TYPE_TINYINT);
-        $this->setNullable(true);
+        $this->setDefaultValue(0);
         $this->setLength(1);
 
         return $this;
