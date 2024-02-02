@@ -80,8 +80,8 @@ class Phtml
 
     /**
      * @param string $string
-     * @throws PhtmlException
      * @return PhtmlNode
+     * @throws PhtmlException
      */
     public function read(string $string)
     {
@@ -372,7 +372,7 @@ class Phtml
                     $this->attrName = $current;
                     $this->debug("ATTR FOUND: $this->attrName");
 
-                    if ($this->nextChar === '') {
+                    if (trim($this->char) === '' || $this->nextChar === '') {
                         $this->getNode()->setAttribute($this->attrName);
                         $this->attrName = '';
                         $this->popWithin();

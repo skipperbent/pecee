@@ -586,7 +586,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $filter = (count($filter) > 0) ? $filter : $this->filter;
 
         foreach (array_keys($this->with) as $key) {
-            $this->invokeElement($key);
+            if (count($filter) === 0 || in_array($key, $filter, true) || isset($this->rename[$key])) {
+                $this->invokeElement($key);
+            }
         }
 
         $output = [];

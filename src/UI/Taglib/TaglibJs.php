@@ -133,7 +133,21 @@ class TaglibJs extends Taglib
 
         $as = $attrs->as ?? 'd';
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w,viewId = null, view = null){ let t = w.template; let %5$s=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $defaultData = [];
+
+        foreach ((array)$attrs as $key => $value) {
+            if (stripos($key, 'data-') === 0) {
+                $defaultData[trim(str_ireplace('data-', '', $key))] = $value;
+            }
+        }
+
+        $dataOutput = '';
+        if (count($defaultData) > 0) {
+            $json = json_encode($defaultData);
+            $dataOutput = "$as = Object.assign($json, $as);";
+        }
+
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w,viewId = null, view = null){ let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -198,8 +212,27 @@ class TaglibJs extends Taglib
             $output .= "if($data !== null) { $dataOutput }";
         }
 
-        $output .= "o += $.{$attrs->id}.view($data, $guid, $widget, viewId, view);";
+        $templateId = (str_contains($attrs->id, '.') === false) ? "$.{$attrs->id}" : $attrs->id;
+
+        $output .= "o += $templateId.view($data, $guid, $widget, viewId, view);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
+    }
+
+    /**
+     * Render inline widget.
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagRenderWidget(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['widget']);
+
+        return sprintf('</%1$s>"; o+= "<div data-id=\"iw_" + %2$s.guid + "\">"; %2$s.setContainer("div[data-id=iw_" + %2$s.guid + "]"); o+= %2$s.render(false) + "</div><%1$s>',
+            static::$JS_WRAPPER_TAG,
+            $attrs->widget,
+        );
     }
 
     protected function tagSwitch(\stdClass $attrs): string
