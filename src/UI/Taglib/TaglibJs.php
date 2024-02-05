@@ -229,7 +229,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['widget']);
 
-        return sprintf('</%1$s>"; o+= "<div data-id=\"iw_" + %2$s.guid + "\">"; %2$s.setContainer("div[data-id=iw_" + %2$s.guid + "]"); o+= %2$s.render(false) + "</div><%1$s>',
+        return sprintf('</%1$s>"; o+= "<div data-id=\"iw_" + %2$s.guid + "\">"; %2$s.setContainer("div[data-id=iw_" + %2$s.guid + "]"); o+= %2$s.render(false); w.bind("render.w", function() { %2$s.trigger("render"); w.unbind("render.w"); }); + "</div><%1$s>',
             static::$JS_WRAPPER_TAG,
             $attrs->widget,
         );
