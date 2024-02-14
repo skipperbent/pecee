@@ -228,7 +228,7 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['widget']);
 
-        return sprintf('</%1$s>"; o+= "<div data-id=\"iw_" + %2$s.guid + "\">"; %2$s.setContainer("div[data-id=iw_" + %2$s.guid + "]"); o+= %2$s.render(false); w.bind("render.w", function() { %2$s.trigger("render"); w.unbind("render.w"); }); + "</div><%1$s>',
+        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"></div>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, function() { _w.render(); }); } else { w.one("render", function() { _w.render(); }); } o += "<%1$s>',
             static::$JS_WRAPPER_TAG,
             $attrs->widget,
         );
@@ -353,7 +353,7 @@ class TaglibJs extends Taglib
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
         $morphHtml = ($morph === 'false') ? 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(i => i.innerHTML = o);' : 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(function(item) { let clone = item.cloneNode(true); clone.innerHTML=o; morphdom(item, clone); });';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; w.template.triggerEvent(this.id, %7$s); } var o="%5$s"; if(replace===true) { ' . $morphHtml . ' } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", function() { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", function() { w.template.triggerEvent(_vid, %7$s); }); }  return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
