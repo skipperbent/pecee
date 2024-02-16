@@ -637,8 +637,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         foreach ((array)$method as $key => $value) {
             if (is_string($value) === true && is_numeric($key) === true) {
                 $this->with[$value] = $value;
+                $invokedKey = array_search($value, $this->invokedElements, true);
             } else {
                 $this->with[$key] = $value;
+                $invokedKey = array_search($key, $this->invokedElements, true);
+            }
+
+            if ($invokedKey !== false) {
+                unset($this->invokedElements[$invokedKey]);
             }
         }
 
