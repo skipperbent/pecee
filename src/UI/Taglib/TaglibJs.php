@@ -427,7 +427,11 @@ class TaglibJs extends Taglib
     {
         $output = array_merge(['<script>'], $this->containers, ['</script>']);
         $this->containers = [];
-        return join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+        $str = join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+        $str = str_replace(['o+="";'], '', $str);
+        $str = str_replace('+"";', ';', $str);
+        $str = str_replace('=""+', '=', $str);
+        return $str;
     }
 
     /**

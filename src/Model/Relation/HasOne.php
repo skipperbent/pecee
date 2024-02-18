@@ -34,7 +34,11 @@ class HasOne extends ModelRelation
      */
     public function getResults()
     {
-        return $this->related->first() ?: $this->getDefaultFor($this->related);
+        if ($this->parent->{$this->localKey} !== null) {
+            return $this->related->first() ?: $this->getDefaultFor($this->related);
+        }
+
+        return $this->getDefaultFor($this->related);
     }
 
 }

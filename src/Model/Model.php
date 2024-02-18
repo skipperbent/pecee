@@ -609,6 +609,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
             $key = $this->rename[$key] ?? $key;
             if (in_array($key, $this->hidden, true) === false) {
+
+                // Check if local method exist
+                if (method_exists($this, 'get' . ucfirst($key)) === true) {
+                    $row = call_user_func([$this, 'get' . ucfirst($key)]);
+                }
+
                 $output[Str::deCamelize($key)] = $this->parseArrayData($row);
             }
         }
