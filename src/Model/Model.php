@@ -573,7 +573,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
-        $name = $this->rename[$name] ?? $name;
         $this->results['rows'][$name] = $output;
     }
 
