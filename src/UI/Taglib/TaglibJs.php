@@ -68,7 +68,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; w._tid++; var _id = w.guid + viewId + "_" + w._tid; o+= t.addEvent({ id: _id, event: "%1$s", callback: function(e) { %3$s } }) + "\"<%2$s>',
+            return sprintf('on%1$s="return </%2$s>"; o+= t.addEvent({ event: "%1$s", viewId: viewId, view: view, index: this.index, callback: function(e) { %3$s } }) + "\"<%2$s>',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
