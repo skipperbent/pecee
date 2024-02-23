@@ -397,7 +397,7 @@ class ModelQueryBuilder
     {
         $item = $this->find($id);
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' not found');
         }
 
         return $item;
@@ -426,7 +426,7 @@ class ModelQueryBuilder
     {
         $item = $this->first();
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' was not found');
+            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' not found');
         }
 
         return $item;
