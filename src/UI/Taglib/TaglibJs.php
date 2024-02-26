@@ -260,7 +260,7 @@ class TaglibJs extends Taglib
 
         $class = isset($attrs->class) ? ' class=\"' . $attrs->class . '\"' : '';
 
-        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, function() { _w.render(); }); } else { w.one("render", function() { _w.trigger("render"); });  } o+= _w.render(false, false); o += "</div><%1$s>',
+        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, function() { _w.render(); widgets.clean(); }); } else { w.one("render", function() { _w.trigger("render"); widgets.clean(); });  } o+= _w.render(false, false); o += "</div><%1$s>',
             static::$JS_WRAPPER_TAG,
             $attrs->widget,
             $class,
