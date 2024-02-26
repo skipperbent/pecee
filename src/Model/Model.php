@@ -585,7 +585,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $filter = (count($filter) > 0) ? $filter : $this->filter;
 
         foreach (array_keys($this->with) as $key) {
-            if (count($filter) === 0 || in_array($key, $filter, true) || isset($this->rename[$key])) {
+            if (count($filter) === 0 || in_array($key, $filter, true) || in_array($key, $filter, true) && isset($this->rename[$key])) {
                 $this->invokeElement($key);
             }
         }
@@ -595,18 +595,23 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         // Ensure default columns are always present
         foreach ($this->columns as $column) {
             // Skip without
-            if (in_array($column, $this->without, true) === true) {
+            if (in_array($column, $this->without, true) === true && in_array($column, $filter, true) === false || count($filter) > 0 && in_array($column, $filter, true) === false) {
                 continue;
             }
+
+            $column = $this->rename[$column] ?? $column;
             $output[$column] = $this->{$column};
         }
 
         foreach ($this->getRows() as $key => $row) {
+
+            $key = $this->rename[$key] ?? $key;
+
             // Skip without
-            if (in_array($key, $this->without, true) === true) {
+            if (in_array($key, $this->without, true) === true || isset($this->rename[$key]) || count($filter) > 0 && in_array(Str::deCamelize($key), $filter, true) === false) {
                 continue;
             }
-            $key = $this->rename[$key] ?? $key;
+
             if (in_array($key, $this->hidden, true) === false) {
 
                 // Check if local method exist
@@ -616,17 +621,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
 
                 $output[Str::deCamelize($key)] = $this->parseArrayData($row);
             }
-        }
-
-        if (count($filter) > 0) {
-
-            $filtered = [];
-
-            foreach ($filter as $key) {
-                $filtered[$key] = $output[$key] ?? null;
-            }
-
-            $output = $filtered;
         }
 
         return $output;
