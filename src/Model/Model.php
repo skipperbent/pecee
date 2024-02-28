@@ -623,6 +623,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
+        foreach ($this->rename as $old => $new) {
+            $output[$new] = $output[$old] ?? $this->{$old};
+        }
+
         return $output;
     }
 
