@@ -51,6 +51,35 @@ class TaglibJs extends Taglib
     }
 
     /**
+     * Enables element properties to be set depending on expression.
+     * Syntax: js-property-true="[property]:[expression]"
+     *
+     * Example:
+     * <input type="checkbox" js-property="selected:true">
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function parseJsPropertiesTrue(string $string): string
+    {
+        // Replace js bindings
+        return preg_replace_callback('/js-property-true="([\w]+):([^"]+)"/is', static function ($matches) {
+
+            $property = $matches[1];
+            $expression = $matches[2];
+
+
+            return sprintf
+            (
+                '</%1$s>"+ ((%3$s) ? "%2$s=\"true\"" : "") + "<%1$s>',
+                static::$JS_WRAPPER_TAG,
+                $property,
+                $expression
+            );
+        }, $string);
+    }
+
+    /**
      * Enables trigger tags within the template, for example:
      * js-click="d.select(item.id);"
      * js-[event]="callback"
@@ -78,6 +107,7 @@ class TaglibJs extends Taglib
 
     protected function makeJsString(string $string): string
     {
+        $string = $this->parseJsPropertiesTrue($string);
         $string = $this->parseJsProperties($string);
         $string = $this->parseJsTriggers($string);
         return preg_replace('/[\n\r\t]*|\s\s/', '', trim($string));
