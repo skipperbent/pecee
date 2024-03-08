@@ -17,7 +17,7 @@ abstract class ControllerBase extends Base
      * @param array $validation
      * @throws ValidationException
      */
-    protected function validate(array $validation): void
+    public function validate(array $validation): void
     {
         parent::validate($validation);
 

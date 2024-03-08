@@ -1,9 +1,10 @@
 <?php
+
 namespace Pecee\Collection;
 
 class CollectionItem implements \IteratorAggregate
 {
-    protected $data = [];
+    protected array $data = [];
 
     public function __construct(array $rows = null)
     {
@@ -74,7 +75,7 @@ class CollectionItem implements \IteratorAggregate
      */
     public function each(callable $callback): self
     {
-        foreach($this->getData() as $key => $row) {
+        foreach ($this->getData() as $key => $row) {
             $callback($row, $key);
         }
 
@@ -88,7 +89,7 @@ class CollectionItem implements \IteratorAggregate
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator() : \ArrayIterator
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->data);
     }

@@ -81,7 +81,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @return static $this
      * @throws \Pecee\Pixie\Exception
      */
-    public function onNewInstance(\stdClass $data, bool $resetQuery = true): self
+    public function onNewInstance(\stdClass $data, bool $resetQuery = false): self
     {
         $item = clone $this;
         if ($resetQuery) {

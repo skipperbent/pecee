@@ -80,7 +80,7 @@ abstract class Base
         Session::set($this->_inputSessionKey, $values);
     }
 
-    protected function validate(array $validation): void
+    public function validate(array $validation): void
     {
         $this->performValidation($validation);
     }
@@ -203,7 +203,7 @@ abstract class Base
      * @param string $message
      * @param string|null $placement
      */
-    protected function setError(string $message, ?string $placement = null): void
+    public function setError(string $message, ?string $placement = null): void
     {
         $this->setMessage($message, $this->errorType, $placement);
     }

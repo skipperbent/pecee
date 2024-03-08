@@ -22,9 +22,7 @@ class HasOne extends ModelRelation
     public function addConstraints()
     {
         if (static::$constraints === true) {
-            $this->related
-                ->where($this->foreignKey, '=', $this->parent->{$this->localKey})
-                ->whereNotNull($this->foreignKey);
+            $this->related->where($this->foreignKey, '=', $this->parent->{$this->localKey});
         }
     }
 

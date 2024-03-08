@@ -4,7 +4,7 @@ namespace Pecee\Collection;
 
 class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
 {
-    protected $rows = [];
+    protected array $rows = [];
 
     public function __construct(array $rows = null)
     {
@@ -68,7 +68,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
      */
     public function each(callable $callback): self
     {
-        foreach($this->getRows() as $key => $row) {
+        foreach ($this->getRows() as $key => $row) {
             $callback($row, $key);
         }
 
@@ -83,7 +83,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
     public function filterArray(callable $callback): array
     {
         $collection = [];
-        foreach($this->getRows() as $row) {
+        foreach ($this->getRows() as $row) {
             $collection[] = $callback($row);
         }
 
@@ -97,12 +97,12 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
      * <b>Traversable</b>
      * @since 5.0.0
      */
-    public function getIterator() : \ArrayIterator
+    public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->rows);
     }
 
-    public function count() : int
+    public function count(): int
     {
         return \count($this->getRows());
     }
@@ -114,7 +114,7 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
      * which is a value of any type other than a resource.
      * @since 5.4.0
      */
-    public function jsonSerialize() : mixed
+    public function jsonSerialize(): mixed
     {
         return $this->getRows();
     }
