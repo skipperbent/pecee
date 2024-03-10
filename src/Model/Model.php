@@ -16,7 +16,7 @@ use Pecee\Str;
 /**
  * @mixin ModelQueryBuilder
  */
-abstract class Model implements \IteratorAggregate, \JsonSerializable
+abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializable
 {
     protected $table;
     protected $results = ['rows' => [], 'original_rows' => []];
@@ -881,6 +881,26 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
     public function __wakeup()
     {
         $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
+    }
+
+    public function serialize()
+    {
+        return $this->getRows();
+    }
+
+    public function unserialize($data)
+    {
+        $this->setRows((array)$data);
+    }
+
+    public function __serialize(): array
+    {
+        return $this->getRows();
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->setRows($data);
     }
 
 }

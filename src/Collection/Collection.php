@@ -2,7 +2,9 @@
 
 namespace Pecee\Collection;
 
-class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
+use Exception;
+
+class Collection implements \IteratorAggregate, \Countable, \JsonSerializable, \Serializable
 {
     protected array $rows = [];
 
@@ -119,4 +121,23 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable
         return $this->getRows();
     }
 
+    public function serialize()
+    {
+        return $this->getRows();
+    }
+
+    public function unserialize($data)
+    {
+        $this->setRows((array)$data);
+    }
+
+    public function __serialize(): array
+    {
+        return $this->getRows();
+    }
+
+    public function __unserialize(array $data): void
+    {
+        $this->setRows($data);
+    }
 }
