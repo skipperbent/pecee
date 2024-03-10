@@ -379,7 +379,7 @@ class Phtml
                     }
                 } else {
                     $val = $this->getCurrent();
-                    $val = substr($val, 1, -1);
+                    $val = ($val !== '') ? substr($val, 1, -1) : $this->attrName;
                     $this->debug("ATTR VAL FOUND FOR: $this->attrName ($val)");
                     $this->getNode()->setAttribute($this->attrName, $val);
                     $this->attrName = '';
