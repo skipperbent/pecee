@@ -81,7 +81,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
      * @return static $this
      * @throws \Pecee\Pixie\Exception
      */
-    public function onNewInstance(\stdClass $data, bool $resetQuery = true): self
+    public function onNewInstance(\stdClass $data, bool $resetQuery = false): self
     {
         $item = clone $this;
         if ($resetQuery) {
@@ -573,7 +573,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
             }
         }
 
-        $name = $this->rename[$name] ?? $name;
         $this->results['rows'][$name] = $output;
     }
 
@@ -586,7 +585,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         $filter = (count($filter) > 0) ? $filter : $this->filter;
 
         foreach (array_keys($this->with) as $key) {
-            $this->invokeElement($key);
+            if (count($filter) === 0 || in_array($key, $filter, true) || in_array($key, $filter, true) && isset($this->rename[$key])) {
+                $this->invokeElement($key);
+            }
         }
 
         $output = [];
@@ -594,32 +595,36 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         // Ensure default columns are always present
         foreach ($this->columns as $column) {
             // Skip without
-            if (in_array($column, $this->without, true) === true) {
+            if (in_array($column, $this->without, true) === true && in_array($column, $filter, true) === false || count($filter) > 0 && in_array($column, $filter, true) === false) {
                 continue;
             }
+
+            $column = $this->rename[$column] ?? $column;
             $output[$column] = $this->{$column};
         }
 
         foreach ($this->getRows() as $key => $row) {
+
+            $key = $this->rename[$key] ?? $key;
+
             // Skip without
-            if (in_array($key, $this->without, true) === true) {
+            if (in_array($key, $this->without, true) === true || isset($this->rename[$key]) || count($filter) > 0 && in_array(Str::deCamelize($key), $filter, true) === false) {
                 continue;
             }
-            $key = $this->rename[$key] ?? $key;
+
             if (in_array($key, $this->hidden, true) === false) {
+
+                // Check if local method exist
+                if (method_exists($this, 'get' . ucfirst($key)) === true) {
+                    $row = call_user_func([$this, 'get' . ucfirst($key)]);
+                }
+
                 $output[Str::deCamelize($key)] = $this->parseArrayData($row);
             }
         }
 
-        if (count($filter) > 0) {
-
-            $filtered = [];
-
-            foreach ($filter as $key) {
-                $filtered[$key] = $output[$key] ?? null;
-            }
-
-            $output = $filtered;
+        foreach ($this->rename as $old => $new) {
+            $output[$new] = $output[$old] ?? $this->{$old};
         }
 
         return $output;
@@ -635,8 +640,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable
         foreach ((array)$method as $key => $value) {
             if (is_string($value) === true && is_numeric($key) === true) {
                 $this->with[$value] = $value;
+                $invokedKey = array_search($value, $this->invokedElements, true);
             } else {
                 $this->with[$key] = $value;
+                $invokedKey = array_search($key, $this->invokedElements, true);
+            }
+
+            if ($invokedKey !== false) {
+                unset($this->invokedElements[$invokedKey]);
             }
         }
 

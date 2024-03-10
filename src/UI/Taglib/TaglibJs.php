@@ -22,6 +22,64 @@ class TaglibJs extends Taglib
     }
 
     /**
+     * Enables element properties to be set depending on expression.
+     * Syntax: js-property="[property]:[expression]"
+     *
+     * Example:
+     * <input type="checkbox" js-property="selected:true">
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function parseJsProperties(string $string): string
+    {
+        // Replace js bindings
+        return preg_replace_callback('/js-property="([\w]+):([^"]+)"/is', static function ($matches) {
+
+            $property = $matches[1];
+            $expression = $matches[2];
+
+
+            return sprintf
+            (
+                '</%1$s>"+ ((%3$s) ? "%2$s" : "") + "<%1$s>',
+                static::$JS_WRAPPER_TAG,
+                $property,
+                $expression
+            );
+        }, $string);
+    }
+
+    /**
+     * Enables element properties to be set depending on expression.
+     * Syntax: js-property-true="[property]:[expression]"
+     *
+     * Example:
+     * <input type="checkbox" js-property="selected:true">
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function parseJsPropertiesTrue(string $string): string
+    {
+        // Replace js bindings
+        return preg_replace_callback('/js-property-true="([\w]+):([^"]+)"/is', static function ($matches) {
+
+            $property = $matches[1];
+            $expression = $matches[2];
+
+
+            return sprintf
+            (
+                '</%1$s>"+ ((%3$s) ? "%2$s=\"true\"" : "") + "<%1$s>',
+                static::$JS_WRAPPER_TAG,
+                $property,
+                $expression
+            );
+        }, $string);
+    }
+
+    /**
      * Enables trigger tags within the template, for example:
      * js-click="d.select(item.id);"
      * js-[event]="callback"
@@ -34,22 +92,23 @@ class TaglibJs extends Taglib
     protected function parseJsTriggers(string $string): string
     {
         // Replace js bindings
-        return preg_replace_callback('/js-(\w+)="?((?:.(?!"\{\}?\s+\S+=|\s*\/?[>"]))+.)"?/is', function ($matches) {
+        return preg_replace_callback('/js-(\w+)="?((?:.(?!"\{\}?\s+\S+=|\s*\/?[>"]))+.)"?/is', static function ($matches) {
 
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; var _id = w.utils.generateGuid(); o+= t.addEvent({ id: _id, event: "%1$s", viewId: viewId, view: view, index: (typeof this.index === \'undefined\') ? null : this.index, callback: function(e) { %3$s } }) + "\" data-%1$s=\""+ _id + "<%2$s>"',
+            return sprintf('on%1$s="return </%2$s>"; o+= t.addEvent({ event: "%1$s", viewId: viewId, view: view, index: this.index, callback: function(e) { %3$s } }) + "\"<%2$s>',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
-                md5($event . $callback),
             );
         }, $string);
     }
 
     protected function makeJsString(string $string): string
     {
+        $string = $this->parseJsPropertiesTrue($string);
+        $string = $this->parseJsProperties($string);
         $string = $this->parseJsTriggers($string);
         return preg_replace('/[\n\r\t]*|\s\s/', '', trim($string));
     }
@@ -133,7 +192,21 @@ class TaglibJs extends Taglib
 
         $as = $attrs->as ?? 'd';
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w,viewId = null, view = null){ let t = w.template; let %5$s=_d; var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $defaultData = [];
+
+        foreach ((array)$attrs as $key => $value) {
+            if (stripos($key, 'data-') === 0) {
+                $defaultData[trim(str_ireplace('data-', '', $key))] = $value;
+            }
+        }
+
+        $dataOutput = '';
+        if (count($defaultData) > 0) {
+            $json = json_encode($defaultData);
+            $dataOutput = "$as = Object.assign($json, $as);";
+        }
+
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w,viewId = null, view = null){ let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -198,8 +271,30 @@ class TaglibJs extends Taglib
             $output .= "if($data !== null) { $dataOutput }";
         }
 
-        $output .= "o += $.{$attrs->id}.view($data, $guid, $widget, viewId, view);";
+        $templateId = (str_contains($attrs->id, '.') === false) ? "$.{$attrs->id}" : $attrs->id;
+
+        $output .= "o += $templateId.view($data, $guid, $widget, viewId, view);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
+    }
+
+    /**
+     * Render inline widget.
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagRenderWidget(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['widget']);
+
+        $class = isset($attrs->class) ? ' class=\"' . $attrs->class . '\"' : '';
+
+        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, function() { _w.render(); widgets.clean(); }); } else { w.one("render", function() { _w.trigger("render"); widgets.clean(); });  } o+= _w.render(false, false); o += "</div><%1$s>',
+            static::$JS_WRAPPER_TAG,
+            $attrs->widget,
+            $class,
+        );
     }
 
     protected function tagSwitch(\stdClass $attrs): string
@@ -321,7 +416,7 @@ class TaglibJs extends Taglib
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
         $morphHtml = ($morph === 'false') ? 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(i => i.innerHTML = o);' : 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(function(item) { let clone = item.cloneNode(true); clone.innerHTML=o; morphdom(item, clone); });';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { window.widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; w.template.triggerEvent(this.id, %7$s); } var o="%5$s"; if(replace===true) { ' . $morphHtml . ' } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", function() { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", function() { w.template.triggerEvent(_vid, %7$s); }); }  return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
@@ -395,7 +490,12 @@ class TaglibJs extends Taglib
     {
         $output = array_merge(['<script>'], $this->containers, ['</script>']);
         $this->containers = [];
-        return join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+        $str = join((app()->getDebugEnabled() === true) ? chr(10) : '', $output);
+        $str = str_replace(['o+="";'], '', $str);
+        $str = str_replace('+"";', ';', $str);
+        $str = str_replace('=""+', '=', $str);
+        $str = str_replace(['+""+', '+ "" +'], '+', $str);
+        return $str;
     }
 
     /**

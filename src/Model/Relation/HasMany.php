@@ -23,9 +23,7 @@ class HasMany extends ModelRelation
     public function addConstraints()
     {
         if (static::$constraints === true) {
-            $this->related
-                ->where($this->foreignKey, '=', $this->parent->{$this->localKey})
-                ->whereNotNull($this->foreignKey);
+            $this->related->where($this->foreignKey, '=', $this->parent->{$this->localKey});
         }
     }
 
@@ -35,7 +33,11 @@ class HasMany extends ModelRelation
      */
     public function getResults()
     {
-        return $this->related->all() ?: $this->getDefaultFor($this->related);
+        if ($this->parent->{$this->localKey} !== null) {
+            return $this->related->all() ?: $this->getDefaultFor($this->related);
+        }
+
+        return $this->getDefaultFor($this->related);
     }
 
 }

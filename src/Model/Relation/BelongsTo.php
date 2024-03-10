@@ -46,7 +46,11 @@ class BelongsTo extends ModelRelation
      */
     public function getResults()
     {
-        return $this->related->first() ?: $this->getDefaultFor($this->related);
+        if ($this->child->{$this->foreignKey} !== null) {
+            return $this->related->first() ?: $this->getDefaultFor($this->related);
+        }
+
+        return $this->getDefaultFor($this->related);
     }
 
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Form\Validation;
 
 class ValidateNotNullOrEmpty extends ValidateInput
@@ -7,7 +8,7 @@ class ValidateNotNullOrEmpty extends ValidateInput
 
     public function validates(): bool
     {
-        return (is_string($this->input->getValue()) && trim($this->input->getValue()) !== '');
+        return (is_string($this->input->getValue()) && trim($this->input->getValue()) !== '' || is_array(input($this->input->getIndex())) && count(input($this->input->getIndex())) > 0);
     }
 
     public function getError(): string

@@ -9,12 +9,12 @@ use Pecee\Str;
 class ModelCollection extends Collection
 {
 
-    protected $type;
+    protected string $type = '';
 
     /**
      * @return string
      */
-    public function getType()
+    public function getType(): string
     {
         return $this->type;
     }
@@ -22,7 +22,7 @@ class ModelCollection extends Collection
     /**
      * @param string $type
      */
-    public function setType($type)
+    public function setType(string $type): void
     {
         $this->type = $type;
     }
@@ -57,7 +57,7 @@ class ModelCollection extends Collection
      * @param int $limit
      * @return static
      */
-    public function limit($limit)
+    public function limit(int $limit)
     {
         $out = [];
         if ($this->hasRows()) {
@@ -133,7 +133,7 @@ class ModelCollection extends Collection
                             $out[] = $row;
                         }
                     } else {
-                        if ($rowValue === $value) {
+                        if ((string)$rowValue === $value) {
                             $out[] = $row;
                         }
                     }
@@ -150,12 +150,12 @@ class ModelCollection extends Collection
      * @param string $direction
      * @return static
      */
-    public function order($key, $direction = 'desc')
+    public function order(string $key, string $direction = 'desc')
     {
         if ($this->hasRows() === true) {
             $rows = [];
             foreach ($this->getRows() as $row) {
-                $k = isset($row->fields[$key]) ? $row->fields[$key] : $row->data->{$key};
+                $k = $row->fields[$key] ?? $row->data->{$key};
                 $k = ((string)$k === 'Tjs=') ? Str::base64Decode($k) : $k;
                 $rows[$k] = $row;
             }
@@ -178,7 +178,7 @@ class ModelCollection extends Collection
      * @param array|string|null $filterKeys
      * @return array
      */
-    public function toArray($filterKeys = null)
+    public function toArray($filterKeys = null): array
     {
         $output = [];
         foreach ($this->getRows() as $row) {
@@ -200,7 +200,7 @@ class ModelCollection extends Collection
      * @param string $displayRow
      * @return array
      */
-    public function toDataSet($valueRow = 'id', $displayRow = 'id')
+    public function toDataSet(string $valueRow = 'id', string $displayRow = 'id'): array
     {
         $output = [];
         /* @var $row \Pecee\Model\Model */
