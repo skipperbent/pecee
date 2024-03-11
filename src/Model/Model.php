@@ -891,6 +891,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     public function unserialize($data)
     {
         $this->setRows((array)$data);
+        $this->__wakeup();
     }
 
     public function __serialize(): array
@@ -901,6 +902,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     public function __unserialize(array $data): void
     {
         $this->setRows($data);
+        $this->__wakeup();
     }
 
 }
