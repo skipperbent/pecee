@@ -162,6 +162,10 @@ class ModelQueryBuilder
      */
     public function whereIn($key, $values)
     {
+        if (is_array($values) && count($values) === 0) {
+            return $this->model;
+        }
+
         $this->query->whereIn($key, $values);
 
         return $this->model;
@@ -193,6 +197,10 @@ class ModelQueryBuilder
      */
     public function whereNotIn($key, $values)
     {
+        if (is_array($values) && count($values) === 0) {
+            return $this->model;
+        }
+
         $this->query->whereNotIn($key, $values);
 
         return $this->model;
@@ -268,6 +276,10 @@ class ModelQueryBuilder
      */
     public function orWhereIn($key, $values)
     {
+        if (is_array($values) && count($values) === 0) {
+            return $this->model;
+        }
+
         $this->query->orWhereIn($key, $values);
 
         return $this->model;

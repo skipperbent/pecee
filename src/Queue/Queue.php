@@ -13,7 +13,7 @@ abstract class Queue
 
     public function getQueue(): string
     {
-        return str_replace('\\', '.', basename(get_class()));
+        return str_replace('\\', '.', basename(get_class($this)));
     }
 
 }
