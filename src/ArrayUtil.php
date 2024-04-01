@@ -2,6 +2,8 @@
 
 namespace Pecee;
 
+use Laravel\SerializableClosure\SerializableClosure;
+
 class ArrayUtil
 {
 
@@ -14,17 +16,36 @@ class ArrayUtil
      */
     public static function filter(array $array, ?callable $callback = null): array
     {
-        $array = array_map(static function($item) {
+        $array = array_map(static function ($item) {
             return is_array($item) ? static::filter($item) : $item;
         }, $array);
 
-        if($callback === null) {
-            $callback = static function($value) {
+        if ($callback === null) {
+            $callback = static function ($value) {
                 return !empty($value);
             };
         }
 
         return array_filter($array, $callback);
+    }
+
+    public static function serialize(array $input): array
+    {
+        $output = [];
+        foreach ($input as $key => $value) {
+            $output[$key] = ($value instanceof \Closure) ? new SerializableClosure($value) : $value;
+        }
+        return $output;
+    }
+
+    public static function unserialize(array $input): array
+    {
+        $output = [];
+        foreach ($input as $key => $value) {
+            $output[$key] = ($value instanceof SerializableClosure) ? $value->getClosure() : $value;
+        }
+
+        return $output;
     }
 
     public static function average(array $arr)

@@ -3,6 +3,7 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use Pecee\ArrayUtil;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Relation\BelongsTo;
@@ -885,24 +886,42 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
     public function serialize()
     {
-        return $this->getRows();
+        return [
+            'results' => $this->results,
+            'with' => ArrayUtil::serialize($this->with),
+            'without' => $this->without,
+            'rename' => $this->rename,
+            'hidden' => $this->hidden,
+            'filter' => $this->filter,
+            'invokedElements' => $this->invokedElements,
+            'relations' => $this->relations,
+        ];
     }
 
+    /**
+     * @param array $data
+     */
     public function unserialize($data)
     {
-        $this->setRows((array)$data);
+        $this->results = $data['results'];
+        $this->with = ArrayUtil::unserialize($data['with']);
+        $this->without = $data['without'];
+        $this->rename = $data['rename'];
+        $this->hidden = $data['hidden'];
+        $this->filter = $data['filter'];
+        $this->invokedElements = $data['invokedElements'];
+        $this->relations = $data['relations'];
         $this->__wakeup();
     }
 
     public function __serialize(): array
     {
-        return $this->getRows();
+        return $this->serialize();
     }
 
     public function __unserialize(array $data): void
     {
-        $this->setRows($data);
-        $this->__wakeup();
+        $this->unserialize($data);
     }
 
 }
