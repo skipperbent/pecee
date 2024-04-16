@@ -6,13 +6,14 @@ use Pecee\Guid;
 
 class Session
 {
+    public static string $name = 'pecee_session';
     private static bool $active = false;
     public static array $initialData = [];
 
-    public static function start(string $name = 'pecee_session'): void
+    public static function start(): void
     {
         if (static::$active === false) {
-            session_name($name);
+            session_name(static::$name);
             session_start();
             static::$active = true;
             static::$initialData = $_SESSION;
@@ -40,6 +41,11 @@ class Session
      */
     public static function set(string $id, $value): void
     {
+
+        if (static::$active === false) {
+            static::start();
+        }
+
         $data = [
             serialize($value),
             app()->getSecret(),
@@ -52,6 +58,10 @@ class Session
 
     public static function get($id, $defaultValue = null)
     {
+        if (static::$active === false) {
+            static::start();
+        }
+
         if (static::exists($id) === true) {
 
             $value = $_SESSION[$id];
@@ -61,7 +71,7 @@ class Session
                 $value = Guid::decrypt(app()->getSecret(), $value);
                 $data = explode('|', $value);
 
-                if (\is_array($data) && trim(end($data)) === app()->getSecret()) {
+                if (is_array($data) && trim(end($data)) === app()->getSecret()) {
                     return unserialize($data[0], ['allowed_classes' => true]);
                 }
 
