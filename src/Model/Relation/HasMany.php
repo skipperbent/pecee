@@ -27,6 +27,19 @@ class HasMany extends ModelRelation
         }
     }
 
+    public function getDefaultFor(Model $parent)
+    {
+        if ($this->withDefault === null && $this->returnEmpty === true) {
+            return null;
+        }
+
+        if ($this->withDefault === null) {
+            return new ModelCollection();
+        }
+
+        return parent::getDefaultFor($parent);
+    }
+
     /**
      * @return Model|ModelCollection
      * @throws \Pecee\Pixie\Exception

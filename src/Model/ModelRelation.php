@@ -95,11 +95,11 @@ abstract class ModelRelation
 
     public function getDefaultFor(Model $parent)
     {
-        $instance = $parent->newQuery();
-
         if ($this->withDefault === null && $this->returnEmpty === true) {
             return null;
         }
+
+        $instance = $parent->newQuery();
 
         if ($this->withDefault === null) {
             return $instance;

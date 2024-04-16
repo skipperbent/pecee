@@ -3,6 +3,7 @@
 namespace Pecee\Model;
 
 use Carbon\Carbon;
+use Pecee\ArrayUtil;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Exceptions\ModelNotFoundException;
@@ -43,7 +44,7 @@ class ModelQueryBuilder
     protected function createInstance(\stdClass $item)
     {
         $model = $this->model->onNewInstance($item);
-        $model->mergeRows((array)$item);
+        $model->mergeRows(ArrayUtil::clean((array)$item));
         $model->setOriginalRows((array)$item);
         $model->onInstanceCreate();
 
@@ -618,6 +619,8 @@ class ModelQueryBuilder
             $item = $this->createInstance((object)$data);
             $item->setOriginalRows([]);
             $item->save();
+        } else {
+            $item->mergeRows(ArrayUtil::clean($data));
         }
 
         return $item;
@@ -633,6 +636,7 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item !== null) {
+            $item->mergeRows(ArrayUtil::clean($data));
             return $item;
         }
 

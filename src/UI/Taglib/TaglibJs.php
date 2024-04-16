@@ -97,7 +97,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; o+= t.addEvent({ event: "%1$s", viewId: viewId, view: view, index: this.index, callback: function(e) { %3$s } }) + "\"<%2$s>',
+            return sprintf('on%1$s="return </%2$s>"; o+= t.addEvent("%1$s", (e) => { %3$s }, viewId, view, this.index) + "\"<%2$s>',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
@@ -126,7 +126,7 @@ class TaglibJs extends Taglib
             $result .= ($i == (count($parts) - 1)) ? 'return ' . $parts[$i] . ';' : $parts[$i] . ';';
         }
 
-        return sprintf('(function(){%s})()', $result);
+        return sprintf('(()=>{%s})()', $result);
     }
 
     protected function replaceJsExpressions(string $string): string
@@ -206,7 +206,7 @@ class TaglibJs extends Taglib
             $dataOutput = "$as = Object.assign($json, $as);";
         }
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = function(_d,g,w,viewId = null, view = null){ let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = (_d,g,w,viewId = null, view = null) => { let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -290,7 +290,7 @@ class TaglibJs extends Taglib
 
         $class = isset($attrs->class) ? ' class=\"' . $attrs->class . '\"' : '';
 
-        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, function() { _w.render(); widgets.clean(); }); } else { w.one("render", function() { _w.trigger("render"); widgets.clean(); });  } o+= _w.render(false, false); o += "</div><%1$s>',
+        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, () => { _w.render(); widgets.clean(); }); } else { w.one("render", () => { _w.trigger("render"); widgets.clean(); });  } o+= _w.render(false, false); o += "</div><%1$s>',
             static::$JS_WRAPPER_TAG,
             $attrs->widget,
             $class,
@@ -414,9 +414,9 @@ class TaglibJs extends Taglib
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
         $hiddenHtml1 = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\">" + ';
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
-        $morphHtml = ($morph === 'false') ? 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(i => i.innerHTML = o);' : 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(function(item) { let clone = item.cloneNode(true); clone.innerHTML=o; morphdom(item, clone); });';
+        $morphHtml = ($morph === 'false') ? 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(i => i.innerHTML = o);' : 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach((item) => { let clone = item.cloneNode(true); clone.innerHTML=o; morphdom(item, clone); });';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", function() { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", function() { w.template.triggerEvent(_vid, %7$s); }); }  return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); }  return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,

@@ -29,6 +29,19 @@ class ArrayUtil
         return array_filter($array, $callback);
     }
 
+    /**
+     * Remove empty and null values from array but allows false and 0.
+     *
+     * @param array $array
+     * @return array
+     */
+    public static function clean(array $array): array
+    {
+        return array_filter($array, static function ($value) {
+            return ($value !== null && $value !== '');
+        });
+    }
+
     public static function serialize(array $input): array
     {
         $output = [];

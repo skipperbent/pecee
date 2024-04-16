@@ -52,7 +52,7 @@ class Taglib implements ITaglib
 
     public function getBody(): string
     {
-        return $this->body;
+        return (string)$this->body;
     }
 
     public function setBody(string $body): void

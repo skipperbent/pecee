@@ -1,35 +1,37 @@
 window.morphdom = require('morphdom').default;
 
+window.t = function (id, data) {
+    return window.widgets.trigger(id, data);
+};
+
 window.widgets = {
     getViews: function (guid, viewId, index = null) {
-        if (typeof this[guid] === 'undefined') {
-            throw 'Widget not found';
+        const widget = this[guid]; // Store reference for potential reuse
+
+        if (!widget) {
+            throw new Error('Widget not found');
         }
 
-        if (viewId === null) {
-            viewId = guid;
-        }
-
-        var views = this[guid].views[viewId];
+        viewId = viewId ?? guid; // Use nullish coalescing for efficient default value
+        let views = widget.views[viewId];
 
         if (index !== null) {
-            views = views.filter((v => v.index !== null && index !== null && v.index.toString() === index.toString()));
+            views = views.filter(v => v.index !== null && v.index === index); // Simplified condition
         }
 
-        if (typeof views === 'undefined') {
-            throw 'View [' + guid + '][' + viewId + '] not found';
+        if (!views) {
+            throw new Error(`View [${guid}][${viewId}] not found`); // Template literal for clearer error message
         }
 
         return views;
     },
     getView: function (guid, viewId = null, index = null) {
 
-        var views = this.getViews(guid, viewId);
-
-        var view = views.find((v => (v.id === viewId || v.id === guid) && (v.index !== null && index !== null && v.index.toString() === index.toString() || index === null)));
+        let views = this.getViews(guid, viewId);
+        let view = views.find((v => (v.id === viewId || v.id === guid) && (v.index !== null && index !== null && v.index.toString() === index.toString() || index === null)));
 
         if (typeof view === 'undefined') {
-            throw 'View ' + viewId + ' not found ' + index;
+            throw Error(`View [${viewId}] not found [${index}]`);
         }
 
         return view;
@@ -39,31 +41,61 @@ window.widgets = {
             throw 'Widget not found';
         }
 
-        var viewIndex = this[guid].views[viewId].findIndex((v => v.el === el));
+        let viewIndex = this[guid].views[viewId].findIndex((v => v.el === el));
         this[guid].views[viewId].splice(viewIndex, 1);
     },
-    trigger: function (guid, viewId, index, id, data) {
+    trigger: function (id, data) {
+        const trigger = this.findTrigger(id);
 
-        var trigger;
-        if (index === null) {
-            trigger = this.getViews(guid, viewId).find((v => v.triggers.find((t => t.id === id)))).triggers.find((t => t.id === id));
-        } else {
-            trigger = this.getView(guid, viewId, index).triggers.find((t => t.id === id));
+        if (trigger !== null) {
+            try {
+                return trigger.callback(data);
+            } catch (ex) {
+                console.error(ex);
+            }
         }
 
-        if (typeof trigger !== 'undefined') {
-            return trigger.callback(data);
+        throw 'Trigger [' + id + '] not found';
+    },
+    findTrigger: function (id) {
+        for (const [wk, widget] of Object.entries(widgets)) {
+            if (widget.views) {
+                for (const [vk, view] of Object.entries(widget.views)) {
+                    for (const v of view) {
+                        if (v.triggers) {
+                            const trigger = v.triggers.find(t => t.id === id);
+                            if (trigger) {
+                                return trigger;
+                            }
+                        }
+                    }
+                }
+            }
         }
-
-        throw 'Trigger [' + id + '] not found in [g:' + guid + '][v:' + viewId + '][index: ' + index + ']';
+        return null;
+    },
+    clean: function () {
+        for (const [guid, widget] of Object.entries(window.widgets)) {
+            if (widget?.widget?.persist === false && $(widget.widget.container).length === 0) {
+                // Remove attached events
+                widget.widget.elementEvents.forEach(({element, event}) => {
+                    if (typeof element === 'string') {
+                        $(widget.widget.container).find(element).off(event);
+                    } else {
+                        $(element).off(event);
+                    }
+                });
+                delete window.widgets[guid];
+            }
+        }
     }
 };
 
-$p.widget.template = function (widget) {
+window.widget.template = function (widget) {
     return this.init(widget);
 };
 
-$p.widget.template.prototype = {
+window.widget.template.prototype = {
     guid: null,
     widget: null,
     events: [],
@@ -75,70 +107,72 @@ $p.widget.template.prototype = {
         return this.trigger(name, data, index);
     },
     trigger: function (name, data = null, index = null) {
+        try {
+            let views = window.widgets.getViews(this.guid, name, index);
+            let output = '';
 
-        var views = window.widgets.getViews(this.guid, name, index);
+            views.forEach((view) => {
+                view.triggers = [];
 
-        var output = '';
+                let eventData = view.data;
 
-        for (var i = 0; i < views.length; i++) {
-            var view = views[i];
+                // Use custom data and store on view
+                if (data !== null) {
+                    eventData = data;
+                    view.data = eventData;
+                }
 
-            view.triggers = [];
+                // Remove view triggers
+                output += view.callback(eventData);
+                this.triggerEvent(name, eventData);
+            });
 
-            var eventData = view.data;
+            this.triggerEvent('render', data);
 
-            // Use custom data and store on view
-            if (data !== null) {
-                eventData = data;
-                view.data = eventData;
-            }
+            return output;
+        } catch (ex) {
 
-            // Remove view triggers
-            output += view.callback(eventData);
-
-            this.triggerEvent(name, eventData);
         }
 
-        return output;
+        return '';
     },
     triggerEvent: function (name, data) {
-        var shortName = '';
-        if (name.indexOf('.') > -1) {
-            shortName = name.split('.')[0];
-        }
-
-        var events = typeof this.events[name] !== 'undefined' ? this.events[name] : this.events[shortName];
-
-        if (typeof events !== 'undefined' && events.length > 0) {
-            for (var i = 0; i < events.length; i++) {
-                events[i](data);
-            }
-        }
+        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach(e => e.callback(data, this));
     },
     on: function (name, callback) {
-        if (typeof this.events[name] === 'undefined') {
-            this.events[name] = [];
-        }
-
-        this.events[name].push(callback);
+        name.split(' ').filter(event => event.trim() !== '').forEach(event => this.events.push({
+            name: event,
+            callback: callback
+        }));
+        return this;
     },
     off: function (name) {
-        delete this.events[name];
+        Object.keys(this.events).filter(key => this.events[key].name === name || this.events[key].name.split('.')[0] === name).forEach(key => this.events.splice(parseInt(key), 1));
+        return this;
+    },
+    one: function (name, callback) {
+        this.events.push({
+            name: name + '.one',
+            callback: (data) => {
+                this.off(name + '.one');
+                callback(data);
+            }
+        });
+
+        return this;
     },
     clear: function () {
-
         this.events = [];
         this.widget = null;
-
         return this;
     },
     setDefaultView: function () {
         // Remove widgets with no association
-        for (var guid in window.widgets) {
+        Object.keys(window.widgets).forEach((guid) => {
             if (window.widgets[guid].container === this.widget.container && guid !== this.guid) {
                 delete window.widgets[guid];
             }
-        }
+        });
 
         window.widgets[this.guid] = {
             container: this.widget.container,
@@ -161,7 +195,7 @@ $p.widget.template.prototype = {
         if (typeof window.widgets[this.guid].views[object.id] === 'undefined') {
             window.widgets[this.guid].views[object.id] = [object];
         } else {
-            var existingIndex = window.widgets[this.guid].views[object.id].findIndex((b => b.index === object.index && (b.id === object.id && b.hash === object.hash)));
+            let existingIndex = window.widgets[this.guid].views[object.id].findIndex((b => b.index === object.index && (b.id === object.id && b.hash === object.hash)));
 
             if (existingIndex === -1) {
                 window.widgets[this.guid].views[object.id].push(object);
@@ -172,7 +206,18 @@ $p.widget.template.prototype = {
 
         return object.callback(object.data, object.id, object, false);
     },
-    addEvent: function (event) {
+    addEvent: function (type, callback, viewId = null, view = null, index = null) {
+
+        let event = {
+            event: type,
+            callback: callback,
+            viewId: viewId,
+            view: view,
+            index: (typeof index === 'undefined') ? null : index,
+            id: this.guid + viewId + "" + this.widget._tid,
+        };
+
+        this.widget._tid++;
 
         if (event.index === null && event.view !== null) {
             event.view.triggers.push(event);
@@ -180,21 +225,11 @@ $p.widget.template.prototype = {
             window.widgets.getView(this.guid, event.viewId, event.index).triggers.push(event);
         }
 
-        var viewIdArg = "'" + event.viewId + "'";
-        var indexArg = "'" + event.index + "'";
-        if (event.viewId === null) {
-            viewIdArg = "null";
-        }
-
-        if (event.index === null) {
-            indexArg = null;
-        }
-
-        return "window.widgets.trigger('" + this.guid + "', " + viewIdArg + ", " + indexArg + ", '" + event.id + "', this);";
+        return "t('" + event.id + "', this);";
     },
 };
 
-$p.Widget = function (template, container) {
+site.Widget = function (template, container = null) {
 
     this.clear();
     template.clear();
@@ -202,36 +237,49 @@ $p.Widget = function (template, container) {
 
     this.container = container;
     this.template.guid = this.guid;
+    this.template.widget = this;
 
     this.init();
     this.template.init(this);
     return this;
 };
 
-$p.Widget.clean = function () {
-    for (var guid in window.widgets) {
-        var widget = window.widgets[guid];
-
-        if (typeof widget.widget !== 'undefined' && widget.widget.persist === false && $(widget.widget.container).length === 0) {
-            delete window.widgets[guid];
-        }
-    }
-};
-
-$p.Widget.prototype = {
+site.Widget.prototype = {
     guid: null,
     template: null,
     container: null,
+    containerNodeClone: null,
     persist: false,
     data: {},
     events: [],
-    init: function (template, container) {
-        this.template.widget = this;
+    elementEvents: [],
+    _tid: 0,
+    init: function () {
+        //this.template.widget = this;
         this.template.guid = this.guid;
         this.template.id = this.guid;
-        this.template.setDefaultView();
+
+        if (this.container !== null) {
+            this.template.setDefaultView();
+            this.cloneContainer();
+        }
 
         return this;
+    },
+    cloneContainer: function () {
+        if (this.container !== null) {
+            const container = document.querySelector(this.container);
+            if (container !== null) {
+                this.containerNodeClone = container.cloneNode(true)
+            }
+        }
+    },
+    setContainer: function (container) {
+        this.container = container;
+        this.cloneContainer();
+        this.template.widget = this;
+        this.template.guid = this.guid;
+        //this.template.setDefaultView();
     },
     clear: function () {
         this.template = null;
@@ -242,40 +290,62 @@ $p.Widget.prototype = {
         this.events = [];
     },
     extend: function (object) {
-        for (var key in object) {
-            this[key] = object[key];
-        }
+        Object.keys(object).forEach((k => this[k] = object[k]));
         return this;
     },
     setData: function (data) {
         this.data = data;
     },
-    ajax: function (url, settings) {
-        var self = this;
-        settings = (typeof settings === 'undefined') ? {} : settings;
+    ajax: function (url, settings = {}) {
         return $.ajax($.extend({
             type: 'GET',
             url: url,
             dataType: 'json',
-            success: function (d) {
-                self.setData(d);
-                self.render();
+            success: (d) => {
+                this.setData(d);
+                this.render();
             }
         }, settings));
     },
-    render: function () {
+    render: function (morph = true, triggerEvents = true) {
 
-        if ($(this.container).length === 0) {
-            return;
-        }
+        this.template.widget = this;
+
+        this._tid = 0;
+        let output = '';
 
         this.template.setDefaultView();
-
         this.trigger('preRender');
 
-        morphdom($(this.container).get(0), $(this.container).clone(true).html(this.template.view(this.data, this.guid, this, this.guid)).get(0));
+        if (morph === true) {
+            let container = document.querySelectorAll(this.container);
 
-        this.trigger('render');
+            if (container === null) {
+                return;
+            }
+
+            output = this.template.view(this.data, this.guid, this, this.guid);
+
+            if (this.containerNodeClone === null) {
+                this.cloneContainer();
+            }
+
+            const clone = this.containerNodeClone;
+
+            container.forEach(function (node) {
+                clone.innerHTML = output;
+                morphdom(node, clone, {childrenOnly: true});
+            });
+
+        } else {
+            output = this.template.view(this.data, this.guid, this, this.guid);
+        }
+
+        if (triggerEvents) {
+            this.trigger('render');
+        }
+
+        return output;
     },
     getData: function () {
         return this.data;
@@ -284,14 +354,9 @@ $p.Widget.prototype = {
         return this.rows;
     },
     trigger: function (name, data) {
-        var self = this;
-        $.each(this.events, function () {
-            if (this.name === name) {
-                data = (data == null) ? self.data : data;
-                return this.fn(data, self);
-            }
+        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach(e => {
+            e.callback(data, this)
         });
-        return null;
     },
     setTemplate: function (template) {
         this.template = template;
@@ -299,21 +364,27 @@ $p.Widget.prototype = {
         this.template.guid = this.guid;
         this.template.init(this);
     },
-    bind: function (name, fn) {
-        var self = this;
-        var exists = false;
-
-        $.each(this.events, function (i) {
-            if (this.name === name) {
-                self.events[i].fn = fn;
-                exists = true;
-                return false;
+    bind: function (name, callback) {
+        name.split(' ').filter(event => event.trim() !== '').forEach(event => this.events.push({
+            name: event,
+            callback: callback
+        }));
+        return this;
+    },
+    unbind: function (name) {
+        Object.keys(this.events).filter(key => this.events[key].name === name || this.events[key].name.split('.')[0] === name).forEach(key => this.events.splice(parseInt(key), 1));
+        return this;
+    },
+    one: function (name, callback) {
+        this.events.push({
+            name: name + '.one',
+            callback: (data) => {
+                this.unbind(name + '.one');
+                callback(data, this);
             }
         });
 
-        if (!exists) {
-            this.events.push({'name': name, 'fn': fn});
-        }
+        return this;
     },
     remove: function () {
         $(this.container).html('');
@@ -328,12 +399,12 @@ $p.Widget.prototype = {
 
         data.sort(function (a, b) {
 
-            var x = (a[column] === null) ? '' : a[column];
-            var y = (b[column] === null) ? '' : b[column];
+            let x = (a[column] === null) ? '' : a[column];
+            let y = (b[column] === null) ? '' : b[column];
 
             // Guess type
-            var typeA = $.type(x);
-            var typeB = $.type(y);
+            let typeA = $.type(x);
+            let typeB = $.type(y);
 
             if (typeA === 'number' && typeB === 'number') {
                 if (direction === 'asc') {
@@ -350,18 +421,18 @@ $p.Widget.prototype = {
         });
     },
     getDataByPath: function (path, data) {
-        var parts = path.split('/');
-        var d = (data) ? data : this.data;
+        let parts = path.split('/');
+        let d = (data) ? data : this.data;
         if (!data)
             return null;
-        var last = false;
-        for (var i = 0; i < parts.length; i++) {
+        let last = false;
+        for (let i = 0; i < parts.length; i++) {
             if (i === (parts.length - 1))
                 last = true;
-            var p = parts[i];
-            var ix = 0;
+            let p = parts[i];
+            let ix = 0;
             if (p.indexOf("[") > -1) {
-                var nameIndex = p.split('[');
+                let nameIndex = p.split('[');
                 p = nameIndex[0];
                 ix = parseInt(nameIndex);
             }
@@ -378,10 +449,33 @@ $p.Widget.prototype = {
         }
         return d;
     },
+    addEvent: function (eventType, callback) {
+        return this.template.addEvent(eventType, callback);
+    },
+    onElement: function (element, event, callback) {
+
+        event.split(' ').forEach((e) => {
+
+            e += '.' + this.guid;
+
+            this.elementEvents.push({
+                element: element,
+                event: e,
+            });
+
+            if (typeof element === 'string') {
+                $(this.container).find(element).on(e, callback);
+            } else {
+                $(element).on(e, callback);
+            }
+        });
+
+        return this;
+    },
     utils: {
         generateGuid: function () {
             return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                let r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
         },
@@ -401,10 +495,10 @@ $p.Widget.prototype = {
         },
         arrayAsync: function (array, fn, chunk = 100, context) {
             context = context || window;
-            var index = 0;
+            let index = 0;
 
             function doChunk() {
-                var cnt = chunk;
+                let cnt = chunk;
                 while (cnt-- && index < array.length) {
                     // callback called with args (value, index, array)
                     fn.call(context, array[index], index, array);
