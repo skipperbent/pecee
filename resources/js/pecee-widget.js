@@ -206,6 +206,9 @@ window.widget.template.prototype = {
 
         return object.callback(object.data, object.id, object, false);
     },
+    e: function (type, callback, viewId = null, view = null, index = null) {
+        return this.addEvent(type, callback, viewId = null, view = null, index = null);
+    },
     addEvent: function (type, callback, viewId = null, view = null, index = null) {
 
         let event = {
