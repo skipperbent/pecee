@@ -192,18 +192,23 @@ class TaglibJs extends Taglib
 
         $as = $attrs->as ?? 'd';
 
-        $defaultData = [];
+        $dataOutput = '';
 
-        foreach ((array)$attrs as $key => $value) {
+        foreach ($attrs as $key => $value) {
             if (stripos($key, 'data-') === 0) {
-                $defaultData[trim(str_ireplace('data-', '', $key))] = $value;
+
+                $dataOutput .= sprintf(
+                    '%1$s.%2$s = %1$s.%2$s ?? %3$s;',
+                    $as,
+                    trim(str_ireplace('data-', '', $key)),
+                    ($value === '') ? 'null' : $value,
+                );
+
             }
         }
 
-        $dataOutput = '';
-        if (count($defaultData) > 0) {
-            $json = json_encode($defaultData);
-            $dataOutput = "$as = Object.assign($json, $as);";
+        if (strlen($dataOutput) > 0) {
+            $dataOutput = "if($as !== null) { $dataOutput }";
         }
 
         $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = (_d,g,w,viewId = null, view = null) => { let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
@@ -416,7 +421,7 @@ class TaglibJs extends Taglib
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
         $morphHtml = ($morph === 'false') ? 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(i => i.innerHTML = o);' : 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach((item) => { let clone = item.cloneNode(true); clone.innerHTML=o; morphdom(item, clone); });';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); } return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); }  return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,

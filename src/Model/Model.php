@@ -285,11 +285,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         if ($data !== null) {
 
             /* Only save valid columns */
-            $data = array_filter($data, function ($key) {
+            $updateData = array_filter(array_merge($updateData, $data), function ($key) {
                 return (in_array($key, $this->columns, true) === true);
             }, ARRAY_FILTER_USE_KEY);
 
-            $updateData = array_merge($updateData, $data);
         }
 
         foreach ($updateData as $key => $value) {
