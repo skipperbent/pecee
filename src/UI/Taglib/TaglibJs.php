@@ -293,12 +293,12 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['widget']);
 
-        $class = isset($attrs->class) ? ' class=\"' . $attrs->class . '\"' : '';
+        $class = isset($attrs->class) ? explode(' ', $attrs->class) : [];
 
-        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, () => { _w.render(); widgets.clean(); }); } else { w.one("render", () => { _w.trigger("render"); widgets.clean(); });  } o+= _w.render(false, false); o += "</div><%1$s>',
+        return sprintf('</%1$s>"; o+=w.renderWidget(%2$s,view,%3$s); o+="<%1$s>',
             static::$JS_WRAPPER_TAG,
             $attrs->widget,
-            $class,
+            json_encode($class),
         );
     }
 

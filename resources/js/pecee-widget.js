@@ -232,7 +232,7 @@ window.widget.template.prototype = {
     },
 };
 
-site.Widget = function (template, container = null) {
+window.Widget = function (template, container = null) {
 
     this.clear();
     template.clear();
@@ -247,7 +247,7 @@ site.Widget = function (template, container = null) {
     return this;
 };
 
-site.Widget.prototype = {
+window.Widget.prototype = {
     guid: null,
     template: null,
     container: null,
@@ -327,7 +327,7 @@ site.Widget.prototype = {
                 return;
             }
 
-            output = this.template.view(this.data, this.guid, this, this.guid);
+            output = this.renderTemplate(this.template, this.data);
 
             if (this.containerNodeClone === null) {
                 this.cloneContainer();
@@ -341,7 +341,7 @@ site.Widget.prototype = {
             });
 
         } else {
-            output = this.template.view(this.data, this.guid, this, this.guid);
+            output = this.renderTemplate(this.template, this.data);
         }
 
         if (triggerEvents) {
@@ -349,6 +349,37 @@ site.Widget.prototype = {
         }
 
         return output;
+    },
+    renderTemplate: function (template, data = {}) {
+        return template.view(data, this.guid, this, this.guid);
+    },
+    renderWidget: function (widget, view = null, classes = []) {
+
+        let classHtml = '';
+
+        if (classes.length > 0) {
+            classHtml += ' class=' + classes.join(' ') + '"';
+        }
+
+        let out = `<div data-id="iw_${widget.guid}"${classHtml}>`;
+
+        widget.setContainer("div[data-id=iw_" + widget.guid + "]");
+
+        if (view !== null) {
+            widget.template.one(view.id, () => {
+                widget.render();
+                widgets.clean();
+            });
+        } else {
+            widget.one("render", () => {
+                widget.trigger("render");
+                widgets.clean();
+            });
+        }
+
+        out += widget.render(false, false);
+        out += '</div>';
+        return out;
     },
     getData: function () {
         return this.data;
