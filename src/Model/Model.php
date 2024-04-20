@@ -409,9 +409,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         $this->results['rows'] = $rows;
     }
 
-    public function mergeRows(array $rows)
+    /**
+     * @param array $rows
+     * @return static $this
+     */
+    public function mergeRows(array $rows): static
     {
         $this->results['rows'] = array_merge($this->results['rows'], $rows);
+        return $this;
     }
 
     public function mergeData(array $data): void
@@ -727,10 +732,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     /**
      * Set original rows
      * @param array $rows
+     * @return static
      */
-    public function setOriginalRows(array $rows)
+    public function setOriginalRows(array $rows): self
     {
         $this->results['original_rows'] = $rows;
+        return $this;
     }
 
     public function getOriginalRows()

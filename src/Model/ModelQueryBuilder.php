@@ -13,6 +13,9 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Pixie\QueryBuilder\Raw;
 use Pecee\Str;
 
+/**
+ * @mixin Model
+ */
 class ModelQueryBuilder
 {
     protected static self $instance;
@@ -40,12 +43,15 @@ class ModelQueryBuilder
     /**
      * @param \stdClass $item
      * @return static
+     * @throws Exception
      */
     protected function createInstance(\stdClass $item)
     {
-        $model = $this->model->onNewInstance($item);
-        $model->mergeRows(ArrayUtil::clean((array)$item));
-        $model->setOriginalRows((array)$item);
+        $model = $this->model
+            ->onNewInstance($item)
+            ->mergeRows(ArrayUtil::clean((array)$item))
+            ->setOriginalRows((array)$item);
+
         $model->onInstanceCreate();
 
         return $model;
@@ -613,12 +619,11 @@ class ModelQueryBuilder
      */
     public function firstOrCreate(array $data = [])
     {
+        /* @var $item Model */
         $item = $this->first();
 
         if ($item === null) {
-            $item = $this->createInstance((object)$data);
-            $item->setOriginalRows([]);
-            $item->save();
+            $item = $this->createInstance((object)$data)->setOriginalRows([])->save();
         } else {
             $item->mergeRows(ArrayUtil::clean($data));
         }
@@ -640,9 +645,7 @@ class ModelQueryBuilder
             return $item;
         }
 
-        $item = $this->createInstance((object)$data);
-        $item->setOriginalRows([]);
-        return $item;
+        return $this->createInstance((object)$data)->setOriginalRows([]);
     }
 
     /**
