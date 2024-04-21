@@ -358,7 +358,7 @@ window.Widget.prototype = {
         let classHtml = '';
 
         if (classes.length > 0) {
-            classHtml += ' class=' + classes.join(' ') + '"';
+            classHtml += ' class="' + classes.join(' ') + '"';
         }
 
         let out = `<div data-id="iw_${widget.guid}"${classHtml}>`;

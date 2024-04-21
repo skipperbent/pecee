@@ -198,7 +198,7 @@ class TaglibJs extends Taglib
             if (stripos($key, 'data-') === 0) {
 
                 $dataOutput .= sprintf(
-                    '%1$s.%2$s = %1$s.%2$s ?? %3$s;',
+                    '%1$s.%2$s = (typeof %1$s.%2$s !== \'undefined\') ? %1$s.%2$s : %3$s;',
                     $as,
                     trim(str_ireplace('data-', '', $key)),
                     ($value === '') ? 'null' : $value,
