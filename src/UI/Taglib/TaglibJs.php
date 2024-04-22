@@ -486,6 +486,33 @@ class TaglibJs extends Taglib
         );
     }
 
+    protected function tagAsync(\stdClass $attrs): string
+    {
+        $classes = $attrs->class ? ' class=\"' . $attrs->class . '\"' : '';
+
+        return sprintf(
+            '</%2$s>";  w._tid++; var aid=w.guid + viewId + "" + w._tid; o += "<div id=\"" + aid + "\"%3$s></div>"; w.one("render", async () => {  let o ="<%2$s>%1$s</%2$s>"; }); o+="<%2$s>',
+            $this->getBody(),
+            static::$JS_WRAPPER_TAG,
+            $classes,
+        );
+    }
+
+    protected function tagPromise(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['callback']);
+
+        $as = $attrs->as ?? 'd';
+
+        return sprintf(
+            '</%3$s>"; let _c=document.getElementById(aid); if(_c===null) {return;} _c.innerHTML = o; %1$s.then((%4$s) => { let o="<%3$s>%2$s</%3$s>"; _c.innerHTML = o; }); o+="<%3$s>',
+            $this->makeJsString($attrs->callback),
+            $this->getBody(),
+            static::$JS_WRAPPER_TAG,
+            $as,
+        );
+    }
+
     protected function tagBreak(): string
     {
         return sprintf('</%1$s>"; break; o+="<%1$s>', static::$JS_WRAPPER_TAG);
