@@ -624,8 +624,6 @@ class ModelQueryBuilder
 
         if ($item === null) {
             $item = $this->createInstance((object)$data)->setOriginalRows([])->save();
-        } else {
-            $item->mergeRows(ArrayUtil::clean($data));
         }
 
         return $item;
@@ -641,7 +639,6 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item !== null) {
-            $item->mergeRows(ArrayUtil::clean($data));
             return $item;
         }
 
@@ -823,6 +820,18 @@ class ModelQueryBuilder
     public function __clone()
     {
         $this->query = clone $this->query;
+    }
+
+    /**
+     * When enabled sql-statements will overwrite each other.
+     *
+     * @param bool $enabled
+     * @return static $this
+     */
+    public function overwriteQuery(bool $enabled = true): self
+    {
+        $this->getQuery()->setOverwriteEnabled($enabled);
+        return $this->model;
     }
 
     /**

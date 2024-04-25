@@ -257,6 +257,7 @@ window.Widget.prototype = {
     events: [],
     elementEvents: [],
     _tid: 0,
+    _aid: 0,
     init: function () {
         //this.template.widget = this;
         this.template.guid = this.guid;
@@ -315,6 +316,7 @@ window.Widget.prototype = {
         this.template.widget = this;
 
         this._tid = 0;
+        this._aid = 0;
         let output = '';
 
         this.template.setDefaultView();
