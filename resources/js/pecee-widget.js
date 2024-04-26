@@ -217,7 +217,7 @@ window.widget.template.prototype = {
             viewId: viewId,
             view: view,
             index: (typeof index === 'undefined') ? null : index,
-            id: this.guid + viewId + "" + this.widget._tid,
+            id: this.guid + ((viewId === null) ? "" : viewId) + "" + this.widget._tid,
         };
 
         this.widget._tid++;
@@ -355,7 +355,11 @@ window.Widget.prototype = {
     renderTemplate: function (template, data = {}) {
         return template.view(data, this.guid, this, this.guid);
     },
-    renderWidget: function (widget, view = null, classes = []) {
+    renderWidget: function (widget = null, view = null, classes = []) {
+
+        if (widget === null) {
+            return '';
+        }
 
         let classHtml = '';
 
@@ -368,12 +372,12 @@ window.Widget.prototype = {
         widget.setContainer("div[data-id=iw_" + widget.guid + "]");
 
         if (view !== null) {
-            widget.template.one(view.id, () => {
+            this.template.one(view.id, () => {
                 widget.render();
                 widgets.clean();
             });
         } else {
-            widget.one("render", () => {
+            this.one("render", () => {
                 widget.trigger("render");
                 widgets.clean();
             });
