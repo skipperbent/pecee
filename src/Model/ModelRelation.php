@@ -100,7 +100,7 @@ abstract class ModelRelation
             return null;
         }
 
-        $instance = $parent->newQuery();
+        $instance = clone $parent;
         $instance->setOriginalRows($parent->getOriginalRows());
 
         if ($this->withDefault === null) {
