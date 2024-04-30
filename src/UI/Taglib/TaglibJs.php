@@ -491,7 +491,7 @@ class TaglibJs extends Taglib
         $classes = $attrs->class ? ' class=\"' . $attrs->class . '\"' : '';
 
         return sprintf(
-            '</%2$s>"; w._aid++; var aid=w.guid + ((viewId) ? viewId : "") + w._aid; o += "<div id=\"" + aid + "\"%3$s></div>"; w.one("render", async () => {  let o ="<%2$s>%1$s</%2$s>"; }); o+="<%2$s>',
+            '</%2$s>"; w._aid++; var aid=w.guid + "" + w._aid; o += "<div id=\"" + aid +  "\"%3$s></div>"; w.one("render", async (__d) => { const aid=__d.aid; let o ="<%2$s>%1$s</%2$s>"; }, { aid: aid }); o+="<%2$s>',
             $this->getBody(),
             static::$JS_WRAPPER_TAG,
             $classes,
@@ -505,7 +505,7 @@ class TaglibJs extends Taglib
         $as = $attrs->as ?? 'd';
 
         return sprintf(
-            '</%3$s>"; let _c=document.getElementById(aid); if(_c===null) {return;} _c.innerHTML = o; %1$s.then((%4$s) => { let o="<%3$s>%2$s</%3$s>"; _c.innerHTML = o; w.trigger("async", %4$s); }); o+="<%3$s>',
+            '</%3$s>"; let _c=document.getElementById(aid); if(_c===null) {return;} _c.innerHTML = o; %1$s.then((%4$s) => { let o="<%3$s>%2$s</%3$s>"; _c.innerHTML = o; w.trigger("async", %4$s); w.trigger("render"); }); o+="<%3$s>',
             $this->makeJsString($attrs->callback),
             $this->getBody(),
             static::$JS_WRAPPER_TAG,

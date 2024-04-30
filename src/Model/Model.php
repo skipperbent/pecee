@@ -4,6 +4,7 @@ namespace Pecee\Model;
 
 use Carbon\Carbon;
 use Pecee\ArrayUtil;
+use Pecee\Guid;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Relation\BelongsTo;
@@ -48,6 +49,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
         $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
 
+        // Set fixed identifier
+        if ($this->fixedIdentifier === true) {
+            $this->{$this->primaryKey} = Guid::create();
+        }
+
+        // Set timestamps
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
                 'updated_at',

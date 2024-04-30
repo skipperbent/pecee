@@ -137,7 +137,7 @@ window.widget.template.prototype = {
         return '';
     },
     triggerEvent: function (name, data) {
-        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach(e => e.callback(data, this));
+        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach((e, i) => e.callback(data, this, i));
     },
     on: function (name, callback) {
         name.split(' ').filter(event => event.trim() !== '').forEach(event => this.events.push({
@@ -150,12 +150,16 @@ window.widget.template.prototype = {
         Object.keys(this.events).filter(key => this.events[key].name === name || this.events[key].name.split('.')[0] === name).forEach(key => this.events.splice(parseInt(key), 1));
         return this;
     },
-    one: function (name, callback) {
+    one: function (name, callback, mergeData = null) {
         this.events.push({
             name: name + '.one',
-            callback: (data) => {
+            callback: (data, context, index) => {
                 this.off(name + '.one');
-                callback(data);
+                if (mergeData !== null) {
+                    data = (data === null) ? {} : data;
+                    $.extend(data, mergeData);
+                }
+                callback(data, context, index);
             }
         });
 
@@ -257,7 +261,7 @@ window.Widget.prototype = {
     events: [],
     elementEvents: [],
     _tid: 0,
-    _aid: 0,
+    _aid: 1,
     init: function () {
         //this.template.widget = this;
         this.template.guid = this.guid;
@@ -316,7 +320,7 @@ window.Widget.prototype = {
         this.template.widget = this;
 
         this._tid = 0;
-        this._aid = 0;
+        this._aid = 1;
         let output = '';
 
         this.template.setDefaultView();
@@ -394,9 +398,7 @@ window.Widget.prototype = {
         return this.rows;
     },
     trigger: function (name, data) {
-        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach(e => {
-            e.callback(data, this)
-        });
+        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach((e, i) => e.callback(data, this, i));
     },
     setTemplate: function (template) {
         this.template = template;
@@ -415,12 +417,16 @@ window.Widget.prototype = {
         Object.keys(this.events).filter(key => this.events[key].name === name || this.events[key].name.split('.')[0] === name).forEach(key => this.events.splice(parseInt(key), 1));
         return this;
     },
-    one: function (name, callback) {
+    one: function (name, callback, mergeData = null) {
         this.events.push({
             name: name + '.one',
-            callback: (data) => {
+            callback: (data = null, context, index) => {
                 this.unbind(name + '.one');
-                callback(data, this);
+                if (mergeData !== null) {
+                    data = (data === null) ? {} : data;
+                    $.extend(data, mergeData);
+                }
+                callback(data, context, index);
             }
         });
 
