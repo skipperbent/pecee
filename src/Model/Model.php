@@ -324,7 +324,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
             return static::instance()->where($this->getPrimaryKey(), '=', $this->{$this->getPrimaryKey()})->update($updateData);
         }
 
-        $updateData = array_filter($updateData, function ($value) {
+        $updateData = array_filter($updateData, static function ($value) {
             return $value !== null;
         }, ARRAY_FILTER_USE_BOTH);
 
