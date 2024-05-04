@@ -498,6 +498,23 @@ window.Widget.prototype = {
     addEvent: function (eventType, callback) {
         return this.template.addEvent(eventType, callback);
     },
+    on: function (element, event, callback) {
+        event.split(' ').forEach((e) => {
+
+            const _event = e + '.' + this.guid;
+
+            $(element).on(_event, (e) => {
+                if ($(this.container).length === 0) {
+                    $(element).off(_event);
+                    return;
+                }
+
+                callback(e);
+            });
+        });
+
+        return this;
+    },
     onElement: function (element, event, callback) {
 
         event.split(' ').forEach((e) => {
