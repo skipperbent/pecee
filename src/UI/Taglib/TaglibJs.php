@@ -269,11 +269,11 @@ class TaglibJs extends Taglib
         $output = '';
 
         if ($data === 'd') {
-            $output .= "if(typeof d === 'undefined') { d = {}; }";
+            $output .= "if(typeof d === 'undefined') { d = {}; } ";
         }
 
         if (strlen($dataOutput) > 0) {
-            $output .= "if($data !== null) { $dataOutput }";
+            $output .= "if($data !== null) { $dataOutput } ";
         }
 
         $templateId = (str_contains($attrs->id, '.') === false) ? "$.{$attrs->id}" : $attrs->id;
