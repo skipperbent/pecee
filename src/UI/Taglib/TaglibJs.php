@@ -257,8 +257,7 @@ class TaglibJs extends Taglib
             if (stripos($key, 'data-') === 0) {
 
                 $dataOutput .= sprintf(
-                    '%1$s.%2$s = %3$s;',
-                    $data,
+                    '_d.%1$s = %2$s;',
                     trim(str_ireplace('data-', '', $key)),
                     $value,
                 );
@@ -266,19 +265,15 @@ class TaglibJs extends Taglib
             }
         }
 
-        $output = '';
-
-        if ($data === 'd') {
-            $output .= "if(typeof d === 'undefined') { d = {}; } ";
-        }
+        $output = "var _d = $data;";
 
         if (strlen($dataOutput) > 0) {
-            $output .= "if($data !== null) { $dataOutput } ";
+            $output .= "if(_d !== null) { $dataOutput }";
         }
 
         $templateId = (str_contains($attrs->id, '.') === false) ? "$.{$attrs->id}" : $attrs->id;
 
-        $output .= "o += $templateId.view($data, $guid, $widget, viewId, view);";
+        $output .= "o += $templateId.view(_d, $guid, $widget, viewId, view);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
     }
 

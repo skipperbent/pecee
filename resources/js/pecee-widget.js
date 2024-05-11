@@ -499,11 +499,8 @@ window.Widget.prototype = {
         return this.template.addEvent(eventType, callback);
     },
     on: function (element, event, callback) {
-        event.split(' ').forEach((e) => {
-
-            const _event = e + '.' + this.guid;
-
-            $(element).on(_event, (e) => {
+        event.split(' ').forEach((_event) => {
+            $(element).off(_event).on(_event, (e) => {
                 if ($(this.container).length === 0) {
                     $(element).off(_event);
                     return;
@@ -527,9 +524,9 @@ window.Widget.prototype = {
             });
 
             if (typeof element === 'string') {
-                $(this.container).find(element).on(e, callback);
+                $(this.container).find(element).off(e).on(e, callback);
             } else {
-                $(element).on(e, callback);
+                $(element).off(e).on(e, callback);
             }
         });
 
