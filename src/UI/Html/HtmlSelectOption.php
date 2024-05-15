@@ -4,7 +4,7 @@ namespace Pecee\UI\Html;
 
 class HtmlSelectOption extends Html
 {
-    protected $group;
+    protected ?string $group = null;
 
     public function __construct(?string $text = null, ?string $value = null, bool $selected = false)
     {
@@ -21,13 +21,15 @@ class HtmlSelectOption extends Html
         }
     }
 
-    public function selected(bool $selected = true)
+    public function selected(bool $selected = true): self
     {
         if ($selected === true) {
             $this->attr('selected');
         } else {
             $this->removeAttribute('selected');
         }
+
+        return $this;
     }
 
     /**
@@ -35,7 +37,7 @@ class HtmlSelectOption extends Html
      * @param string $group
      * @return static
      */
-    public function setGroup($group)
+    public function setGroup(string $group): self
     {
         $this->group = $group;
 
@@ -47,7 +49,7 @@ class HtmlSelectOption extends Html
      * @param string $group
      * @return static
      */
-    public function group($group)
+    public function group(string $group): self
     {
         return $this->setGroup($group);
     }
@@ -56,7 +58,7 @@ class HtmlSelectOption extends Html
      * Get group name
      * @return string|null
      */
-    public function getGroup()
+    public function getGroup(): ?string
     {
         return $this->group;
     }
@@ -64,7 +66,7 @@ class HtmlSelectOption extends Html
     /**
      * @return static
      */
-    public function disabled()
+    public function disabled(): self
     {
         return $this->addAttribute('disabled', null);
     }

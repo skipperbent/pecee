@@ -617,13 +617,17 @@ class ModelQueryBuilder
      * @throws Exception
      * @throws ModelException
      */
-    public function firstOrCreate(array $data = [])
+    public function firstOrCreate(array $data = [], bool $mergeData = false)
     {
         /* @var $item Model */
         $item = $this->first();
 
         if ($item === null) {
             $item = $this->createInstance((object)$data)->setOriginalRows([])->save();
+        }
+
+        if ($mergeData) {
+            $item->mergeData($data);
         }
 
         return $item;
@@ -826,9 +830,9 @@ class ModelQueryBuilder
      * When enabled sql-statements will overwrite each other.
      *
      * @param bool $enabled
-     * @return static $this
+     * @return Model $this
      */
-    public function overwriteQuery(bool $enabled = true): self
+    public function overwriteQuery(bool $enabled = true): Model
     {
         $this->getQuery()->setOverwriteEnabled($enabled);
         return $this->model;

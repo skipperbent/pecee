@@ -7,15 +7,14 @@ class Html
     public const CLOSE_TYPE_TAG = 'tag';
     public const CLOSE_TYPE_NONE = 'none';
 
-    protected $tag;
-    protected $innerHtml = [];
-    protected $closingType;
-    protected $attributes = [];
+    protected string $tag;
+    protected array $innerHtml = [];
+    protected string $closingType = self::CLOSE_TYPE_TAG;
+    protected array $attributes = [];
 
-    public function __construct($tag)
+    public function __construct(string $tag)
     {
         $this->tag = $tag;
-        $this->closingType = static::CLOSE_TYPE_TAG;
     }
 
     /**
@@ -23,7 +22,7 @@ class Html
      * @param Html|string $element
      * @return static $this
      */
-    public function append($element)
+    public function append($element): self
     {
         $this->innerHtml[] = $element;
 
@@ -35,7 +34,7 @@ class Html
      * @param Html $element
      * @return static $this
      */
-    public function appendTo(self $element)
+    public function appendTo(self $element): self
     {
         $element->append($this);
         return $this;
@@ -46,7 +45,7 @@ class Html
      * @param Html|string $element
      * @return static $this
      */
-    public function prepend($element)
+    public function prepend($element): self
     {
         array_unshift($this->innerHtml, $element);
 
@@ -56,7 +55,7 @@ class Html
     /**
      * @return array
      */
-    public function getChildren()
+    public function getChildren(): array
     {
         return $this->innerHtml;
     }
@@ -65,7 +64,7 @@ class Html
      * @param array $html
      * @return static
      */
-    public function setInnerHtml(array $html)
+    public function setInnerHtml(array $html): self
     {
         $this->innerHtml = $html;
 
@@ -76,14 +75,14 @@ class Html
      * @param string $html
      * @return static
      */
-    public function addInnerHtml($html)
+    public function addInnerHtml($html): self
     {
         $this->innerHtml[] = $html;
 
         return $this;
     }
 
-    public function text(string $text)
+    public function text(string $text): self
     {
         return $this->addInnerHtml($text);
     }
@@ -92,10 +91,10 @@ class Html
      * Replace attribute
      *
      * @param string $name
-     * @param string $value
+     * @param string|null $value
      * @return static
      */
-    public function replaceAttribute($name, $value = '')
+    public function replaceAttribute(string $name, ?string $value = null): self
     {
         $this->attributes[$name] = [$value];
 
@@ -106,10 +105,10 @@ class Html
      * Adds new attribute to the element.
      *
      * @param string $name
-     * @param string $value
+     * @param string|null $value
      * @return static
      */
-    public function addAttribute($name, $value = null)
+    public function addAttribute(string $name, ?string $value = null): self
     {
         if (isset($this->attributes[$name]) && in_array($value, $this->attributes[$name], true) === false) {
             $this->attributes[$name][] = $value;
@@ -124,7 +123,7 @@ class Html
      * @param array $attributes
      * @return static
      */
-    public function setAttributes(array $attributes)
+    public function setAttributes(array $attributes): self
     {
         foreach ($attributes as $name => $value) {
             $this->addAttribute($name, $value);
@@ -135,11 +134,11 @@ class Html
 
     /**
      * @param string $name
-     * @param string $value
+     * @param string|null $value
      * @param bool $replace
      * @return static
      */
-    public function attr($name, $value = null, $replace = true)
+    public function attr(string $name, ?string $value = null, bool $replace = true): self
     {
         if ($replace === true) {
             return $this->replaceAttribute($name, $value);
@@ -152,7 +151,7 @@ class Html
      * @param string $id
      * @return static
      */
-    public function id($id)
+    public function id(string $id): self
     {
         return $this->addAttribute('id', $id);
     }
@@ -161,7 +160,7 @@ class Html
      * @param string $css
      * @return static
      */
-    public function style($css)
+    public function style(string $css): self
     {
         return $this->addAttribute('style', $css);
     }
@@ -169,14 +168,14 @@ class Html
     /**
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         $output = '<' . $this->tag;
 
         foreach ($this->attributes as $key => $val) {
             $output .= ' ' . $key;
             if ($val[0] !== null || strtolower($key) === 'value') {
-                $val = htmlentities(join(' ', $val), ENT_QUOTES, app()->getCharset());
+                $val = addslashes(join(' ', $val));
                 $output .= '="' . $val . '"';
             }
         }
@@ -200,7 +199,7 @@ class Html
      * @param string $class
      * @return static
      */
-    public function addClass($class)
+    public function addClass(string $class): self
     {
         return $this->addAttribute('class', $class);
     }
@@ -208,7 +207,7 @@ class Html
     /**
      * @return string $closingType
      */
-    public function getClosingType()
+    public function getClosingType(): string
     {
         return $this->closingType;
     }
@@ -217,7 +216,7 @@ class Html
      * @param string $closingType
      * @return static
      */
-    public function setClosingType($closingType)
+    public function setClosingType(string $closingType): self
     {
         $this->closingType = $closingType;
 
@@ -232,7 +231,7 @@ class Html
     /**
      * @return array
      */
-    public function getInnerHtml()
+    public function getInnerHtml(): array
     {
         return $this->innerHtml;
     }
@@ -241,7 +240,7 @@ class Html
      * @param string $name
      * @return string|null
      */
-    public function getAttribute($name)
+    public function getAttribute(string $name): ?string
     {
         return $this->attributes[$name] ?? null;
     }
@@ -254,7 +253,7 @@ class Html
     /**
      * @return array
      */
-    public function getAttributes()
+    public function getAttributes(): array
     {
         return $this->attributes;
     }
@@ -263,7 +262,7 @@ class Html
      * @param string $tag
      * @return static $this
      */
-    public function setTag($tag)
+    public function setTag(string $tag): self
     {
         $this->tag = $tag;
 
@@ -273,7 +272,7 @@ class Html
     /**
      * @return string
      */
-    public function getTag()
+    public function getTag(): string
     {
         return $this->tag;
     }
@@ -282,7 +281,7 @@ class Html
      * @param string $name
      * @return static
      */
-    public function removeAttribute($name)
+    public function removeAttribute(string $name): self
     {
         if (isset($this->attributes[$name])) {
             unset($this->attributes[$name]);

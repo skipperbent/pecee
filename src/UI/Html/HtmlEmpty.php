@@ -7,10 +7,10 @@ class HtmlEmpty extends Html
 
     public function __construct()
     {
-        parent::__construct($tag = '');
+        parent::__construct('');
     }
 
-    public function render()
+    public function render(): string
     {
         return '';
     }

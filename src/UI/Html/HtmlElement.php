@@ -1,4 +1,5 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 use Pecee\UI\Xml\XmlElement;
@@ -6,7 +7,7 @@ use Pecee\UI\Xml\XmlElement;
 class HtmlElement extends XmlElement implements IHtmlNode
 {
 
-    public function isContainer()
+    public function isContainer(): bool
     {
         switch (strtolower($this->getTag())) {
             case 'div':

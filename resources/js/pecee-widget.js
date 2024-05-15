@@ -341,10 +341,12 @@ window.Widget.prototype = {
 
             const clone = this.containerNodeClone;
 
-            container.forEach(function (node) {
-                clone.innerHTML = output;
-                morphdom(node, clone, {childrenOnly: true});
-            });
+            if (clone === null) {
+                return output;
+            }
+
+            clone.innerHTML = output;
+            container.forEach((node) => morphdom(node, clone, {childrenOnly: true}));
 
         } else {
             output = this.renderTemplate(this.template, this.data);

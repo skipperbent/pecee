@@ -5,7 +5,7 @@ namespace Pecee\UI\Html;
 class HtmlInput extends Html
 {
 
-    public function __construct($name, $type, $value = null)
+    public function __construct(string $name, string $type, ?string $value = null)
     {
         parent::__construct('input');
 
@@ -26,7 +26,7 @@ class HtmlInput extends Html
      * @param string $name
      * @return static
      */
-    public function name($name)
+    public function name(string $name): self
     {
         return $this->addAttribute('name', $name);
     }
@@ -35,7 +35,7 @@ class HtmlInput extends Html
      * @param string $value
      * @return static
      */
-    public function value($value)
+    public function value(string $value): self
     {
         return $this->addAttribute('value', $value);
     }
@@ -44,7 +44,7 @@ class HtmlInput extends Html
      * @param string $text
      * @return static
      */
-    public function placeholder($text)
+    public function placeholder(string $text): self
     {
         return $this->addAttribute('placeholder', $text);
     }
@@ -53,7 +53,7 @@ class HtmlInput extends Html
      * @param bool $status
      * @return static
      */
-    public function autoComplete($status = false)
+    public function autoComplete(bool $status = false): self
     {
         return $this->addAttribute('autocomplete', (($status === true) ? 'on' : 'off'));
     }
@@ -61,7 +61,7 @@ class HtmlInput extends Html
     /**
      * @return static
      */
-    public function readonly()
+    public function readonly(): self
     {
         return $this->addAttribute('readonly');
     }
@@ -69,7 +69,7 @@ class HtmlInput extends Html
     /**
      * @return static
      */
-    public function disabled()
+    public function disabled(): self
     {
         return $this->addAttribute('disabled');
     }
@@ -77,7 +77,7 @@ class HtmlInput extends Html
     /**
      * @return static
      */
-    public function autoFocus()
+    public function autoFocus(): self
     {
         return $this->addAttribute('autofocus');
     }
@@ -85,7 +85,7 @@ class HtmlInput extends Html
     /**
      * @return static
      */
-    public function required()
+    public function required(): self
     {
         return $this->addAttribute('required');
     }
@@ -93,7 +93,7 @@ class HtmlInput extends Html
     /**
      * @return static
      */
-    public function multiple()
+    public function multiple(): self
     {
         return $this->addAttribute('required');
     }
@@ -102,7 +102,7 @@ class HtmlInput extends Html
      * @param int $maxLength
      * @return static
      */
-    public function maxLength($maxLength)
+    public function maxLength(int $maxLength): self
     {
         return $this->addAttribute('maxlength', $maxLength);
     }
@@ -111,16 +111,16 @@ class HtmlInput extends Html
      * @param int $size
      * @return static
      */
-    public function size($size)
+    public function size(int $size): self
     {
         return $this->addAttribute('size', $size);
     }
 
     /**
-     * @param int $type
+     * @param string $type
      * @return static
      */
-    public function type($type)
+    public function type(string $type): self
     {
         return $this->addAttribute('type', $type);
     }
@@ -129,7 +129,7 @@ class HtmlInput extends Html
      * @param int $pattern
      * @return static
      */
-    public function pattern($pattern)
+    public function pattern(int $pattern): self
     {
         return $this->addAttribute('pattern', $pattern);
     }
@@ -138,7 +138,7 @@ class HtmlInput extends Html
      * @param bool $checked
      * @return static
      */
-    public function checked(bool $checked)
+    public function checked(bool $checked): self
     {
         if ($checked === true) {
             return $this->addAttribute('checked');

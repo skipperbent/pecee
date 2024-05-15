@@ -1,13 +1,14 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class HtmlSelect extends Html
 {
-    protected $options = [];
-    protected $groups = [];
-    protected $groupsDisabled;
+    protected array $options = [];
+    protected array $groups = [];
+    protected bool $groupsDisabled = false;
 
-    public function __construct($name)
+    public function __construct(?string $name)
     {
         parent::__construct('select');
 
@@ -60,7 +61,7 @@ class HtmlSelect extends Html
     /**
      * @return static
      */
-    public function multiple()
+    public function multiple(): self
     {
         return $this->addAttribute('multiple', null);
     }
@@ -68,7 +69,7 @@ class HtmlSelect extends Html
     /**
      * @return static
      */
-    public function required()
+    public function required(): self
     {
         return $this->addAttribute('required');
     }
@@ -76,7 +77,7 @@ class HtmlSelect extends Html
     /**
      * @return string
      */
-    public function render()
+    public function render(): string
     {
         /* @var $options array */
         foreach ($this->groups as $name => $options) {
@@ -108,7 +109,7 @@ class HtmlSelect extends Html
     /**
      * @return static
      */
-    public function disabled()
+    public function disabled(): self
     {
         return $this->addAttribute('disabled', null);
     }
@@ -118,7 +119,7 @@ class HtmlSelect extends Html
      * @param string $group
      * @return static
      */
-    public function disableGroup($group)
+    public function disableGroup(string $group): self
     {
         $this->groupsDisabled[] = $group;
 
