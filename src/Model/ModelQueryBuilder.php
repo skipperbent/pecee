@@ -13,6 +13,9 @@ use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Pixie\QueryBuilder\Raw;
 use Pecee\Str;
 
+/**
+ * @mixin Model
+ */
 class ModelQueryBuilder
 {
     protected static self $instance;
@@ -40,12 +43,15 @@ class ModelQueryBuilder
     /**
      * @param \stdClass $item
      * @return static
+     * @throws Exception
      */
     protected function createInstance(\stdClass $item)
     {
-        $model = $this->model->onNewInstance($item);
-        $model->mergeRows(ArrayUtil::clean((array)$item));
-        $model->setOriginalRows((array)$item);
+        $model = $this->model
+            ->onNewInstance($item)
+            ->mergeRows(ArrayUtil::clean((array)$item))
+            ->setOriginalRows((array)$item);
+
         $model->onInstanceCreate();
 
         return $model;
@@ -611,16 +617,17 @@ class ModelQueryBuilder
      * @throws Exception
      * @throws ModelException
      */
-    public function firstOrCreate(array $data = [])
+    public function firstOrCreate(array $data = [], bool $mergeData = false)
     {
+        /* @var $item Model */
         $item = $this->first();
 
         if ($item === null) {
-            $item = $this->createInstance((object)$data);
-            $item->setOriginalRows([]);
-            $item->save();
-        } else {
-            $item->mergeRows(ArrayUtil::clean($data));
+            $item = $this->createInstance((object)$data)->setOriginalRows([])->save();
+        }
+
+        if ($mergeData) {
+            $item->mergeData($data);
         }
 
         return $item;
@@ -636,13 +643,10 @@ class ModelQueryBuilder
         $item = $this->first();
 
         if ($item !== null) {
-            $item->mergeRows(ArrayUtil::clean($data));
             return $item;
         }
 
-        $item = $this->createInstance((object)$data);
-        $item->setOriginalRows([]);
-        return $item;
+        return $this->createInstance((object)$data)->setOriginalRows([]);
     }
 
     /**
@@ -820,6 +824,18 @@ class ModelQueryBuilder
     public function __clone()
     {
         $this->query = clone $this->query;
+    }
+
+    /**
+     * When enabled sql-statements will overwrite each other.
+     *
+     * @param bool $enabled
+     * @return Model $this
+     */
+    public function overwriteQuery(bool $enabled = true): Model
+    {
+        $this->getQuery()->setOverwriteEnabled($enabled);
+        return $this->model;
     }
 
     /**

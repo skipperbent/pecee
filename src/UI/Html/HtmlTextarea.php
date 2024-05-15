@@ -1,17 +1,16 @@
 <?php
+
 namespace Pecee\UI\Html;
 
 class HtmlTextarea extends Html
 {
-    protected $value;
+    protected string $value = '';
 
-    public function __construct($name, $rows = null, $cols = null, $value = null)
+    public function __construct(string $name, ?int $rows = null, ?int $cols = null, ?string $value = null)
     {
         parent::__construct('textarea');
 
         $this->closingType = static::CLOSE_TYPE_TAG;
-
-        $this->value = htmlentities((string)$value, ENT_QUOTES, app()->getCharset());
 
         $this->addAttribute('name', $name);
 
@@ -23,7 +22,8 @@ class HtmlTextarea extends Html
             $this->cols($cols);
         }
 
-        if ($this->value !== null) {
+        if ($value !== null) {
+            $this->value = htmlentities((string)$value, ENT_QUOTES, app()->getCharset());
             $this->addInnerHtml($this->value);
         }
     }
@@ -31,7 +31,7 @@ class HtmlTextarea extends Html
     /**
      * @return string
      */
-    public function getValue()
+    public function getValue(): string
     {
         return html_entity_decode($this->value, ENT_QUOTES, app()->getCharset());
     }
@@ -40,7 +40,7 @@ class HtmlTextarea extends Html
      * @param string $text
      * @return static
      */
-    public function placeholder($text)
+    public function placeholder(string $text): self
     {
         $this->addAttribute('placeholder', $text);
 
@@ -51,7 +51,7 @@ class HtmlTextarea extends Html
      * @param string $wrap
      * @return static
      */
-    public function wrap($wrap)
+    public function wrap(string $wrap): self
     {
         return $this->addAttribute('wrap', $wrap);
     }
@@ -60,7 +60,7 @@ class HtmlTextarea extends Html
      * @param int $rows
      * @return static
      */
-    public function rows($rows)
+    public function rows(int $rows): self
     {
         return $this->addAttribute('rows', $rows);
     }
@@ -69,7 +69,7 @@ class HtmlTextarea extends Html
      * @param int $cols
      * @return static
      */
-    public function cols($cols)
+    public function cols(int $cols): self
     {
         return $this->addAttribute('cols', $cols);
     }

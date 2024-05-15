@@ -12,7 +12,7 @@ class HtmlForm extends Html
     public const METHOD_POST = 'post';
     public const METHOD_GET = 'get';
 
-    public function __construct($name, $method = self::METHOD_POST, $action = null, $encoding = self::ENCTYPE_APPLICATION_URLENCODED)
+    public function __construct(string $name, string $method = self::METHOD_POST, ?string $action = null, string $encoding = self::ENCTYPE_APPLICATION_URLENCODED)
     {
         parent::__construct('form');
 
@@ -28,7 +28,7 @@ class HtmlForm extends Html
      * @param string $name
      * @return static
      */
-    public function name($name)
+    public function name(string $name): self
     {
         return $this->addAttribute('name', $name);
     }
@@ -37,7 +37,7 @@ class HtmlForm extends Html
      * @param string $method
      * @return static
      */
-    public function method($method)
+    public function method(string $method): self
     {
         if ($method !== static::METHOD_GET) {
             return $this->addAttribute('method', $method);
@@ -50,7 +50,7 @@ class HtmlForm extends Html
      * @param string $enctype
      * @return static
      */
-    public function enctype($enctype)
+    public function enctype(string $enctype): self
     {
         if ($enctype !== static::ENCTYPE_APPLICATION_URLENCODED) {
             return $this->addAttribute('enctype', $enctype);
@@ -62,7 +62,7 @@ class HtmlForm extends Html
     /**
      * @return static
      */
-    public function fileUpload()
+    public function fileUpload(): self
     {
         return $this->enctype(static::ENCTYPE_FORM_DATA);
     }
@@ -71,7 +71,7 @@ class HtmlForm extends Html
      * @param string $action
      * @return static
      */
-    public function action($action)
+    public function action(string $action): self
     {
         return $this->addAttribute('action', $action);
     }

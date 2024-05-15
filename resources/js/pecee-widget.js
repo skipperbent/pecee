@@ -137,7 +137,7 @@ window.widget.template.prototype = {
         return '';
     },
     triggerEvent: function (name, data) {
-        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach(e => e.callback(data, this));
+        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach((e, i) => e.callback(data, this, i));
     },
     on: function (name, callback) {
         name.split(' ').filter(event => event.trim() !== '').forEach(event => this.events.push({
@@ -150,12 +150,16 @@ window.widget.template.prototype = {
         Object.keys(this.events).filter(key => this.events[key].name === name || this.events[key].name.split('.')[0] === name).forEach(key => this.events.splice(parseInt(key), 1));
         return this;
     },
-    one: function (name, callback) {
+    one: function (name, callback, mergeData = null) {
         this.events.push({
             name: name + '.one',
-            callback: (data) => {
+            callback: (data, context, index) => {
                 this.off(name + '.one');
-                callback(data);
+                if (mergeData !== null) {
+                    data = (data === null) ? {} : data;
+                    $.extend(data, mergeData);
+                }
+                callback(data, context, index);
             }
         });
 
@@ -206,6 +210,9 @@ window.widget.template.prototype = {
 
         return object.callback(object.data, object.id, object, false);
     },
+    e: function (type, callback, viewId = null, view = null, index = null) {
+        return this.addEvent(type, callback, viewId, view, index);
+    },
     addEvent: function (type, callback, viewId = null, view = null, index = null) {
 
         let event = {
@@ -214,7 +221,7 @@ window.widget.template.prototype = {
             viewId: viewId,
             view: view,
             index: (typeof index === 'undefined') ? null : index,
-            id: this.guid + viewId + "" + this.widget._tid,
+            id: this.guid + ((viewId === null) ? "" : viewId) + "" + this.widget._tid,
         };
 
         this.widget._tid++;
@@ -229,7 +236,7 @@ window.widget.template.prototype = {
     },
 };
 
-site.Widget = function (template, container = null) {
+window.Widget = function (template, container = null) {
 
     this.clear();
     template.clear();
@@ -244,7 +251,7 @@ site.Widget = function (template, container = null) {
     return this;
 };
 
-site.Widget.prototype = {
+window.Widget.prototype = {
     guid: null,
     template: null,
     container: null,
@@ -254,6 +261,7 @@ site.Widget.prototype = {
     events: [],
     elementEvents: [],
     _tid: 0,
+    _aid: 1,
     init: function () {
         //this.template.widget = this;
         this.template.guid = this.guid;
@@ -312,6 +320,7 @@ site.Widget.prototype = {
         this.template.widget = this;
 
         this._tid = 0;
+        this._aid = 1;
         let output = '';
 
         this.template.setDefaultView();
@@ -324,7 +333,7 @@ site.Widget.prototype = {
                 return;
             }
 
-            output = this.template.view(this.data, this.guid, this, this.guid);
+            output = this.renderTemplate(this.template, this.data);
 
             if (this.containerNodeClone === null) {
                 this.cloneContainer();
@@ -332,13 +341,15 @@ site.Widget.prototype = {
 
             const clone = this.containerNodeClone;
 
-            container.forEach(function (node) {
-                clone.innerHTML = output;
-                morphdom(node, clone, {childrenOnly: true});
-            });
+            if (clone === null) {
+                return output;
+            }
+
+            clone.innerHTML = output;
+            container.forEach((node) => morphdom(node, clone, {childrenOnly: true}));
 
         } else {
-            output = this.template.view(this.data, this.guid, this, this.guid);
+            output = this.renderTemplate(this.template, this.data);
         }
 
         if (triggerEvents) {
@@ -347,6 +358,41 @@ site.Widget.prototype = {
 
         return output;
     },
+    renderTemplate: function (template, data = {}) {
+        return template.view(data, this.guid, this, this.guid);
+    },
+    renderWidget: function (widget = null, view = null, classes = []) {
+
+        if (widget === null) {
+            return '';
+        }
+
+        let classHtml = '';
+
+        if (classes.length > 0) {
+            classHtml += ' class="' + classes.join(' ') + '"';
+        }
+
+        let out = `<div data-id="iw_${widget.guid}"${classHtml}>`;
+
+        widget.setContainer("div[data-id=iw_" + widget.guid + "]");
+
+        if (view !== null) {
+            this.template.one(view.id, () => {
+                widget.render();
+                widgets.clean();
+            });
+        } else {
+            this.one("render", () => {
+                widget.trigger("render");
+                widgets.clean();
+            });
+        }
+
+        out += widget.render(false, false);
+        out += '</div>';
+        return out;
+    },
     getData: function () {
         return this.data;
     },
@@ -354,9 +400,7 @@ site.Widget.prototype = {
         return this.rows;
     },
     trigger: function (name, data) {
-        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach(e => {
-            e.callback(data, this)
-        });
+        this.events.filter(e => e.name === name || e.name.split('.')[0] === name).forEach((e, i) => e.callback(data, this, i));
     },
     setTemplate: function (template) {
         this.template = template;
@@ -375,12 +419,16 @@ site.Widget.prototype = {
         Object.keys(this.events).filter(key => this.events[key].name === name || this.events[key].name.split('.')[0] === name).forEach(key => this.events.splice(parseInt(key), 1));
         return this;
     },
-    one: function (name, callback) {
+    one: function (name, callback, mergeData = null) {
         this.events.push({
             name: name + '.one',
-            callback: (data) => {
+            callback: (data = null, context, index) => {
                 this.unbind(name + '.one');
-                callback(data, this);
+                if (mergeData !== null) {
+                    data = (data === null) ? {} : data;
+                    $.extend(data, mergeData);
+                }
+                callback(data, context, index);
             }
         });
 
@@ -452,6 +500,20 @@ site.Widget.prototype = {
     addEvent: function (eventType, callback) {
         return this.template.addEvent(eventType, callback);
     },
+    on: function (element, event, callback) {
+        event.split(' ').forEach((_event) => {
+            $(element).off(_event).on(_event, (e) => {
+                if ($(this.container).length === 0) {
+                    $(element).off(_event);
+                    return;
+                }
+
+                callback(e);
+            });
+        });
+
+        return this;
+    },
     onElement: function (element, event, callback) {
 
         event.split(' ').forEach((e) => {
@@ -464,9 +526,9 @@ site.Widget.prototype = {
             });
 
             if (typeof element === 'string') {
-                $(this.container).find(element).on(e, callback);
+                $(this.container).find(element).off(e).on(e, callback);
             } else {
-                $(element).on(e, callback);
+                $(element).off(e).on(e, callback);
             }
         });
 

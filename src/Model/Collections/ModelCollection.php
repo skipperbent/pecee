@@ -72,6 +72,23 @@ class ModelCollection extends Collection
     }
 
     /**
+     * Remove item from array based on key/value.
+     * @param string $key
+     * @param string $value
+     * @return $this
+     */
+    public function removeByFilter(string $key, string $value): self
+    {
+        $this->each(function ($item, $key) {
+            if ($item->{$key} === $value) {
+                $this->remove($key);
+            }
+        });
+
+        return $this;
+    }
+
+    /**
      * Filter elements
      * @param string|array $key
      * @param string $value

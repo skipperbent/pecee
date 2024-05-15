@@ -97,7 +97,7 @@ class TaglibJs extends Taglib
             $event = $matches[1];
             $callback = $matches[2];
 
-            return sprintf('on%1$s="return </%2$s>"; o+= t.addEvent("%1$s", (e) => { %3$s }, viewId, view, this.index) + "\"<%2$s>',
+            return sprintf('on%1$s="return </%2$s>"; o+= t.e("%1$s", (e) => { %3$s }, viewId, view, this.index) + "\"<%2$s>',
                 $event,
                 static::$JS_WRAPPER_TAG,
                 $callback,
@@ -192,18 +192,23 @@ class TaglibJs extends Taglib
 
         $as = $attrs->as ?? 'd';
 
-        $defaultData = [];
+        $dataOutput = '';
 
-        foreach ((array)$attrs as $key => $value) {
+        foreach ($attrs as $key => $value) {
             if (stripos($key, 'data-') === 0) {
-                $defaultData[trim(str_ireplace('data-', '', $key))] = $value;
+
+                $dataOutput .= sprintf(
+                    '%1$s.%2$s = (typeof %1$s.%2$s !== \'undefined\') ? %1$s.%2$s : %3$s;',
+                    $as,
+                    trim(str_ireplace('data-', '', $key)),
+                    ($value === '') ? 'null' : $value,
+                );
+
             }
         }
 
-        $dataOutput = '';
-        if (count($defaultData) > 0) {
-            $json = json_encode($defaultData);
-            $dataOutput = "$as = Object.assign($json, $as);";
+        if (strlen($dataOutput) > 0) {
+            $dataOutput = "if($as !== null) { $dataOutput }";
         }
 
         $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = (_d,g,w,viewId = null, view = null) => { let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
@@ -252,8 +257,7 @@ class TaglibJs extends Taglib
             if (stripos($key, 'data-') === 0) {
 
                 $dataOutput .= sprintf(
-                    '%1$s.%2$s = %3$s;',
-                    $data,
+                    '_d.%1$s = %2$s;',
                     trim(str_ireplace('data-', '', $key)),
                     $value,
                 );
@@ -261,19 +265,15 @@ class TaglibJs extends Taglib
             }
         }
 
-        $output = '';
-
-        if ($data === 'd') {
-            $output .= "if(typeof d === 'undefined') { d = {}; }";
-        }
+        $output = "var _d = $data;";
 
         if (strlen($dataOutput) > 0) {
-            $output .= "if($data !== null) { $dataOutput }";
+            $output .= "if(_d !== null) { $dataOutput }";
         }
 
         $templateId = (str_contains($attrs->id, '.') === false) ? "$.{$attrs->id}" : $attrs->id;
 
-        $output .= "o += $templateId.view($data, $guid, $widget, viewId, view);";
+        $output .= "o += $templateId.view(_d, $guid, $widget, viewId, view);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
     }
 
@@ -288,12 +288,12 @@ class TaglibJs extends Taglib
     {
         $this->requireAttributes($attrs, ['widget']);
 
-        $class = isset($attrs->class) ? ' class=\"' . $attrs->class . '\"' : '';
+        $class = isset($attrs->class) ? explode(' ', $attrs->class) : [];
 
-        return sprintf('</%1$s>"; var _w=%2$s; o+= "<div data-id=\"iw_" + _w.guid + "\"%3$s>"; _w.setContainer("div[data-id=iw_" + _w.guid + "]"); if(view !== null) { w.template.one(view.id, () => { _w.render(); widgets.clean(); }); } else { w.one("render", () => { _w.trigger("render"); widgets.clean(); });  } o+= _w.render(false, false); o += "</div><%1$s>',
+        return sprintf('</%1$s>"; o+=w.renderWidget(%2$s,view,%3$s); o+="<%1$s>',
             static::$JS_WRAPPER_TAG,
             $attrs->widget,
-            $class,
+            json_encode($class),
         );
     }
 
@@ -478,6 +478,33 @@ class TaglibJs extends Taglib
             $attrs->parameters,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG
+        );
+    }
+
+    protected function tagAsync(\stdClass $attrs): string
+    {
+        $classes = $attrs->class ? ' class=\"' . $attrs->class . '\"' : '';
+
+        return sprintf(
+            '</%2$s>"; w._aid++; var aid=w.guid + "" + w._aid; o += "<div id=\"" + aid +  "\"%3$s></div>"; w.one("render", async (__d) => { const aid=__d.aid; let o ="<%2$s>%1$s</%2$s>"; }, { aid: aid }); o+="<%2$s>',
+            $this->getBody(),
+            static::$JS_WRAPPER_TAG,
+            $classes,
+        );
+    }
+
+    protected function tagPromise(\stdClass $attrs): string
+    {
+        $this->requireAttributes($attrs, ['callback']);
+
+        $as = $attrs->as ?? 'd';
+
+        return sprintf(
+            '</%3$s>"; let _c=document.getElementById(aid); if(_c===null) {return;} _c.innerHTML = o; %1$s.then((%4$s) => { let o="<%3$s>%2$s</%3$s>"; _c.innerHTML = o; w.trigger("async", %4$s); w.trigger("render"); }); o+="<%3$s>',
+            $this->makeJsString($attrs->callback),
+            $this->getBody(),
+            static::$JS_WRAPPER_TAG,
+            $as,
         );
     }
 

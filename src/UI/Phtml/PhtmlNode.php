@@ -9,10 +9,10 @@ use Pecee\UI\Taglib\ITaglib;
 class PhtmlNode extends HtmlElement
 {
 
-    private static $closureCount = 0;
-    private static $append = '';
-    private static $prepend = '';
-    private $container = false;
+    private static int $closureCount = 0;
+    private static string $append = '';
+    private static string $prepend = '';
+    private bool $container = false;
 
     public static function getNextClosure()
     {
@@ -22,7 +22,7 @@ class PhtmlNode extends HtmlElement
         return 'closure' . md5($basis);
     }
 
-    public function isContainer()
+    public function isContainer(): bool
     {
         return $this->container;
     }

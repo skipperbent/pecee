@@ -4,6 +4,7 @@ namespace Pecee\Model;
 
 use Carbon\Carbon;
 use Pecee\ArrayUtil;
+use Pecee\Guid;
 use Pecee\Model\Collections\ModelCollection;
 use Pecee\Model\Exceptions\ModelException;
 use Pecee\Model\Relation\BelongsTo;
@@ -48,6 +49,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
         $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
 
+        // Set fixed identifier
+        if ($this->fixedIdentifier === true) {
+            $this->{$this->primaryKey} = Guid::create();
+        }
+
+        // Set timestamps
         if ($this->timestamps === true) {
             $this->columns = array_merge($this->columns, [
                 'updated_at',
@@ -275,7 +282,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
         $updateData = [];
         foreach ($this->columns as $column) {
-            if ($data !== null && $this->{$column} !== null || $data === null) {
+            if ($this->{$column} !== $data && ($data !== null && $this->{$column} !== null || $data === null)) {
                 $updateData[$column] = $this->{$column};
             }
         }
@@ -285,11 +292,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         if ($data !== null) {
 
             /* Only save valid columns */
-            $data = array_filter($data, function ($key) {
+            $updateData = array_filter(array_merge($updateData, $data), function ($key) {
                 return (in_array($key, $this->columns, true) === true);
             }, ARRAY_FILTER_USE_KEY);
 
-            $updateData = array_merge($updateData, $data);
         }
 
         foreach ($updateData as $key => $value) {
@@ -318,7 +324,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
             return static::instance()->where($this->getPrimaryKey(), '=', $this->{$this->getPrimaryKey()})->update($updateData);
         }
 
-        $updateData = array_filter($updateData, function ($value) {
+        $updateData = array_filter($updateData, static function ($value) {
             return $value !== null;
         }, ARRAY_FILTER_USE_BOTH);
 
@@ -410,9 +416,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         $this->results['rows'] = $rows;
     }
 
-    public function mergeRows(array $rows)
+    /**
+     * @param array $rows
+     * @return static $this
+     */
+    public function mergeRows(array $rows): static
     {
         $this->results['rows'] = array_merge($this->results['rows'], $rows);
+        return $this;
     }
 
     public function mergeData(array $data): void
@@ -625,6 +636,10 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         }
 
         foreach ($this->rename as $old => $new) {
+            if (in_array($new, $this->hidden, true) === true) {
+                continue;
+            }
+
             $output[$new] = $output[$old] ?? $this->{$old};
         }
 
@@ -728,10 +743,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     /**
      * Set original rows
      * @param array $rows
+     * @return static
      */
-    public function setOriginalRows(array $rows)
+    public function setOriginalRows(array $rows): self
     {
         $this->results['original_rows'] = $rows;
+        return $this;
     }
 
     public function getOriginalRows()

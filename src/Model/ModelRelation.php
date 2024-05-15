@@ -38,6 +38,7 @@ abstract class ModelRelation
     {
         $this->related = $related;
         $this->parent = $parent;
+        $related->setOriginalRows($parent->getOriginalRows());
 
         $this->related->select([$this->related->getTable() . '.*']);
 
@@ -99,7 +100,8 @@ abstract class ModelRelation
             return null;
         }
 
-        $instance = $parent->newQuery();
+        $instance = clone $parent;
+        $instance->setOriginalRows($parent->getOriginalRows());
 
         if ($this->withDefault === null) {
             return $instance;

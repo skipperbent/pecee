@@ -46,7 +46,13 @@ class BelongsToMany extends ModelRelation
      */
     public function getResults()
     {
-        return $this->related->all();
+        $results = $this->related->all();
+
+        if ($results->count() === 0 && ($this->withDefault || $this->returnEmpty)) {
+            return $this->getDefaultFor($this->related);
+        }
+
+        return $results;
     }
 
     /**
