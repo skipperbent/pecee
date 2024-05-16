@@ -464,7 +464,14 @@ class Column
      */
     public function getRelationKey(): string
     {
-        return sprintf('%s_%s_fk', $this->table, $this->getName());
+        if (strlen($this->table) < 15) {
+            return sprintf('%s_%s_fk', $this->table, $this->getName());
+        }
+
+        $name = ucwords(str_replace('_', ' ', $this->table));
+        preg_match_all('/([A-Z]{1})/', $name, $matches);
+
+        return sprintf('%s_%s_fk', strtolower(join('', $matches[0])), $this->getName());
     }
 
     public function getRemoveRelation(): bool
