@@ -2,6 +2,7 @@
 
 namespace Pecee\UI\Taglib;
 
+use Pecee\Str;
 use Pecee\UI\Phtml\Phtml;
 
 class TaglibJs extends Taglib
@@ -539,7 +540,7 @@ class TaglibJs extends Taglib
 
         $content = file_get_contents('views/snippets/' . $attrs->file, FILE_USE_INCLUDE_PATH);
         if ($content !== false) {
-            return (new Phtml())->read($content)->toPHP();
+            return Str::sanitizeHtml((new Phtml())->read($content)->toPHP());
         }
 
         return '';
