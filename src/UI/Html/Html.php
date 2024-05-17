@@ -175,7 +175,7 @@ class Html
         foreach ($this->attributes as $key => $val) {
             $output .= ' ' . $key;
             if ($val[0] !== null || strtolower($key) === 'value') {
-                $val = addslashes(join(' ', $val));
+                $val = htmlspecialchars(join(' ', $val), ENT_QUOTES, app()->getCharset());
                 $output .= '="' . $val . '"';
             }
         }
