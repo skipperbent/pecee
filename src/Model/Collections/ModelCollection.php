@@ -79,7 +79,7 @@ class ModelCollection extends Collection
      */
     public function removeByFilter(string $key, string $value): self
     {
-        $this->each(function ($item, $key) {
+        $this->each(function ($item, $key) use ($value) {
             if ($item->{$key} === $value) {
                 $this->remove($key);
             }
