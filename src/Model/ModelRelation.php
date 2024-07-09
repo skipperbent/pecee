@@ -101,7 +101,11 @@ abstract class ModelRelation
         }
 
         $instance = clone $parent;
-        $instance->setOriginalRows($parent->getOriginalRows());
+
+        // Make sure ->isNew isn't true.
+        $rows = $parent->getOriginalRows();
+        $rows[$parent->getPrimaryKey()] = null;
+        $instance->setOriginalRows($rows);
 
         if ($this->withDefault === null) {
             return $instance;

@@ -262,9 +262,14 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         return strtolower(implode('_', $models));
     }
 
-    public function getForeignKey()
+    public function getForeignKey(): string
     {
         return $this->table . '_' . $this->primaryKey;
+    }
+
+    public function hasFixedIdentifier(): bool
+    {
+        return $this->fixedIdentifier;
     }
 
     /**
