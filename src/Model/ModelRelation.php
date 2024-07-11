@@ -101,11 +101,7 @@ abstract class ModelRelation
         }
 
         $instance = clone $parent;
-
-        // Make sure ->isNew isn't true.
-        $rows = $parent->getOriginalRows();
-        $rows[$parent->getPrimaryKey()] = null;
-        $instance->setOriginalRows($rows);
+        $instance->setOriginalRows($parent->getOriginalRows());
 
         if ($this->withDefault === null) {
             return $instance;
@@ -116,7 +112,12 @@ abstract class ModelRelation
         }
 
         if (is_array($this->withDefault) === true) {
-            $instance->mergeRows($this->withDefault);
+            // Make sure ->isNew isn't true.
+            $instance->mergeRows(array_merge([$instance->getPrimaryKey() => null], $this->withDefault));
+
+            $originalRows = $instance->getOriginalRows();
+            $originalRows[$instance->getPrimaryKey()] = null;
+            $instance->setOriginalRows($originalRows);
         }
 
         return $instance;
