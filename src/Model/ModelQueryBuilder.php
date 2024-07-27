@@ -638,7 +638,7 @@ class ModelQueryBuilder
      * @return static
      * @throws Exception
      */
-    public function firstOrNew(array $data = [])
+    public function firstOrNew(array $data = [], bool $mergeData = false)
     {
         $item = $this->first();
 
@@ -646,7 +646,13 @@ class ModelQueryBuilder
             return $item;
         }
 
-        return $this->createInstance((object)$data)->setOriginalRows([]);
+        $item = $this->createInstance((object)$data)->setOriginalRows([]);
+
+        if ($mergeData) {
+            $item->mergeData($data);
+        }
+
+        return $item;
     }
 
     /**
