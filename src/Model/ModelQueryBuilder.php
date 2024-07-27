@@ -642,11 +642,9 @@ class ModelQueryBuilder
     {
         $item = $this->first();
 
-        if ($item !== null) {
-            return $item;
+        if ($item === null) {
+            $item = $this->createInstance((object)$data)->setOriginalRows([]);
         }
-
-        $item = $this->createInstance((object)$data)->setOriginalRows([]);
 
         if ($mergeData) {
             $item->mergeData($data);
