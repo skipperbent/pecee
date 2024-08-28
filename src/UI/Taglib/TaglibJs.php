@@ -453,6 +453,14 @@ class TaglibJs extends Taglib
 
     protected function tagFor(\stdClass $attrs): string
     {
+        if (isset($attrs->test)) {
+            return sprintf('</%3$s>";for(%1$s){o+="<%3$s>%2$s</%3$s>";}o+="<%3$s>',
+                $attrs->test,
+                $this->makeJsString($this->getBody()),
+                static::$JS_WRAPPER_TAG
+            );
+        }
+
         $this->requireAttributes($attrs, ['limit', 'start', 'i']);
 
         return sprintf('</%5$s>";for(let %1$s=%2$s;%1$s<%3$s;%1$s++){o+="<%5$s>%4$s</%5$s>";}o+="<%5$s>',
