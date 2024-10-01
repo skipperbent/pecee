@@ -1,9 +1,10 @@
 <?php
+
 namespace Pecee\UI\Form\Validation;
 
 class ValidateFileExtension extends ValidateFile
 {
-    protected $extensions;
+    protected array $extensions;
 
     public function __construct(array $extensions)
     {
@@ -12,7 +13,7 @@ class ValidateFileExtension extends ValidateFile
 
     public function validates(): bool
     {
-        return in_array($this->input->getExtension(), array_map('strtolower', $this->extensions), false);
+        return in_array(strtolower($this->input->getExtension()), array_map('strtolower', $this->extensions), true);
     }
 
     public function getError(): string
