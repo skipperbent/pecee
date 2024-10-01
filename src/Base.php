@@ -203,9 +203,9 @@ abstract class Base
      * @param string $message
      * @param string|null $placement
      */
-    public function setError(string $message, ?string $placement = null): void
+    public function setError(string $message, ?string $placement = null, ?string $index = null): void
     {
-        $this->setMessage($message, $this->errorType, $placement);
+        $this->setMessage($message, $this->errorType, $placement, $index);
     }
 
     /**

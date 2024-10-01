@@ -5,7 +5,7 @@ use Pecee\DB\Schema\Table;
 
 class CreateNodeTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
         $this->schema->create('node', function (Table $table) {
             $table->column('id')->string(32)->primary();
@@ -26,7 +26,7 @@ class CreateNodeTable extends Migration
 
     }
 
-    public function down()
+    public function down(): void
     {
         $this->schema->drop('node');
     }

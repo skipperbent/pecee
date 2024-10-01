@@ -40,7 +40,6 @@ class TaglibJs extends Taglib
             $property = $matches[1];
             $expression = $matches[2];
 
-
             return sprintf
             (
                 '</%1$s>"+ ((%3$s) ? "%2$s" : "") + "<%1$s>',
@@ -415,9 +414,8 @@ class TaglibJs extends Taglib
         $morph = (isset($attrs->morph) && strtolower($attrs->morph) === 'false') ? 'false' : 'true';
         $hiddenHtml1 = ($hidden === 'true') ? '' : 'o += "<%2$s data-id=\"%9$s_%1$s' . $index . '\">" + ';
         $hiddenHtml2 = ($hidden === 'true') ? ';' : ' + "</%3$s>";';
-        $morphHtml = ($morph === 'false') ? 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach(i => i.innerHTML = o);' : 'document.querySelectorAll(w.container + " [data-id=\"%9$s_%1$s' . $index . '\"]").forEach((item) => { let clone = item.cloneNode(true); clone.innerHTML=o; morphdom(item, clone); });';
 
-        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", callback: function(%7$s, viewId = ' . $id . ', view = this, replace = true){ if(replace===false) { widgets.getViews(w.guid, this.id).find((v => this.index !== null && v.index === this.index || v.index === null && v.hash === this.hash)).triggers = []; } var _vid=this.id; var o="%5$s"; if(replace===true) { ' . $morphHtml . '  } else { if(typeof this.viewId === "undefined") { w.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); } w.template.one("render", () => { w.template.triggerEvent(_vid, %7$s); }); }  return o; }, data: %4$s, hidden: %8$s})' . $hiddenHtml2 . ' o+="<%6$s>',
+        return sprintf('</%6$s>"; ' . $hiddenHtml1 . ' t.addView({id: ' . $id . ', index: ' . ($attrs->index ?? 'null') . ', el: "%9$s_%1$s' . $index . '", hash: "%9$s", output: function(%7$s, viewId = this.id, view = this.view) { let o = "%5$s"; return o; }, data: %4$s, morph: %10$s})' . $hiddenHtml2 . ' o+="<%6$s>',
             $attrs->name,
             $elStartTag,
             $elEndTag,
@@ -427,6 +425,7 @@ class TaglibJs extends Taglib
             $as,
             $hidden,
             md5($output),
+            ($morph === 'false') ? 'false' : 'true',
         );
     }
 

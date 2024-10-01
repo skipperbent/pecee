@@ -19,7 +19,7 @@
     }
   ],
   "require": {
-    "php": ">=7.4",
+    "php": ">=8.0",
     "josegonzalez/dotenv": "3.*",
     "pecee/simple-router": "^5.0",
     "robmorgan/phinx": "^0.13.4",

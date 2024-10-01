@@ -428,7 +428,7 @@ class Table
      */
     public function createIndex(array $columns = null, string $type = Column::INDEX_INDEX, ?string $name = null): self
     {
-        $type = ($type === Column::INDEX_INDEX) ? '' : $type;
+        //$type = ($type === Column::INDEX_INDEX) ? '' : $type;
         $columns = $columns ?? [$name];
 
         if ($name !== null) {

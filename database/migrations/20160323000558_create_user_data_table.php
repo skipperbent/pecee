@@ -5,7 +5,7 @@ use Pecee\DB\Schema\Table;
 
 class CreateUserDataTable extends Migration
 {
-	public function up()
+	public function up(): void
 	{
 		$this->schema->create('user_data', function (Table $table) {
 			$table->column('id')->bigint()->primary()->increment();
@@ -15,7 +15,7 @@ class CreateUserDataTable extends Migration
 		});
 	}
 
-	public function down()
+	public function down(): void
 	{
 		$this->schema->drop('user_data');
 	}

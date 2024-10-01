@@ -37,9 +37,9 @@ class Str
      * @param string $text
      * @return string
      */
-    public static function nl2p(string $text): string
+    public static function nl2p(string $text, int $lines = 2): string
     {
-        return preg_replace('/[\r\n]{4}/', '</p><p>', '<p>' . $text . '</p>');
+        return preg_replace("/[\r\n]$lines/", '</p><p>', '<p>' . $text . '</p>');
     }
 
     /**

@@ -11,7 +11,6 @@ use Pecee\Pixie\Connection;
 use Pecee\Pixie\Exception;
 use Pecee\Pixie\QueryBuilder\QueryBuilderHandler;
 use Pecee\Pixie\QueryBuilder\Raw;
-use Pecee\Str;
 
 /**
  * @mixin Model
@@ -416,7 +415,7 @@ class ModelQueryBuilder
     {
         $item = $this->find($id);
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' not found');
+            throw new ModelNotFoundException(ucfirst(ucfirst(substr($this->model::class, strrpos($this->model::class, '\\') + 1))) . ' not found');
         }
 
         return $item;
@@ -445,7 +444,7 @@ class ModelQueryBuilder
     {
         $item = $this->first();
         if ($item === null) {
-            throw new ModelNotFoundException(ucfirst(Str::camelize($this->model->getTable())) . ' not found');
+            throw new ModelNotFoundException(ucfirst(ucfirst(substr($this->model::class, strrpos($this->model::class, '\\') + 1))) . ' not found');
         }
 
         return $item;
