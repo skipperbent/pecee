@@ -1,9 +1,10 @@
 <?php
+
 namespace Pecee\UI\Form\Validation;
 
 class ValidateFileMime extends ValidateFile
 {
-    protected $mimeTypes;
+    protected array $mimeTypes;
 
     public function __construct(array $mimeTypes)
     {
@@ -12,7 +13,7 @@ class ValidateFileMime extends ValidateFile
 
     public function validates(): bool
     {
-        return in_array(strtolower($this->input->getType()), $this->mimeTypes, false);
+        return in_array(strtolower($this->input->getType()), array_map('strtolower', $this->mimeTypes), true);
     }
 
     public function getError(): string
