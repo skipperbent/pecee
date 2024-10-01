@@ -390,7 +390,7 @@ class TaglibJs extends Taglib
             $output = preg_replace('/";(}else\{|for|if]switch)/i', "\";\n$1", $output);
         }
 
-        $data = $attrs->data ?? 'null';
+        $data = $attrs->data ?? 'd';
         $elStartTag = $attrs->el ?? 'div';
         $elEndTag = $elStartTag;
         $as = $attrs->as ?? 'd';
