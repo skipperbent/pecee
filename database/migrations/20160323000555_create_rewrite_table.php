@@ -5,7 +5,7 @@ use Pecee\DB\Schema\Table;
 
 class CreateRewriteTable extends Migration
 {
-	public function up()
+	public function up(): void
 	{
 		$this->schema->create('rewrite', function (Table $table) {
 			$table->column('id')->integer()->primary()->increment();
@@ -18,7 +18,7 @@ class CreateRewriteTable extends Migration
 		});
 	}
 
-	public function down()
+	public function down(): void
 	{
 		$this->schema->drop('rewrite');
 	}

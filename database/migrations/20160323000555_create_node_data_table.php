@@ -6,7 +6,7 @@ use Pecee\DB\Schema\Table;
 class CreateNodeDataTable extends Migration
 {
 
-    public function up()
+    public function up(): void
     {
         $this->schema->create('node_data', function (Table $table) {
             $table->column('id')->bigint()->primary()->increment();
@@ -16,7 +16,7 @@ class CreateNodeDataTable extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         $this->schema->drop('node_data');
     }

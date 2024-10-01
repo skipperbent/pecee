@@ -5,7 +5,7 @@ use Pecee\DB\Schema\Table;
 
 class CreateFileTable extends Migration
 {
-	public function up()
+	public function up(): void
 	{
 		$this->schema->create('file', function (Table $table) {
 			$table->column('id')->string(40)->primary();
@@ -18,7 +18,7 @@ class CreateFileTable extends Migration
 		});
 	}
 
-	public function down()
+	public function down(): void
 	{
 		$this->schema->drop('file');
 	}

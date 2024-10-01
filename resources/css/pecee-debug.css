@@ -1,5 +1,8 @@
 .pecee-debug {
     color: #000!important;
+    /* Make sure always on top */
+    position: relative;
+    z-index: 999999999;
 }
 
 .pecee-debug h1 {

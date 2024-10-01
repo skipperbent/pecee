@@ -7,7 +7,7 @@ use Pecee\UI\Phtml\Phtml;
 trait TaglibRenderer
 {
 
-    public function setJsDependencies()
+    public function setJsDependencies(): void
     {
         $this->getSite()->addWrappedJs('js/pecee-widget.js');
     }
