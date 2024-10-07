@@ -68,8 +68,6 @@ trait TaglibRenderer
         if (is_file($cacheFile) === true) {
             if (app()->getDebugEnabled() === false) {
                 return (string)$this->renderPhp(file_get_contents($cacheFile));
-            } else {
-                unlink($cacheFile);
             }
         }
 
@@ -86,11 +84,15 @@ trait TaglibRenderer
             $output = $pHtml->read(file_get_contents($file, FILE_USE_INCLUDE_PATH))->toPHP();
             debug('taglib', 'Finished parsing Phtml template');
 
-            debug('taglib', 'Writing Phtml cache file');
-            $handle = fopen($cacheFile, 'w+b+');
-            fwrite($handle, $output);
-            fclose($handle);
-            debug('taglib', 'Finished writing Phtml cache file');
+            if (app()->getDebugEnabled() === false) {
+
+                debug('taglib', 'Writing Phtml cache file');
+                $handle = fopen($cacheFile, 'w+b+');
+                fwrite($handle, $output);
+                fclose($handle);
+                debug('taglib', 'Finished writing Phtml cache file');
+
+            }
 
             $output = $this->renderPhp($output);
 
