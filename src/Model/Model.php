@@ -345,7 +345,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
             static::instance()->getQuery()->insert($updateData);
         }
 
-        //$this->results['original_rows'][$this->primaryKey] = $this->{$this->primaryKey};
+        $this->results['original_rows'][$this->primaryKey] = $this->{$this->primaryKey};
 
         return $this;
     }
