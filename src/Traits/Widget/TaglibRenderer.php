@@ -7,6 +7,8 @@ use Pecee\UI\Phtml\Phtml;
 trait TaglibRenderer
 {
 
+    protected bool $phpTagsEnabled = false;
+
     public function setJsDependencies(): void
     {
         $this->getSite()->addWrappedJs('js/pecee-widget.js');
@@ -54,6 +56,18 @@ trait TaglibRenderer
 
     protected function renderPhp(string $content): string
     {
+        if ($this->phpTagsEnabled) {
+            // Add support for php{} tags
+            preg_match_all('/php\{([^}]+)\}/is', $content, $matches);
+
+            if (count($matches[0])) {
+                foreach ($matches[0] as $index => $match) {
+                    $output = str_replace(["\n", "\t", chr(13)], '', str_replace('"', '\"', eval('return ' . $matches[1][$index] . ';')));
+                    $content = str_replace($match, $output, $content);
+                }
+            }
+        }
+
         ob_start();
         eval('?>' . $content);
         return ob_get_clean();
@@ -63,20 +77,14 @@ trait TaglibRenderer
     {
         $cacheDir = $this->getPhtmlCacheDir();
         $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $file);
-        $output = '';
 
-        if (is_file($cacheFile) === true) {
-            if (app()->getDebugEnabled() === false) {
-                return (string)$this->renderPhp(file_get_contents($cacheFile));
-            }
+        if (is_file($cacheFile) === true && app()->getDebugEnabled() === false) {
+            return $this->renderPhp(file_get_contents($cacheFile));
         }
 
         try {
-
-            if (is_dir($cacheDir) === false) {
-                if (mkdir($cacheDir, 0755, true) === false) {
-                    throw new \ErrorException('Failed to create temp-cache directory');
-                }
+            if (is_dir($cacheDir) === false && mkdir($cacheDir, 0755, true) === false) {
+                throw new \ErrorException('Failed to create temp-cache directory');
             }
 
             debug('taglib', 'Parsing Phtml template');
@@ -119,5 +127,11 @@ trait TaglibRenderer
         if ($this->_contentHtml === null && $this->_contentTemplate !== null && $this->_contentTemplate !== '') {
             $this->_contentHtml = $this->renderFile($this->_contentTemplate);
         }
+    }
+
+    public function setIsPhpTagsEnabled(bool $value): self
+    {
+        $this->phpTagsEnabled = $value;
+        return $this;
     }
 }

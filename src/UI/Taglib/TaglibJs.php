@@ -297,6 +297,53 @@ class TaglibJs extends Taglib
         );
     }
 
+    /**
+     * Render infinite scroll list.
+     * Inner content should contain a foreach of the data argument that will be used for each element in the list.
+     *
+     * Parameters
+     * - callback: this method is called when items is retrieved.
+     * - data: this will make the list try to fetch items automaticially from provided array
+     * - itemsPerPage: how many items will appear in the list.
+     *
+     * Required parameters: callback or data.
+     *
+     * @param \stdClass $attrs
+     * @return string
+     * @throws \ErrorException
+     */
+    protected function tagInfiniteList(\stdClass $attrs): string
+    {
+        if (!isset($attrs->callback) && !isset($attrs->data)) {
+            throw new \ErrorException("The current tag {$this->currentTag} requires the attribute(s): callback or data to be set");
+        }
+
+        $options = $attrs->options ?? json_encode([]);
+
+        $id = $attrs->id ?? 'wl_' . uniqid();
+
+        $attrs->id = sprintf('%s', $id);
+        $this->tagTemplate($attrs);
+
+        if (isset($attrs->callback)) {
+            $customHtml = sprintf('_l.getItems = %1$s;', $attrs->callback);
+        } else {
+            $customHtml = sprintf('_l.setData(%1$s, %2$s);', $attrs->data, $attrs->itemsPerPage ?? 20);
+        }
+
+        $output = sprintf(
+            '</%1$s>"; var _l = w._addList("%2$s", $.%2$s, %3$s); %4$s',
+            static::$JS_WRAPPER_TAG,
+            $id,
+            $options,
+            $customHtml,
+        );
+        $output .= sprintf('o+="<%1$s>', static::$JS_WRAPPER_TAG);
+        $output .= $this->tagRenderWidget((object)['widget' => "_l", 'class' => "wl $id"]);
+
+        return $output;
+    }
+
     protected function tagSwitch(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['test']);
