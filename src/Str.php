@@ -35,11 +35,12 @@ class Str
      * Converts double newline into paragraphs.
      * Example: Word1\n\nWord2 = <p>Word1</p><p>Word2</p>
      * @param string $text
+     * @param int $lines
      * @return string
      */
     public static function nl2p(string $text, int $lines = 2): string
     {
-        return preg_replace("/[\r\n]$lines/", '</p><p>', '<p>' . $text . '</p>');
+        return preg_replace('/[\r\n]{' . $lines . '}/', '</p><p>', '<p>' . $text . '</p>');
     }
 
     /**

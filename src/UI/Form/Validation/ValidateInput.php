@@ -86,4 +86,10 @@ abstract class ValidateInput
         return $this->allowEmpty;
     }
 
+    public function setAllowEmpty(bool $allowEmpty): self
+    {
+        $this->allowEmpty = $allowEmpty;
+        return $this;
+    }
+
 }
