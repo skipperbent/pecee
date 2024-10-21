@@ -92,6 +92,10 @@ class Str
 
     public static function substr(string $text, int $maxLength = 150, string $end = '...', string $encoding = 'UTF-8'): string
     {
+        if ($maxLength === -1) {
+            return $text;
+        }
+
         if (\strlen($text) > $maxLength) {
             return mb_substr($text, 0, $maxLength, $encoding) . $end;
         }

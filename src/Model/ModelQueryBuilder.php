@@ -803,7 +803,7 @@ class ModelQueryBuilder
     /**
      * @return Model
      */
-    public function getModel()
+    public function getModel(): Model
     {
         return $this->model;
     }
@@ -811,7 +811,7 @@ class ModelQueryBuilder
     /**
      * @param Model $model
      */
-    public function setModel(Model $model)
+    public function setModel(Model $model): void
     {
         $this->model = $model;
     }
@@ -833,7 +833,7 @@ class ModelQueryBuilder
      * When enabled sql-statements will overwrite each other.
      *
      * @param bool $enabled
-     * @return Model $this
+     * @return static $this
      */
     public function overwriteQuery(bool $enabled = true): Model
     {
@@ -846,7 +846,7 @@ class ModelQueryBuilder
      * @return string
      * @throws Exception
      */
-    public function getQueryIdentifier()
+    public function getQueryIdentifier(): string
     {
         return md5(static::class . $this->getQuery()->getQuery()->getRawSql());
     }
