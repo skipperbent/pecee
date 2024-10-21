@@ -36,6 +36,11 @@ class Collection implements \IteratorAggregate, \Countable, \JsonSerializable, \
         return (\count($this->rows) > 0);
     }
 
+    public function isEmpty(): bool
+    {
+        return !$this->hasRows();
+    }
+
     public function add($item): void
     {
         $this->rows[] = $item;
