@@ -202,9 +202,9 @@ abstract class ModelData extends Model
         }
     }
 
-    public function toArray(array $filter = []): array
+    public function toArray(array $filters = []): array
     {
-        $rows = parent::toArray($filter);
+        $rows = parent::toArray($filters);
 
         if ($this->mergeData === true) {
             $data = $rows['data'] ?? null;

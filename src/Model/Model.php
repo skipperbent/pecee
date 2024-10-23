@@ -594,15 +594,15 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     }
 
     /**
-     * @param array|string|null $filter
+     * @param array|string|null $filters
      * @return array
      */
-    public function toArray(array $filter = []): array
+    public function toArray(array $filters = []): array
     {
-        $filter = (count($filter) > 0) ? $filter : $this->filter;
+        $filters = (count($filters) > 0) ? $filters : $this->filter;
 
         foreach (array_keys($this->with) as $key) {
-            if (count($filter) === 0 || in_array($key, $filter, true) || in_array($key, $filter, true) && isset($this->rename[$key])) {
+            if (count($filters) === 0 || in_array($key, $filters, true) || in_array($key, $filters, true) && isset($this->rename[$key])) {
                 $this->invokeElement($key);
             }
         }
@@ -612,7 +612,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         // Ensure default columns are always present
         foreach ($this->columns as $column) {
             // Skip without
-            if (in_array($column, $this->without, true) === true && in_array($column, $filter, true) === false || count($filter) > 0 && in_array($column, $filter, true) === false) {
+            if (in_array($column, $this->without, true) === true && in_array($column, $filters, true) === false || count($filters) > 0 && in_array($column, $filters, true) === false) {
                 continue;
             }
 
@@ -625,7 +625,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
             $key = $this->rename[$key] ?? $key;
 
             // Skip without
-            if (in_array($key, $this->without, true) === true || isset($this->rename[$key]) || count($filter) > 0 && in_array(Str::deCamelize($key), $filter, true) === false) {
+            if (in_array($key, $this->without, true) === true || isset($this->rename[$key]) || count($filters) > 0 && in_array(Str::deCamelize($key), $filters, true) === false) {
                 continue;
             }
 
@@ -646,6 +646,15 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
             }
 
             $output[$new] = $output[$old] ?? $this->{$old};
+        }
+
+        if (count($filters) > 0) {
+            $newOutput = [];
+            foreach ($filters as $filter) {
+                $newOutput[$filter] = $output[$filter] ?? null;
+            }
+
+            $output = $newOutput;
         }
 
         return $output;
