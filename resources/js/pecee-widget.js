@@ -777,7 +777,11 @@ window.Widget.prototype = {
         return this;
     },
     remove: function () {
-        $(this.container).html('');
+        const ctn = document.querySelector(this.container);
+        if(ctn) {
+            ctn.innerHTML = '';
+        }
+
         this.events = [];
         this.data = {};
         return this;

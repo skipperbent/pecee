@@ -7,7 +7,7 @@ class CreateRewriteTable extends Migration
 {
 	public function up(): void
 	{
-		$this->schema->create('rewrite', function (Table $table) {
+		$this->schema->create('rewrite', static function (Table $table) {
 			$table->column('id')->integer()->primary()->increment();
 			$table->column('original_url')->string(355)->index();
 			$table->column('rewrite_url')->string(355)->index();

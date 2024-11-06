@@ -64,7 +64,7 @@ class Table
     public function timestamps(): self
     {
         $this->column('updated_at')->datetime()->nullable()->index();
-        $this->column('created_at')->datetime()->index();
+        $this->column('created_at')->datetime()->setDefaultValue('`NOW()`')->index();
 
         return $this;
     }

@@ -9,8 +9,6 @@ use Pecee\Http\Request;
 use Pecee\Http\Response;
 use Pecee\Http\Url;
 
-request()->app = new \Pecee\Application\Application();
-
 /**
  * Get url for a route by using either name/alias, class or method name.
  *
@@ -29,7 +27,7 @@ request()->app = new \Pecee\Application\Application();
  * @return \Pecee\Http\Url
  * @throws \InvalidArgumentException
  */
-function url(?string $name = null, $parameters = null, ?array $getParams = null): Url
+function url(?string $name = null, mixed $parameters = null, ?array $getParams = null): Url
 {
     return Router::getUrl($name, $parameters, $getParams);
 }
@@ -57,7 +55,7 @@ function request(): Request
  * @param array ...$methods Default methods
  * @return \Pecee\Http\Input\InputHandler|array|string|null
  */
-function input($index = null, $defaultValue = null, ...$methods)
+function input(?string $index = null, ?string $defaultValue = null, ...$methods)
 {
     if ($index !== null) {
         return request()->getInputHandler()->value($index, $defaultValue, ...$methods);
@@ -84,8 +82,12 @@ function redirect(string $url, ?int $code = null): void
  *
  * @return \Pecee\Application\Application
  */
-function app()
+function app(): \Pecee\Application\Application
 {
+    if (request()->app === null) {
+        request()->app = new \Pecee\Application\Application();
+    }
+
     return request()->app;
 }
 
@@ -94,7 +96,7 @@ function app()
  * @param string|array ...$args
  * @return string
  */
-function lang($key, ...$args): string
+function lang(string $key, ...$args): string
 {
     return app()->translation->translate($key, ...$args);
 }
@@ -126,7 +128,7 @@ function add_module(string $name, string $path): void
  *
  * @return string|null
  */
-if(function_exists('env') === false) {
+if (function_exists('env') === false) {
     function env(string $key, ?string $default = null): ?string
     {
         return $_ENV[$key] ?? $default;
@@ -140,11 +142,7 @@ if(function_exists('env') === false) {
 function csrf_token(): ?string
 {
     $baseVerifier = Router::router()->getCsrfVerifier();
-    if ($baseVerifier !== null) {
-        return $baseVerifier->getTokenProvider()->getToken();
-    }
-
-    return null;
+    return $baseVerifier?->getTokenProvider()->getToken();
 }
 
 /**

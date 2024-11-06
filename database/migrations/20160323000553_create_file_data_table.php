@@ -7,7 +7,7 @@ class CreateFileDataTable extends Migration
 {
 	public function up(): void
 	{
-		$this->schema->create('file_data', function (Table $table) {
+		$this->schema->create('file_data', static function (Table $table) {
 			$table->column('id')->bigint()->primary()->increment();
 			$table->column('file_id')->string(40)->index()->relation('file', 'id');
 			$table->column('key')->string(255)->index();

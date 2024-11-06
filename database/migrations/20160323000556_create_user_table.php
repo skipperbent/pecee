@@ -7,7 +7,7 @@ class CreateUserTable extends Migration
 {
 	public function up(): void
 	{
-		$this->schema->create('user', function (Table $table) {
+		$this->schema->create('user', static function (Table $table) {
 			$table->column('id')->bigint()->primary()->increment();
 			$table->column('username')->string(300)->index();
 			$table->column('password')->string(255)->index();

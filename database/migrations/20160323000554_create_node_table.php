@@ -7,7 +7,7 @@ class CreateNodeTable extends Migration
 {
     public function up(): void
     {
-        $this->schema->create('node', function (Table $table) {
+        $this->schema->create('node', static function (Table $table) {
             $table->column('id')->string(32)->primary();
             $table->column('parent_id')->string(32)->nullable()->index()->relation('node', 'id');
             $table->column('user_id')->bigint()->nullable()->index()->relation('user', 'id');

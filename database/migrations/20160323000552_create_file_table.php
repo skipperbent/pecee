@@ -7,7 +7,7 @@ class CreateFileTable extends Migration
 {
 	public function up(): void
 	{
-		$this->schema->create('file', function (Table $table) {
+		$this->schema->create('file', static function (Table $table) {
 			$table->column('id')->string(40)->primary();
 			$table->column('filename')->string(355)->index();
 			$table->column('original_filename')->string(355)->index();

@@ -7,7 +7,7 @@ class CreateUserResetTable extends Migration
 {
 	public function up(): void
 	{
-		$this->schema->create('user_reset', function (Table $table) {
+		$this->schema->create('user_reset', static function (Table $table) {
 			$table->column('id')->bigint()->primary()->increment();
 			$table->column('user_id')->bigint()->index()->relation('user', 'id');
 			$table->column('key')->string(32)->index();

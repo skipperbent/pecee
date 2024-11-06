@@ -2,9 +2,9 @@
 global $argv, $appPath;
 
 try {
-	require_once $appPath . '/bootstrap.php';
+    require_once $appPath . '/bootstrap.php';
 } catch (\PDOException $e) {
-	// Ignore database errors for now
+    // Ignore database errors for now
 }
 
 // TODO: check if bootstrap.php exists.
@@ -16,268 +16,290 @@ echo chr(10);
 function loopFolder($path, \Closure $callback, array $filterExtensions = [])
 {
 
-	$handle = opendir($path);
-	while ($item = readdir($handle)) {
+    $handle = opendir($path);
+    while ($item = readdir($handle)) {
 
-		if ($item === '.' || $item === '..') {
-			continue;
-		}
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
 
-		$newPath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($item, DIRECTORY_SEPARATOR);
-		if (is_dir($newPath) === true) {
-			loopFolder($newPath, $callback);
-		} else {
+        $newPath = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . ltrim($item, DIRECTORY_SEPARATOR);
+        if (is_dir($newPath) === true) {
+            loopFolder($newPath, $callback);
+        } else {
 
-			if (count($filterExtensions) && !in_array(\Pecee\IO\File::getExtension($newPath), $filterExtensions, false)) {
-				continue;
-			}
+            if (count($filterExtensions) && !in_array(\Pecee\IO\File::getExtension($newPath), $filterExtensions, false)) {
+                continue;
+            }
 
-			$callback($newPath);
-		}
-	}
-	closedir($handle);
+            $callback($newPath);
+        }
+    }
+    closedir($handle);
 
 }
 
 function setEnvironmentValue($key, $value = '', $autoCreate = true, $setExample = true)
 {
 
-	global $appPath;
+    global $appPath;
 
-	$setValue = function ($file) use ($key, $value, $autoCreate) {
-		if (is_file($file)) {
-			$lines = explode(chr(10), file_get_contents($file));
+    $setValue = function ($file) use ($key, $value, $autoCreate) {
+        if (is_file($file)) {
+            $lines = explode(chr(10), file_get_contents($file));
 
-			$found = false;
+            $found = false;
 
-			foreach ($lines as $i => $line) {
-				if (stripos($line, $key . '=') !== false) {
-					$found = true;
-					$lines[$i] = $key . '=' . $value;
-					break;
-				}
-			}
+            foreach ($lines as $i => $line) {
+                if (stripos($line, $key . '=') !== false) {
+                    $found = true;
+                    $lines[$i] = $key . '=' . $value;
+                    break;
+                }
+            }
 
-			if ($autoCreate === true && $found === false) {
-				$lines[] = strtoupper($key) . '=' . trim($value);
-			}
+            if ($autoCreate === true && $found === false) {
+                $lines[] = strtoupper($key) . '=' . trim($value);
+            }
 
-			file_put_contents($file, join(chr(10), $lines));
-		}
-	};
+            file_put_contents($file, join(chr(10), $lines));
+        }
+    };
 
-	$setValue($appPath . '/.env');
+    $setValue($appPath . '/.env');
 
-	if ($setExample === true) {
-		$setValue($appPath . '/.env.example');
-	}
+    if ($setExample === true) {
+        $setValue($appPath . '/.env.example');
+    }
 }
 
 switch (strtolower($argv[1])) {
-	case 'copy-migrations':
+    case 'copy-migrations':
 
-		\Pecee\IO\Directory::copy(dirname(__DIR__) . '/database/migrations', $appPath . '/database/migrations');
-		echo 'Copy complete!';
-		exit(0);
+        \Pecee\IO\Directory::copy(dirname(__DIR__) . '/database/migrations', $appPath . '/database/migrations');
+        echo 'Migrations copied!';
+        exit(0);
 
-		break;
-	case 'phinx':
-		$phinx = $appPath . '/vendor/bin/phinx';
-		$config = $appPath . '/config/phinx-config.php';
+        break;
+    case 'phinx':
+        $phinx = $appPath . '/vendor/bin/phinx';
+        $config = $appPath . '/config/phinx-config.php';
 
-		$argv = array_slice($argv, 1);
+        $argv = array_slice($argv, 1);
 
-		$args = $argv;
-		$args[] = '--configuration=' . $config;
+        $args = $argv;
+        $args[] = '--configuration=' . $config;
+        $template = null;
 
-		if (isset($argv[1]) && strtolower($argv[1]) === 'create') {
-			$template = dirname(__DIR__) . '/database/stubs/migration.php';
-			$args[] = '--template=' . $template;
-		}
+        if (isset($argv[1]) && strtolower($argv[1]) === 'create' && isset($argv[2])) {
+            $templateContents = file_get_contents(dirname(__DIR__) . '/database/stubs/migration.php');
 
-		// Run Phinx
-		try {
-			$app = new \Phinx\Console\PhinxApplication();
-			$app->run(new \Symfony\Component\Console\Input\ArgvInput($args));
-		}catch(Exception $e) {
-			echo $e->getMessage() . chr(10);
-		}
+            // Replace class name
+            $templateContents = str_replace('MigrationDummy', $argv[2], $templateContents);
 
-		exit(0);
-		break;
-	case 'change-namespace':
+            // Parse table, if any
+            preg_match('/.+([A-Z]{1}[a-z]+)Table/', $templateContents, $matches);
 
-		$argv = array_slice($argv, 2);
+            if (isset($matches[1])) {
+                $templateContents = str_replace('dummy_table', strtolower($matches[1]), $templateContents);
+            }
 
-		if (!isset($argv[0])) {
-			echo 'Error: missing required parameter namespace';
-			exit(1);
-		}
+            $template = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'migration.php';
+            file_put_contents($template, $templateContents);
 
-		if (preg_match_all('/^[a-zA-Z\_]+$/i', $argv[0]) === 0) {
-			echo 'Error: invalid namespace (example: Demo)';
-			exit(1);
-		}
+            $args[] = '--template=' . $template;
+        }
 
-		$newNamespace = trim($argv[0]);
-		$oldNamespace = null;
+        // Run Phinx
+        try {
+            $app = new \Phinx\Console\PhinxApplication();
+            $app->run(new \Symfony\Component\Console\Input\ArgvInput($args));
+        } catch (Exception $e) {
+            echo $e->getMessage() . chr(10);
+        } finally {
+            // Remove template
+            if ($template !== null) {
+                unlink($template);
+            }
+        }
 
-		function getClassInfo($file)
-		{
-			$contents = file_get_contents($file);
-			preg_match_all('/namespace ([^;\n]+)|class ([^\s{]+)/i', $contents, $matches);
+        exit(0);
+        break;
+    case 'change-namespace':
 
-			return [
-				'has_match' => isset($matches[1]) && count($matches[1]) > 0 || isset($matches[2]) && count($matches[2]) > 0,
-				'contents'  => $contents,
-				'class'     => $matches[2][1] ?? null,
-				'namespace' => $matches[1][0] ?? null,
-				'full'      => isset($matches[1][0]) ? $matches[1][0] . '\\' . $matches[2][1] : null,
-				'matches'   => $matches,
-			];
-		}
+        $argv = array_slice($argv, 2);
 
-		$oldNamespace = 'Demo';
+        if (!isset($argv[0])) {
+            echo 'Error: missing required parameter namespace';
+            exit(1);
+        }
 
-		function replaceFile($file, array $map = [])
-		{
-			global $oldNamespace;
-			global $newNamespace;
+        if (preg_match_all('/^[a-zA-Z\_]+$/i', $argv[0]) === 0) {
+            echo 'Error: invalid namespace (example: Demo)';
+            exit(1);
+        }
 
-			$map = array_merge([
-				$oldNamespace . '::'          => $newNamespace . '::',
-				$oldNamespace . '\\'          => $newNamespace . '\\',
-				'use ' . $oldNamespace . '\\' => 'use ' . $newNamespace . '\\',
-			], $map);
+        $newNamespace = trim($argv[0]);
+        $oldNamespace = null;
 
-			if (is_file($file)) {
-				$contents = file_get_contents($file);
-				$contents = str_ireplace(array_keys($map), array_values($map), $contents);
-				file_put_contents($file, $contents);
-				$contents = null;
-			}
-		}
+        function getClassInfo($file)
+        {
+            $contents = file_get_contents($file);
+            preg_match_all('/namespace ([^;\n]+)|class ([^\s{]+)/i', $contents, $matches);
 
-		// --- Fix classes ---
+            return [
+                'has_match' => isset($matches[1]) && count($matches[1]) > 0 || isset($matches[2]) && count($matches[2]) > 0,
+                'contents' => $contents,
+                'class' => $matches[2][1] ?? null,
+                'namespace' => $matches[1][0] ?? null,
+                'full' => isset($matches[1][0]) ? $matches[1][0] . '\\' . $matches[2][1] : null,
+                'matches' => $matches,
+            ];
+        }
 
-		loopFolder($appPath . '/app', function ($file) {
+        $oldNamespace = 'Demo';
 
-			global $oldNamespace;
-			global $newNamespace;
+        function replaceFile($file, array $map = [])
+        {
+            global $oldNamespace;
+            global $newNamespace;
 
-			$info = getClassInfo($file);
+            $map = array_merge([
+                $oldNamespace . '::' => $newNamespace . '::',
+                $oldNamespace . '\\' => $newNamespace . '\\',
+                'use ' . $oldNamespace . '\\' => 'use ' . $newNamespace . '\\',
+            ], $map);
 
-			if ($info['has_match'] === true) {
-				echo '- Class: ' . $file . '...';
+            if (is_file($file)) {
+                $contents = file_get_contents($file);
+                $contents = str_ireplace(array_keys($map), array_values($map), $contents);
+                file_put_contents($file, $contents);
+                $contents = null;
+            }
+        }
 
-				$tmp = explode('\\', $info['namespace']);
+        // --- Fix classes ---
 
-				if ($oldNamespace === null) {
-					$oldNamespace = $tmp[0];
-				}
+        loopFolder($appPath . '/app', function ($file) {
 
-				$tmp[0] = $newNamespace;
+            global $oldNamespace;
+            global $newNamespace;
 
-				replaceFile($file, [
-					$info['namespace'] => join('\\', $tmp),
-				]);
+            $info = getClassInfo($file);
 
-				echo ' OK!' . chr(10);
-			}
-		}, ['php']);
+            if ($info['has_match'] === true) {
+                echo '- Class: ' . $file . '...';
 
-		// --- Fix views ---
+                $tmp = explode('\\', $info['namespace']);
 
-		loopFolder($appPath . '/views', function ($file) use ($newNamespace, $oldNamespace) {
-			echo '- View: ' . $file . '...';
+                if ($oldNamespace === null) {
+                    $oldNamespace = $tmp[0];
+                }
 
-			replaceFile($file);
+                $tmp[0] = $newNamespace;
 
-			echo ' OK!' . chr(10);
-		}, ['php']);
+                replaceFile($file, [
+                    $info['namespace'] => join('\\', $tmp),
+                ]);
 
-		echo chr(10) . '.... project files OK!' . chr(10) . chr(10);
+                echo ' OK!' . chr(10);
+            }
+        }, ['php']);
 
-		// --- Fixing routes file ---
+        // --- Fix views ---
 
-		loopFolder($appPath . '/routes', function ($file) use ($newNamespace, $oldNamespace) {
-			echo '- View: ' . $file . '...';
+        loopFolder($appPath . '/views', function ($file) use ($newNamespace, $oldNamespace) {
+            echo '- View: ' . $file . '...';
 
-			replaceFile($file);
+            replaceFile($file);
 
-			echo ' OK!' . chr(10);
-		}, ['php']);
+            echo ' OK!' . chr(10);
+        }, ['php']);
 
-		echo chr(10) . '.... router files OK!' . chr(10) . chr(10);
+        echo chr(10) . '.... project files OK!' . chr(10) . chr(10);
 
-		// --- Fixing .env file ---
+        // --- Fixing routes file ---
 
-		echo '- Setting new APP_NAME in env...';
+        loopFolder($appPath . '/routes', function ($file) use ($newNamespace, $oldNamespace) {
+            echo '- View: ' . $file . '...';
 
-		setEnvironmentValue('APP_NAME', $newNamespace);
+            replaceFile($file);
 
-		echo 'OK!' . chr(10);
+            echo ' OK!' . chr(10);
+        }, ['php']);
 
-		// --- COMPLETED ---
+        echo chr(10) . '.... router files OK!' . chr(10) . chr(10);
 
-		echo '- Completed!' . chr(10) . chr(10);
+        // --- Fixing .env file ---
 
-		exit(0);
+        echo '- Setting new APP_NAME in env...';
 
-		break;
-	case 'key:generate':
-		echo 'New key: ' . \Pecee\Guid::generateSalt() . chr(10);
-		exit(0);
-		break;
-	case 'env:key-generate':
-		$key = \Pecee\Guid::generateSalt();
-		setEnvironmentValue('APP_SECRET', $key);
+        setEnvironmentValue('APP_NAME', $newNamespace);
 
-		echo 'App-secret successfully set' . chr(10);
-		exit(0);
+        echo 'OK!' . chr(10);
 
-		break;
-	case 'password:create': {
+        // --- COMPLETED ---
 
-		$argv = array_slice($argv, 2);
+        echo '- Completed!' . chr(10) . chr(10);
 
-		if (!isset($argv[0])) {
-			echo 'Error: missing required parameter [input password]';
-			exit(1);
-		}
+        exit(0);
 
-		echo sprintf('New password: %s', password_hash($argv[0], PASSWORD_DEFAULT)) . chr(10);
+        break;
+    case 'key:generate':
+        echo 'New key: ' . \Pecee\Guid::generateSalt() . chr(10);
+        exit(0);
+        break;
+    case 'env:key-generate':
+        $key = \Pecee\Guid::generateSalt();
+        setEnvironmentValue('APP_SECRET', $key);
 
-		echo chr(10);
-		exit(0);
-	}
-		break;
-	case 'password:reset': {
+        echo 'App-secret successfully set' . chr(10);
+        exit(0);
 
-		$argv = array_slice($argv, 2);
+        break;
+    case 'password:create':
+        {
 
-		if (!isset($argv[0])) {
-			echo 'Error: missing required parameter [user id]';
-			exit(1);
-		}
+            $argv = array_slice($argv, 2);
 
-		$user = \Pecee\Model\ModelUser::instance()->findOrfail($argv[0]);
+            if (!isset($argv[0])) {
+                echo 'Error: missing required parameter [input password]';
+                exit(1);
+            }
 
-		if ($user === null) {
-			echo sprintf('User with id %s not found', $argv[0]) . chr(10);
-		} else {
-			$password = \Pecee\Guid::generateHash(8);
-			$user->setPassword($password);
-			$user->save();
+            echo sprintf('New password: %s', password_hash($argv[0], PASSWORD_DEFAULT)) . chr(10);
 
-			echo sprintf('Password changed for %s to: %s', $user->username, $password) . chr(10);
-		}
+            echo chr(10);
+            exit(0);
+        }
+        break;
+    case 'password:reset':
+        {
 
-		echo chr(10);
-		exit(0);
+            $argv = array_slice($argv, 2);
 
-	}
-		break;
+            if (!isset($argv[0])) {
+                echo 'Error: missing required parameter [user id]';
+                exit(1);
+            }
+
+            $user = \Pecee\Model\ModelUser::instance()->findOrfail($argv[0]);
+
+            if ($user === null) {
+                echo sprintf('User with id %s not found', $argv[0]) . chr(10);
+            } else {
+                $password = \Pecee\Guid::generateHash(8);
+                $user->setPassword($password);
+                $user->save();
+
+                echo sprintf('Password changed for %s to: %s', $user->username, $password) . chr(10);
+            }
+
+            echo chr(10);
+            exit(0);
+
+        }
+        break;
 }
 
 echo 'Error: please enter valid argument';
