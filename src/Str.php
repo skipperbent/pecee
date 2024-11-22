@@ -50,7 +50,6 @@ class Str
      */
     public static function sanitizeHtml(string $html): string
     {
-
         $regex = '%# Collapse ws everywhere but in blacklisted elements.
         (?>             # Match all whitespans other than single space.
           [^\S ]\s*     # Either one [\t\r\n\f\v] and zero or more ws,
@@ -72,10 +71,10 @@ class Str
         )  # If we made it here, we are not in a blacklist tag.
         %ix';
 
-        return preg_replace($regex, ' ', $html);
+        return preg_replace($regex, '', $html);
     }
 
-    public static function getFirstOrDefault(string $value, $default = null)
+    public static function getFirstOrDefault(string $value, mixed $default = null): mixed
     {
         return (empty($value) === false) ? trim($value) : $default;
     }

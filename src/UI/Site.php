@@ -7,14 +7,14 @@ class Site
 {
     public const SECTION_DEFAULT = 'default';
 
-    protected $title;
-    protected $description;
-    protected $keywords = [];
-    protected $header = [];
-    protected $js = [];
-    protected $css = [];
-    protected $jsFilesWrapped = [];
-    protected $cssFilesWrapped = [];
+    protected ?string $title = null;
+    protected ?string $description = null;
+    protected array $keywords = [];
+    protected array $header = [];
+    protected array $js = [];
+    protected array $css = [];
+    protected array $jsFilesWrapped = [];
+    protected array $cssFilesWrapped = [];
 
     public function getTitle(): ?string
     {

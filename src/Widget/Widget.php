@@ -14,6 +14,11 @@ abstract class Widget extends Base
     protected ?string $_contentTemplate = null;
     protected ?string $_contentHtml = null;
 
+    protected function onInit(): void
+    {
+
+    }
+
     protected function onLoad(): void
     {
 
@@ -77,11 +82,7 @@ abstract class Widget extends Base
         $validation = parent::getValidationFor($name);
 
         if ($validation !== null) {
-            $span = new Html('div');
-            $span->addClass('text-danger small');
-            $span->addInnerHtml($validation);
-
-            return $span;
+            return (new Html('div'))->addClass('invalid-feedback')->addInnerHtml($validation);
         }
 
         return new HtmlEmpty();
@@ -216,10 +217,23 @@ abstract class Widget extends Base
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function render(): ?string
     {
+        // Dynamically set properties
+        $routeParameters = request()->getLoadedRoute()?->getParameters();
+        if ($routeParameters !== null) {
+            foreach ($routeParameters as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->{$key} = $value;
+                }
+            }
+        }
+
+        // Trigger onInit event
+        $this->onInit();
+
         // Trigger onLoad event
         $this->onLoad();
 
@@ -244,7 +258,6 @@ abstract class Widget extends Base
         debug('widget', 'END %s:', static::class);
 
         return $this->onRender($this->_contentHtml);
-
     }
 
     protected function renderContent(): void

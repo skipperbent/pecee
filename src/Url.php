@@ -5,6 +5,32 @@ namespace Pecee;
 class Url
 {
 
+    /**
+     * Encodes url components
+     *
+     * @param string $url
+     * @return string
+     * @throws \InvalidArgumentException Throw on invalid url
+     */
+    public static function encodeComponent(string $url): string
+    {
+        if (!static::isValid($url)) {
+            throw new \InvalidArgumentException("Invalid URL: $url");
+        }
+
+        $components = parse_url($url);
+        if (isset($components['path'])) {
+            $path = join('/', array_map('rawurlencode', explode('/', $components['path'])));
+            $url = str_replace($components['path'], $path, $url);
+        }
+
+        if (isset($components['query'])) {
+            $url = str_replace('?' . $components['query'], urlencode('?' . $components['query']), $url);
+        }
+
+        return $url;
+    }
+
     public static function hasParams(string $url): bool
     {
         return (strpos($url, '?') > -1);
@@ -23,9 +49,21 @@ class Url
         return (strpos($url, '?') > -1) ? '&' : '?';
     }
 
-    public static function isValid(string $url): bool
+    /**
+     * Returns true if URL is valid.
+     * When strict is disabled, urls containing foreign characters will also pass as valid.
+     *
+     * @param string $url
+     * @param bool $strict
+     * @return bool
+     */
+    public static function isValid(string $url, bool $strict = false): bool
     {
-        return (preg_match('/^\w+:\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url) === 1);
+        if ($strict) {
+            return (filter_var($url, FILTER_VALIDATE_URL) !== false);
+        }
+
+        return (parse_url($url, PHP_URL_SCHEME) && parse_url($url, PHP_URL_HOST));
     }
 
     /**

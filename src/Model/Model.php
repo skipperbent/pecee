@@ -34,20 +34,22 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     protected $fixedIdentifier = false;
     protected $relations = [];
     protected $filter = [];
+    protected bool $new = true;
 
     /**
      * @var ModelQueryBuilder
      */
     protected ModelQueryBuilder $queryable;
+    protected array $defaults = [];
 
     public function __construct()
     {
+        $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
+
         // Set table name if its not already defined
         if ($this->table === null) {
             $this->table = str_ireplace('model', '', class_basename(static::class));
         }
-
-        $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
 
         // Set fixed identifier
         if ($this->fixedIdentifier === true) {
@@ -60,7 +62,19 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
                 'updated_at',
                 'created_at',
             ]);
+            $this->created_at = Carbon::now();
         }
+
+        $this->onInit();
+
+        foreach ($this->defaults as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    protected function onInit(): void
+    {
+
     }
 
     protected function onConnectionCreate(): ?Connection
@@ -68,7 +82,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         return app()->getConnection();
     }
 
-    public function newQuery()
+    public function newQuery(): static
     {
         return new static();
     }
@@ -78,7 +92,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
      *
      * @return static
      */
-    public static function instance()
+    public static function instance(): static
     {
         return new static();
     }
@@ -99,7 +113,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         return $item;
     }
 
-    public function onInstanceCreate()
+    public function onInstanceCreate(): void
     {
         if ($this->isNew() === true) {
             return;
@@ -110,7 +124,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         }
     }
 
-    public function onCollectionCreate($items)
+    public function onCollectionCreate($items): ModelCollection
     {
         return new ModelCollection($items);
     }
@@ -158,7 +172,6 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
      */
     public function belongsToMany($related, $table = null, $foreignPivotKey = null, $relatedPivotKey = null, $parentKey = null, $relatedKey = null, $relation = null)
     {
-
         if ($relation === null) {
             $relation = $this->guessBelongsToRelation();
         }
@@ -313,12 +326,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
             return $this;
         }
 
-        if ($this->isNew() === false) {
+        if ($this->exists()) {
 
-            if (isset($updateData[$this->getPrimaryKey()]) === true) {
-                // Remove primary key
-                unset($updateData[$this->getPrimaryKey()]);
-            }
+            unset($updateData[$this->getPrimaryKey()]);
 
             if ($this->timestamps === true) {
                 $updateData['updated_at'] = Carbon::now()->toDateTimeString();
@@ -326,7 +336,8 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
             $this->mergeRows($updateData);
 
-            return static::instance()->where($this->getPrimaryKey(), '=', $this->{$this->getPrimaryKey()})->update($updateData);
+            static::instance()->where($this->getPrimaryKey(), '=', $this->{$this->getPrimaryKey()})->update($updateData);
+            return $this;
         }
 
         $updateData = array_filter($updateData, static function ($value) {
@@ -374,8 +385,9 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
      */
     public function exists()
     {
-        if ($this->isNew() === true) {
-            return ($this->count() > 0);
+        if (isset($this->getOriginalRows()[$this->primaryKey]) === false || $this->getOriginalRows()[$this->primaryKey] === null) {
+            return false;
+            //return ($this->count() > 0);
         }
 
         $id = static::instance()->select([$this->primaryKey])->where($this->primaryKey, '=', $this->{$this->primaryKey})->first();
@@ -391,9 +403,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
     public function isNew()
     {
-        $originalRows = $this->getOriginalRows();
-
-        return (isset($originalRows[$this->primaryKey]) === false || $originalRows[$this->primaryKey] === null);
+        return $this->new;
     }
 
     public function hasRows()
@@ -431,11 +441,13 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
         return $this;
     }
 
-    public function mergeData(array $data): void
+    public function mergeData(array $data): self
     {
         foreach ($data as $key => $value) {
             $this->{$key} = $value;
         }
+
+        return $this;
     }
 
     /**
@@ -471,6 +483,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
     public function __set($name, $value)
     {
+        $this->invokedElements[] = $name;
         $this->results['rows'][$name] = $value;
     }
 
@@ -761,6 +774,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
      */
     public function setOriginalRows(array $rows): self
     {
+        $this->new = !isset($rows[$this->primaryKey]);
         $this->results['original_rows'] = $rows;
         return $this;
     }

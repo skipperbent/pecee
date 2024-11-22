@@ -14,7 +14,7 @@ class TaglibJs extends Taglib
     protected static string $JS_EXPRESSION_START = '/js{/';
     protected static string $JS_WIDGET_EXPRESSION = '/\\$self(.*?)}/';
 
-    protected string $namespace = '$p';
+    protected string $namespace = 'Pecee';
     protected int $indexCount = 0;
 
     protected function getJsWrapperMatchRegEx(): string
@@ -211,7 +211,7 @@ class TaglibJs extends Taglib
             $dataOutput = "if($as !== null) { $dataOutput }";
         }
 
-        $output = sprintf('$.%1$s = new %4$s.template(); $.%1$s.view = (_d,g,w,viewId = null, view = null) => { let t = w.template; let %5$s=_d; ' . $dataOutput . ' var o="<%3$s>%2$s</%3$s>"; return o;};',
+        $output = sprintf('$p.%1$s = new %4$sTemplate(); $p.%1$s.view = function (_d,g,w,viewId = null, view = null) { let t = this; let %5$s=_d; ' . $dataOutput . ' let o="<%3$s>%2$s</%3$s>"; return o;};',
             $attrs->id,
             $this->makeJsString($this->getBody()),
             static::$JS_WRAPPER_TAG,
@@ -271,7 +271,7 @@ class TaglibJs extends Taglib
             $output .= "if(_d !== null) { $dataOutput }";
         }
 
-        $templateId = (str_contains($attrs->id, '.') === false) ? "$.{$attrs->id}" : $attrs->id;
+        $templateId = (str_contains($attrs->id, '.') === false) ? "$p.{$attrs->id}" : $attrs->id;
 
         $output .= "o += $templateId.view(_d, $guid, $widget, viewId, view);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
@@ -332,7 +332,7 @@ class TaglibJs extends Taglib
         }
 
         $output = sprintf(
-            '</%1$s>"; var _l = w._addList("%2$s", $.%2$s, %3$s); %4$s',
+            '</%1$s>"; var _l = w._addList("%2$s", $p.%2$s, %3$s); %4$s',
             static::$JS_WRAPPER_TAG,
             $id,
             $options,
@@ -488,7 +488,7 @@ class TaglibJs extends Taglib
 
         $this->indexCount++;
 
-        return sprintf('</%4$s>"; for(let %5$s=0;%5$s<%1$s.length;%5$s++){let %2$s=%1$s[%5$s]; o+="<%4$s>%3$s</%4$s>"; } o+="<%4$s>',
+        return sprintf('</%4$s>"; %1$s.forEach((%2$s, %5$s) => {o+="<%4$s>%3$s</%4$s>"}); o+="<%4$s>',
             $attrs->in,
             $row,
             $this->makeJsString($this->getBody()),
@@ -528,7 +528,7 @@ class TaglibJs extends Taglib
     protected function tagFunction(\stdClass $attrs): string
     {
         $this->requireAttributes($attrs, ['name', 'parameters']);
-        return sprintf('</%4$s>"; function %1$s(%2$s){var o="<%4$s>%3$s</%4$s>"; return o; } o+="<%4$s>',
+        return sprintf('</%4$s>"; function %1$s(%2$s){let o="<%4$s>%3$s</%4$s>"; return o; } o+="<%4$s>',
             $attrs->name,
             $attrs->parameters,
             $this->makeJsString($this->getBody()),
@@ -541,7 +541,7 @@ class TaglibJs extends Taglib
         $classes = $attrs->class ? ' class=\"' . $attrs->class . '\"' : '';
 
         return sprintf(
-            '</%2$s>"; w._aid++; var aid=w.guid + "" + w._aid; o += "<div id=\"" + aid +  "\"%3$s></div>"; w.one("render", async (__d) => { const aid=__d.aid; let o ="<%2$s>%1$s</%2$s>"; }, { aid: aid }); o+="<%2$s>',
+            '</%2$s>"; w._aid++; var aid=w.guid + "" + w._aid; o += "<div id=\"" + aid +  "\"%3$s></div>"; w.once("render", async (__d) => { const aid=__d.aid; let o ="<%2$s>%1$s</%2$s>"; }, { aid: aid }); o+="<%2$s>',
             $this->getBody(),
             static::$JS_WRAPPER_TAG,
             $classes,

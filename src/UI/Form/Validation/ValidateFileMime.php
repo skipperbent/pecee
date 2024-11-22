@@ -18,7 +18,7 @@ class ValidateFileMime extends ValidateFile
 
     public function getError(): string
     {
-        return lang('%s is not a valid format', [$this->input->getName()]);
+        return lang('%s is not a valid format', $this->input->getName());
     }
 
 }

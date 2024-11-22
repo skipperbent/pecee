@@ -18,7 +18,7 @@ class ValidateFileNotNullOrEmpty extends ValidateFile
 
     public function getError(): string
     {
-        return lang('%s cannot be empty', [$this->input->getName()]);
+        return lang('%s cannot be empty', $this->input->getName());
     }
 
 }

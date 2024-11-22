@@ -16,7 +16,7 @@ use Pecee\UI\Html\HtmlTextarea;
 class Form
 {
 
-    protected $enableCsrfToken = true;
+    protected bool $enableCsrfToken = true;
 
     /**
      * Starts new form
@@ -25,7 +25,7 @@ class Form
      * @param string|null $action
      * @return \Pecee\UI\Html\HtmlForm
      */
-    public function start($name, $method = HtmlForm::METHOD_POST, $action = null)
+    public function start(string $name, string $method = HtmlForm::METHOD_POST, ?string $action = null): HtmlForm
     {
         $form = new HtmlForm($name, $method, $action);
         // Add csrf token
@@ -44,7 +44,7 @@ class Form
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlInput
      */
-    public function input($name, $type = 'text', $value = null, $saveValue = true)
+    public function input(string $name, string $type = 'text', ?string $value = null, bool $saveValue = true): HtmlInput
     {
         if ($saveValue && (($value === null && input()->exists($name) === true) || request()->getMethod() !== 'get')) {
             $value = (string)input($name);
@@ -61,7 +61,7 @@ class Form
      * @param bool $saveValue
      * @return HtmlInput
      */
-    public function radio($name, $value, $saveValue = true)
+    public function radio(string $name, string $value, bool $saveValue = true): HtmlInput
     {
         $element = new HtmlInput($name, 'radio', $value);
 
@@ -82,7 +82,7 @@ class Form
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlCheckbox
      */
-    public function bool($name, $value = true, $defaultValue = null, $saveValue = true)
+    public function bool($name, bool $value = true, bool $defaultValue = null, bool $saveValue = true): HtmlCheckbox
     {
         $element = new HtmlCheckbox($name, ($defaultValue === null) ? '1' : (int)$defaultValue);
         if ($saveValue !== false) {
@@ -115,7 +115,7 @@ class Form
      * @param string|null $for
      * @return \Pecee\UI\Html\Html
      */
-    public function label(?string $inner = null, ?string $for = null)
+    public function label(?string $inner = null, ?string $for = null): Html
     {
         $label = new Html('label');
 
@@ -139,7 +139,7 @@ class Form
      * @return \Pecee\UI\Html\HtmlSelect
      * @throws \InvalidArgumentException
      */
-    public function selectStart(string $name, $data = null, ?string $value = null, bool $saveValue = true): HtmlSelect
+    public function selectStart(string $name, mixed $data = null, ?string $value = null, bool $saveValue = true): HtmlSelect
     {
         $element = new HtmlSelect($name);
         if ($data !== null) {
@@ -172,7 +172,7 @@ class Form
      * @param bool $saveValue
      * @return \Pecee\UI\Html\HtmlTextarea
      */
-    public function textarea($name, $rows, $cols, $value = null, $saveValue = true)
+    public function textarea(string $name, int $rows, int $cols, ?string $value = null, bool $saveValue = true): HtmlTextarea
     {
         if ($saveValue === true && (($value === null && input($name) !== null) || request()->getMethod() !== 'get')) {
             $value = (string)input($name);
@@ -187,9 +187,9 @@ class Form
      * @param string $value
      * @return \Pecee\UI\Html\HtmlInput
      */
-    public function submit($name, $value)
+    public function submit(string $name, string $value): HtmlInput
     {
-        return $this->input($name, 'submit', $value);
+        return $this->input($name, 'submit', $value, false);
     }
 
     /**
@@ -200,7 +200,7 @@ class Form
      * @param string|null $value
      * @return Html
      */
-    public function button($text, $type = null, $name = null, $value = null)
+    public function button(string $text, ?string $type = null, ?string $name = null, ?string $value = null): Html
     {
         $el = (new Html('button'))->addInnerHtml($text);
 
@@ -223,17 +223,17 @@ class Form
      * Ends open form
      * @return string
      */
-    public function end()
+    public function end(): string
     {
         return '</form>';
     }
 
-    public function setEnableCsrfToken($value)
+    public function setEnableCsrfToken($value): void
     {
         $this->enableCsrfToken = $value;
     }
 
-    public function isCsrfTokenEnabled()
+    public function isCsrfTokenEnabled(): bool
     {
         return $this->enableCsrfToken;
     }

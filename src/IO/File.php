@@ -6,6 +6,7 @@ use Pecee\Url;
 
 class File
 {
+
     /**
      * Creates temporary file and returns file-path.
      * Will automatically remove file upon shutdown.
@@ -15,7 +16,7 @@ class File
      * @param bool $autoRemove
      * @return string Path to the temp-file created
      */
-    public static function tmpFile($name, $contents = null, $autoRemove = true)
+    public static function tmpFile(string $name, ?string $contents = null, bool $autoRemove = true): string
     {
         $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid($name, false);
 
@@ -38,7 +39,11 @@ class File
         return $file;
     }
 
-    public static function remoteSize($url)
+    /**
+     * @param string $url
+     * @return int
+     */
+    public static function remoteSize(string $url): int
     {
         $headers = array_change_key_case(get_headers($url, 1), CASE_LOWER);
 
@@ -56,10 +61,10 @@ class File
         curl_exec($handle);
         $size = curl_getinfo($handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-        return $size ? $size : null;
+        return $size ?: -1;
     }
 
-    public static function remoteExist($url)
+    public static function remoteExist(string $url): bool
     {
         $handle = curl_init($url);
         curl_setopt($handle, CURLOPT_NOBODY, true);
@@ -75,7 +80,7 @@ class File
         return false;
     }
 
-    public static function getRemoteMime($url)
+    public static function getRemoteMime(string $url): string
     {
         if (Url::isValid($url) === true) {
             $handle = curl_init($url);
@@ -87,13 +92,16 @@ class File
 
             curl_exec($handle);
 
-            return curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
+            $mime = curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
+            curl_close($handle);
+
+            return $mime;
         }
 
         throw new \ErrorException('Failed to parse mime-type');
     }
 
-    public static function getExtension($path)
+    public static function getExtension(string $path): string
     {
         $ext = pathinfo($path, PATHINFO_EXTENSION);
 
@@ -106,7 +114,7 @@ class File
      * @param string $destination
      * @throws \ErrorException
      */
-    public static function move($source, $destination)
+    public static function move(string $source, string $destination): void
     {
         if (is_dir($source) === true) {
 

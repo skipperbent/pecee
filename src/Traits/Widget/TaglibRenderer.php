@@ -8,11 +8,9 @@ trait TaglibRenderer
 {
 
     protected bool $phpTagsEnabled = false;
+    protected ?string $_template = null;
 
-    public function setJsDependencies(): void
-    {
-        $this->getSite()->addWrappedJs('js/pecee-widget.js');
-    }
+    abstract function setDependencies(): void;
 
     protected function getPhtmlCacheDir(): string
     {
@@ -21,32 +19,8 @@ trait TaglibRenderer
 
     public function render(): ?string
     {
-        $this->setJsDependencies();
-
-        if ($this->_template === null) {
-            $this->setTemplate('Default.php');
-        }
-
-        if ($this->_contentTemplate === null) {
-            $this->setContentTemplate($this->getTemplatePath());
-        }
-
-        $this->setInputValues();
-
-        // Trigger postback event
-        if (request()->getMethod() === 'post') {
-            $this->onPostBack();
-        }
-
-        // Trigger onLoad event
-        $this->onLoad();
-
-        $this->renderContent();
-        $this->renderTemplate();
-
-        debug('taglib', 'END WIDGET: %s', static::class);
-
-        return $this->onRender($this->_contentHtml);
+        $this->setDependencies();
+        return parent::render();
     }
 
     protected function getHtmlParser(): Phtml
@@ -58,7 +32,7 @@ trait TaglibRenderer
     {
         if ($this->phpTagsEnabled) {
             // Add support for php{} tags
-            preg_match_all('/php\{([^}]+)\}/is', $content, $matches);
+            preg_match_all('/php\{([^}]+)}/i', $content, $matches);
 
             if (count($matches[0])) {
                 foreach ($matches[0] as $index => $match) {
@@ -76,10 +50,29 @@ trait TaglibRenderer
     protected function renderFile($file): string
     {
         $cacheDir = $this->getPhtmlCacheDir();
-        $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . str_replace([DIRECTORY_SEPARATOR, '/'], '_', $file);
+        $filename = str_replace([DIRECTORY_SEPARATOR, '/'], '_', $file);
+        $cacheFile = $cacheDir . DIRECTORY_SEPARATOR . $filename;
 
-        if (is_file($cacheFile) === true && app()->getDebugEnabled() === false) {
-            return $this->renderPhp(file_get_contents($cacheFile));
+        $hashFile = sprintf('%s/%s.md5', dirname($cacheFile), $filename);
+
+        if (is_file($cacheFile) === true) {
+
+            if (app()->getDebugEnabled() === false) {
+                return $this->renderPhp(file_get_contents($cacheFile));
+            } else {
+
+                // Verify file hash
+                if (is_file($hashFile)) {
+
+                    $existingHash = file_get_contents($hashFile);
+                    $currentHash = md5(file_get_contents($file, FILE_USE_INCLUDE_PATH));
+
+                    if ($existingHash === $currentHash) {
+                        return $this->renderPhp(file_get_contents($cacheFile));
+                    }
+
+                }
+            }
         }
 
         try {
@@ -88,18 +81,21 @@ trait TaglibRenderer
             }
 
             debug('taglib', 'Parsing Phtml template');
-            $pHtml = $this->getHtmlParser();
-            $output = $pHtml->read(file_get_contents($file, FILE_USE_INCLUDE_PATH))->toPHP();
+            $template = file_get_contents($file, FILE_USE_INCLUDE_PATH);
+            $output = $this->getHtmlParser()->read($template)->toPHP();
             debug('taglib', 'Finished parsing Phtml template');
 
-            if (app()->getDebugEnabled() === false) {
+            debug('taglib', 'Writing Phtml cache file');
+            $handle = fopen($cacheFile, 'w+b+');
+            fwrite($handle, $output);
+            fclose($handle);
+            debug('taglib', 'Finished writing Phtml cache file');
 
-                debug('taglib', 'Writing Phtml cache file');
-                $handle = fopen($cacheFile, 'w+b+');
-                fwrite($handle, $output);
+            if (app()->getDebugEnabled()) {
+                // Save file hash for comparison
+                $handle = fopen($hashFile, 'w+b+');
+                fwrite($handle, md5($template));
                 fclose($handle);
-                debug('taglib', 'Finished writing Phtml cache file');
-
             }
 
             $output = $this->renderPhp($output);
