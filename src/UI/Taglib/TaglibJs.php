@@ -92,7 +92,7 @@ class TaglibJs extends Taglib
     protected function parseJsTriggers(string $string): string
     {
         // Replace js bindings
-        return preg_replace_callback('/js-(\w+)="?((?:.(?!"\{\}?\s+\S+=|\s*\/?[>"]))+.)"?/is', static function ($matches) {
+        return preg_replace_callback('/js-(\w+)="?((?:.(?!"\{\}?\s+\S+=|\s*\/?["]))+.)"?/is', static function ($matches) {
 
             $event = $matches[1];
             $callback = $matches[2];
@@ -208,7 +208,7 @@ class TaglibJs extends Taglib
         }
 
         if (strlen($dataOutput) > 0) {
-            $dataOutput = "if(typeof($as) === 'object') { $dataOutput }";
+            $dataOutput = "if($as && typeof($as) === 'object') { $dataOutput }";
         }
 
         $output = sprintf('$p.%1$s = new %4$sTemplate(); $p.%1$s.view = function (_d,g,w,viewId = null, view = null) { let t = this; let %5$s=_d; ' . $dataOutput . ' let o="<%3$s>%2$s</%3$s>"; return o;};',
@@ -268,7 +268,7 @@ class TaglibJs extends Taglib
         $output = "var _d = $data;";
 
         if (strlen($dataOutput) > 0) {
-            $output .= "if(typeof(_d) === 'object') { $dataOutput }";
+            $output .= "if(_d && typeof(_d) === 'object') { $dataOutput }";
         }
 
         $templateId = (str_contains($attrs->id, '.') === false) ? "\$p.{$attrs->id}" : $attrs->id;
