@@ -44,12 +44,12 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
     public function __construct()
     {
-        $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
-
         // Set table name if its not already defined
         if ($this->table === null) {
             $this->table = str_ireplace('model', '', class_basename(static::class));
         }
+
+        $this->queryable = new ModelQueryBuilder($this, $this->onConnectionCreate());
 
         // Set fixed identifier
         if ($this->fixedIdentifier === true) {
@@ -607,7 +607,7 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
     }
 
     /**
-     * @param array|string|null $filters
+     * @param array|null $filters
      * @return array
      */
     public function toArray(array $filters = []): array
@@ -642,14 +642,16 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
                 continue;
             }
 
-            if (in_array($key, $this->hidden, true) === false) {
+            $deCamelizeKey = Str::deCamelize($key);
+
+            if (in_array($deCamelizeKey, $this->hidden, true) === false && in_array($key, $this->hidden, true) === false) {
 
                 // Check if local method exist
                 if (method_exists($this, 'get' . ucfirst($key)) === true) {
                     $row = call_user_func([$this, 'get' . ucfirst($key)]);
                 }
 
-                $output[Str::deCamelize($key)] = $this->parseArrayData($row);
+                $output[$deCamelizeKey] = $this->parseArrayData($row);
             }
         }
 
@@ -675,12 +677,18 @@ abstract class Model implements \IteratorAggregate, \JsonSerializable, \Serializ
 
     /**
      * Add data to output
-     * @param string|array $method
+     * @param array $with
+     * @param bool $merge
      * @return static $this
      */
-    public function with($method)
+    public function with(array $with, bool $merge = true): self
     {
-        foreach ((array)$method as $key => $value) {
+        if ($merge === false) {
+            $this->with = $with;
+            return $this;
+        }
+
+        foreach ((array)$with as $key => $value) {
             if (is_string($value) === true && is_numeric($key) === true) {
                 $this->with[$value] = $value;
                 $invokedKey = array_search($value, $this->invokedElements, true);

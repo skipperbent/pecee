@@ -1,15 +1,16 @@
 <?php
+
 namespace Pecee\UI\Menu;
 
 use Pecee\UI\Html\Html;
 
 class Menu
 {
-    protected $items = [];
-    protected $attributes = [];
-    protected $content = [];
-    protected $class;
-    protected $parent;
+    protected array $items = [];
+    protected array $attributes = [];
+    protected array $content = [];
+    protected ?string $class = null;
+    protected ?MenuItem $parent = null;
 
     public function getItems()
     {
@@ -21,7 +22,7 @@ class Menu
      * @param int $index
      * @return \Pecee\UI\Menu\MenuItem
      */
-    public function getItem($index)
+    public function getItem(int $index)
     {
         return $this->hasItem($index) ? $this->items[$index] : null;
     }
@@ -97,7 +98,7 @@ class Menu
      * @param string $url
      * @return \Pecee\UI\Menu\MenuItem
      */
-    public function addItem($name, $url)
+    public function addItem(string $name, string $url)
     {
         $item = new MenuItem($name, $url);
         $item->setParent($this);
@@ -124,14 +125,14 @@ class Menu
      * @param string $name
      * @return static
      */
-    public function setClass($name)
+    public function setClass(string $name)
     {
         $this->class = $name;
 
         return $this;
     }
 
-    public function addAttribute($name, $value)
+    public function addAttribute(string $name, string $value)
     {
         if (isset($this->attributes[$name])) {
             $this->attributes[$name][] = $value;
@@ -146,7 +147,7 @@ class Menu
      * @param string $class
      * @return Menu
      */
-    public function addClass($class)
+    public function addClass(string $class)
     {
         return $this->addAttribute('class', $class);
     }

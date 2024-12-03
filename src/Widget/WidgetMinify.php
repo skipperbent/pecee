@@ -58,6 +58,11 @@ class WidgetMinify extends Widget
 
         $minified = $this->getCacheDir() . DIRECTORY_SEPARATOR . $filename;
         if (is_file($minified) === false || app()->getDebugEnabled() === true) {
+
+            if (!is_dir($this->getCacheDir())) {
+                mkdir($this->getCacheDir());
+            }
+
             $contents = $this->minify(file_get_contents($template, FILE_USE_INCLUDE_PATH));
             file_put_contents($minified, $contents);
         }

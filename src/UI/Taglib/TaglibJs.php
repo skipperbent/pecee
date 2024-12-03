@@ -208,7 +208,7 @@ class TaglibJs extends Taglib
         }
 
         if (strlen($dataOutput) > 0) {
-            $dataOutput = "if($as !== null) { $dataOutput }";
+            $dataOutput = "if(typeof($as) === 'object') { $dataOutput }";
         }
 
         $output = sprintf('$p.%1$s = new %4$sTemplate(); $p.%1$s.view = function (_d,g,w,viewId = null, view = null) { let t = this; let %5$s=_d; ' . $dataOutput . ' let o="<%3$s>%2$s</%3$s>"; return o;};',
@@ -268,12 +268,12 @@ class TaglibJs extends Taglib
         $output = "var _d = $data;";
 
         if (strlen($dataOutput) > 0) {
-            $output .= "if(_d !== null) { $dataOutput }";
+            $output .= "if(typeof(_d) === 'object') { $dataOutput }";
         }
 
-        $templateId = (str_contains($attrs->id, '.') === false) ? "$p.{$attrs->id}" : $attrs->id;
+        $templateId = (str_contains($attrs->id, '.') === false) ? "\$p.{$attrs->id}" : $attrs->id;
 
-        $output .= "o += $templateId.view(_d, $guid, $widget, viewId, view);";
+        $output .= "$templateId.guid = $widget.guid; $templateId.widget = $widget; o += $templateId.view(_d, $guid, $widget, viewId, view);";
         return sprintf('</%1$s>"; %2$s o+="<%1$s>', static::$JS_WRAPPER_TAG, $output);
     }
 

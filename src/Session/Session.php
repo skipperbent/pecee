@@ -39,9 +39,8 @@ class Session
      * @param string $id
      * @param mixed $value
      */
-    public static function set(string $id, $value): void
+    public static function set(string $id, mixed $value): void
     {
-
         if (static::$active === false) {
             static::start();
         }
@@ -56,7 +55,7 @@ class Session
         $_SESSION[$id] = $data;
     }
 
-    public static function get($id, $defaultValue = null)
+    public static function get(string $id, mixed $defaultValue = null)
     {
         if (static::$active === false) {
             static::start();
